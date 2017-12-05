@@ -14,11 +14,12 @@ $TonalityDict=<|
 	"B"->-1,"#F"->6,"#C"->1,"F"->5,"bB"->-2,
 	"bE"->3,"bA"->-4,"bD"->1,"bG"->6,"bC"->-1
 |>;
-$SongData={};
-index=Import[$favorite<>"Index.dat","Data"];
-Do[
-	AppendTo[$SongData,#[[2]]->#[[1]]&@StringSplit[index[[i,1]],{"[","]"}]],
-{i,Length@index}];
+index=Import[$favorite<>"Index.xml","CDATA"];
+$songCount=Length@index/2;
+$songTitle=Take[index,{1,Length@index,2}];
+$songPath=Take[index,{2,Length@index,2}];
+$songDict=Association[#->$songTitle[[#]]&/@Range[$songCount]];
+$playing="Null";
 
 
 QingyunPlay[song_]:=Module[{filename},
@@ -107,11 +108,17 @@ qymPlay[filename_]:=Module[
 ]
 
 
-Framed@Column[{
-	Style["QingyunMusicPlayer",Bold,20],
-	SetterBar[Dynamic[choice],$SongData,Appearance -> "Vertical" -> {Automatic,3}],
-	Button["Play",
-		Print["Song: ",Association[$SongData][[choice]]];
-		QingyunPlay[choice],
-	ImageSize->150]
-},Center]
+CreateDialog[Column[{
+	Style["\:9752\:4e91\:64ad\:653e\:5668",Bold,20],
+	SetterBar[Dynamic[choice],$songDict,Appearance->"Vertical"],
+	Button["\:64ad\:653e",
+		$playing=$songTitle[[choice]];
+		QingyunPlay[$songPath[[choice]]];
+		$playing="Null",
+	ImageSize->150],
+	If[$playing=="Null",
+		"\:70b9\:51fb\[OpenCurlyDoubleQuote]\:64ad\:653e\[CloseCurlyDoubleQuote]\:6309\:94ae\:5f00\:59cb\:6f14\:594f\:3002",
+		"\:6b63\:5728\:64ad\:653e\:ff1a"<>Dynamic[$playing]
+	]
+},Center],
+WindowTitle->"\:9752\:4e91\:64ad\:653e\:5668"];

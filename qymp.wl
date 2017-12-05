@@ -5,28 +5,49 @@
 (*Version 1.0.0*)
 (**)
 (*Usage:*)
-(*QingyunPlay[filename]*)
-(*filename: Path to the .qym file you want to play*)
+(*QingyunPlay[song]*)
 (**)
 
 
-QingyunPlay[filename_]:=Module[
+(* Initialization *)
+$favorite=NotebookDirectory[];
+$TonalityDict=<|
+	"C"->0,"G"->7,"D"->2,"A"->-3,"E"->4,
+	"B"->-1,"#F"->6,"#C"->1,"F"->5,"bB"->-2,
+	"bE"->3,"bA"->-4,"bD"->1,"bG"->6,"bC"->-1
+|>;
+
+
+setFavorite[name_]:=If[ToLowerCase@name=="default",
+	$favorite=NotebookDirectory[],
+	$favorite=name
+];
+QingyunPlay[song_]:=Module[{filename},
+	filename=$favorite<>song<>".qym";
+	If[FileExistsQ[filename],
+		qymPlay[filename],
+		Print["Not Found!"];Return[];
+	]
+];
+
+
+qymPlay[filename_]:=Module[
 	{
 		i,j,
-		file,char,
-		speed=88,tonality=0,beat=1,
-		pitch,sharp=0,time,space
+		file,
+		char,
+		tonality=0,beat=1,speed=88,
+		pitch,sharp=0,time,space,
+		comment,match
 	},
 	file=Import[filename,"Table"];
 	Do[
 		j=1;
-		While[j<=StringLength[file[[i]][[1]]],
-			char=StringTake[file[[i]][[1]],{j}];
+		While[j<=StringLength[file[[i,1]]],
+			char=StringTake[file[[i,1]],{j}];
 			Switch[char,
 				"/",
-					If[StringTake[file[[i]][[1]],{j+1}]=="/",
-						Break[];
-					],
+					If[StringTake[file[[i,1]],{j+1}]=="/",Break[]],
 				"#",
 					sharp++;
 					j++;
@@ -36,36 +57,17 @@ QingyunPlay[filename_]:=Module[
 					j++;
 					Continue[],
 				"<",
-					If[StringTake[file[[i]][[1]],{j+1,j+2}]=="1=",
-						If[StringTake[file[[i]][[1]],{j+4}]==">",
-							char=StringTake[file[[i]][[1]],{j+3}];
-							j+=4,
-							char=StringTake[file[[i]][[1]],{j+3,j+4}];
-							j+=5
-						];
-						Switch[char,
-							"C",tonality=0,
-							"G",tonality=7,
-							"D",tonality=2,
-							"A",tonality=-3,
-							"E",tonality=4,
-							"B",tonality=-1,
-							"#F",tonality=6,
-							"#C",tonality=1,
-							"F",tonality=5,
-							"bB",tonality=-2,
-							"bE",tonality=3,
-							"bA",tonality=-4,
-							"bD",tonality=1,
-							"bG",tonality=6,
-							"bC",tonality=-1
-						],
-						If[StringTake[file[[i]][[1]],{j+2}]=="/",
-							beat=ToExpression[StringTake[file[[i]][[1]],{j+3}]]/4;
-							j+=4;
-						];
+					match=Select[Transpose[StringPosition[file[[i,1]],">"]][[1]],#>j&][[1]]-1;
+					comment=StringTake[file[[i,1]],{j+1,match}];
+					Switch[StringTake[comment,{2}],
+						"=",
+							tonality=$TonalityDict[[StringTake[comment,{3,StringLength@comment}]]],
+						"/",
+							beat=ToExpression[StringTake[comment,{3}]]/4,
+						_,
+							speed=ToExpression[comment];
 					];
-					j++;
+					j=match;
 					Continue[];
 			];
 			If[MemberQ[{"0","1","2","3","4","5","6","7"},char],
@@ -84,8 +86,8 @@ QingyunPlay[filename_]:=Module[
 					"7",pitch*=2^(2/12)
 				];
 				j++;
-				While[j<=StringLength[file[[i]][[1]]] && MemberQ[{"-","_","'",",",".","^"},StringTake[file[[i]][[1]],{j}]],
-					char=StringTake[file[[i]][[1]],{j}];
+				While[j<=StringLength[file[[i,1]]] && MemberQ[{"-","_","'",",",".","^"},StringTake[file[[i,1]],{j}]],
+					char=StringTake[file[[i,1]],{j}];
 					Switch[char,
 						"-",time+=1,
 						"_",time/=2,
@@ -101,12 +103,12 @@ QingyunPlay[filename_]:=Module[
 					EmitSound[Play[Sin[pitch*2*Pi*t],{t,0,time*7/8}]];
 					EmitSound[Play[0,{t,0,time/8}]],
 					EmitSound[Play[Sin[pitch*2*Pi*t],{t,0,time}]];
-				]
-				
-			,j++];
-		];
-	,{i,Length[file]}];
+				],
+			j++];
+		],
+	{i,Length[file]}];
 ]
 
 
-QingyunPlay[NotebookDirectory[]<>"The_Internationale.qym"]
+(* ::Input:: *)
+(*QingyunPlay["The_Internationale"]*)

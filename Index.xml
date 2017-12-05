@@ -12,7 +12,7 @@
 <path>Kaze_No_Sumu_Machi.qym</path>
 </song>
 <song>
-<title>宴会开始</title>
+<title>鬼子电报员</title>
 <path>Telegrapher.qym</path>
 </song>
 <song>
@@ -26,5 +26,9 @@
 <song>
 <title>东方红</title>
 <path>The_East_is_Red.qym</path>
+</song>
+<song>
+<title>Numb(未完成)</title>
+<path>Numb.qymi</path>
 </song>
 </index>

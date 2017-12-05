@@ -57,8 +57,8 @@ qymPlay[filename_]:=Module[
 					j++;
 					Continue[],
 				"<",
-					match=Select[Transpose[StringPosition[file[[i,1]],">"]][[1]],#>j&][[1]]-1;
-					comment=StringTake[file[[i,1]],{j+1,match}];
+					match=Select[Transpose[StringPosition[file[[i,1]],">"]][[1]],#>j&][[1]];
+					comment=StringTake[file[[i,1]],{j+1,match-1}];
 					Switch[StringTake[comment,{2}],
 						"=",
 							tonality=$TonalityDict[[StringTake[comment,{3,StringLength@comment}]]],
@@ -67,7 +67,7 @@ qymPlay[filename_]:=Module[
 						_,
 							speed=ToExpression[comment];
 					];
-					j=match;
+					j=match+1;
 					Continue[];
 			];
 			If[MemberQ[{"0","1","2","3","4","5","6","7"},char],
@@ -112,3 +112,12 @@ qymPlay[filename_]:=Module[
 
 (* ::Input:: *)
 (*QingyunPlay["The_Internationale"]*)
+
+
+QingyunPlay["Telegrapher"]
+
+
+print[]
+
+
+

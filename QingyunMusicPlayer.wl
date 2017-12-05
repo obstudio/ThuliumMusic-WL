@@ -35,7 +35,7 @@ qymPlay[filename_]:=Module[
 		file,
 		char,
 		tonality=0,beat=1,speed=88,
-		pitch,sharp=0,time,space,
+		pitch,sharp=0,time,space,tercet=0,tercetTime,
 		comment,match,timeDot
 	},
 	file=Import[filename,"Table"];
@@ -65,6 +65,13 @@ qymPlay[filename_]:=Module[
 						_,
 							speed=ToExpression[comment];
 					];
+					j=match+1;
+					Continue[],
+				"(",
+					match=Select[Transpose[StringPosition[file[[i,1]],")"]][[1]],#>j&][[1]];
+					comment=StringTake[file[[i,1]],{j+1,match-1}];
+					tercet=ToExpression[comment];
+					tercetTime=(2^Floor[Log2[tercet]])/tercet;
 					j=match+1;
 					Continue[];
 			];
@@ -101,6 +108,10 @@ qymPlay[filename_]:=Module[
 						"^",space=False
 					];
 					j++;
+				];
+				If[tercet>0,
+					time*=tercetTime;
+					tercet--;
 				];
 				time=60/speed*time*beat;
 				If[space,

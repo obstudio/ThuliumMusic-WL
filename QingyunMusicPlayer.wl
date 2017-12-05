@@ -3,34 +3,31 @@
 (* ::Text:: *)
 (*Qingyun Music Player*)
 (*Version 1.0.0*)
-(**)
-(*Usage:*)
-(*QingyunPlay[song]*)
-(**)
 
 
 (* Initialization *)
+$CharacterEncoding="UTF-8";
+$Language="ChineseSimplified";
 $favorite=NotebookDirectory[];
 $TonalityDict=<|
 	"C"->0,"G"->7,"D"->2,"A"->-3,"E"->4,
 	"B"->-1,"#F"->6,"#C"->1,"F"->5,"bB"->-2,
 	"bE"->3,"bA"->-4,"bD"->1,"bG"->6,"bC"->-1
 |>;
+$SongData={};
+index=Import[$favorite<>"Index.dat","Data"];
+Do[
+	AppendTo[$SongData,#[[2]]->#[[1]]&@StringSplit[index[[i,1]],{"[","]"}]],
+{i,Length@index}];
 
 
-setFavorite[name_]:=If[ToLowerCase@name=="default",
-	$favorite=NotebookDirectory[],
-	$favorite=name
-];
 QingyunPlay[song_]:=Module[{filename},
-	filename=$favorite<>song<>".qym";
+	filename=$favorite<>"Songs\\"<>song;
 	If[FileExistsQ[filename],
 		qymPlay[filename],
 		Print["Not Found!"];Return[];
 	]
 ];
-
-
 qymPlay[filename_]:=Module[
 	{
 		i,j,
@@ -110,14 +107,11 @@ qymPlay[filename_]:=Module[
 ]
 
 
-(* ::Input:: *)
-(*QingyunPlay["The_Internationale"]*)
-
-
-QingyunPlay["Telegrapher"]
-
-
-print[]
-
-
-
+Framed@Column[{
+	Style["QingyunMusicPlayer",Bold,20],
+	SetterBar[Dynamic[choice],$SongData,Appearance -> "Vertical" -> {Automatic,3}],
+	Button["Play",
+		Print["Song: ",Association[$SongData][[choice]]];
+		QingyunPlay[choice],
+	ImageSize->150]
+},Center]

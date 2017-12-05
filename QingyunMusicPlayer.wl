@@ -36,7 +36,7 @@ qymPlay[filename_]:=Module[
 		char,
 		tonality=0,beat=1,speed=88,
 		pitch,sharp=0,time,space,
-		comment,match
+		comment,match,timeDot
 	},
 	file=Import[filename,"Table"];
 	Do[
@@ -92,10 +92,12 @@ qymPlay[filename_]:=Module[
 						"'",pitch*=2,
 						",",pitch/=2,
 						".",
-							If[StringTake[file[[i,1]],{j+1}]==".",
-								time*=(7/4),
-								time*=(3/2)
-							],
+							timeDot=1/2;
+							While[StringTake[file[[i,1]],{j+1}]==".",
+								timeDot/=2;
+								j++;
+							];
+							time*=(2-timeDot),
 						"^",space=False
 					];
 					j++;

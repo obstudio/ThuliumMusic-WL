@@ -91,7 +91,11 @@ qymPlay[filename_]:=Module[
 						"_",time/=2,
 						"'",pitch*=2,
 						",",pitch/=2,
-						".",time*=(3/2),
+						".",
+							If[StringTake[file[[i,1]],{j+1}]==".",
+								time*=(7/4),
+								time*=(3/2)
+							],
 						"^",space=False
 					];
 					j++;

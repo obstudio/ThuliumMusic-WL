@@ -85,21 +85,22 @@ qymPlay[filename_,default_]:=Module[
 					tercet--;
 				];
 				duration=60/speed*time*beat;
+				If[pitch===None,AppendTo[music,AudioGenerator["Silence",duration]];Continue[]];
 				If[instrument=="Sine",
-					frequency=If[pitch===None,0,440*2^((pitch-9)/12)];
+					frequency=440*2^((pitch-9)/12);
 					If[space,
-						EmitSound@Play[Sin[frequency*2*Pi*t],{t,0,duration*7/8}];
-						EmitSound@Play[0,{t,0,duration/8}],
-						EmitSound@Play[Sin[frequency*2*Pi*t],{t,0,duration}];
+						AppendTo[music,AudioGenerator[{"Sin",frequency},duration*7/8]];
+						AppendTo[music,AudioGenerator["Silence",duration/8]],
+						AppendTo[music,AudioGenerator[{"Sin",frequency},duration]];
 					],
 					If[space,
-						AppendTo[music,SoundNote[pitch,duration*7/8,instrument]];
-						AppendTo[music,SoundNote[None,duration/8]],
-						AppendTo[music,SoundNote[pitch,duration,instrument]];
+						AppendTo[music,Audio@SoundNote[pitch,duration*7/8,instrument]];
+						AppendTo[music,AudioGenerator["Silence",duration/8]],
+						AppendTo[music,Audio@SoundNote[pitch,duration,instrument]];
 					]
 				],
 			j++];
 		],
 	{i,Length[data]}];
-	If[music!={},EmitSound@Sound@music];
+	AudioPlay[AudioJoin[music]];
 ]

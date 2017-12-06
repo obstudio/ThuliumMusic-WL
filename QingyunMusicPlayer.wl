@@ -16,10 +16,12 @@ $TonalityDict=<|
 |>;
 $PitchDict=<|"1"->0,"2"->2,"3"->4,"4"->6,"5"->7,"6"->9,"7"->11|>;
 index=Import[$favorite<>"Index.xml","CDATA"];
-$songCount=Length@index/2;
-$songTitle=Take[index,{1,Length@index,2}];
-$songPath=Take[index,{2,Length@index,2}];
+$songCount=Length@index/4;
+$songTitle=Take[index,{1,Length@index,4}];
+$songPath=Take[index,{4,Length@index,4}];
 $songDict=Association[#->$songTitle[[#]]&/@Range[$songCount]];
+$songLyricist=Take[index,{3,Length@index,4}];
+$songComposer=Take[index,{2,Length@index,4}];
 $playing="Null";
 QingyunPlay[song_]:=Module[{filename},
 	filename=$favorite<>"Songs\\"<>song;
@@ -230,6 +232,11 @@ qymiPlay[filename_]:=Module[
 ]
 
 
+(* ::Input:: *)
+(*EmitSound[Sound[{SoundNote["C",.5],SoundNote["E",.5]}]]*)
+(*EmitSound[Sound[{SoundNote["E",.5],SoundNote["G",.5],SoundNote["B",.5]}]]*)
+
+
 CreateDialog[Column[{
 	Style["\:9752\:4e91\:64ad\:653e\:5668",Bold,20],
 	SetterBar[Dynamic[choice],$songDict,Appearance->"Vertical"],
@@ -248,3 +255,7 @@ WindowTitle->"\:9752\:4e91\:64ad\:653e\:5668"];
 
 (* ::Input:: *)
 (*QingyunPlay["Numb.qymi"]*)
+
+
+(* ::Input:: *)
+(*EmitSound@Sound[{Play[{Sin[440*2\[Pi] t]+Sin[349*2\[Pi] t]},{t,0,1}],Play[{Sin[293.5*2\[Pi] t]+Sin[349*2\[Pi] t]},{t,0,1}]}]*)

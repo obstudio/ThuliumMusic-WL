@@ -3,7 +3,7 @@
 qymPlay[filename_,default_]:=Module[
 	{
 		i,j,
-		data,char,music={},voiceParts={},
+		data,char,music,voiceParts,
 		tonality=0,beat=1,speed=88,instrument,
 		pitch,sharp=0,time,space,tercet=0,tercetTime,
 		comment,match,timeDot,note,duration,frequency,
@@ -21,8 +21,10 @@ qymPlay[filename_,default_]:=Module[
 		data=StringJoin[data[[1]],#]&/@data;
 		Delete[data,1];
 	];
+	voiceParts={};
 	Do[
 		j=1;
+		music={};
 		While[j<=StringLength[data[[i]]],
 			char=StringTake[data[[i]],{j}];
 			Switch[char,
@@ -103,8 +105,8 @@ qymPlay[filename_,default_]:=Module[
 					]
 				],
 			j++];
-			AppendTo[voiceParts,AudioJoin@music];
-		],
+		];
+		If[music!={},AppendTo[voiceParts,AudioJoin@music]],
 	{i,Length[data]}];
-	AudioPlay[AudioOverlay[voiceParts]];
+	AudioPlay@AudioOverlay@voiceParts;
 ]

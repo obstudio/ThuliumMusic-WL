@@ -45,7 +45,7 @@ QingyunPlay[]:=CreateDialog[Column[{,
 
 
 (* ::Input:: *)
-(*QingyunPlay["Numb.qym",{"Piano"}]*)
+(*QingyunPlay["Sumizome_Sakura.qym",{"Sine"}]*)
 
 
 (* ::Input:: *)

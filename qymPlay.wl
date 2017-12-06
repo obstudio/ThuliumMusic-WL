@@ -1,20 +1,18 @@
 (* ::Package:: *)
 
-$TonalityDict=<|
-	"C"->0,"G"->7,"D"->2,"A"->-3,"E"->4,
-	"B"->-1,"#F"->6,"#C"->1,"F"->5,"bB"->-2,
-	"bE"->3,"bA"->-4,"bD"->1,"bG"->6,"bC"->-1
-|>;
-$PitchDict=<|"1"->0,"2"->2,"3"->4,"4"->5,"5"->7,"6"->9,"7"->11|>;
-
-
 qymPlay[filename_,default_]:=Module[
 	{
 		i,j,
 		data,char,music={},
 		tonality=0,beat=1,speed=88,instrument,
 		pitch,sharp=0,time,space,tercet=0,tercetTime,
-		comment,match,timeDot,note,duration,frequency
+		comment,match,timeDot,note,duration,frequency,
+		tonalityDict=<|
+			"C"->0,"G"->7,"D"->2,"A"->-3,"E"->4,
+			"B"->-1,"#F"->6,"#C"->1,"F"->5,"bB"->-2,
+			"bE"->3,"bA"->-4,"bD"->1,"bG"->6,"bC"->-1
+		|>,
+		pitchDict=<|"1"->0,"2"->2,"3"->4,"4"->5,"5"->7,"6"->9,"7"->11|>
 	},
 	instrument=default[[1]];
 	data=#[[1]]&/@Import[filename,"Table"];
@@ -38,7 +36,7 @@ qymPlay[filename_,default_]:=Module[
 					comment=StringTake[data[[i]],{j+1,match-1}];
 					Switch[StringTake[comment,{2}],
 						"=",
-							tonality=$TonalityDict[[StringTake[comment,{3,StringLength@comment}]]],
+							tonality=tonalityDict[[StringTake[comment,{3,StringLength@comment}]]],
 						"/",
 							beat=ToExpression[StringTake[comment,{3}]]/4,
 						_,
@@ -61,7 +59,7 @@ qymPlay[filename_,default_]:=Module[
 				note=ToExpression@char;
 				time=1;
 				space=True;
-				pitch=If[note==0,None,$PitchDict[[note]]+tonality+sharp];
+				pitch=If[note==0,None,pitchDict[[note]]+tonality+sharp];
 				sharp=0;
 				j++;
 				While[j<=StringLength[data[[i]]] && MemberQ[{"-","_","'",",",".","^"},StringTake[data[[i]],{j}]],

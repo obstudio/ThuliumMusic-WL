@@ -15,10 +15,12 @@ $TonalityDict=<|
 	"bE"->3,"bA"->-4,"bD"->1,"bG"->6,"bC"->-1
 |>;
 index=Import[$favorite<>"Index.xml","CDATA"];
-$songCount=Length@index/2;
-$songTitle=Take[index,{1,Length@index,2}];
-$songPath=Take[index,{2,Length@index,2}];
+$songCount=Length@index/4;
+$songTitle=Take[index,{1,Length@index,4}];
+$songPath=Take[index,{4,Length@index,4}];
 $songDict=Association[#->$songTitle[[#]]&/@Range[$songCount]];
+$songLyricist=Take[index,{3,Length@index,4}];
+$songComposer=Take[index,{2,Length@index,4}];
 $playing="Null";
 
 
@@ -32,20 +34,19 @@ QingyunPlay[song_]:=Module[{filename},
 qymPlay[filename_]:=Module[
 	{
 		i,j,
-		file,
-		char,
-		tonality=0,beat=1,speed=88,
+		data,char,music={},
+		tonality=0,beat=1,speed=88,instrument,
 		pitch,sharp=0,time,space,tercet=0,tercetTime,
-		comment,match,timeDot
+		comment,match,timeDot,note,duration
 	},
-	file=Import[filename,"Table"];
+	data=#[[1]]&/@Import[filename,"Table"];
 	Do[
 		j=1;
-		While[j<=StringLength[file[[i,1]]],
-			char=StringTake[file[[i,1]],{j}];
+		While[j<=StringLength[data[[i]]],
+			char=StringTake[data[[i]],{j}];
 			Switch[char,
 				"/",
-					If[StringTake[file[[i,1]],{j+1}]=="/",Break[]],
+					If[StringTake[data[[i]],{j+1}]=="/",Break[]],
 				"#",
 					sharp++;
 					j++;
@@ -55,8 +56,8 @@ qymPlay[filename_]:=Module[
 					j++;
 					Continue[],
 				"<",
-					match=Select[Transpose[StringPosition[file[[i,1]],">"]][[1]],#>j&][[1]];
-					comment=StringTake[file[[i,1]],{j+1,match-1}];
+					match=Select[Transpose[StringPosition[data[[i]],">"]][[1]],#>j&][[1]];
+					comment=StringTake[data[[i]],{j+1,match-1}];
 					Switch[StringTake[comment,{2}],
 						"=",
 							tonality=$TonalityDict[[StringTake[comment,{3,StringLength@comment}]]],
@@ -68,39 +69,33 @@ qymPlay[filename_]:=Module[
 					j=match+1;
 					Continue[],
 				"(",
-					match=Select[Transpose[StringPosition[file[[i,1]],")"]][[1]],#>j&][[1]];
-					comment=StringTake[file[[i,1]],{j+1,match-1}];
+					match=Select[Transpose[StringPosition[data[[i]],")"]][[1]],#>j&][[1]];
+					comment=StringTake[data[[i]],{j+1,match-1}];
 					tercet=ToExpression[comment];
 					tercetTime=(2^Floor[Log2[tercet]])/tercet;
 					j=match+1;
-					Continue[];
+					Continue[],
+				"{",
+					match=Select[Transpose[StringPosition[data[[i]],"}"]][[1]],#>j&][[1]];
+					instrument=StringTake[data[[i]],{j+1,match-1}]
 			];
 			If[MemberQ[{"0","1","2","3","4","5","6","7"},char],
+				note=ToExpression@char;
 				time=1;
 				space=True;
-				pitch=440*2^((tonality+sharp)/12);
+				pitch=If[note==0,None,$PitchDict[[note]]+tonality+sharp];
 				sharp=0;
-				Switch[char,
-					"0",pitch*=0,
-					"1",pitch*=2^(-9/12),
-					"2",pitch*=2^(-7/12),
-					"3",pitch*=2^(-5/12),
-					"4",pitch*=2^(-4/12),
-					"5",pitch*=2^(-2/12),
-					"6",pitch*=2^(0/12),
-					"7",pitch*=2^(2/12)
-				];
 				j++;
-				While[j<=StringLength[file[[i,1]]] && MemberQ[{"-","_","'",",",".","^"},StringTake[file[[i,1]],{j}]],
-					char=StringTake[file[[i,1]],{j}];
+				While[j<=StringLength[data[[i]]] && MemberQ[{"-","_","'",",",".","^"},StringTake[data[[i]],{j}]],
+					char=StringTake[data[[i]],{j}];
 					Switch[char,
 						"-",time+=1,
 						"_",time/=2,
-						"'",pitch*=2,
-						",",pitch/=2,
+						"'",pitch+=12,
+						",",pitch-=12,
 						".",
 							timeDot=1/2;
-							While[StringTake[file[[i,1]],{j+1}]==".",
+							While[StringTake[data[[i]],{j+1}]==".",
 								timeDot/=2;
 								j++;
 							];
@@ -113,15 +108,23 @@ qymPlay[filename_]:=Module[
 					time*=tercetTime;
 					tercet--;
 				];
-				time=60/speed*time*beat;
-				If[space,
-					EmitSound[Play[Sin[pitch*2*Pi*t],{t,0,time*7/8}]];
-					EmitSound[Play[0,{t,0,time/8}]],
-					EmitSound[Play[Sin[pitch*2*Pi*t],{t,0,time}]];
+				duration=60/speed*time*beat;
+				If[instrument=="",
+					If[space,
+						EmitSound[Play[Sin[440*2^((pitch-9)/12)*2*Pi*t],{t,0,duration*7/8}]];
+						EmitSound[Play[0,{t,0,duration/8}]],
+						EmitSound[Play[Sin[440*2^((pitch-9)/12)*2*Pi*t],{t,0,duration}]];
+					],
+					If[space,
+						AppendTo[music,SoundNote[pitch,duration*7/8,instrument]];
+						AppendTo[music,SoundNote[None,duration/8]],
+						AppendTo[music,SoundNote[pitch,duration,instrument]];
+					];
 				],
 			j++];
 		],
-	{i,Length[file]}];
+	{i,Length[data]}];
+	EmitSound@Sound@music
 ]
 
 

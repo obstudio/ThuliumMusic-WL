@@ -14,7 +14,7 @@ $TonalityDict=<|
 	"B"->-1,"#F"->6,"#C"->1,"F"->5,"bB"->-2,
 	"bE"->3,"bA"->-4,"bD"->1,"bG"->6,"bC"->-1
 |>;
-$PitchDict=<|"1"->0,"2"->2,"3"->4,"4"->6,"5"->7,"6"->9,"7"->11|>;
+$PitchDict=<|"1"->0,"2"->2,"3"->4,"4"->5,"5"->7,"6"->9,"7"->11|>;
 index=Import[$favorite<>"Index.xml","CDATA"];
 $songCount=Length@index/4;
 $songTitle=Take[index,{1,Length@index,4}];
@@ -139,9 +139,9 @@ qymPlay[filename_]:=Module[
 				duration=60/speed*time*beat;
 				If[instrument=="Null",
 					If[space,
-						EmitSound@Play[Sin[440*2^(pitch/12)*2*Pi*t],{t,0,duration*7/8}];
+						EmitSound@Play[Sin[440*2^((pitch-9)/12)*2*Pi*t],{t,0,duration*7/8}];
 						EmitSound@Play[0,{t,0,duration/8}],
-						EmitSound@Play[Sin[440*2^(pitch/12)*2*Pi*t],{t,0,duration}];
+						EmitSound@Play[Sin[440*2^((pitch-9)/12)*2*Pi*t],{t,0,duration}];
 					],
 					If[space,
 						AppendTo[music,SoundNote[pitch,duration*7/8,instrument]];
@@ -157,7 +157,7 @@ qymPlay[filename_]:=Module[
 
 
 (* ::Input:: *)
-(*QingyunPlay["Numb.qym"]*)
+(*QingyunPlay["The_East_is_Red.qym"]*)
 
 
 (* ::Input:: *)

@@ -8,25 +8,30 @@
 (* Initialization *)
 $CharacterEncoding="UTF-8";
 $Language="ChineseSimplified";
-$favorite=NotebookDirectory[];
+$local=NotebookDirectory[];
 $TonalityDict=<|
 	"C"->0,"G"->7,"D"->2,"A"->-3,"E"->4,
 	"B"->-1,"#F"->6,"#C"->1,"F"->5,"bB"->-2,
 	"bE"->3,"bA"->-4,"bD"->1,"bG"->6,"bC"->-1
 |>;
 $PitchDict=<|"1"->0,"2"->2,"3"->4,"4"->5,"5"->7,"6"->9,"7"->11|>;
-index=Import[$favorite<>"Index.xml","CDATA"];
+index=Import[$local<>"Index.xml","CDATA"];
 $songCount=Length@index/4;
 $songTitle=Take[index,{1,Length@index,4}];
 $songPath=Take[index,{4,Length@index,4}];
-$songDict=Association[#->$songTitle[[#]]&/@Range[$songCount]];
 $songLyricist=Take[index,{3,Length@index,4}];
 $songComposer=Take[index,{2,Length@index,4}];
+$songDict=Association[#->$songTitle[[#]]&/@Range[$songCount]];
+$songInfo=Column[{
+	$songTitle[[#]],
+	If[$songComposer[[#]]=="N",Nothing,"\:66f2\:ff1a"<>$songComposer[[#]]],
+}]&/@Range@$songCount;
+$instrumentDefault="Sine";
 QingyunPlay[song_]:=Module[{filename},
-	filename=$favorite<>"Songs\\"<>song;
+	filename=$local<>"Songs\\"<>song;
 	If[FileExistsQ[filename],
 		qymPlay[filename],
-		CreateDialog[{
+		MessageDialog[{
 			TextCell["File not found!"],DefaultButton[]},
 		WindowTitle->"Error"];
 		Return[];
@@ -36,14 +41,10 @@ QingyunPlay[]:=CreateDialog[Column[{
 	Style["\:9752\:4e91\:64ad\:653e\:5668",Bold,20],
 	SetterBar[Dynamic[choice],$songDict,Appearance->"Vertical"],
 	Button["\:64ad\:653e",
-		$playing=$songTitle[[choice]];
-		QingyunPlay[$songPath[[choice]]];
-		$playing="Null",
+		MessageDialog[$songInfo[[choice]],WindowTitle->"\:6b63\:5728\:64ad\:653e..."];
+		QingyunPlay[$songPath[[choice]]],
 	ImageSize->150],
-	If[$playing=="Null",
-		"\:70b9\:51fb\[OpenCurlyDoubleQuote]\:64ad\:653e\[CloseCurlyDoubleQuote]\:6309\:94ae\:5f00\:59cb\:6f14\:594f\:3002",
-		"\:6b63\:5728\:64ad\:653e\:ff1a"<>Dynamic[$playing]
-	]
+	"\:70b9\:51fb\[OpenCurlyDoubleQuote]\:64ad\:653e\[CloseCurlyDoubleQuote]\:6309\:94ae\:5f00\:59cb\:6f14\:594f\:3002"
 },Center],
 WindowTitle->"\:9752\:4e91\:64ad\:653e\:5668"];
 
@@ -52,10 +53,11 @@ qymPlay[filename_]:=Module[
 	{
 		i,j,
 		data,char,music={},
-		tonality=0,beat=1,speed=88,instrument="Sine",
+		tonality=0,beat=1,speed=88,instrument,
 		pitch,sharp=0,time,space,tercet=0,tercetTime,
 		comment,match,timeDot,note,duration,frequency
 	},
+	instrument=$instrumentDefault;
 	data=#[[1]]&/@Import[filename,"Table"];
 	Do[
 		j=1;
@@ -112,7 +114,7 @@ qymPlay[filename_]:=Module[
 						",",pitch-=12,
 						".",
 							timeDot=1/2;
-							While[StringTake[data[[i]],{j+1}]==".",
+							While[j<=StringLength[data[[i]]] && StringTake[data[[i]],{j+1}]==".",
 								timeDot/=2;
 								j++;
 							];
@@ -137,7 +139,7 @@ qymPlay[filename_]:=Module[
 						AppendTo[music,SoundNote[pitch,duration*7/8,instrument]];
 						AppendTo[music,SoundNote[None,duration/8]],
 						AppendTo[music,SoundNote[pitch,duration,instrument]];
-					];
+					]
 				],
 			j++];
 		],
@@ -146,4 +148,9 @@ qymPlay[filename_]:=Module[
 ]
 
 
-QingyunPlay[];
+(* ::Input:: *)
+(*QingyunPlay["Numb.qym"]*)
+
+
+(* ::Input:: *)
+(*QingyunPlay[];*)

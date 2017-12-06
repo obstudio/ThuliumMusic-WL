@@ -103,3 +103,7 @@ qymPlay[filename_,default_]:=Module[
 	{i,Length[data]}];
 	If[music!={},EmitSound@Sound@music];
 ]
+
+
+(* ::Input:: *)
+(*qymPlay["E:\\QingyunMusicPlayer\\Songs\\The_East_is_Red.qym",{"Piano"}]*)

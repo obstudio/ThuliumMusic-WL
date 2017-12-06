@@ -41,11 +41,12 @@ QingyunPlay[]:=CreateDialog[Column[{,
 		MessageDialog[$songInfo[[choice]],WindowTitle->"\:6b63\:5728\:64ad\:653e..."];
 		QingyunPlay[$songPath[[choice]],Dynamic[instrument]],
 	ImageSize->150],
-},Center],WindowTitle->"\:9752\:4e91\:64ad\:653e\:5668"];
+},Center,ItemSize->20],
+WindowTitle->"\:9752\:4e91\:64ad\:653e\:5668"];
 
 
 (* ::Input:: *)
-(*QingyunPlay["Sumizome_Sakura.qym",{"Sine"}]*)
+(*QingyunPlay["Numb.qym",{"Piano"}]*)
 
 
 (* ::Input:: *)

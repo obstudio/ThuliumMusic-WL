@@ -3,7 +3,7 @@
 qymPlay[filename_,default_]:=Module[
 	{
 		i,j,
-		data,char,music={},
+		data,char,music={},voiceParts={},
 		tonality=0,beat=1,speed=88,instrument,
 		pitch,sharp=0,time,space,tercet=0,tercetTime,
 		comment,match,timeDot,note,duration,frequency,
@@ -103,7 +103,8 @@ qymPlay[filename_,default_]:=Module[
 					]
 				],
 			j++];
+			AppendTo[voiceParts,AudioJoin@music];
 		],
 	{i,Length[data]}];
-	AudioPlay[AudioJoin[music]];
+	AudioPlay[AudioOverlay[voiceParts]];
 ]

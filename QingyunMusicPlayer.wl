@@ -51,24 +51,10 @@ WindowTitle->"\:9752\:4e91\:64ad\:653e\:5668"];
 qymPlay[filename_]:=Module[
 	{
 		i,j,
-		data,
-		char,
-		note,
-		tonality=0,
-		beat=1,
-		speed=60,		
-		pitch,
-		sharp=0,
-		time,
-		space,
-		tercet=0,
-		tercetTime,
-		timeDot,
-		duration,
-		comment,
-		match,
-		music={},
-		instrument="Null"
+		data,char,music={},
+		tonality=0,beat=1,speed=88,instrument="Sine",
+		pitch,sharp=0,time,space,tercet=0,tercetTime,
+		comment,match,timeDot,note,duration,frequency
 	},
 	data=#[[1]]&/@Import[filename,"Table"];
 	Do[
@@ -117,7 +103,7 @@ qymPlay[filename_]:=Module[
 				pitch=If[note==0,None,$PitchDict[[note]]+tonality+sharp];
 				sharp=0;
 				j++;
-				While[MemberQ[{"-","_","'",",",".","^"},StringTake[data[[i]],{j}]],
+				While[j<=StringLength[data[[i]]] && MemberQ[{"-","_","'",",",".","^"},StringTake[data[[i]],{j}]],
 					char=StringTake[data[[i]],{j}];
 					Switch[char,
 						"-",time+=1,
@@ -135,30 +121,29 @@ qymPlay[filename_]:=Module[
 					];
 					j++;
 				];
-				If[tercet>0,time*=tercetTime;tercet--];
+				If[tercet>0,
+					time*=tercetTime;
+					tercet--;
+				];
 				duration=60/speed*time*beat;
-				If[instrument=="Null",
+				If[instrument=="Sine",
+					frequency=If[pitch==None,0,440*2^((pitch-9)/12)];
 					If[space,
-						EmitSound@Play[Sin[440*2^((pitch-9)/12)*2*Pi*t],{t,0,duration*7/8}];
+						EmitSound@Play[Sin[frequency*2*Pi*t],{t,0,duration*7/8}];
 						EmitSound@Play[0,{t,0,duration/8}],
-						EmitSound@Play[Sin[440*2^((pitch-9)/12)*2*Pi*t],{t,0,duration}];
+						EmitSound@Play[Sin[frequency*2*Pi*t],{t,0,duration}];
 					],
 					If[space,
 						AppendTo[music,SoundNote[pitch,duration*7/8,instrument]];
 						AppendTo[music,SoundNote[None,duration/8]],
 						AppendTo[music,SoundNote[pitch,duration,instrument]];
-					]
+					];
 				],
 			j++];
 		],
 	{i,Length[data]}];
-	EmitSound@Sound@music
+	If[music!={},EmitSound@Sound@music];
 ]
 
 
-(* ::Input:: *)
-(*QingyunPlay["The_East_is_Red.qym"]*)
-
-
-(* ::Input:: *)
-(*QingyunPlay[];*)
+QingyunPlay[];

@@ -3,7 +3,7 @@
 qymPlay[filename_,default_]:=Module[
 	{
 		i,j,
-		data,char,music={},
+		data,data1,data2,char,music={},
 		tonality=0,beat=1,speed=88,instrument,
 		pitch,sharp=0,time,space,tercet=0,tercetTime,
 		comment,match,timeDot,note,duration,frequency,
@@ -15,14 +15,14 @@ qymPlay[filename_,default_]:=Module[
 		pitchDict=<|"1"->0,"2"->2,"3"->4,"4"->5,"5"->7,"6"->9,"7"->11|>
 	},
 	instrument=default[[1]];
-	data=#[[1]]&/@Import[filename,"Table"];
+	data1=StringJoin/@Import[filename,"Table"];
+	data2=Select[data1,!StringContainsQ[#,"//"]&];
+	data=data2;
 	Do[
 		j=1;
 		While[j<=StringLength[data[[i]]],
 			char=StringTake[data[[i]],{j}];
 			Switch[char,
-				"/",
-					If[StringTake[data[[i]],{j+1}]=="/",Break[]],
 				"#",
 					sharp++;
 					j++;

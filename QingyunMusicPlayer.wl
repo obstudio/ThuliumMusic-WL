@@ -22,23 +22,39 @@ $songPath=Take[index,{4,Length@index,4}];
 $songDict=Association[#->$songTitle[[#]]&/@Range[$songCount]];
 $songLyricist=Take[index,{3,Length@index,4}];
 $songComposer=Take[index,{2,Length@index,4}];
-$playing="Null";
-
-
 QingyunPlay[song_]:=Module[{filename},
 	filename=$favorite<>"Songs\\"<>song;
 	If[FileExistsQ[filename],
 		qymPlay[filename],
-		Print["Not Found!"];Return[];
+		CreateDialog[{
+			TextCell["File not found!"],DefaultButton[]},
+		WindowTitle->"Error"];
+		Return[];
 	]
 ];
+QingyunPlay[]:=CreateDialog[Column[{
+	Style["\:9752\:4e91\:64ad\:653e\:5668",Bold,20],
+	SetterBar[Dynamic[choice],$songDict,Appearance->"Vertical"],
+	Button["\:64ad\:653e",
+		$playing=$songTitle[[choice]];
+		QingyunPlay[$songPath[[choice]]];
+		$playing="Null",
+	ImageSize->150],
+	If[$playing=="Null",
+		"\:70b9\:51fb\[OpenCurlyDoubleQuote]\:64ad\:653e\[CloseCurlyDoubleQuote]\:6309\:94ae\:5f00\:59cb\:6f14\:594f\:3002",
+		"\:6b63\:5728\:64ad\:653e\:ff1a"<>Dynamic[$playing]
+	]
+},Center],
+WindowTitle->"\:9752\:4e91\:64ad\:653e\:5668"];
+
+
 qymPlay[filename_]:=Module[
 	{
 		i,j,
 		data,char,music={},
-		tonality=0,beat=1,speed=88,instrument,
+		tonality=0,beat=1,speed=88,instrument="Sine",
 		pitch,sharp=0,time,space,tercet=0,tercetTime,
-		comment,match,timeDot,note,duration
+		comment,match,timeDot,note,duration,frequency
 	},
 	data=#[[1]]&/@Import[filename,"Table"];
 	Do[
@@ -110,11 +126,12 @@ qymPlay[filename_]:=Module[
 					tercet--;
 				];
 				duration=60/speed*time*beat;
-				If[instrument=="",
+				If[instrument=="Sine",
+					frequency=If[pitch==None,0,440*2^((pitch-9)/12)];
 					If[space,
-						EmitSound[Play[Sin[440*2^((pitch-9)/12)*2*Pi*t],{t,0,duration*7/8}]];
-						EmitSound[Play[0,{t,0,duration/8}]],
-						EmitSound[Play[Sin[440*2^((pitch-9)/12)*2*Pi*t],{t,0,duration}]];
+						EmitSound@Play[Sin[frequency*2*Pi*t],{t,0,duration*7/8}];
+						EmitSound@Play[0,{t,0,duration/8}],
+						EmitSound@Play[Sin[frequency*2*Pi*t],{t,0,duration}];
 					],
 					If[space,
 						AppendTo[music,SoundNote[pitch,duration*7/8,instrument]];
@@ -125,21 +142,8 @@ qymPlay[filename_]:=Module[
 			j++];
 		],
 	{i,Length[data]}];
-	EmitSound@Sound@music
+	If[music!={},EmitSound@Sound@music];
 ]
 
 
-CreateDialog[Column[{
-	Style["\:9752\:4e91\:64ad\:653e\:5668",Bold,20],
-	SetterBar[Dynamic[choice],$songDict,Appearance->"Vertical"],
-	Button["\:64ad\:653e",
-		$playing=$songTitle[[choice]];
-		QingyunPlay[$songPath[[choice]]];
-		$playing="Null",
-	ImageSize->150],
-	If[$playing=="Null",
-		"\:70b9\:51fb\[OpenCurlyDoubleQuote]\:64ad\:653e\[CloseCurlyDoubleQuote]\:6309\:94ae\:5f00\:59cb\:6f14\:594f\:3002",
-		"\:6b63\:5728\:64ad\:653e\:ff1a"<>Dynamic[$playing]
-	]
-},Center],
-WindowTitle->"\:9752\:4e91\:64ad\:653e\:5668"];
+QingyunPlay[];

@@ -1,30 +1,50 @@
 ﻿<index>
 <song>
 <title>义勇军进行曲</title>
+<composer>聂耳</composer>
+<lyricist>田汉</lyricist>
 <path>March_of_the_Volunteers.qym</path>
 </song>
 <song>
 <title>南师附中校歌</title>
+<composer>N</composer>
+<lyricist>柳诒徵</lyricist>
 <path>NSFZ_School_Song.qym</path>
 </song>
 <song>
 <title>风居住的街道</title>
+<composer>矶村由纪子</composer>
+<lyricist>N</lyricist>
 <path>Kaze_No_Sumu_Machi.qym</path>
 </song>
 <song>
-<title>宴会开始</title>
+<title>鬼子电报员</title>
+<composer>三泽康広</composer>
+<lyricist>N</lyricist>
 <path>Telegrapher.qym</path>
 </song>
 <song>
 <title>社会主义好</title>
+<composer>李焕之</composer>
+<lyricist>希扬</lyricist>
 <path>Socialism_is_Good.qym</path>
 </song>
 <song>
 <title>国际歌</title>
+<composer>Pierre De Geyter</composer>
+<lyricist>Eugène Edine Pottier</lyricist>
 <path>The_Internationale.qym</path>
 </song>
 <song>
 <title>东方红</title>
+<composer>陕北民歌</composer>
+<lyricist>陕北民歌</lyricist>
 <path>The_East_is_Red.qym</path>
+</song>
+<song>
+<title>Numb(未完成)</title>
+<composer>Linkin Park</composer>
+<lyricist>Linkin Park</lyricist>
+<path>Numb.qym</path>
 </song>
 </index>

@@ -14,6 +14,7 @@ $TonalityDict=<|
 	"B"->-1,"#F"->6,"#C"->1,"F"->5,"bB"->-2,
 	"bE"->3,"bA"->-4,"bD"->1,"bG"->6,"bC"->-1
 |>;
+$PitchDict=<|"1"->0,"2"->2,"3"->4,"4"->5,"5"->7,"6"->9,"7"->11|>;
 index=Import[$favorite<>"Index.xml","CDATA"];
 $songCount=Length@index/4;
 $songTitle=Take[index,{1,Length@index,4}];

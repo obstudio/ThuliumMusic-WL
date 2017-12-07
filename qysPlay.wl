@@ -17,7 +17,7 @@ qysPlay[filename_]:=Module[
 		tonality=0,beat=1,speed=88,volume=1,
 		pitch,time,space,tercet=0,tercetTime,
 		comment,match,timeDot,note,duration,
-		lastPitch
+		lastPitch,extend
 	},
 	volume=1;
 	data1=StringJoin/@Import[filename,"Table"];             (* delete the spacings *)
@@ -34,6 +34,7 @@ qysPlay[filename_]:=Module[
 	data=StringDelete[#,"|"|"\\"]&/@data4;                 (* delete the joint marks and add a ending mark *)
 	Do[
 		j=1;
+		space=True;
 		voicePart={};
 		While[j<=StringLength[data[[i]]],
 			char=StringTake[data[[i]],{j}];
@@ -64,6 +65,7 @@ qysPlay[filename_]:=Module[
 			];
 			(* find out the pitch *)
 			j++;
+			extend=False;
 			If[char=="%",
 				pitch=lastPitch,                            (* the same as the last pitch *)
 				If[DigitQ[char],
@@ -88,14 +90,16 @@ qysPlay[filename_]:=Module[
 				While[j<=StringLength[data[[i]]] && MemberQ[{"#","b","'",","},StringTake[data[[i]],{j}]],
 					char=StringTake[data[[i]],{j}];
 					Switch[char,
-						"#",pitch[[k]]++,
-						"b",pitch[[k]]--,
+						"#",pitch++,
+						"b",pitch--,
 						"'",pitch+=12,
 						",",pitch-=12
 					];
 					j++;
 				];				
 			];
+			If[lastPitch==pitch && space==False,extend=True];
+			lastPitch=pitch;			
 			(* find out the duration *)
 			time=1;
 			space=True;
@@ -115,13 +119,19 @@ qysPlay[filename_]:=Module[
 				];
 				j++;
 			];
-			lastPitch=pitch;
 			If[tercet>0,time*=tercetTime;tercet--];
 			duration=60/speed*time*beat;
-			If[space,
-				AppendTo[voicePart,{pitch,duration*7/8,instrument,SoundVolume->volume}];
-				AppendTo[voicePart,{None,duration/8}],
-				AppendTo[voicePart,{pitch,duration,instrument,SoundVolume->volume}];
+			If[extend,
+				If[space,
+					voicePart[[-1,2]]+=duration*7/8;
+					AppendTo[voicePart,{None,duration/8}],
+					voicePart[[-1,2]]+=duration;
+				],
+				If[space,
+					AppendTo[voicePart,{pitch,duration*7/8,instrument,SoundVolume->volume}];
+					AppendTo[voicePart,{None,duration/8}],
+					AppendTo[voicePart,{pitch,duration,instrument,SoundVolume->volume}];
+				];
 			];
 		];
 		If[voicePart!={},AppendTo[music,Sound[SoundNote@@#&/@voicePart]]],
@@ -132,6 +142,3 @@ qysPlay[filename_]:=Module[
 
 (* ::Input:: *)
 (*qysPlay["E:\\QingyunMusicPlayer\\Songs\\Necro_Fantasia.qys"]*)
-
-
-

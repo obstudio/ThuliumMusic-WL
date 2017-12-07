@@ -22,15 +22,16 @@ qysPlay[filename_]:=Module[
 	volume=1;
 	data1=StringJoin/@Import[filename,"Table"];             (* delete the spacings *)
 	data2=Select[data1,!StringContainsQ[#,"//"]&];         (* delete the comments *)
-	data3={};j=0;join=False;                                (* join multiple lines of music scores together *)
+	data3=Cases[data2,Except[""]];                          (* delete the blank lines *)
+	data4={};j=0;join=False;                                (* join multiple lines of music scores together *)
 	Do[
 		If[join,
-			join=False;data3[[j]]=data3[[j]]<>data2[[i]],
-			j++;AppendTo[data3,data2[[i]]]
+			join=False;data4[[j]]=data4[[j]]<>data3[[i]],
+			j++;AppendTo[data4,data3[[i]]]
 		];
-		If[StringTake[data2[[i]],{-1}]=="\\",join=True],
-	{i,Length@data2}];
-	data=StringDelete[#,"|"|"\\"]&/@data3;                 (* delete the joint marks and add a ending mark *)
+		If[StringTake[data3[[i]],{-1}]=="\\",join=True],
+	{i,Length@data3}];
+	data=StringDelete[#,"|"|"\\"]&/@data4;                 (* delete the joint marks and add a ending mark *)
 	Do[
 		j=1;
 		voicePart={};

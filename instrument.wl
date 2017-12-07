@@ -1,36 +1,5 @@
 (* ::Package:: *)
 
-InstrumentList={
- {"Accordion", "Agogo", "AltoSax", "Applause"},
- {"Atmosphere", "Bagpipe", "Bandoneon", "Banjo"},
- {"BaritoneSax", "Bass", "BassAndLead", "Bassoon"},
- {"Bird", "BlownBottle", "Bowed", "BrassSection"},
- {"Breath", "Brightness", "BrightPiano", "Calliope"},
- {"Celesta", "Cello", "Charang", "Chiff"},
- {"Choir", "Clarinet", "Clavi", "Contrabass"},
- {"Crystal", "DrawbarOrgan", "Dulcimer", "Echoes"},
- {"ElectricBass", "ElectricGrandPiano", "ElectricGuitar", "ElectricPiano"},
- {"ElectricPiano2", "EnglishHorn", "Fiddle", "Fifths"},
- {"Flute", "FrenchHorn", "FretlessBass", "FretNoise"},
- {"Glockenspiel", "Goblins", "Guitar", "GuitarDistorted"},
- {"GuitarHarmonics", "GuitarMuted", "GuitarOverdriven", "Gunshot"},
- {"Halo", "Harmonica", "Harp", "Harpsichord"},
- {"Helicopter", "HonkyTonkPiano", "JazzGuitar", "Kalimba"},
- {"Koto", "Marimba", "MelodicTom", "Metallic"},
- {"MusicBox", "MutedTrumpet", "NewAge", "Oboe"},
- {"Ocarina", "OrchestraHit", "Organ", "PanFlute"},
- {"PercussiveOrgan", "Piano", "Piccolo", "PickedBass"},
- {"PizzicatoStrings", "Polysynth", "Rain", "Recorder"},
- {"ReedOrgan", "ReverseCymbal", "RockOrgan", "Sawtooth"},
- {"SciFi", "Seashore", "Shakuhachi", "Shamisen"},
- {"Shanai", "Sitar", "SlapBass", "SlapBass2"},
- {"SopranoSax", "Soundtrack", "Square", "Steeldrums"},
- {"SteelGuitar", "Strings", "Strings2", "Sweep"},
- {"SynthBass", "SynthBass2", "SynthBrass", "SynthBrass2"},
- {"SynthDrum", "SynthStrings", "SynthStrings2", "SynthVoice"},
- {"Taiko", "Telephone", "TenorSax", "Timpani"},
- {"Tinklebell", "TremoloStrings", "Trombone", "Trumpet"},
- {"Tuba", "TubularBells", "Vibraphone", "Viola"},
- {"Violin", "Voice", "VoiceAahs", "VoiceOohs"},
- {"Warm", "Whistle", "Woodblock", "Xylophone"}
-};
+instrDict=Association@Import[NotebookDirectory[]<>"instrument.json"];
+instrRequired=instrDict[["Required"]];
+instrLocal=instrDict[["Local"]];

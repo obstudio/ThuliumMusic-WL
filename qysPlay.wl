@@ -16,7 +16,8 @@ qysPlay[filename_]:=Module[
 		music={},voicePart,instrument="Piano",
 		tonality=0,beat=1,speed=88,volume=1,
 		pitch,time,space,tercet=0,tercetTime,
-		comment,match,timeDot,note,duration
+		comment,match,timeDot,note,duration,
+		lastPitch
 	},
 	volume=1;
 	data1=StringJoin/@Import[filename,"Table"];             (* delete the spacings *)
@@ -40,14 +41,10 @@ qysPlay[filename_]:=Module[
 					match=Select[Transpose[StringPosition[data[[i]],">"]][[1]],#>j&][[1]];
 					comment=StringTake[data[[i]],{j+1,match-1}];
 					Switch[StringTake[comment,{2}],
-						"=",
-							tonality=tonalityDict[[StringTake[comment,{3,StringLength@comment}]]],
-						"/",
-							beat=ToExpression[StringTake[comment,{3}]]/4,
-						".",
-							volume=ToExpression[comment],
-						_,
-							speed=ToExpression[comment];
+						"=",tonality=tonalityDict[[StringTake[comment,{3,StringLength@comment}]]],
+						"/",beat=ToExpression[StringTake[comment,{3}]]/4,
+						".",volume=ToExpression[comment],
+						_,speed=ToExpression[comment];
 					];
 					j=match+1;
 					Continue[],
@@ -62,74 +59,78 @@ qysPlay[filename_]:=Module[
 					match=Select[Transpose[StringPosition[data[[i]],"}"]][[1]],#>j&][[1]];
 					instrument=StringTake[data[[i]],{j+1,match-1}];
 					j=match+1;
-					Continue[],
-				_,
-					If[DigitQ[char],
-						(* single-tone *)
-						note=ToExpression@char;
-						pitch=If[note==0,None,pitchDict[[note]]+tonality];
-						j++;
-						If[StringTake[data[[i]],{j}]=="#",pitch++;j++];
-						If[StringTake[data[[i]],{j}]=="b",pitch--;j++],
-						(* harmony *)
-						pitch={};
-						j++;
-						k=0;
-						While[StringTake[data[[i]],{j}]!="]",
-							char=StringTake[data[[i]],{j}];
-							Switch[char,
-								"#",pitch[[k]]++,
-								"b",pitch[[k]]--,
-								"'",pitch+=12,
-								",",pitch-=12,
-								_,
-									k++;
-									AppendTo[pitch,pitchDict[[ToExpression[char]]]+tonality];
-							];
-							j++;
-						];
-						j++;
-					];
-					time=1;
-					space=True;					
-					While[j<=StringLength[data[[i]]]&&MemberQ[{"-","_","'",",",".","^"},StringTake[data[[i]],{j}]],
+					Continue[];
+			];
+			(* find out the pitch *)
+			j++;
+			If[char=="%",
+				pitch=lastPitch,                            (* the same as the last pitch *)
+				If[DigitQ[char],
+					note=ToExpression@char;                 (* single-tone *)
+					pitch={If[note==0,None,pitchDict[[note]]+tonality]},
+					pitch={};k=0;                           (* harmony *)
+					While[StringTake[data[[i]],{j}]!="]",
 						char=StringTake[data[[i]],{j}];
 						Switch[char,
-							"-",time+=1,
-							"_",time/=2,
+							"#",pitch[[k]]++,
+							"b",pitch[[k]]--,
 							"'",pitch+=12,
 							",",pitch-=12,
-							".",
-								timeDot=1/2;
-								While[j<=StringLength[data[[i]]] && StringTake[data[[i]],{j+1}]==".",
-									timeDot/=2;
-									j++;
-								];
-								time*=(2-timeDot),
-							"^",space=False
+							_,
+								k++;
+								AppendTo[pitch,pitchDict[[ToExpression[char]]]+tonality];
 						];
 						j++;
 					];
-					If[tercet>0,time*=tercetTime;tercet--];
-					duration=60/speed*time*beat;
-					If[space,
-						AppendTo[voicePart,SoundNote[pitch,duration*7/8,instrument,SoundVolume->volume]];
-						AppendTo[voicePart,SoundNote[None,duration/8]],
-						AppendTo[voicePart,SoundNote[pitch,duration,instrument,SoundVolume->volume]];
+					j++;
+				];
+				While[j<=StringLength[data[[i]]] && MemberQ[{"#","b","'",","},StringTake[data[[i]],{j}]],
+					char=StringTake[data[[i]],{j}];
+					Switch[char,
+						"#",pitch[[k]]++,
+						"b",pitch[[k]]--,
+						"'",pitch+=12,
+						",",pitch-=12
 					];
+					j++;
+				];				
+			];
+			(* find out the duration *)
+			time=1;
+			space=True;
+			While[j<=StringLength[data[[i]]]&&MemberQ[{"-","_",".","^"},StringTake[data[[i]],{j}]],
+				char=StringTake[data[[i]],{j}];
+				Switch[char,
+					"-",time+=1,
+					"_",time/=2,
+					".",
+						timeDot=1/2;
+						While[j<=StringLength[data[[i]]] && StringTake[data[[i]],{j+1}]==".",
+							timeDot/=2;
+							j++;
+						];
+						time*=(2-timeDot),
+					"^",space=False
+				];
+				j++;
+			];
+			lastPitch=pitch;
+			If[tercet>0,time*=tercetTime;tercet--];
+			duration=60/speed*time*beat;
+			If[space,
+				AppendTo[voicePart,{pitch,duration*7/8,instrument,SoundVolume->volume}];
+				AppendTo[voicePart,{None,duration/8}],
+				AppendTo[voicePart,{pitch,duration,instrument,SoundVolume->volume}];
 			];
 		];
-		If[voicePart!={},AppendTo[music,Sound@voicePart]],
+		If[voicePart!={},AppendTo[music,Sound[SoundNote@@#&/@voicePart]]],
 	{i,Length[data]}];
 	Parallelize[Map[EmitSound,music]];
 ];
 
 
 (* ::Input:: *)
-(*qysPlay["C:\\Users\\kouch\\Documents\\QingyunMusicPlayer-WL\\Songs\\Sumizome_Sakura.qys"]*)
-
-
-EmitSound@Sound@SoundNote["C",.5,"Tuba"]
+(*qysPlay["E:\\QingyunMusicPlayer\\Songs\\Necro_Fantasia.qys"]*)
 
 
 

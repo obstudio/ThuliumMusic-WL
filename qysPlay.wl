@@ -143,4 +143,4 @@ qysPlay[filename_]:=Module[
 
 (* ::Input:: *)
 (*debug=False;*)
-(*qysPlay["E:\\QingyunMusicPlayer\\Songs\\Necro_Fantasia.qys"]*)
+(*qysPlay["E:\\QingyunMusicPlayer\\Songs\\Sumizome_Sakura_2.qys"]*)

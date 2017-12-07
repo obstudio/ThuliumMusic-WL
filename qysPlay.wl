@@ -126,4 +126,10 @@ qysPlay[filename_]:=Module[
 
 
 (* ::Input:: *)
-(*qysPlay["E:\\QingyunMusicPlayer\\Songs\\Telegrapher.qys"]*)
+(*qysPlay["C:\\Users\\kouch\\Documents\\QingyunMusicPlayer-WL\\Songs\\Sumizome_Sakura.qys"]*)
+
+
+EmitSound@Sound@SoundNote["C",.5,"Tuba"]
+
+
+

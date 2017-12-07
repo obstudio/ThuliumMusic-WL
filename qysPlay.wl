@@ -7,6 +7,7 @@ tonalityDict=<|
 |>;
 pitchDict=<|"1"->0,"2"->2,"3"->4,"4"->5,"5"->7,"6"->9,"7"->11|>;
 LaunchKernels[4];
+debug=False;
 
 
 qysPlay[filename_]:=Module[
@@ -77,8 +78,8 @@ qysPlay[filename_]:=Module[
 						Switch[char,
 							"#",pitch[[k]]++,
 							"b",pitch[[k]]--,
-							"'",pitch+=12,
-							",",pitch-=12,
+							"'",pitch[[k]]+=12,
+							",",pitch[[k]]-=12,
 							_,
 								k++;
 								AppendTo[pitch,pitchDict[[ToExpression[char]]]+tonality];
@@ -136,9 +137,10 @@ qysPlay[filename_]:=Module[
 		];
 		If[voicePart!={},AppendTo[music,Sound[SoundNote@@#&/@voicePart]]],
 	{i,Length[data]}];
-	Parallelize[Map[EmitSound,music]];
+	If[debug,Print[music],Parallelize[Map[EmitSound,music]]];
 ];
 
 
 (* ::Input:: *)
+(*debug=False;*)
 (*qysPlay["E:\\QingyunMusicPlayer\\Songs\\Necro_Fantasia.qys"]*)

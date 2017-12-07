@@ -8,6 +8,7 @@
 $CharacterEncoding="UTF-8";
 $Language="ChineseSimplified";
 $local=NotebookDirectory[];
+<<($local<>"qysPlay.wl")
 <<($local<>"qymPlay.wl")
 index=Import[$local<>"Index.xml","CDATA"];
 $songCount=Length@index/4;
@@ -21,13 +22,16 @@ $songInfo=Column[{
 	If[$songComposer[[#]]=="N",Nothing,"\:66f2\:ff1a"<>$songComposer[[#]]],
 	If[$songLyricist[[#]]=="N",Nothing,"\:8bcd\:ff1a"<>$songLyricist[[#]]]
 }]&/@Range@$songCount;
+
+
 QingyunPlay[song_,default_]:=Module[{filename},
 	filename=$local<>"Songs\\"<>song;
 	If[FileExistsQ[filename],
-		qymPlay[filename,default],
-		MessageDialog[{
-			TextCell["File not found!"],DefaultButton[]},
-		WindowTitle->"Error"];
+		If[StringTake[filename,-3]=="qym",
+			qymPlay[filename,default],
+			qysPlay[filename]
+		],
+		MessageDialog[TextCell["File not found!"],WindowTitle->"Error"];
 		Return[];
 	]
 ];
@@ -35,17 +39,14 @@ QingyunPlay[]:=CreateDialog[Column[{,
 	Style["\:9752\:4e91\:64ad\:653e\:5668",Bold,32],,
 	Style["\:9009\:62e9\:66f2\:76ee",Bold,24],
 	SetterBar[Dynamic[choice],$songDict,Appearance->"Vertical"->{Automatic,2}],,
-	Style["\:9009\:62e9\:9ed8\:8ba4\:4e50\:5668",Bold,20],
-	RadioButtonBar[Dynamic[instrument],{"Sine","Piano","Violin"}],,
+	Style["\:9009\:62e9\:9ed8\:8ba4\:4e50\:5668(\:4ec5\:9650qym\:6587\:4ef6)",Bold,20],
+	RadioButtonBar[Dynamic[instrument],{"Sine","Piano","Violin","Guitar"},Appearance->"Vertical"->{Automatic,2}],,
 	Button["\:64ad\:653e",
 		MessageDialog[$songInfo[[choice]],WindowTitle->"\:6b63\:5728\:64ad\:653e..."];
-		QingyunPlay[$songPath[[choice]],Dynamic[instrument]],
+		QingyunPlay[$songPath[[choice]],{Dynamic[instrument],1}],
 	ImageSize->150],
-},Center],WindowTitle->"\:9752\:4e91\:64ad\:653e\:5668"];
-
-
-(* ::Input:: *)
-(*QingyunPlay["Sumizome_Sakura.qym",{"Sine"}]*)
+},Center,ItemSize->20],
+WindowTitle->"\:9752\:4e91\:64ad\:653e\:5668"];
 
 
 (* ::Input:: *)

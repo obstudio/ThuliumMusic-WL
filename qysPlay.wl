@@ -6,10 +6,26 @@ tonalityDict=<|
 	"bE"->3,"bA"->-4,"bD"->1,"bG"->6,"bC"->-1
 |>;
 pitchDict=<|"1"->0,"2"->2,"3"->4,"4"->5,"5"->7,"6"->9,"7"->11|>;
-LaunchKernels[4];
+If[$KernelCount<8,LaunchKernels[8-$KernelCount]];
 debug=False;
 
 
+getPitch[score_,pos_,tonality_]:=Module[
+	{i=pos,note,pitch},
+	note=ToExpression@StringTake[score,{i}];
+	pitch=If[note==0,None,pitchDict[[note]]+tonality];
+	i++;
+	While[i<=StringLength[score] && MemberQ[{"#","b","'",","},StringTake[score,{i}]],
+		Switch[StringTake[score,{i}],
+			"#",pitch++,
+			"b",pitch--,
+			"'",pitch+=12,
+			",",pitch-=12
+		];
+		i++;
+	];
+	Return[{pitch,i}];
+];
 qysPlay[filename_]:=Module[
 	{
 		i,j,k,
@@ -19,7 +35,7 @@ qysPlay[filename_]:=Module[
 		pitch,time,space,tercet=0,tercetTime,
 		comment,match,timeDot,note,duration,
 		lastPitch,extend,portamento,rate,
-		tremolo,score,repeat
+		tremolo,score,repeat,appoggiatura
 	},
 	volume=1;
 	data1=StringJoin/@Import[filename,"Table"];             (* delete the spacings *)
@@ -38,6 +54,7 @@ qysPlay[filename_]:=Module[
 		j=1;
 		space=True;
 		portamento=False;
+		appoggiatura=False;
 		tremolo=0;
 		voicePart={};
 		If[StringPosition[data[[i]],":"]=={},
@@ -80,7 +97,15 @@ qysPlay[filename_]:=Module[
 							tercet=ToExpression[comment];
 							tercetTime=(2^Floor[Log2[tercet]])/tercet,
 						"=",                       (* tremolo *)
-							tremolo=ToExpression[comment]
+							tremolo=ToExpression[comment],
+						"^",                       (* appoggiatura *)
+							lastPitch={};
+							appoggiatura=True;
+							k=1;
+							While[k<=StringLength@comment,
+								AppendTo[lastPitch,getPitch[comment,k,tonality][[1]]];
+								k=getPitch[comment,k,tonality][[2]];
+							];
 					];
 					j=match+1;
 					Continue[],
@@ -102,19 +127,10 @@ qysPlay[filename_]:=Module[
 				If[DigitQ[char],
 					note=ToExpression@char;                 (* single-tone *)
 					pitch=If[note==0,None,pitchDict[[note]]+tonality],
-					pitch={};k=0;                           (* harmony *)
+					pitch={};                               (* harmony *)
 					While[StringTake[score,{j}]!="]",
-						char=StringTake[score,{j}];
-						Switch[char,
-							"#",pitch[[k]]++,
-							"b",pitch[[k]]--,
-							"'",pitch[[k]]+=12,
-							",",pitch[[k]]-=12,
-							_,
-								k++;
-								AppendTo[pitch,pitchDict[[ToExpression[char]]]+tonality];
-						];
-						j++;
+						AppendTo[pitch,getPitch[score,j,tonality][[1]]];
+						j=getPitch[score,j,tonality][[2]];
 					];
 					j++;
 				];
@@ -127,7 +143,7 @@ qysPlay[filename_]:=Module[
 						",",pitch-=12
 					];
 					j++;
-				];				
+				];
 			];
 			If[lastPitch==pitch && space==False,extend=True];
 			(* find out the duration *)
@@ -150,6 +166,14 @@ qysPlay[filename_]:=Module[
 				j++;
 			];
 			If[tercet>0,time*=tercetTime;tercet--];
+			If[appoggiatura,
+				time-=1/4;
+				duration=60/speed/4/Length@lastPitch*beat;
+				Do[
+					AppendTo[voicePart,{lastPitch[[k]],duration,instrument,SoundVolume->volume}],
+				{k,Length@lastPitch}];
+				appoggiatura=False;
+			];
 			duration=60/speed*time*beat;
 			If[tremolo!=0,
 				duration/=(time*2^tremolo);
@@ -199,6 +223,3 @@ qysPlay[filename_]:=Module[
 (* ::Input:: *)
 (*debug=True;*)
 (*qysPlay["E:\\QingyunMusicPlayer\\Songs\\Necro_Fantasia.qys"]*)
-
-
-

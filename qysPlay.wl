@@ -18,11 +18,12 @@ qysPlay[filename_]:=Module[
 		tonality=0,beat=1,speed=88,volume=1,
 		pitch,time,space,tercet=0,tercetTime,
 		comment,match,timeDot,note,duration,
-		lastPitch,extend,portamento,rate
+		lastPitch,extend,portamento,rate,
+		tremolo
 	},
 	volume=1;
 	data1=StringJoin/@Import[filename,"Table"];             (* delete the spacings *)
-	data2=Select[data1,!StringContainsQ[#,"//"]&];         (* delete the comments *)
+	data2=Select[data1,!StringContainsQ[#,"//"]&];          (* delete the comments *)
 	data3=Cases[data2,Except[""]];                          (* delete the blank lines *)
 	data4={};j=0;join=False;                                (* join multiple lines of music scores together *)
 	Do[
@@ -37,6 +38,7 @@ qysPlay[filename_]:=Module[
 		j=1;
 		space=True;
 		portamento=False;
+		tremolo=0;
 		voicePart={};
 		While[j<=StringLength[data[[i]]],
 			char=StringTake[data[[i]],{j}];
@@ -59,24 +61,19 @@ qysPlay[filename_]:=Module[
 						"-",                       (* tercet *)
 							tercet=ToExpression[comment];
 							tercetTime=(2^Floor[Log2[tercet]])/tercet,
-						"~",                       (* portamento *)
-							portamento=True;
-							lastPitch=ToExpression[StringTake[comment,{1}]];
-							Do[
-								Switch[StringTake[comment,{k}],
-									"#",lastPitch++,
-									"b",lastPitch--,
-									"'",lastPitch+=12,
-									",",lastPitch-=12
-								],
-							{k,2,StringLength@comment}];
+						"=",                       (* tremolo *)
+							tremolo=ToExpression[comment]
 					];
 					j=match+1;
 					Continue[],
-				"{",
+				"{",                               (* instrument *)
 					match=Select[Transpose[StringPosition[data[[i]],"}"]][[1]],#>j&][[1]];
 					instrument=StringTake[data[[i]],{j+1,match-1}];
 					j=match+1;
+					Continue[],
+				"~",                               (* portamento *)
+					portamento=True;
+					j++;
 					Continue[];
 			];
 			(* find out the pitch *)
@@ -136,12 +133,24 @@ qysPlay[filename_]:=Module[
 			];
 			If[tercet>0,time*=tercetTime;tercet--];
 			duration=60/speed*time*beat;
+			If[tremolo!=0,
+				duration/=(time*2^tremolo);
+				voicePart=Drop[voicePart,-2];
+				Do[
+					AppendTo[voicePart,{lastPitch,duration,instrument,SoundVolume->volume}];
+					AppendTo[voicePart,{pitch,duration,instrument,SoundVolume->volume}],
+				{k,time*2^(tremolo-1)}];
+				tremolo=0;
+				Continue[];
+			]
 			If[portamento,
 				rate=(pitch-lastPitch+1)/time/6;
 				duration/=(time*6);
+				voicePart=Drop[voicePart,-2];
 				Do[
-					AppendTo[voicePart,{Floor@k,duration,instrument,SoundVolume->volume}],
+					AppendTo[voicePart,{Floor[k],duration,instrument,SoundVolume->volume}],
 				{k,lastPitch,pitch,rate}];
+				portamento=False;
 				Continue[];
 			];
 			lastPitch=pitch;		

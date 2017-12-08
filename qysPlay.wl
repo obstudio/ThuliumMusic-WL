@@ -40,17 +40,20 @@ qysPlay[filename_]:=Module[
 		portamento=False;
 		tremolo=0;
 		voicePart={};
-		(*repeat=Partition[Transpose[StringPosition[data[[i]],":"]][[1]],2];
-		score=StringTake[data[[i]],repeat[[1,1]]-1];
-		Do[
-			score=score<>StringTake[data[[i]],{repeat[[j,1]]+1,repeat[[j,2]]-1}];
-			score=score<>StringTake[data[[i]],{repeat[[j,1]]+1,repeat[[j,2]]-1}];
-			score=score<>StringTake[data[[i]],{repeat[[j,2]]+1,repeat[[j+1,1]]-1}],
-		{j,Length@repeat-1}];
-		score=score<>StringTake[data[[i]],{repeat[[-1,1]]+1,repeat[[-1,2]]-1}];
-		score=score<>StringTake[data[[i]],{repeat[[-1,1]]+1,repeat[[-1,2]]-1}];
-		score=score<>StringTake[data[[i]],{repeat[[-1,2]]+1,StringLength@str}];*)
-		score=data[[i]];
+		If[StringPosition[data[[i]],":"]=={},
+			score=data[[i]],
+			(* repeat *)
+			repeat=Partition[Transpose[StringPosition[data[[i]],":"]][[1]],2];
+			score=StringTake[data[[i]],repeat[[1,1]]-1];
+			Do[
+				score=score<>StringTake[data[[i]],{repeat[[j,1]]+1,repeat[[j,2]]-1}];
+				score=score<>StringTake[data[[i]],{repeat[[j,1]]+1,repeat[[j,2]]-1}];
+				score=score<>StringTake[data[[i]],{repeat[[j,2]]+1,repeat[[j+1,1]]-1}],
+			{j,Length@repeat-1}];
+			score=score<>StringTake[data[[i]],{repeat[[-1,1]]+1,repeat[[-1,2]]-1}];
+			score=score<>StringTake[data[[i]],{repeat[[-1,1]]+1,repeat[[-1,2]]-1}];
+			score=score<>StringTake[data[[i]],{repeat[[-1,2]]+1,StringLength@data[[i]]}];
+		];		
 		While[j<=StringLength[score],
 			char=StringTake[score,{j}];
 			Switch[char,
@@ -58,10 +61,14 @@ qysPlay[filename_]:=Module[
 					match=Select[Transpose[StringPosition[score,">"]][[1]],#>j&][[1]];
 					comment=StringTake[score,{j+1,match-1}];
 					Switch[StringTake[comment,{2}],
-						"=",tonality=tonalityDict[[StringTake[comment,{3,StringLength@comment}]]],
-						"/",beat=ToExpression[StringTake[comment,{3,StringLength@comment}]]/4,
-						".",volume=ToExpression[comment],
-						_,speed=ToExpression[comment];
+						"=",                       (* tonality *)
+							tonality=tonalityDict[[StringTake[comment,{3,StringLength@comment}]]],
+						"/",                       (* beat *)
+							beat=ToExpression[StringTake[comment,{3,StringLength@comment}]]/4,
+						".",                       (* volume *)
+							volume=ToExpression[comment],
+						_,                         (* speed *)
+							speed=ToExpression[comment];
 					];
 					j=match+1;
 					Continue[],
@@ -192,3 +199,6 @@ qysPlay[filename_]:=Module[
 (* ::Input:: *)
 (*debug=True;*)
 (*qysPlay["E:\\QingyunMusicPlayer\\Songs\\Necro_Fantasia.qys"]*)
+
+
+

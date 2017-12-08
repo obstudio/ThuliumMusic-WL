@@ -19,7 +19,7 @@ qysPlay[filename_]:=Module[
 		pitch,time,space,tercet=0,tercetTime,
 		comment,match,timeDot,note,duration,
 		lastPitch,extend,portamento,rate,
-		tremolo
+		tremolo,score,repeat
 	},
 	volume=1;
 	data1=StringJoin/@Import[filename,"Table"];             (* delete the spacings *)
@@ -40,24 +40,35 @@ qysPlay[filename_]:=Module[
 		portamento=False;
 		tremolo=0;
 		voicePart={};
-		While[j<=StringLength[data[[i]]],
-			char=StringTake[data[[i]],{j}];
+		(*repeat=Partition[Transpose[StringPosition[data[[i]],":"]][[1]],2];
+		score=StringTake[data[[i]],repeat[[1,1]]-1];
+		Do[
+			score=score<>StringTake[data[[i]],{repeat[[j,1]]+1,repeat[[j,2]]-1}];
+			score=score<>StringTake[data[[i]],{repeat[[j,1]]+1,repeat[[j,2]]-1}];
+			score=score<>StringTake[data[[i]],{repeat[[j,2]]+1,repeat[[j+1,1]]-1}],
+		{j,Length@repeat-1}];
+		score=score<>StringTake[data[[i]],{repeat[[-1,1]]+1,repeat[[-1,2]]-1}];
+		score=score<>StringTake[data[[i]],{repeat[[-1,1]]+1,repeat[[-1,2]]-1}];
+		score=score<>StringTake[data[[i]],{repeat[[-1,2]]+1,StringLength@str}];*)
+		score=data[[i]];
+		While[j<=StringLength[score],
+			char=StringTake[score,{j}];
 			Switch[char,
 				"<",
-					match=Select[Transpose[StringPosition[data[[i]],">"]][[1]],#>j&][[1]];
-					comment=StringTake[data[[i]],{j+1,match-1}];
+					match=Select[Transpose[StringPosition[score,">"]][[1]],#>j&][[1]];
+					comment=StringTake[score,{j+1,match-1}];
 					Switch[StringTake[comment,{2}],
 						"=",tonality=tonalityDict[[StringTake[comment,{3,StringLength@comment}]]],
-						"/",beat=ToExpression[StringTake[comment,{3}]]/4,
+						"/",beat=ToExpression[StringTake[comment,{3,StringLength@comment}]]/4,
 						".",volume=ToExpression[comment],
 						_,speed=ToExpression[comment];
 					];
 					j=match+1;
 					Continue[],
 				"(",
-					match=Select[Transpose[StringPosition[data[[i]],")"]][[1]],#>j&][[1]];
-					comment=StringTake[data[[i]],{j+1,match-2}];
-					Switch[StringTake[data[[i]],{match-1}],
+					match=Select[Transpose[StringPosition[score,")"]][[1]],#>j&][[1]];
+					comment=StringTake[score,{j+1,match-2}];
+					Switch[StringTake[score,{match-1}],
 						"-",                       (* tercet *)
 							tercet=ToExpression[comment];
 							tercetTime=(2^Floor[Log2[tercet]])/tercet,
@@ -67,8 +78,8 @@ qysPlay[filename_]:=Module[
 					j=match+1;
 					Continue[],
 				"{",                               (* instrument *)
-					match=Select[Transpose[StringPosition[data[[i]],"}"]][[1]],#>j&][[1]];
-					instrument=StringTake[data[[i]],{j+1,match-1}];
+					match=Select[Transpose[StringPosition[score,"}"]][[1]],#>j&][[1]];
+					instrument=StringTake[score,{j+1,match-1}];
 					j=match+1;
 					Continue[],
 				"~",                               (* portamento *)
@@ -85,8 +96,8 @@ qysPlay[filename_]:=Module[
 					note=ToExpression@char;                 (* single-tone *)
 					pitch=If[note==0,None,pitchDict[[note]]+tonality],
 					pitch={};k=0;                           (* harmony *)
-					While[StringTake[data[[i]],{j}]!="]",
-						char=StringTake[data[[i]],{j}];
+					While[StringTake[score,{j}]!="]",
+						char=StringTake[score,{j}];
 						Switch[char,
 							"#",pitch[[k]]++,
 							"b",pitch[[k]]--,
@@ -100,8 +111,8 @@ qysPlay[filename_]:=Module[
 					];
 					j++;
 				];
-				While[j<=StringLength[data[[i]]] && MemberQ[{"#","b","'",","},StringTake[data[[i]],{j}]],
-					char=StringTake[data[[i]],{j}];
+				While[j<=StringLength[score] && MemberQ[{"#","b","'",","},StringTake[score,{j}]],
+					char=StringTake[score,{j}];
 					Switch[char,
 						"#",pitch++,
 						"b",pitch--,
@@ -115,14 +126,14 @@ qysPlay[filename_]:=Module[
 			(* find out the duration *)
 			time=1;
 			space=True;
-			While[j<=StringLength[data[[i]]]&&MemberQ[{"-","_",".","^"},StringTake[data[[i]],{j}]],
-				char=StringTake[data[[i]],{j}];
+			While[j<=StringLength[score]&&MemberQ[{"-","_",".","^"},StringTake[score,{j}]],
+				char=StringTake[score,{j}];
 				Switch[char,
 					"-",time+=1,
 					"_",time/=2,
 					".",
 						timeDot=1/2;
-						While[j<=StringLength[data[[i]]] && StringTake[data[[i]],{j+1}]==".",
+						While[j<=StringLength[score] && StringTake[score,{j+1}]==".",
 							timeDot/=2;
 							j++;
 						];

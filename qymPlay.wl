@@ -112,5 +112,5 @@ qymPlay[filename_]:=Module[
 		];
 		If[music!={},AppendTo[voiceParts,AudioJoin@music]],
 	{i,Length[data]}];
-	AudioPlay@AudioOverlay@voiceParts;
+	Return[AudioOverlay@voiceParts];
 ]

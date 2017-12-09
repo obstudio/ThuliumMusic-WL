@@ -6,7 +6,6 @@ tonalityDict=<|
 	"bE"->3,"bA"->-4,"bD"->1,"bG"->6,"bC"->-1
 |>;
 pitchDict=<|"1"->0,"2"->2,"3"->4,"4"->5,"5"->7,"6"->9,"7"->11|>;
-If[$KernelCount<8,LaunchKernels[8-$KernelCount]];
 debug=False;
 
 
@@ -212,17 +211,12 @@ qysPlay[filename_]:=Module[
 				];
 			];
 		];
-		If[voicePart!={},AppendTo[music,Sound[SoundNote@@#&/@voicePart]]],
+		If[voicePart!={},AppendTo[music,Audio@Sound[SoundNote@@#&/@voicePart]]],
 	{i,Length[data]}];
-	If[debug,Print[music],Parallelize[Map[EmitSound,music]]];
+	If[debug,Print[music],Return[AudioOverlay@music]];
 ];
 
 
 (* ::Input:: *)
 (*debug=False;*)
-(*qysPlay["E:\\QingyunMusicPlayer\\Songs\\Rainbow.qys"]*)
-
-
-(* ::Input:: *)
-(*debug=True;*)
-(*qysPlay["E:\\QingyunMusicPlayer\\Songs\\Rainbow.qys"]*)
+(*AudioPlay@qysPlay["E:\\QingyunMusicPlayer\\Songs\\Rainbow.qys"]*)

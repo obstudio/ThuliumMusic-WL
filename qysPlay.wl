@@ -37,7 +37,10 @@ qysPlay[filename_]:=Module[
 		lastPitch,extend,portamento,rate,
 		tremolo,score,repeat,appoggiatura
 	},
-	volume=1;
+	If[!FileExistsQ[filename],
+		MessageDialog[TextCell["File not found!"],WindowTitle->"Error"];
+		Return[];
+	];
 	data1=StringJoin/@Import[filename,"Table"];             (* delete the spacings *)
 	data2=Select[data1,!StringContainsQ[#,"//"]&];          (* delete the comments *)
 	data3=Cases[data2,Except[""]];                          (* delete the blank lines *)
@@ -184,7 +187,7 @@ qysPlay[filename_]:=Module[
 				{k,time*2^(tremolo-1)}];
 				tremolo=0;
 				Continue[];
-			]
+			];
 			If[portamento,
 				rate=(pitch-lastPitch+1)/time/6;
 				duration/=(time*6);

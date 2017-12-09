@@ -1,6 +1,6 @@
 (* ::Package:: *)
 
-qymPlay[filename_,default_]:=Module[
+qymPlay[filename_]:=Module[
 	{
 		i,j,
 		data,char,music,voiceParts,
@@ -14,7 +14,11 @@ qymPlay[filename_,default_]:=Module[
 		|>,
 		pitchDict=<|"1"->0,"2"->2,"3"->4,"4"->5,"5"->7,"6"->9,"7"->11|>
 	},
-	instrument=default[[1]];
+	If[!FileExistsQ[filename],
+		MessageDialog[TextCell["File not found!"],WindowTitle->"Error"];
+		Return[];
+	];
+	instrument="Piano";
 	data=StringJoin/@Import[filename,"Table"];
 	data=Select[data,!StringContainsQ[#,"//"]&];
 	If[StringTake[data[[1]],-1]==">",

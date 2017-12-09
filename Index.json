@@ -1,0 +1,61 @@
+{
+    "义勇军进行曲": {
+        "comment": "中华人民共和国国歌",
+        "composer": "聂耳",
+        "lyricist": "田汉",
+        "path": "March_of_the_Volunteers.qym"
+    },
+    "南师附中校歌": {
+        "lyricist": "柳诒徵",
+        "path": "NSFZ_School_Song.qym"
+    },
+    "东方之珠": {
+        "comment": "主歌部分",
+        "composer": "顾嘉辉",
+        "lyricist": "郑国江",
+        "path": "Oriental_Pearl.qys"
+    },
+    "风居住的街道": {
+        "composer": "矶村由纪子",
+        "path": "Kaze_No_Sumu_Machi.qym"
+    },
+    "鬼子电报员": {
+        "comment": "宴会开始",
+        "composer": "三泽康広",
+        "path": "Telegrapher.qys"
+    },
+    "社会主义好": {
+        "composer": "李焕之",
+        "lyricist": "希扬",
+        "path": "Socialism_is_Good.qym"
+    },
+    "国际歌": {
+        "composer": "Pierre De Geyter",
+        "lyricist": "Eugène Edine Pottier",
+        "path": "The_Internationale.qym"
+    },
+    "东方红": {
+        "composer": "陕北民歌",
+        "lyricist": "陕北民歌",
+        "path": "The_East_is_Red.qym"
+    },
+    "Numb": {
+        "composer": "Linkin Park",
+        "lyricist": "Linkin Park",
+        "path": "Numb.qys"
+    },
+    "彩虹": {
+        "composer": "周杰伦",
+        "lyricist": "周杰伦",
+        "path": "Rainbow.qys"
+    },
+    "幽雅绽放·墨染之樱": {
+        "composer": "ZUN",
+        "comment": "幽雅に咲かせ 墨染の樱",
+        "path": "Sumizome_Sakura.qys"
+    },
+    "亡灵幻想曲": {
+        "composer": "ZUN",
+        "path": "Necro_Fantasia.qys"
+    }
+}

@@ -57,5 +57,9 @@
     "亡灵幻想曲": {
         "composer": "ZUN",
         "path": "Necro_Fantasia.qys"
+    },
+    "东方组曲第一弹": {
+        "composer": "ZUN",
+        "path": "Touhou_Mix_1.qys"
     }
 }

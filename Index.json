@@ -65,5 +65,11 @@
         "composer": "ZUN",
         "path": "Touhou_Mix_1.qys",
         "abstract": "行走在旧地狱街道上（旧地獄街道を行く）：东方地灵殿3面道中曲\n魔法少女们的百年祭（魔法少女達の百年祭）：东方红魔乡EX道中曲\n明日之盛·昨日之俗（明日ハレの日、ケの昨日）：东方风神录EX道中曲"
+    },
+    "绿眼的嫉妒": {
+        "comment": "緑眼のジェラシー",
+        "composer": "ZUN",
+        "path": "Ryokugann_No_Jealousy.qys",
+        "abstract": "水桥帕露西的bgm"
     }
 }

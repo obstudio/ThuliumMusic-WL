@@ -219,4 +219,4 @@ qysPlay[filename_]:=Module[
 
 (* ::Input:: *)
 (*debug=False;*)
-(*AudioPlay@qysPlay["E:\\QingyunMusicPlayer\\Songs\\Rainbow.qys"]*)
+(*AudioPlay@qysPlay["E:\\QingyunMusicPlayer\\Songs\\Banana.qys"];*)

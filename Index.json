@@ -71,5 +71,9 @@
         "composer": "ZUN",
         "path": "Ryokugann_No_Jealousy.qys",
         "abstract": "水桥帕露西的bgm"
+    },
+    "Banana": {
+        "comment": "Minion Song",
+        "path": "Banana.qys"
     }
 }

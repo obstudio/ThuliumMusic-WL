@@ -21,10 +21,11 @@
         "path": "Numb.qys"
     },
     "亡灵幻想曲": {
-        "comment": "ネクロファンタジア",
         "composer": "ZUN",
-        "path": "Necro_Fantasia.qys",
-        "abstract": "紫妈fdsiufhoihwqphfjiuew的bgm"
+        "abstract": "八云紫的bgm",
+        "adapter": "まらしぃ",
+        "comment": "ネクロファンタジア",
+        "path": "Necro_Fantasia.qys"
     },
     "南师附中校歌": {
         "lyricist": "柳诒徵",
@@ -80,5 +81,12 @@
     "Banana": {
         "comment": "Minion Song",
         "path": "Banana.qys"
+    },
+    "红星歌": {
+        "lyricist": "邬大为, 魏宝贵",
+        "composer": "傅庚辰",
+        "comment": "合唱版",
+        "abstract": "电影《闪闪的红星》主题曲",
+        "path": "Red_Star_Song.qym"
     }
 }

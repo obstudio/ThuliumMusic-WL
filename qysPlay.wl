@@ -6,7 +6,6 @@ tonalityDict=<|
 	"bE"->3,"bA"->-4,"bD"->1,"bG"->6,"bC"->-1
 |>;
 pitchDict=<|"1"->0,"2"->2,"3"->4,"4"->5,"5"->7,"6"->9,"7"->11|>;
-debug=False;
 
 
 getPitch[score_,pos_,tonality_]:=Module[
@@ -27,33 +26,57 @@ getPitch[score_,pos_,tonality_]:=Module[
 ];
 
 
-qysPlay[filename_]:=Module[
-	{
-		i,j,k,
-		data,data1,data2,data3,data4,join,char,
-		music={},voicePart,instrument="Piano",
-		tonality=0,beat=1,speed=88,volume=1,
-		pitch,time,space,tercet=0,tercetTime,
-		comment,match,timeDot,note,duration,
-		lastPitch,extend,portamento,rate,
-		tremolo,score,repeat,appoggiatura
-	},
+getScore[filename_]:=Module[
+	{i,j,data1,data2,score,join,repeat},
 	If[!FileExistsQ[filename],
 		MessageDialog[TextCell["File not found!"],WindowTitle->"Error"];
 		Return[];
 	];
 	data1=StringJoin/@Import[filename,"Table"];             (* delete the spacings *)
-	data2=Select[data1,!StringContainsQ[#,"//"]&];          (* delete the comments *)
-	data3=Cases[data2,Except[""]];                          (* delete the blank lines *)
-	data4={};j=0;join=False;                                (* join multiple lines of music scores together *)
+	data1=Select[data1,!StringContainsQ[#,"//"]&];          (* delete the comments *)
+	data1=Cases[data1,Except[""]];                          (* delete the blank lines *)
+	data2={};j=0;join=False;                                (* join multiple lines of music scores together *)
 	Do[
 		If[join,
-			join=False;data4[[j]]=data4[[j]]<>data3[[i]],
-			j++;AppendTo[data4,data3[[i]]]
+			join=False;data2[[j]]=data2[[j]]<>data1[[i]],
+			j++;AppendTo[data2,data1[[i]]]
 		];
-		If[StringPart[data3[[i]],-1]=="\\",join=True],
-	{i,Length@data3}];
-	data=StringDelete[#,"|"|"\\"]&/@data4;                 (* delete the joint marks and add a ending mark *)
+		If[StringPart[data1[[i]],-1]=="\\",join=True],
+	{i,Length@data1}];
+	data2=StringDelete[#,"|"|"\\"]&/@data2;                 (* delete the joint marks *)
+	score=Array[""&,Length@data2];
+	Do[
+		If[StringPosition[data2[[i]],":"]=={},
+			score[[i]]=data2[[i]],
+			(* repeat *)
+			repeat=Partition[Transpose[StringPosition[data2[[i]],":"]][[1]],2];
+			score[[i]]=StringTake[data2[[i]],repeat[[1,1]]-1];
+			Do[
+				score[[i]]=score[[i]]<>StringTake[data2[[i]],{repeat[[j,1]]+1,repeat[[j,2]]-1}];
+				score[[i]]=score[[i]]<>StringTake[data2[[i]],{repeat[[j,1]]+1,repeat[[j,2]]-1}];
+				score[[i]]=score[[i]]<>StringTake[data2[[i]],{repeat[[j,2]]+1,repeat[[j+1,1]]-1}],
+			{j,Length@repeat-1}];
+			score[[i]]=score[[i]]<>StringTake[data2[[i]],{repeat[[-1,1]]+1,repeat[[-1,2]]-1}];
+			score[[i]]=score[[i]]<>StringTake[data2[[i]],{repeat[[-1,1]]+1,repeat[[-1,2]]-1}];
+			score[[i]]=score[[i]]<>StringTake[data2[[i]],{repeat[[-1,2]]+1,StringLength@data2[[i]]}];
+		],
+	{i,Length@data2}];
+	Return[score];
+];
+
+
+qysPlay[filename_]:=Module[
+	{
+		i,j,k,char,                                     (* loop related *)
+		score,track={},voicePart,                       (* score and tracks*)
+		comment,match,                                  (* comment related *)
+		instrument="Piano",instrumentList={},           (* instrument *)
+		tonality=0,beat=1,speed=88,volume=1,            (* angle bracket related *)
+		tercet=0,tercetTime,tremolo,appoggiatura,       (* round bracket related *)
+		note,pitch,time,space,timeDot,duration,
+		lastPitch,extend,portamento,rate		
+	},
+	score=getScore[filename];
 	Do[
 		j=1;
 		space=True;
@@ -61,26 +84,12 @@ qysPlay[filename_]:=Module[
 		appoggiatura=False;
 		tremolo=0;
 		voicePart={};
-		If[StringPosition[data[[i]],":"]=={},
-			score=data[[i]],
-			(* repeat *)
-			repeat=Partition[Transpose[StringPosition[data[[i]],":"]][[1]],2];
-			score=StringTake[data[[i]],repeat[[1,1]]-1];
-			Do[
-				score=score<>StringTake[data[[i]],{repeat[[j,1]]+1,repeat[[j,2]]-1}];
-				score=score<>StringTake[data[[i]],{repeat[[j,1]]+1,repeat[[j,2]]-1}];
-				score=score<>StringTake[data[[i]],{repeat[[j,2]]+1,repeat[[j+1,1]]-1}],
-			{j,Length@repeat-1}];
-			score=score<>StringTake[data[[i]],{repeat[[-1,1]]+1,repeat[[-1,2]]-1}];
-			score=score<>StringTake[data[[i]],{repeat[[-1,1]]+1,repeat[[-1,2]]-1}];
-			score=score<>StringTake[data[[i]],{repeat[[-1,2]]+1,StringLength@data[[i]]}];
-		];		
-		While[j<=StringLength[score],
-			char=StringPart[score,j];
+		While[j<=StringLength[score[[i]]],
+			char=StringPart[score[[i]],j];
 			Switch[char,
 				"<",
-					match=Select[Transpose[StringPosition[score,">"]][[1]],#>j&][[1]];
-					comment=StringTake[score,{j+1,match-1}];
+					match=Select[Transpose[StringPosition[score[[i]],">"]][[1]],#>j&][[1]];
+					comment=StringTake[score[[i]],{j+1,match-1}];
 					Switch[StringPart[comment,2],
 						"=",                       (* tonality *)
 							tonality=tonalityDict[[StringTake[comment,{3,StringLength@comment}]]],
@@ -94,9 +103,9 @@ qysPlay[filename_]:=Module[
 					j=match+1;
 					Continue[],
 				"(",
-					match=Select[Transpose[StringPosition[score,")"]][[1]],#>j&][[1]];
-					comment=StringTake[score,{j+1,match-2}];
-					Switch[StringTake[score,{match-1}],
+					match=Select[Transpose[StringPosition[score[[i]],")"]][[1]],#>j&][[1]];
+					comment=StringTake[score[[i]],{j+1,match-2}];
+					Switch[StringTake[score[[i]],{match-1}],
 						"-",                       (* tercet *)
 							tercet=ToExpression[comment];
 							tercetTime=(2^Floor[Log2[tercet]])/tercet,
@@ -114,8 +123,9 @@ qysPlay[filename_]:=Module[
 					j=match+1;
 					Continue[],
 				"{",                               (* instrument *)
-					match=Select[Transpose[StringPosition[score,"}"]][[1]],#>j&][[1]];
-					instrument=StringTake[score,{j+1,match-1}];
+					match=Select[Transpose[StringPosition[score[[i]],"}"]][[1]],#>j&][[1]];
+					instrument=StringTake[score[[i]],{j+1,match-1}];
+					instrumentList=Union[instrumentList,{instrument}];
 					j=match+1;
 					Continue[],
 				"~",                               (* portamento *)
@@ -132,14 +142,14 @@ qysPlay[filename_]:=Module[
 					note=ToExpression@char;                 (* single-tone *)
 					pitch=If[note==0,None,pitchDict[[note]]+tonality],
 					pitch={};                               (* harmony *)
-					While[StringPart[score,j]!="]",
-						AppendTo[pitch,getPitch[score,j,tonality][[1]]];
-						j=getPitch[score,j,tonality][[2]];
+					While[StringPart[score[[i]],j]!="]",
+						AppendTo[pitch,getPitch[score[[i]],j,tonality][[1]]];
+						j=getPitch[score[[i]],j,tonality][[2]];
 					];
 					j++;
 				];
-				While[j<=StringLength[score] && MemberQ[{"#","b","'",","},StringPart[score,j]],
-					char=StringPart[score,j];
+				While[j<=StringLength[score[[i]]] && MemberQ[{"#","b","'",","},StringPart[score[[i]],j]],
+					char=StringPart[score[[i]],j];
 					Switch[char,
 						"#",pitch++,
 						"b",pitch--,
@@ -153,14 +163,14 @@ qysPlay[filename_]:=Module[
 			(* find out the duration *)
 			time=1;
 			space=True;
-			While[j<=StringLength[score]&&MemberQ[{"-","_",".","^"},StringPart[score,j]],
-				char=StringPart[score,j];
+			While[j<=StringLength[score[[i]]]&&MemberQ[{"-","_",".","^"},StringPart[score[[i]],j]],
+				char=StringPart[score[[i]],j];
 				Switch[char,
 					"-",time+=1,
 					"_",time/=2,
 					".",
 						timeDot=1/2;
-						While[j<=StringLength[score] && StringPart[score,j+1]==".",
+						While[j<=StringLength[score[[i]]] && StringPart[score[[i]],j+1]==".",
 							timeDot/=2;
 							j++;
 						];
@@ -213,16 +223,19 @@ qysPlay[filename_]:=Module[
 				];
 			];
 		];
-		If[voicePart!={},AppendTo[music,volume*Audio@Sound[SoundNote@@#&/@voicePart]]],
-	{i,Length[data]}];
-	If[debug,Print[music],Return[AudioOverlay@music]];
+		If[voicePart!={},AppendTo[track,volume*Audio[Sound[SoundNote@@#&/@voicePart]]]],
+	{i,Length[score]}];
+	Return[Audio[AudioOverlay[track],MetaInformation-><|
+		"TrackCount"->Length@track,
+		"TrackDuration"->Duration/@track,
+		"Instruments"->instrumentList
+	|>]];
 ];
 
 
 (* ::Input:: *)
-(*debug=False;*)
-(*AudioPlay@qysPlay["E:\\QingyunMusicPlayer\\Songs\\Banana.qys"];*)
+(*AudioPlay@qysPlay["E:\\QingyunMusicPlayer\\Songs\\Rainbow.qys"];*)
 
 
 (* ::Input:: *)
-(*AudioStop[];RemoveAudioStream[];*)
+(*AudioStop[];*)

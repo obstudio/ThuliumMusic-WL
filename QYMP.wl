@@ -6,15 +6,15 @@
 
 version="1.0.2";
 userPath="C:\\Users\\"<>$UserName<>"\\AppData\\Local\\QYMP\\";
-If[!DirectoryQ[userPath],
-	CreateDirectory[userPath];
-	Export[userPath<>"Instrument.json",{"Piano","Violin","Guitar","Flute"}];
-];
+If[!DirectoryQ[userPath],CreateDirectory[userPath]];
+If[!FileExistsQ[userPath<>"Instrument.json"],Export[userPath<>"Instrument.json",{"Piano","Violin","Guitar","Flute"}]];
+If[!DirectoryQ[userPath<>"export\\"],CreateDirectory[userPath<>"export\\"]];
 path=NotebookDirectory[];
 <<(path<>"qysPlay.wl")
 <<(path<>"qymPlay.wl")
 index=Association/@Association@Import[path<>"Index.json"];
 songList=Keys[index];
+tagList={"lyricist","composer","adapter","comment","abstract"};
 SetDirectory[path<>"Songs\\"];
 
 
@@ -70,12 +70,29 @@ Debugger[song_]:=(
 	songPath=index[[song,"path"]];
 	audio=If[StringTake[songPath,-1]=="m",qymPlay,qysPlay][path<>"Songs\\"<>songPath];
 	info=MetaInformation/.Options[audio,MetaInformation];
+	playing=False;
 	CreateDialog[Column[{,
 		Grid[{
+			{"\:603b\:65f6\:957f",ToString[info[["Duration"]]]},
 			{"\:97f3\:8f68\:6570",ToString[info[["TrackCount"]]]},
 			{"\:4f7f\:7528\:4e50\:5668",StringRiffle[info[["Instruments"]],", "]}
 		},Alignment->Left],,
-		Button["\:8fd4\:56de",DialogReturn[ModifySongInfo[song]],ImageSize->150],
+		Row[{
+			Dynamic@If[playing,
+				Button["\:6682\:505c",AudioPause[current];playing=False,ImageSize->150],
+				Button["\:64ad\:653e",AudioPlay[current];playing=True,ImageSize->150]
+			],
+			StringRepeat[" ",5],
+			Button["\:4e2d\:6b62",AudioStop[],ImageSize->150]
+		}],
+		Row[{
+			Button["\:5bfc\:51fa\:6587\:4ef6",
+				Export[userPath<>"export\\"<>song<>".mp3",audio];
+				SystemOpen[userPath<>"export\\"],
+			ImageSize->150],
+			StringRepeat[" ",5],
+			Button["\:8fd4\:56de",DialogReturn[ModifySongInfo[song]],ImageSize->150]
+		}],
 	},Center,ItemSize->30,Spacings->1],
 	WindowTitle->"\:8c03\:8bd5\:ff1a"<>song];
 );
@@ -160,9 +177,10 @@ Player[song_]:=(
 			Nothing
 		],,
 		Row[{
-			Button["\:64ad\:653e",AudioPlay[current],ImageSize->80],
-			StringRepeat[" ",5],
-			Button["\:6682\:505c",AudioPause[],ImageSize->80],
+			Dynamic@If[playing,
+				Button["\:6682\:505c",AudioPause[current];playing=False,ImageSize->80],
+				Button["\:64ad\:653e",AudioPlay[current];playing=True,ImageSize->80],
+			],
 			StringRepeat[" ",5],
 			Button["\:4e2d\:6b62",AudioStop[],ImageSize->80],
 			StringRepeat[" ",5],

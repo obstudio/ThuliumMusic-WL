@@ -227,7 +227,7 @@ qysPlay[filename_]:=Module[
 	{i,Length[score]}];
 	Return[Audio[AudioOverlay[track],MetaInformation-><|
 		"TrackCount"->Length@track,
-		"TrackDuration"->Duration/@track,
+		"Duration"->Max@Duration/@track,
 		"Instruments"->instrumentList
 	|>]];
 ];

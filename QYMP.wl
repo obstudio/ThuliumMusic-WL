@@ -42,6 +42,17 @@ putSongInfo[song_]:=(
 );
 
 
+getMetaInfo[filename_]:=(
+	metainfo=<||>;
+	filedata=StringJoin/@Import[filename,"Table"];
+	Do[
+		match=StringPosition[filedata[[i]],": ",1][[1]];
+		Append[metainfo,StringTake[filedata[[i]],{1,match-1}]->StringTake[filedata[[i]],{match+2,StringLength[filedata[[i]]]}]];
+	,{i,Length[filedata]}];
+	Return[metainfo];
+);
+
+
 ModifySongInfo[song_]:=(
 	getSongInfo[song];
 	CreateDialog[Column[{,

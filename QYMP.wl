@@ -19,12 +19,15 @@ SetDirectory[path<>"Songs\\"];
 
 
 ModifySongInfo[song_]:=(
-	songPath=index[[song,"path"]];Print[songPath];
-	songLyricist=If[KeyExistsQ[index[[song]],"lyricist"],index[[song,"lyricist"]],""];
-	songComposer=If[KeyExistsQ[index[[song]],"composer"],index[[song,"composer"]],""];
-	songAdapter=If[KeyExistsQ[index[[song]],"adapter"],index[[song,"adapter"]],""];
-	songComment=If[KeyExistsQ[index[[song]],"comment"],index[[song,"comment"]],""];
-	songAbstract=If[KeyExistsQ[index[[song]],"abstract"],index[[song,"abstract"]],""];
+	songPath=index[[song,"path"]];
+	(*audio=If[StringTake[songPath,-1]=="m",qymPlay,qysPlay][path<>"Songs\\"<>songPath];*)
+	getSongInfo:=(
+		songLyricist=If[KeyExistsQ[index[[song]],"lyricist"],index[[song,"lyricist"]],""];
+		songComposer=If[KeyExistsQ[index[[song]],"composer"],index[[song,"composer"]],""];
+		songAdapter=If[KeyExistsQ[index[[song]],"adapter"],index[[song,"adapter"]],""];
+		songComment=If[KeyExistsQ[index[[song]],"comment"],index[[song,"comment"]],""];
+		songAbstract=If[KeyExistsQ[index[[song]],"abstract"],index[[song,"abstract"]],""];
+	);
 	CreateDialog[Column[{,
 		Style[song,FontSize->28,Bold],,
 		Row[{"\:4f5c\:8bcd  ",InputField[Dynamic@songLyricist,String]}],
@@ -32,22 +35,33 @@ ModifySongInfo[song_]:=(
 		Row[{"\:6539\:7f16  ",InputField[Dynamic@songAdapter,String]}],
 		Row[{"\:5907\:6ce8  ",InputField[Dynamic@songComment,String]}],
 		Row[{"\:6458\:8981  ",InputField[Dynamic@songAbstract,String]}],,
-		Row[{Button["\:4fdd\:5b58\:4fee\:6539",
-			index[[song]]=<|
-				If[songLyricist!="","lyricist"->songLyricist,Nothing],
-				If[songComposer!="","composer"->songComposer,Nothing],
-				If[songAdapter!="","adapter"->songAdapter,Nothing],
-				If[songComment!="","comment"->songComment,Nothing],
-				If[songAbstract!="","abstract"->songAbstract,Nothing],
-				"path"->songPath
-			|>;
-			Export[path<>"Index.json",Normal/@Normal@index],
-		ImageSize->150],
-		Spacer[20],
-		Button["\:8fd4\:56de",DialogReturn[Management],ImageSize->150]}],
+		Row[{
+			Button["\:4fdd\:5b58\:4fee\:6539",
+				index[[song]]=<|
+					If[songLyricist!="","lyricist"->songLyricist,Nothing],
+					If[songComposer!="","composer"->songComposer,Nothing],
+					If[songAdapter!="","adapter"->songAdapter,Nothing],
+					If[songComment!="","comment"->songComment,Nothing],
+					If[songAbstract!="","abstract"->songAbstract,Nothing],
+					"path"->songPath
+				|>;
+				Export[path<>"Index.json",Normal/@Normal@index],
+			ImageSize->150],
+			Spacer[20],
+			Button["\:91cd\:7f6e",getSongInfo,ImageSize->150]
+		}],
+		Row[{
+			Button["\:8c03\:8bd5",
+				123456
+			,ImageSize->150],
+			Spacer[20],
+			Button["\:8fd4\:56de",DialogReturn[Management],ImageSize->150]
+		}],
 	},Center,ItemSize->30,Spacings->1],
 	WindowTitle->"\:4fee\:6539\:300a"<>song<>"\:300b\:7684\:6b4c\:66f2\:4fe1\:606f"];
 );
+
+
 AddNewSong:=(
 	songName="";
 	songPath="";
@@ -87,6 +101,8 @@ AddNewSong:=(
 	},Center,ItemSize->30,Spacings->1],
 	WindowTitle->"\:6dfb\:52a0\:65b0\:66f2\:76ee"]
 );
+
+
 DeleteSong[song_]:=CreateDialog[Column[{,
 	"\:4f60\:786e\:5b9a\:8981\:5c06\:6b4c\:66f2\:300a"<>song<>"\:300b\:4ece\:6b4c\:5355\:4e2d\:79fb\:9664\:5417\:ff1f",,
 	Row[{
@@ -100,16 +116,20 @@ DeleteSong[song_]:=CreateDialog[Column[{,
 	}],
 },Center,ItemSize->36],
 WindowTitle->"\:5220\:9664\:66f2\:76ee"];
+
+
 Management:=CreateDialog[Column[{"",
 	Style["\:6b4c\:5355\:7ba1\:7406",Bold,32],,
 	Grid[{#,
 		Button["\:4fee\:6539",DialogReturn[ModifySongInfo[#]],ImageSize->Tiny],
-		Button["\:5220\:9664",DialogReturn[DeleteSong[#]],ImageSize->Tiny],
+		Button["\:5220\:9664",DialogReturn[DeleteSong[#]],ImageSize->Tiny]
 	}&/@songList],,
 	Button["\:6dfb\:52a0\:65b0\:66f2\:76ee",DialogReturn[AddNewSong],ImageSize->150],
 	Button["\:8fd4\:56de\:4e3b\:754c\:9762",DialogReturn[QYMP],ImageSize->150],
 },Center,ItemSize->20],
 WindowTitle->"\:6b4c\:5355\:7ba1\:7406"];
+
+
 Player[song_]:=(
 	AudioStop[];
 	filename=path<>"Songs\\"<>index[[song,"path"]];
@@ -142,6 +162,8 @@ Player[song_]:=(
 	},Center,ItemSize->50],
 	WindowTitle->"\:6b63\:5728\:64ad\:653e\:ff1a"<>song];
 );
+
+
 QYMP:=CreateDialog[Column[{"",
 	Style["\:9752\:4e91\:64ad\:653e\:5668",Bold,32],,
 	Style["\:9009\:62e9\:66f2\:76ee",Bold,24],

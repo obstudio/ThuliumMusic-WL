@@ -11,11 +11,11 @@ debug=False;
 
 getPitch[score_,pos_,tonality_]:=Module[
 	{i=pos,note,pitch},
-	note=ToExpression@StringTake[score,{i}];
+	note=ToExpression@StringPart[score,i];
 	pitch=If[note==0,None,pitchDict[[note]]+tonality];
 	i++;
-	While[i<=StringLength[score] && MemberQ[{"#","b","'",","},StringTake[score,{i}]],
-		Switch[StringTake[score,{i}],
+	While[i<=StringLength[score] && MemberQ[{"#","b","'",","},StringPart[score,i]],
+		Switch[StringPart[score,i],
 			"#",pitch++,
 			"b",pitch--,
 			"'",pitch+=12,
@@ -25,6 +25,8 @@ getPitch[score_,pos_,tonality_]:=Module[
 	];
 	Return[{pitch,i}];
 ];
+
+
 qysPlay[filename_]:=Module[
 	{
 		i,j,k,
@@ -49,7 +51,7 @@ qysPlay[filename_]:=Module[
 			join=False;data4[[j]]=data4[[j]]<>data3[[i]],
 			j++;AppendTo[data4,data3[[i]]]
 		];
-		If[StringTake[data3[[i]],{-1}]=="\\",join=True],
+		If[StringPart[data3[[i]],-1]=="\\",join=True],
 	{i,Length@data3}];
 	data=StringDelete[#,"|"|"\\"]&/@data4;                 (* delete the joint marks and add a ending mark *)
 	Do[
@@ -74,12 +76,12 @@ qysPlay[filename_]:=Module[
 			score=score<>StringTake[data[[i]],{repeat[[-1,2]]+1,StringLength@data[[i]]}];
 		];		
 		While[j<=StringLength[score],
-			char=StringTake[score,{j}];
+			char=StringPart[score,j];
 			Switch[char,
 				"<",
 					match=Select[Transpose[StringPosition[score,">"]][[1]],#>j&][[1]];
 					comment=StringTake[score,{j+1,match-1}];
-					Switch[StringTake[comment,{2}],
+					Switch[StringPart[comment,2],
 						"=",                       (* tonality *)
 							tonality=tonalityDict[[StringTake[comment,{3,StringLength@comment}]]],
 						"/",                       (* beat *)
@@ -130,14 +132,14 @@ qysPlay[filename_]:=Module[
 					note=ToExpression@char;                 (* single-tone *)
 					pitch=If[note==0,None,pitchDict[[note]]+tonality],
 					pitch={};                               (* harmony *)
-					While[StringTake[score,{j}]!="]",
+					While[StringPart[score,j]!="]",
 						AppendTo[pitch,getPitch[score,j,tonality][[1]]];
 						j=getPitch[score,j,tonality][[2]];
 					];
 					j++;
 				];
-				While[j<=StringLength[score] && MemberQ[{"#","b","'",","},StringTake[score,{j}]],
-					char=StringTake[score,{j}];
+				While[j<=StringLength[score] && MemberQ[{"#","b","'",","},StringPart[score,j]],
+					char=StringPart[score,j];
 					Switch[char,
 						"#",pitch++,
 						"b",pitch--,
@@ -151,14 +153,14 @@ qysPlay[filename_]:=Module[
 			(* find out the duration *)
 			time=1;
 			space=True;
-			While[j<=StringLength[score]&&MemberQ[{"-","_",".","^"},StringTake[score,{j}]],
-				char=StringTake[score,{j}];
+			While[j<=StringLength[score]&&MemberQ[{"-","_",".","^"},StringPart[score,j]],
+				char=StringPart[score,j];
 				Switch[char,
 					"-",time+=1,
 					"_",time/=2,
 					".",
 						timeDot=1/2;
-						While[j<=StringLength[score] && StringTake[score,{j+1}]==".",
+						While[j<=StringLength[score] && StringPart[score,j+1]==".",
 							timeDot/=2;
 							j++;
 						];
@@ -172,7 +174,7 @@ qysPlay[filename_]:=Module[
 				time-=1/4;
 				duration=60/speed/4/Length@lastPitch*beat;
 				Do[
-					AppendTo[voicePart,{lastPitch[[k]],duration,instrument,SoundVolume->volume}],
+					AppendTo[voicePart,{lastPitch[[k]],duration,instrument}],
 				{k,Length@lastPitch}];
 				appoggiatura=False;
 			];
@@ -181,8 +183,8 @@ qysPlay[filename_]:=Module[
 				duration/=(time*2^tremolo);
 				voicePart=Drop[voicePart,-2];
 				Do[
-					AppendTo[voicePart,{lastPitch,duration,instrument,SoundVolume->volume}];
-					AppendTo[voicePart,{pitch,duration,instrument,SoundVolume->volume}],
+					AppendTo[voicePart,{lastPitch,duration,instrument}];
+					AppendTo[voicePart,{pitch,duration,instrument}],
 				{k,time*2^(tremolo-1)}];
 				tremolo=0;
 				Continue[];
@@ -192,7 +194,7 @@ qysPlay[filename_]:=Module[
 				duration/=(time*6);
 				voicePart=Drop[voicePart,-2];
 				Do[
-					AppendTo[voicePart,{Floor[k],duration,instrument,SoundVolume->volume}],
+					AppendTo[voicePart,{Floor[k],duration,instrument}],
 				{k,lastPitch,pitch,rate}];
 				portamento=False;
 				Continue[];
@@ -205,13 +207,13 @@ qysPlay[filename_]:=Module[
 					voicePart[[-1,2]]+=duration;
 				],
 				If[space,
-					AppendTo[voicePart,{pitch,duration*7/8,instrument,SoundVolume->volume}];
+					AppendTo[voicePart,{pitch,duration*7/8,instrument}];
 					AppendTo[voicePart,{None,duration/8}],
-					AppendTo[voicePart,{pitch,duration,instrument,SoundVolume->volume}];
+					AppendTo[voicePart,{pitch,duration,instrument}];
 				];
 			];
 		];
-		If[voicePart!={},AppendTo[music,Audio@Sound[SoundNote@@#&/@voicePart]]],
+		If[voicePart!={},AppendTo[music,volume*Audio@Sound[SoundNote@@#&/@voicePart]]],
 	{i,Length[data]}];
 	If[debug,Print[music],Return[AudioOverlay@music]];
 ];
@@ -220,3 +222,7 @@ qysPlay[filename_]:=Module[
 (* ::Input:: *)
 (*debug=False;*)
 (*AudioPlay@qysPlay["E:\\QingyunMusicPlayer\\Songs\\Banana.qys"];*)
+
+
+(* ::Input:: *)
+(*AudioStop[];RemoveAudioStream[];*)

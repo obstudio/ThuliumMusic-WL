@@ -1,14 +1,13 @@
 {
-    "亡灵幻想曲": {
-        "composer": "ZUN",
-        "adapter": "まらしぃ",
-        "abstract": "八云紫的bgm",
-        "comment": "ネクロファンタジア",
-        "path": "Necro_Fantasia.qys"
+    "彩虹": {
+        "lyricist": "周杰伦",
+        "composer": "周杰伦",
+        "path": "Rainbow.qys"
     },
-    "南师附中校歌": {
-        "lyricist": "柳诒徵",
-        "path": "NSFZ_School_Song.qym"
+    "东方红": {
+        "composer": "陕北民歌",
+        "lyricist": "陕北民歌",
+        "path": "The_East_is_Red.qym"
     },
     "东方之珠": {
         "comment": "主歌部分",
@@ -21,15 +20,21 @@
         "composer": "Linkin Park",
         "path": "Numb.qys"
     },
-    "彩虹": {
-        "composer": "周杰伦",
-        "lyricist": "周杰伦",
-        "path": "Rainbow.qys"
+    "亡灵幻想曲": {
+        "composer": "ZUN",
+        "abstract": "八云紫的bgm",
+        "adapter": "まらしぃ",
+        "comment": "ネクロファンタジア",
+        "path": "Necro_Fantasia.qys"
     },
-    "东方红": {
-        "composer": "陕北民歌",
-        "lyricist": "陕北民歌",
-        "path": "The_East_is_Red.qym"
+    "南师附中校歌": {
+        "lyricist": "柳诒徵",
+        "path": "NSFZ_School_Song.qym"
+    },
+    "鬼子电报员": {
+        "comment": "宴会开始",
+        "composer": "三泽康広",
+        "path": "Telegrapher.qys"
     },
     "义勇军进行曲": {
         "comment": "中华人民共和国国歌",
@@ -42,11 +47,6 @@
         "lyricist": "Eugène Edine Pottier",
         "path": "The_Internationale.qym"
     },
-    "鬼子电报员": {
-        "comment": "宴会开始",
-        "composer": "三泽康広",
-        "path": "Telegrapher.qys"
-    },
     "东方组曲第一弹": {
         "composer": "ZUN",
         "path": "Touhou_Mix_1.qys",
@@ -57,14 +57,14 @@
         "composer": "徐锡宜",
         "path": "Sunny_Light.qym"
     },
+    "风居住的街道": {
+        "composer": "矶村由纪子",
+        "path": "Kaze_No_Sumu_Machi.qym"
+    },
     "社会主义好": {
         "composer": "李焕之",
         "lyricist": "希扬",
         "path": "Socialism_is_Good.qym"
-    },
-    "风居住的街道": {
-        "composer": "矶村由纪子",
-        "path": "Kaze_No_Sumu_Machi.qym"
     },
     "幽雅绽放·墨染之樱": {
         "composer": "ZUN",
@@ -83,17 +83,17 @@
         "path": "Banana.qys"
     },
     "红星歌": {
-        "abstract": "电影《闪闪的红星》主题曲",
         "lyricist": "邬大为, 魏宝贵",
+        "abstract": "电影《闪闪的红星》主题曲",
         "composer": "傅庚辰",
         "comment": "合唱版",
         "path": "Red_Star_Song.qym"
     },
     "天空的花都": {
         "composer": "ZUN",
+        "abstract": "东方妖妖梦4面道中曲\\n东方Project莉莉白主题曲",
         "adapter": "LittleRed",
         "comment": "天空の花の都",
-        "abstract": "东方妖妖梦4面道中曲\\n东方Project莉莉白主题曲",
         "path": "Tenkuu_Hana_Miyako.qys"
     }
 }

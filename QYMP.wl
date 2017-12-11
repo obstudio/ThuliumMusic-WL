@@ -18,6 +18,21 @@ tagList={"lyricist","composer","adapter","comment","abstract"};
 SetDirectory[path<>"Songs\\"];
 
 
+WriteSongInfo[song_,info_]:=Export[
+	path<>"Meta\\"<>song<>".meta",
+	StringRiffle[KeyValueMap[#1<>": "<>#2<>";"&,info],"\n"],
+"Text"];
+ReadSongInfo[song_]:=Module[
+	{data,info={},match,i},
+	data=StringSplit[Import[path<>"Meta\\"<>song<>".meta","Text"],";"];
+	Do[
+		match=StringPosition[data[[i]],": "][[1,1]];
+		AppendTo[info,StringTake[data[[i]],match-1]->StringTake[data[[i]],{match+2,StringLength[data[[i]]]}]],
+	{i,Length[data]}];
+	Return[info];
+];
+
+
 getSongInfo[song_]:=(
 	songPath=index[[song,"path"]];
 	songLyricist=If[KeyExistsQ[index[[song]],"lyricist"],index[[song,"lyricist"]],""];
@@ -42,15 +57,8 @@ putSongInfo[song_]:=(
 );
 
 
-getMetaInfo[filename_]:=(
-	metainfo=<||>;
-	filedata=StringJoin/@Import[filename,"Table"];
-	Do[
-		match=StringPosition[filedata[[i]],": ",1][[1]];
-		Append[metainfo,StringTake[filedata[[i]],{1,match-1}]->StringTake[filedata[[i]],{match+2,StringLength[filedata[[i]]]}]];
-	,{i,Length[filedata]}];
-	Return[metainfo];
-);
+(* ::Input:: *)
+(*getMetaInfo[NotebookDirectory[]<>"Songs\\test.meta"]*)
 
 
 ModifySongInfo[song_]:=(

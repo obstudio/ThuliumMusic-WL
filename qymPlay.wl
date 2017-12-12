@@ -21,7 +21,7 @@ qymPlay[filename_]:=Module[
 		MessageDialog[TextCell["File not found!"],WindowTitle->"Error"];
 		Return[];
 	];
-	filedata=StringJoin/@Import[filename,"Table"];
+	filedata=StringJoin/@Map[ToString,Import[filename,"Table"],{2}];
 	Do[
 		match=StringPosition[filedata[[i]],"//",1];
 		If[match!={},

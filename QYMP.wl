@@ -19,8 +19,8 @@ path=NotebookDirectory[];
 langData=Association@Import[path<>"Lang\\"<>language<>".json"];
 tagName=Association@langData[["TagName"]];
 instrName=Association@langData[["InstrumentName"]];
-TextInfoTags={"SongName","Lyricist","Composer","Adapter","Comment","Abstract"};
-MetaInfoTags={"Format","TrackCount","Duration","Instruments"};
+textInfoTags={"SongName","Lyricist","Composer","Adapter","Comment","Abstract"};
+metaInfoTags={"Format","TrackCount","Duration","Instruments"};
 refresh;
 
 
@@ -28,11 +28,11 @@ ModifySongInfo[song_]:=DynamicModule[{textInfo},
 	textInfo=getTextInfo[song];
 	CreateDialog[Column[{,
 		Style[textInfo[["SongName"]],FontSize->28,Bold],,
-		Grid[{tagName[[#]],Spacer[20],InputField[Dynamic@textInfo[[#]],String]}&/@TextInfoTags],,
+		Grid[{tagName[[#]],Spacer[20],InputField[Dynamic@textInfo[[#]],String]}&/@textInfoTags],,
 		Grid[{
 			{Button["\:4fdd\:5b58\:4fee\:6539",putTextInfo[song,textInfo],ImageSize->150],
 			Button["\:64a4\:9500",textInfo=getTextInfo[song],ImageSize->150]},
-			{Button["\:8c03\:8bd5",DialogReturn[Debugger[song]],ImageSize->150,Enabled->False],
+			{Button["\:8c03\:8bd5",DialogReturn[Debugger[song]],ImageSize->150],
 			Button["\:8fd4\:56de",DialogReturn[Management],ImageSize->150]}
 		}],
 	},Center,ItemSize->30,Spacings->1],
@@ -40,67 +40,64 @@ ModifySongInfo[song_]:=DynamicModule[{textInfo},
 ];
 
 
-Debugger[song_]:=(
-	songPath=index[[song,"path"]];
-	audio=If[StringTake[songPath,-1]=="m",qymPlay,qysPlay][path<>"Songs\\"<>songPath];
-	info=MetaInformation/.Options[audio,MetaInformation];
-	playing=False;
+Debugger[song_]:=Module[{filename,audio},DynamicModule[{playing=False,current},
+	AudioStop[];
+	filename=path<>"Songs\\"<>song<>"."<>index[[song,"Format"]];
+	audio=parse[filename,index[[song,"Format"]]];
+	current=AudioPlay[audio];AudioPause[];
 	CreateDialog[Column[{,
 		Grid[{
-			{"\:603b\:65f6\:957f",ToString[info[["Duration"]]]},
-			{"\:97f3\:8f68\:6570",ToString[info[["TrackCount"]]]},
-			{"\:4f7f\:7528\:4e50\:5668",StringRiffle[info[["Instruments"]],", "]}
+			{"\:603b\:65f6\:957f",ToString[index[[song,"Duration"]]]},
+			{"\:97f3\:8f68\:6570",ToString[index[[song,"TrackCount"]]]},
+			{"\:4f7f\:7528\:4e50\:5668",StringRiffle[index[[song,"Instruments"]],", "]}
 		},Alignment->Left],,
 		Row[{
 			Dynamic@If[playing,
 				Button["\:6682\:505c",AudioPause[current];playing=False,ImageSize->150],
 				Button["\:64ad\:653e",AudioPlay[current];playing=True,ImageSize->150]
 			],
-			StringRepeat[" ",5],
-			Button["\:4e2d\:6b62",AudioStop[],ImageSize->150]
+			Spacer[20],
+			Button["\:4e2d\:6b62",AudioStop[current];playing=False,ImageSize->150]
 		}],
 		Row[{
 			Button["\:5bfc\:51fa\:6587\:4ef6",
 				Export[userPath<>"export\\"<>song<>".mp3",audio];
 				SystemOpen[userPath<>"export\\"],
 			ImageSize->150],
-			StringRepeat[" ",5],
+			Spacer[20],
 			Button["\:8fd4\:56de",DialogReturn[ModifySongInfo[song]],ImageSize->150]
 		}],
 	},Center,ItemSize->30,Spacings->1],
-	WindowTitle->"\:8c03\:8bd5\:ff1a"<>song];
-);
+	WindowTitle->"\:8c03\:8bd5\:ff1a"<>index[[song,"SongName"]]];
+]];
 
 
-AddNewSong:=(
-	songName="";
-	songPath="";
-	songLyricist="";
-	songComposer="";
-	songAdapter="";
-	songComment="";
-	songAbstract="";
-	CreateDialog[Column[{,
-		Style["\:6dfb\:52a0\:65b0\:66f2\:76ee",FontSize->28,Bold],,
-		Row[{"\:4f4d\:7f6e",Spacer[20],PopupMenu[Dynamic@songPath,Complement[FileNames[],index[[#,"path"]]&/@songList],ImageSize->200]}],
-		Row[{"\:66f2\:540d",Spacer[20],InputField[Dynamic@songName,String]}],
-		Row[{"\:4f5c\:8bcd",Spacer[20],InputField[Dynamic@songLyricist,String]}],
-		Row[{"\:4f5c\:66f2",Spacer[20],InputField[Dynamic@songComposer,String]}],
-		Row[{"\:6539\:7f16",Spacer[20],InputField[Dynamic@songAdapter,String]}],
-		Row[{"\:5907\:6ce8",Spacer[20],InputField[Dynamic@songComment,String]}],
-		Row[{"\:6458\:8981",Spacer[20],InputField[Dynamic@songAbstract,String]}],,
-		Row[{Button["\:6dfb\:52a0",
-			If[MemberQ[songList,songName],
-				MessageDialog["\:8981\:6dfb\:52a0\:7684\:6b4c\:66f2\:4e0e\:73b0\:6709\:6b4c\:66f2\:91cd\:540d\:3002",WindowTitle->"\:8b66\:544a"],
-				DialogReturn[putSongInfo[songName]];
-			];
-			Management,
-		ImageSize->150],
-		Spacer[20],
-		Button["\:8fd4\:56de",DialogReturn[Management],ImageSize->150]}],
-	},Center,ItemSize->30,Spacings->1],
-	WindowTitle->"\:6dfb\:52a0\:65b0\:66f2\:76ee"]
-);
+AddNewSong:=Module[{metaInfo,audio,song},
+	DynamicModule[{songPath,textInfo=AssociationMap[""&,textInfoTags]},
+		SetDirectory[path<>"Songs\\"];
+		CreateDialog[Column[{,
+			Style["\:6dfb\:52a0\:65b0\:66f2\:76ee",FontSize->28,Bold],,
+			Row[{"\:4f4d\:7f6e",Spacer[20],PopupMenu[Dynamic@songPath,
+				Complement[FileNames[],#<>"."<>index[[#,"Format"]]&/@songList],
+			ImageSize->200]}],
+			Grid[{tagName[[#]],Spacer[20],InputField[Dynamic@textInfo[[#]],String]}&/@textInfoTags],,
+			Row[{Button["\:6dfb\:52a0",
+				song=StringDrop[songPath,-4];
+				audio=parse[path<>"Songs\\"<>songPath,StringTake[songPath,-3]];
+				metaInfo=Values[Options[audio,MetaInformation]][[1]];
+				metaInfo[["TrackCount"]]=ToString[metaInfo[["TrackCount"]]];
+				metaInfo[["Duration"]]=ToString[metaInfo[["Duration"]]];
+				metaInfo[["Instruments"]]=ToString[metaInfo[["Instruments"]],InputForm];
+				AppendTo[index,song->metaInfo];
+				putTextInfo[song,textInfo];
+				DialogReturn[Management],
+			ImageSize->150],
+			Spacer[20],
+			Button["\:8fd4\:56de",DialogReturn[Management],ImageSize->150]}],
+		},Center,ItemSize->30,Spacings->1],
+		WindowTitle->"\:6dfb\:52a0\:65b0\:66f2\:76ee"]
+	]
+];
 
 
 DeleteSong[song_]:=CreateDialog[Column[{,
@@ -109,7 +106,7 @@ DeleteSong[song_]:=CreateDialog[Column[{,
 		Button["\:786e\:8ba4",
 			index=Delete[index,song];
 			DeleteFile[path<>"Meta\\"<>song<>".meta"];
-			DialogReturn[Management];
+			DialogReturn[Management],
 		ImageSize->100],
 		Spacer[20],
 		Button["\:8fd4\:56de",DialogReturn[Management],ImageSize->100]			
@@ -118,16 +115,17 @@ DeleteSong[song_]:=CreateDialog[Column[{,
 WindowTitle->"\:5220\:9664\:66f2\:76ee"];
 
 
-Management:=CreateDialog[Column[{"",
+Management:=(refresh;
+CreateDialog[Column[{"",
 	Style["\:6b4c\:5355\:7ba1\:7406",Bold,32],,
 	Grid[{index[[#,"SongName"]],
 		Button["\:4fee\:6539",DialogReturn[ModifySongInfo[#]],ImageSize->Tiny],
 		Button["\:5220\:9664",DialogReturn[DeleteSong[#]],ImageSize->Tiny]
 	}&/@songList],,
-	Button["\:6dfb\:52a0\:65b0\:66f2\:76ee",DialogReturn[AddNewSong],ImageSize->150,Enabled->False],
+	Button["\:6dfb\:52a0\:65b0\:66f2\:76ee",DialogReturn[AddNewSong],ImageSize->150],
 	Button["\:8fd4\:56de\:4e3b\:754c\:9762",DialogReturn[QYMP],ImageSize->150],
 },Center,ItemSize->20],
-WindowTitle->"\:6b4c\:5355\:7ba1\:7406"];
+WindowTitle->"\:6b4c\:5355\:7ba1\:7406"]);
 
 
 Player[song_]:=Module[{filename,audio},DynamicModule[{playing=True,current},
@@ -166,6 +164,7 @@ Player[song_]:=Module[{filename,audio},DynamicModule[{playing=True,current},
 
 QYMP:=DynamicModule[{song},
 	refresh;
+	AudioStop[];
 	CreateDialog[Column[{"",
 		Style["\:9752\:4e91\:64ad\:653e\:5668",Bold,32],,
 		Style["\:9009\:62e9\:66f2\:76ee",Bold,24],

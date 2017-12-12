@@ -160,6 +160,7 @@ parse[filename_,"qym"]:=Module[
 		If[music!={},AppendTo[voiceParts,AudioJoin@music]],
 	{i,Length[filedata]}];
 	Return[Audio[AudioOverlay@voiceParts,MetaInformation-><|
+		"Format"->"qym",
 		"TrackCount"->Length@voiceParts,
 		"Duration"->QuantityMagnitude@UnitConvert[Max[Duration/@voiceParts],"Seconds"],
 		"Instruments"->instrumentList

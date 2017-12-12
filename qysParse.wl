@@ -223,9 +223,11 @@ parse[filename_,"qys"]:=Module[
 				];
 			];
 		];
+		
 		If[voicePart!={},AppendTo[track,volume*Audio[Sound[SoundNote@@#&/@voicePart]]]],
 	{i,Length[score]}];
 	Return[Audio[AudioOverlay[track],MetaInformation-><|
+		"Format"->"qys",
 		"TrackCount"->Length@track,
 		"Duration"->QuantityMagnitude@UnitConvert[Max[Duration/@track],"Seconds"],
 		"Instruments"->instrumentList
@@ -242,4 +244,4 @@ parse[filename_,"qys"]:=Module[
 
 
 (* ::Input:: *)
-(*MetaInformation/.Options[parse["E:\\QingyunMusicPlayer\\Songs\\Rainbow.qys","qys"],MetaInformation]*)
+(*Values@Options[parse["E:\\QingyunMusicPlayer\\Songs\\Rainbow.qys","qys"],MetaInformation]*)

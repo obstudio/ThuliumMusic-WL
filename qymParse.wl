@@ -1,6 +1,6 @@
 (* ::Package:: *)
 
-qymPlay[filename_]:=Module[
+parse[filename_,"qym"]:=Module[
 	{
 		i,j,k,
 		filedata,midchar,

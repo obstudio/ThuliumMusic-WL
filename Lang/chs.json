@@ -1,0 +1,29 @@
+{
+    "LanguageName": "简体中文",
+    "TagName": {
+        "SongName": "曲名",
+        "Lyricist": "作词",
+        "Composer": "作曲",
+        "Adapter": "改编",
+        "Comment": "备注",
+        "Abstract": "摘要",
+        "Format": "格式",
+        "TrackCount": "音轨数",
+        "Duration": "时长",
+        "Instruments": "乐器"
+    },
+    "InstrumentName": {
+        "Piano": "钢琴",
+        "Accordion": "手风琴",
+        "Guitar": "吉他",
+        "Violin": "小提琴",
+        "Cello": "大提琴",
+        "Viola": "中提琴",
+        "Harp": "竖琴",
+        "Tuba": "大号",
+        "Flute": "长笛",
+        "PanFlute": "排萧",
+        "Piccolo": "短笛",
+        "Xylophone": "木琴"
+    }
+}

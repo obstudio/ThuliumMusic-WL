@@ -65,7 +65,7 @@ getScore[filename_]:=Module[
 ];
 
 
-qysPlay[filename_]:=Module[
+parse[filename_,"qys"]:=Module[
 	{
 		i,j,k,char,                                     (* loop related *)
 		score,track={},voicePart,                       (* score and tracks*)

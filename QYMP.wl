@@ -30,7 +30,7 @@ ModifySongInfo[song_]:=DynamicModule[{textInfo},
 		Style[textInfo[["SongName"]],FontSize->28,Bold],,
 		Grid[{tagName[[#]],Spacer[20],InputField[Dynamic@textInfo[[#]],String]}&/@TextInfoTags],,
 		Grid[{
-			{Button["\:4fdd\:5b58\:4fee\:6539",putTextInfo[song,textInfo],ImageSize->150,Enabled->False],
+			{Button["\:4fdd\:5b58\:4fee\:6539",putTextInfo[song,textInfo],ImageSize->150],
 			Button["\:64a4\:9500",textInfo=getTextInfo[song],ImageSize->150]},
 			{Button["\:8c03\:8bd5",DialogReturn[Debugger[song]],ImageSize->150,Enabled->False],
 			Button["\:8fd4\:56de",DialogReturn[Management],ImageSize->150]}
@@ -111,7 +111,7 @@ DeleteSong[song_]:=CreateDialog[Column[{,
 			DeleteFile[path<>"Meta\\"<>song<>".meta"];
 			DialogReturn[Management];
 		ImageSize->100],
-		StringRepeat[" ",5],
+		Spacer[20],
 		Button["\:8fd4\:56de",DialogReturn[Management],ImageSize->100]			
 	}],
 },Center,ItemSize->36],
@@ -160,7 +160,7 @@ Player[song_]:=Module[{filename,audio},DynamicModule[{playing=True,current},
 			Button["\:8fd4\:56de",AudioStop[];DialogReturn[QYMP],ImageSize->80]			
 		}],,
 	},Center,ItemSize->50],
-	WindowTitle->"\:6b63\:5728\:64ad\:653e\:ff1a"<>song];
+	WindowTitle->"\:6b63\:5728\:64ad\:653e\:ff1a"<>index[[song,"SongName"]]];
 ]];
 
 

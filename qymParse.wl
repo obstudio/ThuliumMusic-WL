@@ -6,7 +6,7 @@ parse[filename_,"qym"]:=Module[
 		filedata,midchar,
 		music,musicrepeat,musicclip,voiceParts,
 		instrument="Piano",instrumentList={},
-		tonality=0,beat=1,speed=88,
+		tonality=0,beat=1,speed=88,volume=1,
 		pitch,sharp=0,time,space,tercet=0,tercetTime,
 		repeatTime,
 		comment,match,timeDot,note,duration,frequency,
@@ -81,18 +81,18 @@ parse[filename_,"qym"]:=Module[
 					tercet--;
 				];
 				duration=60/speed*time*beat;
-				If[pitch===None,AppendTo[musicclip,AudioGenerator["Silence",duration]];Continue[]];
+				If[pitch===None,AppendTo[musicclip,volume*AudioGenerator["Silence",duration]];Continue[]];
 				If[instrument=="Sine",
 					frequency=440*2^((pitch-9)/12);
 					If[space,
-						AppendTo[musicclip,AudioGenerator[{"Sin",frequency},duration*7/8]];
-						AppendTo[musicclip,AudioGenerator["Silence",duration/8]],
-						AppendTo[musicclip,AudioGenerator[{"Sin",frequency},duration]];
+						AppendTo[musicclip,volume*AudioGenerator[{"Sin",frequency},duration*7/8]];
+						AppendTo[musicclip,volume*AudioGenerator["Silence",duration/8]],
+						AppendTo[musicclip,volume*AudioGenerator[{"Sin",frequency},duration]];
 					],
 					If[space,
-						AppendTo[musicclip,Audio@SoundNote[pitch,duration*7/8,instrument]];
-						AppendTo[musicclip,AudioGenerator["Silence",duration/8]],
-						AppendTo[musicclip,Audio@SoundNote[pitch,duration,instrument]];
+						AppendTo[musicclip,volume*Audio@SoundNote[pitch,duration*7/8,instrument]];
+						AppendTo[musicclip,volume*AudioGenerator["Silence",duration/8]],
+						AppendTo[musicclip,volume*Audio@SoundNote[pitch,duration,instrument]];
 					]
 				],
 				Switch[midchar,
@@ -109,7 +109,10 @@ parse[filename_,"qym"]:=Module[
 					"/",
 						beat=ToExpression[StringTake[comment,{3}]]/4,
 					_,
-						speed=ToExpression[comment]
+						If[StringTake[comment,-1]=="%",
+							volume=ToExpression[StringTake[comment,StringLength[comment]-1]]/100,
+							speed=ToExpression[comment];
+						];
 					];
 					j=match,
 				"(",

@@ -1,5 +1,8 @@
 SongName: 绿眼的嫉妒;
-Format: qys;
+Format: "qys";
 Comment: 緑眼のジェラシー;
 Composer: ZUN;
 Abstract: 水桥帕露西的bgm;
+TrackCount: 4;
+Duration: 99.869;
+Instruments: {ElectricBass, ElectricPiano2, Piano, Violin};

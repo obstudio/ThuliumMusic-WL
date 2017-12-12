@@ -1,4 +1,7 @@
 SongName: 鬼子电报员;
-Format: qys;
+Format: "qys";
 Comment: 宴会开始;
 Composer: 三泽康広;
+TrackCount: 2;
+Duration: 68.1854;
+Instruments: {Flute, Piano};

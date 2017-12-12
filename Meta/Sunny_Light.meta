@@ -1,4 +1,7 @@
 SongName: 七色光之歌;
-Format: qym;
+Format: "qym";
 Lyricist: 李幼容;
 Composer: 徐锡宜;
+TrackCount: 2;
+Duration: 116.054;
+Instruments: {Piano, VoiceAahs};

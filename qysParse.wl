@@ -227,15 +227,19 @@ parse[filename_,"qys"]:=Module[
 	{i,Length[score]}];
 	Return[Audio[AudioOverlay[track],MetaInformation-><|
 		"TrackCount"->Length@track,
-		"Duration"->Max@Duration/@track,
+		"Duration"->QuantityMagnitude@UnitConvert[Max[Duration/@track],"Seconds"],
 		"Instruments"->instrumentList
 	|>]];
 ];
 
 
 (* ::Input:: *)
-(*AudioPlay@qysPlay["E:\\QingyunMusicPlayer\\Songs\\Rainbow.qys"];*)
+(*AudioPlay@parse["E:\\QingyunMusicPlayer\\Songs\\Rainbow.qys","qys"];*)
 
 
 (* ::Input:: *)
 (*AudioStop[];*)
+
+
+(* ::Input:: *)
+(*MetaInformation/.Options[parse["E:\\QingyunMusicPlayer\\Songs\\Rainbow.qys","qys"],MetaInformation]*)

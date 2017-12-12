@@ -158,7 +158,7 @@ parse[filename_,"qym"]:=Module[
 	{i,Length[filedata]}];
 	Return[Audio[AudioOverlay@voiceParts,MetaInformation-><|
 		"TrackCount"->Length@voiceParts,
-		"Duration"->Max@Duration/@voiceParts,
+		"Duration"->QuantityMagnitude@UnitConvert[Max[Duration/@voiceParts],"Seconds"],
 		"Instruments"->instrumentList
 	|>]];
 ]

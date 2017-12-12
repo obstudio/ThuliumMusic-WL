@@ -1,8 +1,8 @@
 SongName: 东方之珠;
-Format: "qys";
+Format: qys;
 Comment: 主歌部分;
 Composer: 顾嘉辉;
 Lyricist: 郑国江;
 TrackCount: 5;
 Duration: 92.5431;
-Instruments: {Violin, Voice, VoiceAahs};
+Instruments: {"Violin", "Voice", "VoiceAahs"};

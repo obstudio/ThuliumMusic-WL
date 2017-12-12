@@ -1,4 +1,4 @@
-Format: "qys";
+Format: qys;
 SongName: 亡灵幻想曲;
 Composer: ZUN;
 Adapter: まらしぃ;
@@ -6,4 +6,4 @@ Comment: ネクロファンタジア;
 Abstract: 八云紫的bgm;
 TrackCount: 2;
 Duration: 171.677;
-Instruments: {Piano};
+Instruments: {"Piano"};

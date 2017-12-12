@@ -1,6 +1,6 @@
 SongName: Banana;
-Format: "qys";
+Format: qys;
 Comment: Minion Song;
 TrackCount: 4;
 Duration: 34.1333;
-Instruments: {Violin};
+Instruments: {"Violin"};

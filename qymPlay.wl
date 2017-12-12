@@ -2,10 +2,13 @@
 
 qymPlay[filename_]:=Module[
 	{
-		i,j,
-		data,char,music,voiceParts,
-		tonality=0,beat=1,speed=88,instrument,
+		i,j,k,
+		filedata,midchar,
+		music,musicrepeat,musicclip,voiceParts,
+		instrument="Piano",instrumentList={},
+		tonality=0,beat=1,speed=88,
 		pitch,sharp=0,time,space,tercet=0,tercetTime,
+		repeatTime,
 		comment,match,timeDot,note,duration,frequency,
 		tonalityDict=<|
 			"C"->0,"G"->7,"D"->2,"A"->-3,"E"->4,
@@ -18,99 +21,144 @@ qymPlay[filename_]:=Module[
 		MessageDialog[TextCell["File not found!"],WindowTitle->"Error"];
 		Return[];
 	];
-	instrument="Piano";
-	data=StringJoin/@Import[filename,"Table"];
-	data=Select[data,!StringContainsQ[#,"//"]&];
-	If[StringTake[data[[1]],-1]==">",
-		data=StringJoin[data[[1]],#]&/@data;
-		Delete[data,1];
+	filedata=StringJoin/@Import[filename,"Table"];
+	Do[
+		match=StringPosition[filedata[[i]],"//",1];
+		If[match!={},
+			If[match[[1,1]]==1,
+				filedata[[i]]="",
+				filedata[[i]]=StringTake[filedata[[i]],match[[1,1]]-1];
+			];
+		];
+	,{i,Length[filedata]}];
+	filedata=Cases[filedata,Except[""]];
+	If[StringTake[filedata[[1]],-1]==">",
+		midchar=filedata[[1]];
+		filedata=Delete[filedata,1];
+		filedata=StringJoin[midchar,#]&/@filedata;
 	];
 	voiceParts={};
 	Do[
 		j=1;
 		music={};
-		While[j<=StringLength[data[[i]]],
-			char=StringTake[data[[i]],{j}];
-			Switch[char,
-				"#",
-					sharp++;
-					j++;
-					Continue[],
-				"b",
-					sharp--;
-					j++;
-					Continue[],
-				"<",
-					match=Select[Transpose[StringPosition[data[[i]],">"]][[1]],#>j&][[1]];
-					comment=StringTake[data[[i]],{j+1,match-1}];
-					Switch[StringTake[comment,{2}],
-						"=",
-							tonality=tonalityDict[[StringTake[comment,{3,StringLength@comment}]]],
-						"/",
-							beat=ToExpression[StringTake[comment,{3}]]/4,
-						_,
-							speed=ToExpression[comment];
-					];
-					j=match+1;
-					Continue[],
-				"(",
-					match=Select[Transpose[StringPosition[data[[i]],")"]][[1]],#>j&][[1]];
-					comment=StringTake[data[[i]],{j+1,match-1}];
-					tercet=ToExpression[comment];
-					tercetTime=(2^Floor[Log2[tercet]])/tercet;
-					j=match+1;
-					Continue[],
-				"{",
-					match=Select[Transpose[StringPosition[data[[i]],"}"]][[1]],#>j&][[1]];
-					instrument=StringTake[data[[i]],{j+1,match-1}]
-			];
-			If[MemberQ[{"0","1","2","3","4","5","6","7"},char],
-				note=ToExpression@char;
+		musicrepeat={};
+		musicclip={};
+		While[j<=StringLength[filedata[[i]]],
+			midchar=StringTake[filedata[[i]],{j}];
+			If[MemberQ[{"0","1","2","3","4","5","6","7"},midchar],
+				note=ToExpression@midchar;
 				time=1;
 				space=True;
 				pitch=If[note==0,None,pitchDict[[note]]+tonality+sharp];
 				sharp=0;
 				j++;
-				While[j<=StringLength[data[[i]]] && MemberQ[{"-","_","'",",",".","^"},StringTake[data[[i]],{j}]],
-					char=StringTake[data[[i]],{j}];
-					Switch[char,
-						"-",time+=1,
-						"_",time/=2,
-						"'",pitch+=12,
-						",",pitch-=12,
-						".",
-							timeDot=1/2;
-							While[j<=StringLength[data[[i]]] && StringTake[data[[i]],{j+1}]==".",
-								timeDot/=2;
-								j++;
-							];
-							time*=(2-timeDot),
-						"^",space=False
+				midchar=StringTake[filedata[[i]],{j}];
+				While[j<=StringLength[filedata[[i]]] && MemberQ[{"-","_","'",",",".","^"},midchar],
+					Switch[midchar,
+					"-",
+						time+=1,
+					"_",
+						time/=2,
+					"'",
+						pitch+=12,
+					",",
+						pitch-=12,
+					".",
+						timeDot=1/2;
+						While[j<=StringLength[filedata[[i]]] && StringTake[filedata[[i]],{j+1}]==".",
+							timeDot/=2;
+							j++;
+						];
+						time*=(2-timeDot),
+					"^",
+						space=False
 					];
 					j++;
+					midchar=StringTake[filedata[[i]],{j}];
 				];
 				If[tercet>0,
 					time*=tercetTime;
 					tercet--;
 				];
 				duration=60/speed*time*beat;
-				If[pitch===None,AppendTo[music,AudioGenerator["Silence",duration]];Continue[]];
+				If[pitch===None,AppendTo[musicclip,AudioGenerator["Silence",duration]];Continue[]];
 				If[instrument=="Sine",
 					frequency=440*2^((pitch-9)/12);
 					If[space,
-						AppendTo[music,AudioGenerator[{"Sin",frequency},duration*7/8]];
-						AppendTo[music,AudioGenerator["Silence",duration/8]],
-						AppendTo[music,AudioGenerator[{"Sin",frequency},duration]];
+						AppendTo[musicclip,AudioGenerator[{"Sin",frequency},duration*7/8]];
+						AppendTo[musicclip,AudioGenerator["Silence",duration/8]],
+						AppendTo[musicclip,AudioGenerator[{"Sin",frequency},duration]];
 					],
 					If[space,
-						AppendTo[music,Audio@SoundNote[pitch,duration*7/8,instrument]];
-						AppendTo[music,AudioGenerator["Silence",duration/8]],
-						AppendTo[music,Audio@SoundNote[pitch,duration,instrument]];
+						AppendTo[musicclip,Audio@SoundNote[pitch,duration*7/8,instrument]];
+						AppendTo[musicclip,AudioGenerator["Silence",duration/8]],
+						AppendTo[musicclip,Audio@SoundNote[pitch,duration,instrument]];
 					]
 				],
-			j++];
+				Switch[midchar,
+				"#",
+					sharp++,
+				"b",
+					sharp--,
+				"<",
+					match=Select[Transpose[StringPosition[filedata[[i]],">"]][[1]],#>j&][[1]];
+					comment=StringTake[filedata[[i]],{j+1,match-1}];
+					Switch[StringTake[comment,{2}],
+					"=",
+						tonality=tonalityDict[[StringTake[comment,{3,StringLength@comment}]]],
+					"/",
+						beat=ToExpression[StringTake[comment,{3}]]/4,
+					_,
+						speed=ToExpression[comment]
+					];
+					j=match,
+				"(",
+					match=Select[Transpose[StringPosition[filedata[[i]],")"]][[1]],#>j&][[1]];
+					comment=StringTake[filedata[[i]],{j+1,match-1}];
+					tercet=ToExpression[comment];
+					tercetTime=(2^Floor[Log2[tercet]])/tercet;
+					j=match,
+				"{",
+					match=Select[Transpose[StringPosition[filedata[[i]],"}"]][[1]],#>j&][[1]];
+					instrument=StringTake[filedata[[i]],{j+1,match-1}];
+					instrumentList=Union[instrumentList,{instrument}];
+					j=match,
+				":",
+					If[StringTake[filedata[[i]],{j+1}]=="|",
+						If[musicrepeat=={},
+							music=Join[music,musicclip];
+							music=Join[music,musicclip];
+							musicclip={},
+							Do[
+								music=Join[music,musicclip];
+								music=Join[music,musicrepeat];
+							,{k,repeatTime}];
+							repeatTime=0;
+							musicclip={}
+						],
+						music=Join[music,musicclip];
+						musicclip={};
+						musicrepeat={}
+					],
+				"[",
+					match=Select[Transpose[StringPosition[filedata[[i]],"]"]][[1]],#>j&][[1]];
+					repeatTime=StringCount[StringTake[filedata[[i]],{j+1,match-1}],"."];
+					If[StringTake[filedata[[i]],{j+1,j+2}]=="1.",
+						music=Join[music,musicclip];
+						musicrepeat=musicclip;
+						musicclip={};
+					];
+					j=match
+				];
+				j++;
+			];	
 		];
+		music=Join[music,musicclip];
 		If[music!={},AppendTo[voiceParts,AudioJoin@music]],
-	{i,Length[data]}];
-	Return[AudioOverlay@voiceParts];
+	{i,Length[filedata]}];
+	Return[Audio[AudioOverlay@voiceParts,MetaInformation-><|
+		"TrackCount"->Length@voiceParts,
+		"Duration"->Max@Duration/@voiceParts,
+		"Instruments"->instrumentList
+	|>]];
 ]

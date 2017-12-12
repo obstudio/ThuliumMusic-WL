@@ -1,9 +1,9 @@
-SongName: 天空的花都;
 Format: qys;
-Composer: ZUN;
-Adapter: LittleRed;
-Abstract: 东方妖妖梦4面道中曲\n东方Project莉莉白主题曲;
-Comment: 天空の花の都;
 TrackCount: 3;
 Duration: 26.6333;
 Instruments: {"ElectricGrandPiano", "ElectricPiano", "Piano"};
+SongName: 天空的花都;
+Composer: ZUN;
+Adapter: LittleRed;
+Comment: 天空の花の都;
+Abstract: 东方妖妖梦4面道中曲 东方Project莉莉白主题曲;

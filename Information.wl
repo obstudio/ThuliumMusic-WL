@@ -4,6 +4,8 @@ writeInfo[song_,info_]:=Export[
 	path<>"Meta\\"<>song<>".meta",
 	StringRiffle[KeyValueMap[#1<>": "<>#2<>";"&,info],"\n"],
 "Text"];
+
+
 readInfo[song_]:=Module[
 	{data,info={},match,i},
 	data=StringSplit[Import[path<>"Meta\\"<>song<>".meta","Text"],{";\n",";"}];
@@ -13,10 +15,14 @@ readInfo[song_]:=Module[
 	{i,Length[data]}];
 	Return[Association@info];
 ];
+
+
 getTextInfo[song_]:=(
 	refresh;
 	AssociationMap[If[KeyExistsQ[index[[song]],#],index[[song,#]],""]&,textInfoTags]
 );
+
+
 putTextInfo[song_,textInfo_]:=Module[
 	{info=Normal@index[[song,metaInfoTags]]},
 	Do[
@@ -24,6 +30,8 @@ putTextInfo[song_,textInfo_]:=Module[
 	{tag,textInfoTags}];
 	writeInfo[song,Association@info];
 ];
+
+
 refresh:=(
 	SetDirectory[path<>"Meta\\"];
 	songList=StringDrop[FileNames[],-5];

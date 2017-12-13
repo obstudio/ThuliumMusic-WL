@@ -49,6 +49,8 @@
 		"Modify": "修改",
 		"Save": "保存修改",
 		"Undo": "撤销",
-		"Export": "导出文件"
+		"Export": "导出文件",
+		"PgNext": "下一页",
+		"PgPrev": "上一页"
 	}
 }

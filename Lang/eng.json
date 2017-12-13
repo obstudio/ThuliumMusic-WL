@@ -49,6 +49,8 @@
 		"Modify": "Modify",
 		"Save": "Save",
 		"Undo": "Undo",
-		"Export": "Export to file"
+		"Export": "Export to file",
+		"PgNext": "Next page",
+		"PgPrev": "Previous page"
 	}
 }

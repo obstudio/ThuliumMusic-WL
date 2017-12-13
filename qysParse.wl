@@ -1,13 +1,5 @@
 (* ::Package:: *)
 
-tonalityDict=<|
-	"C"->0,"G"->7,"D"->2,"A"->-3,"E"->4,
-	"B"->-1,"#F"->6,"#C"->1,"F"->5,"bB"->-2,
-	"bE"->3,"bA"->-4,"bD"->1,"bG"->6,"bC"->-1
-|>;
-pitchDict=<|"1"->0,"2"->2,"3"->4,"4"->5,"5"->7,"6"->9,"7"->11|>;
-
-
 getPitch[score_,pos_,tonality_]:=Module[
 	{i=pos,note,pitch},
 	note=ToExpression@StringPart[score,i];

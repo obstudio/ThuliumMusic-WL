@@ -4,11 +4,11 @@ parse[filename_,"qym"]:=Module[
 	{
 		i,j,k,
 		filedata,midchar,
-		music,musicrepeat,musicclip,voiceParts,
+		music,musicrepeat,musicclip,voicepart,track,
 		instrument="Piano",instrumentList={},
 		tonality=0,beat=1,speed=88,volume=1,
 		pitch,sharp=0,time,space,tercet=0,tercetTime,
-		repeatTime,
+		repeatTime,chord=False,extend,lastPitch,
 		comment,match,timeDot,note,duration,frequency
 	},
 	If[!FileExistsQ[filename],
@@ -31,23 +31,29 @@ parse[filename_,"qym"]:=Module[
 		filedata=Delete[filedata,1];
 		filedata=StringJoin[midchar,#]&/@filedata;
 	];
-	voiceParts={};
+	track={};
 	Do[
 		j=1;
-		music={};
+		voicepart={};
 		musicrepeat={};
 		musicclip={};
 		While[j<=StringLength[filedata[[i]]],
 			midchar=StringTake[filedata[[i]],{j}];
 			If[MemberQ[{"0","1","2","3","4","5","6","7"},midchar],
 				note=ToExpression@midchar;
+				extend=False;
 				time=1;
-				space=True;
-				pitch=If[note==0,None,pitchDict[[note]]+tonality+sharp];
+				If[chord,
+					AppendTo[pitch,pitchDict[[note]]+tonality+sharp];
+					chord=False,
+					pitch=If[note==0,None,pitchDict[[note]]+tonality+sharp]
+				];
 				sharp=0;
+				If[lastPitch==pitch && space==False,extend=True];
+				space=True;
 				j++;
 				midchar=StringTake[filedata[[i]],{j}];
-				While[j<=StringLength[filedata[[i]]] && MemberQ[{"-","_","'",",",".","^"},midchar],
+				While[j<=StringLength[filedata[[i]]] && MemberQ[{"-","_","'",",",".","^","&"},midchar],
 					Switch[midchar,
 					"-",
 						time+=1,
@@ -65,29 +71,33 @@ parse[filename_,"qym"]:=Module[
 						];
 						time*=(2-timeDot),
 					"^",
-						space=False
+						space=False,
+					"&",
+						chord=True;
+						If[!ListQ[pitch],pitch={pitch}]
 					];
 					j++;
 					midchar=StringTake[filedata[[i]],{j}];
 				];
-				If[tercet>0,
-					time*=tercetTime;
-					tercet--;
-				];
-				duration=60/speed*time*beat;
-				If[pitch===None,AppendTo[musicclip,volume*AudioGenerator["Silence",duration]];Continue[]];
-				If[instrument=="Sine",
-					frequency=440*2^((pitch-9)/12);
-					If[space,
-						AppendTo[musicclip,volume*AudioGenerator[{"Sin",frequency},duration*7/8]];
-						AppendTo[musicclip,volume*AudioGenerator["Silence",duration/8]],
-						AppendTo[musicclip,volume*AudioGenerator[{"Sin",frequency},duration]];
-					],
-					If[space,
-						AppendTo[musicclip,volume*Audio@SoundNote[pitch,duration*7/8,instrument]];
-						AppendTo[musicclip,volume*AudioGenerator["Silence",duration/8]],
-						AppendTo[musicclip,volume*Audio@SoundNote[pitch,duration,instrument]];
-					]
+				If[!chord,
+					If[tercet>0,
+						time*=tercetTime;
+						tercet--;
+					];
+					duration=60/speed*time*beat;
+					lastPitch=pitch;
+					If[extend,
+						If[space,
+							musicclip[[-1,2]]+=duration*7/8;
+							AppendTo[musicclip,{None,duration/8}],
+							musicclip[[-1,2]]+=duration;
+						],
+						If[space,
+							AppendTo[musicclip,{pitch,duration*7/8,instrument}];
+							AppendTo[musicclip,{None,duration/8}],
+							AppendTo[musicclip,{pitch,duration,instrument}];
+						];
+					];
 				],
 				Switch[midchar,
 				"#",
@@ -123,17 +133,17 @@ parse[filename_,"qym"]:=Module[
 				":",
 					If[StringTake[filedata[[i]],{j+1}]=="|",
 						If[musicrepeat=={},
-							music=Join[music,musicclip];
-							music=Join[music,musicclip];
+							voicepart=Join[voicepart,musicclip];
+							voicepart=Join[voicepart,musicclip];
 							musicclip={},
 							Do[
-								music=Join[music,musicclip];
-								music=Join[music,musicrepeat];
+								voicepart=Join[voicepart,musicclip];
+								voicepart=Join[voicepart,musicrepeat];
 							,{k,repeatTime}];
 							repeatTime=0;
 							musicclip={}
 						],
-						music=Join[music,musicclip];
+						voicepart=Join[voicepart,musicclip];
 						musicclip={};
 						musicrepeat={}
 					],
@@ -141,7 +151,7 @@ parse[filename_,"qym"]:=Module[
 					match=Select[Transpose[StringPosition[filedata[[i]],"]"]][[1]],#>j&][[1]];
 					repeatTime=StringCount[StringTake[filedata[[i]],{j+1,match-1}],"."];
 					If[StringTake[filedata[[i]],{j+1,j+2}]=="1.",
-						music=Join[music,musicclip];
+						voicepart=Join[voicepart,musicclip];
 						musicrepeat=musicclip;
 						musicclip={};
 					];
@@ -150,13 +160,13 @@ parse[filename_,"qym"]:=Module[
 				j++;
 			];	
 		];
-		music=Join[music,musicclip];
-		If[music!={},AppendTo[voiceParts,AudioJoin@music]],
+		voicepart=Join[voicepart,musicclip];
+		If[voicepart!={},AppendTo[track,volume*Audio[Sound[SoundNote@@#&/@voicepart]]]],
 	{i,Length[filedata]}];
-	music=AudioOverlay@voiceParts;
+	music=AudioOverlay@track;
 	Return[Audio[music,MetaInformation-><|
 		"Format"->"qym",
-		"TrackCount"->Length@voiceParts,
+		"TrackCount"->Length@track,
 		"Duration"->QuantityMagnitude@UnitConvert[Duration@music,"Seconds"],
 		"Instruments"->instrumentList
 	|>]];

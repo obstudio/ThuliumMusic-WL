@@ -8,7 +8,7 @@ parse[filename_,"qym"]:=Module[
 		instrument="Piano",instrumentList={},
 		tonality=0,beat=1,speed=88,volume=1,
 		pitch,sharp=0,time,space,tercet=0,tercetTime,
-		repeatTime,chord=False,extend,lastPitch,
+		repeatTime,chord=False,lastPitch,lastSpace,
 		comment,match,timeDot,note,duration,frequency
 	},
 	If[!FileExistsQ[filename],
@@ -41,16 +41,15 @@ parse[filename_,"qym"]:=Module[
 			midchar=StringTake[filedata[[i]],{j}];
 			If[MemberQ[{"0","1","2","3","4","5","6","7"},midchar],
 				note=ToExpression@midchar;
-				extend=False;
 				time=1;
 				If[chord,
 					AppendTo[pitch,pitchDict[[note]]+tonality+sharp];
 					chord=False,
-					pitch=If[note==0,None,pitchDict[[note]]+tonality+sharp]
+					pitch=If[note==0,None,pitchDict[[note]]+tonality+sharp];
+					lastSpace=space;
+					space=True;
 				];
 				sharp=0;
-				If[lastPitch==pitch && space==False,extend=True];
-				space=True;
 				j++;
 				midchar=StringTake[filedata[[i]],{j}];
 				While[j<=StringLength[filedata[[i]]] && MemberQ[{"-","_","'",",",".","^","&"},midchar],
@@ -85,8 +84,7 @@ parse[filename_,"qym"]:=Module[
 						tercet--;
 					];
 					duration=60/speed*time*beat;
-					lastPitch=pitch;
-					If[extend,
+					If[lastPitch==pitch && !lastSpace,
 						If[space,
 							musicclip[[-1,2]]+=duration*7/8;
 							AppendTo[musicclip,{None,duration/8}],
@@ -98,6 +96,7 @@ parse[filename_,"qym"]:=Module[
 							AppendTo[musicclip,{pitch,duration,instrument}];
 						];
 					];
+					lastPitch=pitch;
 				],
 				Switch[midchar,
 				"#",

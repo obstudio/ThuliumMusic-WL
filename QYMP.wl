@@ -4,26 +4,33 @@
 (*Qingyun Music Player*)
 
 
-(* Manipulating user data *)
-version="84";
+version=91;
 userPath="C:\\Users\\"<>$UserName<>"\\AppData\\Local\\QYMP\\";
 If[!DirectoryQ[userPath],CreateDirectory[userPath]];
-If[!FileExistsQ[userPath<>"Default.json"],Export[userPath<>"Default.json",{"Version"->version,"Language"->"chs"}]];
+If[!DirectoryQ[userPath<>"export\\"],CreateDirectory[userPath<>"export\\"]];
+If[!DirectoryQ[userPath<>"buffer\\"],CreateDirectory[userPath<>"buffer\\"]];
+template={"Version"->version,"Language"->"chs","Developer"->False};
+If[!FileExistsQ[userPath<>"Default.json"],Export[userPath<>"Default.json",template]];
 default=Association@Import[userPath<>"Default.json"];
-If[!KeyExistsQ[default,"Version"],PrependTo[default,"Version"->version];Export[userPath<>"Default.json",Normal@default]];
+If[default[["Version"]]<version,
+	Do[
+		If[!KeyExistsQ[default,tag],AppendTo[default,tag->template[[tag]]]],
+	{tag,Keys@template}];
+	Export[userPath<>"Default.json",default];
+];
 If[!FileExistsQ[userPath<>"Instrument.json"],Export[userPath<>"Instrument.json",{"Piano","Violin","Guitar","Flute"}]];
 If[!FileExistsQ[userPath<>"Buffer.json"],Export[userPath<>"Buffer.json",{}]];
 bufferHash=Association@Import[userPath<>"Buffer.json"];
-If[!DirectoryQ[userPath<>"export\\"],CreateDirectory[userPath<>"export\\"]];
-If[!DirectoryQ[userPath<>"Buffer\\"],CreateDirectory[userPath<>"Buffer\\"]];
+If[!FileExistsQ[userPath<>"Favorite.json"],Export[userPath<>"Favorite.json",{}]];
+favorite=Import[userPath<>"Favorite.json"];
 
 
-(* Initialization *)
 path=NotebookDirectory[];
 <<(path<>"information.wl")
 <<(path<>"advanced.wl")
 <<(path<>"qysParse.wl")
 <<(path<>"qymParse.wl")
+langList={"chs"->"\:7b80\:4f53\:4e2d\:6587","eng"->"\:82f1\:8bed"};
 langData=Association@Import[path<>"Lang\\"<>default[["Language"]]<>".json"];
 tagName=Association@langData[["TagName"]];
 instrName=Association@langData[["Instrument"]];
@@ -31,6 +38,22 @@ buttonName=Association@langData[["Button"]];
 textInfoTags={"SongName","Lyricist","Composer","Adapter","Comment","Abstract"};
 metaInfoTags={"Format","TrackCount","Duration","Instruments"};
 refresh;
+
+
+settings:=DynamicModule[{},
+	CreateDialog[Column[{"",
+		Style["\:8bbe\:7f6e",Bold,28],,
+		Grid[{
+		{"\:4f60\:7684\:8eab\:4efd\:ff1a",RadioButtonBar[Dynamic@deveChoice,{False->"\:666e\:901a\:7528\:6237",True->"\:5f00\:53d1\:8005"},Appearance->"Horizonal"]},
+		{"\:9009\:62e9\:8bed\:8a00\:ff1a",RadioButtonBar[Dynamic@langChoice,langList,Appearance->"Horizonal"]}}],,
+		Row[{
+			Button["\:4fdd\:5b58\:66f4\:6539",DialogReturn[],ImageSize->150,Enabled->False],
+			Spacer[10],
+			Button[buttonName[["Return"]],DialogReturn[],ImageSize->150]
+		}],""
+	},Center,ItemSize->40],
+	WindowTitle->"\:8bbe\:7f6e"]
+];
 
 
 parse[song_]:=Module[{filename,hash,audio},
@@ -89,7 +112,7 @@ QYMP:=DynamicModule[{song,page=1},
 	CreateDialog[Column[{"",
 		Style["\:9752\:4e91\:64ad\:653e\:5668",Bold,32],,
 		Dynamic@SetterBar[Dynamic@song,
-			Row[{
+			#->Row[{
 				Style[index[[#,"SongName"]],24,FontFamily->"\:5fae\:8f6f\:96c5\:9ed1"],
 				Spacer[20],
 				If[KeyExistsQ[index[[#]],"Comment"],Style[index[[#,"Comment"]],20,Gray,FontFamily->"\:5fae\:8f6f\:96c5\:9ed1"],Nothing]
@@ -107,7 +130,7 @@ QYMP:=DynamicModule[{song,page=1},
 			Button[buttonName[["Manage"]],DialogReturn[Management],ImageSize->200]
 		}],
 		Row[{
-			Button[buttonName[["Settings"]],DialogReturn[],ImageSize->200,Enabled->False],
+			Button[buttonName[["Settings"]],DialogReturn[settings],ImageSize->200,Enabled->False],
 			Spacer[10],
 			Button[buttonName[["Exit"]],DialogReturn[],ImageSize->200]
 		}],""

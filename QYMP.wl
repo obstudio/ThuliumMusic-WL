@@ -89,7 +89,7 @@ QYMP:=DynamicModule[{song,page=1},
 	CreateDialog[Column[{"",
 		Style["\:9752\:4e91\:64ad\:653e\:5668",Bold,32],,
 		Dynamic@SetterBar[Dynamic@song,
-			Row[{
+			#->Row[{
 				Style[index[[#,"SongName"]],24,FontFamily->"\:5fae\:8f6f\:96c5\:9ed1"],
 				Spacer[20],
 				If[KeyExistsQ[index[[#]],"Comment"],Style[index[[#,"Comment"]],20,Gray,FontFamily->"\:5fae\:8f6f\:96c5\:9ed1"],Nothing]

@@ -99,7 +99,7 @@ QYMP:=DynamicModule[{song,page=1},
 		Dynamic@Row[{
 			Button[buttonName[["PgPrev"]],page--,ImageSize->200,Enabled->(page>1)],
 			Spacer[10],
-			Button[buttonName[["PgNext"]],page++,ImageSize->200,Enabled->(page<Length@songList10)]
+			Button[buttonName[["PgNext"]],page++,ImageSize->200,Enabled->(page<Length@songList16)]
 		}],
 		Row[{
 			Button[buttonName[["PlaySong"]],DialogReturn[Player[song]],ImageSize->200],

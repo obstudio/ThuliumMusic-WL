@@ -47,5 +47,5 @@ refresh:=(
 	SetDirectory[path<>"Meta\\"];
 	songList=StringDrop[FileNames[],-5];
 	index=AssociationMap[readInfo,songList];
-	songList10=Partition[songList,UpTo@10];
+	songList16=Partition[songList,UpTo@16];
 );

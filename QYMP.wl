@@ -50,7 +50,7 @@ parse[song_]:=Module[{filename,hash,audio},
 ];
 
 
-Player[song_]:=Module[{filename,audio},DynamicModule[{playing=True,current},
+Player[song_]:=DynamicModule[{playing=True,current},
 	AudioStop[];
 	audio=parse[song];
 	current=AudioPlay[audio];
@@ -80,7 +80,7 @@ Player[song_]:=Module[{filename,audio},DynamicModule[{playing=True,current},
 		}],"",""
 	},Center,ItemSize->50],
 	WindowTitle->"\:6b63\:5728\:64ad\:653e\:ff1a"<>index[[song,"SongName"]]];
-]];
+];
 
 
 QYMP:=DynamicModule[{song,page=1},
@@ -89,7 +89,11 @@ QYMP:=DynamicModule[{song,page=1},
 	CreateDialog[Column[{"",
 		Style["\:9752\:4e91\:64ad\:653e\:5668",Bold,32],,
 		Dynamic@SetterBar[Dynamic@song,
-			Style[StringPadRight[#,48],24,FontFamily->"\:5fae\:8f6f\:96c5\:9ed1"]&/@index[[songList10[[page]],"SongName"]],
+			Row[{
+				Style[index[[#,"SongName"]],24,FontFamily->"\:5fae\:8f6f\:96c5\:9ed1"],
+				Spacer[20],
+				If[KeyExistsQ[index[[#]],"Comment"],Style[index[[#,"Comment"]],20,Gray,FontFamily->"\:5fae\:8f6f\:96c5\:9ed1"],Nothing]
+			}]&/@songList16[[page]],
 			Appearance->"Vertical"
 		],"",
 		Dynamic@Row[{
@@ -107,7 +111,7 @@ QYMP:=DynamicModule[{song,page=1},
 			Spacer[10],
 			Button[buttonName[["Exit"]],DialogReturn[],ImageSize->200]
 		}],""
-	},Center,ItemSize->30],
+	},Center,ItemSize->40],
 	WindowTitle->"\:9752\:4e91\:64ad\:653e\:5668"]
 ];
 

@@ -93,7 +93,7 @@ parse[filename_,"qys"]:=Module[
 							volume=ToExpression[comment],
 						StringMatchQ[comment,NumberString],      (* speed *)
 							speed=ToExpression[comment],
-						comment="Fade",
+						comment=="Fade",
 							fade=True
 					];
 					j=match+1;
@@ -238,26 +238,6 @@ parse[filename_,"qys"]:=Module[
 
 (* ::Input:: *)
 (*AudioStop[];*)
-
-
-(* ::Input:: *)
-(*EmitSound@Sound@SoundNote[0,1,"ElectricPiano"]*)
-
-
-(* ::Input:: *)
-(*EmitSound@Sound@SoundNote[0,1,"ElectricPiano2"]*)
-
-
-(* ::Input:: *)
-(*EmitSound@Sound@SoundNote[0,1,"Guitar"]*)
-
-
-(* ::Input:: *)
-(*EmitSound@Sound@SoundNote[0,1,"Xylophone"]*)
-
-
-(* ::Input:: *)
-(*EmitSound@Sound@SoundNote[0,1,"Flute"]*)
 
 
 (* ::Input:: *)

@@ -60,13 +60,14 @@ getScore[filename_]:=Module[
 parse[filename_,"qys"]:=Module[
 	{
 		i,j,k,char,                                     (* loop related *)
-		score,track={},voicePart,                       (* score and tracks*)
+		score,track={},voicePart,audio,                 (* score and tracks*)
 		comment,match,                                  (* comment related *)
 		instrument="Piano",instrumentList={},           (* instrument *)
 		tonality=0,beat=1,speed=88,volume=1,            (* angle bracket related *)
 		tercet=0,tercetTime,tremolo,appoggiatura,       (* round bracket related *)
 		note,pitch,time,space,timeDot,duration,
-		lastPitch,extend,portamento,rate		
+		lastPitch,extend,portamento,rate,scale,
+		fade=False
 	},
 	score=getScore[filename];
 	Do[
@@ -82,15 +83,18 @@ parse[filename_,"qys"]:=Module[
 				"<",
 					match=Select[Transpose[StringPosition[score[[i]],">"]][[1]],#>j&][[1]];
 					comment=StringTake[score[[i]],{j+1,match-1}];
-					Switch[StringPart[comment,2],
-						"=",                       (* tonality *)
-							tonality=tonalityDict[[StringTake[comment,{3,StringLength@comment}]]],
-						"/",                       (* beat *)
+					Which[
+						StringContainsQ[comment,"="],            (* tonality *)
+							scale=StringCount[comment,"'"]-StringCount[comment,","];
+							tonality=12*scale+tonalityDict[[StringDelete[StringTake[comment,{3,StringLength@comment}],","|"'"]]],
+						StringContainsQ[comment,"/"],            (* beat *)
 							beat=ToExpression[StringTake[comment,{3,StringLength@comment}]]/4,
-						".",                       (* volume *)
+						StringContainsQ[comment,"."],            (* volume *)
 							volume=ToExpression[comment],
-						_,                         (* speed *)
-							speed=ToExpression[comment];
+						StringMatchQ[comment,NumberString],      (* speed *)
+							speed=ToExpression[comment],
+						comment="Fade",
+							fade=True
 					];
 					j=match+1;
 					Continue[],
@@ -215,20 +219,21 @@ parse[filename_,"qys"]:=Module[
 				];
 			];
 		];
-		
 		If[voicePart!={},AppendTo[track,volume*Audio[Sound[SoundNote@@#&/@voicePart]]]],
 	{i,Length[score]}];
-	Return[Audio[AudioOverlay[track],MetaInformation-><|
+	audio=Total[track];
+	If[fade,audio=AudioFade[audio,{0,2}]];
+	Return[Audio[audio,MetaInformation-><|
 		"Format"->"qys",
 		"TrackCount"->Length@track,
-		"Duration"->QuantityMagnitude@UnitConvert[Max[Duration/@track],"Seconds"],
+		"Duration"->QuantityMagnitude@UnitConvert[Duration@audio,"Seconds"],
 		"Instruments"->instrumentList
 	|>]];
 ];
 
 
 (* ::Input:: *)
-(*AudioPlay@parse["E:\\QingyunMusicPlayer\\Songs\\Rainbow.qys","qys"];*)
+(*AudioPlay@parse["E:\\QingyunMusicPlayer\\Songs\\Dark_Side_of_Fate.qys","qys"];*)
 
 
 (* ::Input:: *)
@@ -236,4 +241,24 @@ parse[filename_,"qys"]:=Module[
 
 
 (* ::Input:: *)
-(*Values@Options[parse["E:\\QingyunMusicPlayer\\Songs\\Rainbow.qys","qys"],MetaInformation]*)
+(*EmitSound@Sound@SoundNote[0,1,"ElectricPiano"]*)
+
+
+(* ::Input:: *)
+(*EmitSound@Sound@SoundNote[0,1,"ElectricPiano2"]*)
+
+
+(* ::Input:: *)
+(*EmitSound@Sound@SoundNote[0,1,"Guitar"]*)
+
+
+(* ::Input:: *)
+(*EmitSound@Sound@SoundNote[0,1,"Xylophone"]*)
+
+
+(* ::Input:: *)
+(*EmitSound@Sound@SoundNote[0,1,"Flute"]*)
+
+
+(* ::Input:: *)
+(*EmitSound@Sound@SoundNote[0,1,"PanFlute"]*)

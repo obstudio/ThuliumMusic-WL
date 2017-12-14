@@ -1,7 +1,7 @@
 Format: qys;
-TrackCount: 3;
-Duration: 22.5582;
-Instruments: {"Bass", "Piano", "Violin"};
+TrackCount: 5;
+Duration: 56.4825;
+Instruments: {"Bass", "ElectricBass", "ElectricPiano2", "Piano", "Violin"};
 SongName: 兔已着陆;
 Composer: ZUN;
 Adapter: 触手猴 LittleRed;

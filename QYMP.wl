@@ -34,6 +34,7 @@ langList={"chs"->"\:7b80\:4f53\:4e2d\:6587","eng"->"\:82f1\:8bed"};
 langData=Association@Import[path<>"Lang\\"<>default[["Language"]]<>".json"];
 tagName=Association@langData[["TagName"]];
 instrName=Association@langData[["Instrument"]];
+error=Association@langData[["Error"]];
 buttonName=Association@langData[["Button"]];
 textInfoTags={"SongName","Lyricist","Composer","Adapter","Comment","Abstract"};
 metaInfoTags={"Format","TrackCount","Duration","Instruments"};

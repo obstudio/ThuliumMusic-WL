@@ -32,6 +32,11 @@
 		"Whistle": "口哨",
         "Xylophone": "木琴"
     },
+	"Error": {
+		"FileNotFound": "文件未找到",
+		"BarLengthError": "小节长度错误",
+		"TerminatorAbsent": "缺少终止符"
+	},
 	"Button": {
 		"Play": "播放",
 		"Pause": "暂停",

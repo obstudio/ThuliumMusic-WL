@@ -35,7 +35,9 @@
 	"Error": {
 		"FileNotFound": "文件未找到",
 		"BarLengthError": "小节长度错误",
-		"TerminatorAbsent": "缺少终止符"
+		"TerminatorAbsent": "缺少终止符",
+		"InstrNotExist": "乐器不存在",
+		"RepeatError": "反复标记不匹配"
 	},
 	"Button": {
 		"Play": "播放",

@@ -30,6 +30,7 @@ path=NotebookDirectory[];
 <<(path<>"advanced.wl")
 <<(path<>"qysParse.wl")
 <<(path<>"qymParse.wl")
+instrData=Association@Import[path<>"instr.json"];
 langList={"chs"->"\:7b80\:4f53\:4e2d\:6587","eng"->"\:82f1\:8bed"};
 langData=Association@Import[path<>"Lang\\"<>default[["Language"]]<>".json"];
 tagName=Association@langData[["TagName"]];
@@ -41,7 +42,7 @@ metaInfoTags={"Format","TrackCount","Duration","Instruments"};
 refresh;
 
 
-settings:=DynamicModule[{},
+settings:=DynamicModule[{deveChoice,langChoice},
 	CreateDialog[Column[{"",
 		Style["\:8bbe\:7f6e",Bold,28],,
 		Grid[{

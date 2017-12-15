@@ -22,7 +22,7 @@ getPitch[score_,pos_,tonality_]:=Module[
 
 
 getScore[filename_]:=Module[
-	{i,j,data1,data2,score,join,repeat},
+	{i,j,data1,data2,score,join,repeatL,repeatR},
 	If[!FileExistsQ[filename],Return[{}]];
 	data1=StringJoin/@Import[filename,"Table"];             (* delete the spacings *)
 	data1=Select[data1,!StringContainsQ[#,"//"]&];          (* delete the comments *)
@@ -38,19 +38,25 @@ getScore[filename_]:=Module[
 	data2=StringDelete[#,"\\"]&/@data2;                     (* delete the joint marks *)
 	score=Array[""&,Length@data2];
 	Do[
-		If[StringPosition[data2[[i]],":"]=={},
+		If[StringPosition[data2[[i]],"|:"]=={},
 			score[[i]]=data2[[i]],
 			(* repeat *)
-			repeat=Partition[Transpose[StringPosition[data2[[i]],":"]][[1]],2];
-			score[[i]]=StringTake[data2[[i]],repeat[[1,1]]-1];
+			repeatL=Transpose[StringPosition[data2[[i]],"|:"]][[1]];
+			repeatR=Transpose[StringPosition[data2[[i]],":|"]][[1]];
+			If[Length@repeatL!=Length@repeatR,Print[error[["RepeatError"]],"!"]];
+			score[[i]]=StringTake[data2[[i]],repeatL[[1]]-1]<>"|";
 			Do[
-				score[[i]]=score[[i]]<>StringTake[data2[[i]],{repeat[[j,1]]+1,repeat[[j,2]]-1}]<>"|";
-				score[[i]]=score[[i]]<>StringTake[data2[[i]],{repeat[[j,1]]+1,repeat[[j,2]]-1}];
-				score[[i]]=score[[i]]<>StringTake[data2[[i]],{repeat[[j,2]]+1,repeat[[j+1,1]]-1}],
-			{j,Length@repeat-1}];
-			score[[i]]=score[[i]]<>StringTake[data2[[i]],{repeat[[-1,1]]+1,repeat[[-1,2]]-1}]<>"|";
-			score[[i]]=score[[i]]<>StringTake[data2[[i]],{repeat[[-1,1]]+1,repeat[[-1,2]]-1}];
-			score[[i]]=score[[i]]<>StringTake[data2[[i]],{repeat[[-1,2]]+1,StringLength@data2[[i]]}];
+				score[[i]]=score[[i]]<>StringTake[data2[[i]],{repeatL[[j]]+2,repeatR[[j]]-1}]<>"|";
+				score[[i]]=score[[i]]<>StringTake[data2[[i]],{repeatL[[j]]+2,repeatR[[j]]-1}]<>"|";
+				If[repeatR[[j]]+2<repeatL[[j+1]],
+					score[[i]]=score[[i]]<>StringTake[data2[[i]],{repeatR[[j]]+2,repeatL[[j+1]]-1}]<>"|"
+				],
+			{j,Length@repeatL-1}];
+			score[[i]]=score[[i]]<>StringTake[data2[[i]],{repeatL[[-1]]+2,repeatR[[-1]]-1}]<>"|";
+			score[[i]]=score[[i]]<>StringTake[data2[[i]],{repeatL[[-1]]+2,repeatR[[-1]]-1}]<>"|";
+			If[repeatR[[-1]]+1<StringLength@data2[[i]],
+				score[[i]]=score[[i]]<>StringTake[data2[[i]],{repeatR[[-1]]+2,StringLength@data2[[i]]}]
+			];
 		],
 	{i,Length@data2}];
 	Return[score];
@@ -70,7 +76,7 @@ parse[filename_,"qys"]:=Module[
 		duration,space,speed=88,                        (* duration *)
 		lastPitch,
 		barCount,barBeat,barLength=4,                   (* trans-note *)
-		volume=1,fade=False                             (* volume *)
+		volume=1,fade,fadeAll={0,0}                     (* volume *)
 	},
 	score=getScore[filename];
 	If[debug && score=={},Print[error[["FileNotFound"]],"!"]];
@@ -80,6 +86,7 @@ parse[filename_,"qys"]:=Module[
 		portamento=False;
 		appoggiatura={};
 		tremolo=0;
+		fade={0,0};
 		barBeat=0;
 		barCount=0;
 		track={};
@@ -112,8 +119,9 @@ parse[filename_,"qys"]:=Module[
 							volume=ToExpression[comment],
 						StringMatchQ[comment,NumberString],      (* speed *)
 							speed=ToExpression[comment],
-						comment=="Fade",
-							fade=True
+						StringContainsQ[comment,"Fade:"],        (* fade *)
+							position=StringPosition[comment,":"][[1,1]];
+							If[#>0,fade[[1]]=#,fade[[2]]=-#]&@ToExpression[StringDrop[comment,position]];
 					];
 					j=match+1;
 					Continue[],
@@ -121,12 +129,12 @@ parse[filename_,"qys"]:=Module[
 					match=Select[Transpose[StringPosition[score[[i]],")"]][[1]],#>j&][[1]];
 					comment=StringTake[score[[i]],{j+1,match-2}];
 					Switch[StringTake[score[[i]],{match-1}],
-						"-",                       (* tercet *)
+						"-",                            (* tercet *)
 							tercet=ToExpression[comment];
 							tercetTime=(2^Floor[Log2[tercet]])/tercet,
-						"=",                       (* tremolo *)
+						"=",                            (* tremolo *)
 							tremolo=ToExpression[comment],
-						"^",                       (* appoggiatura *)
+						"^",                            (* appoggiatura *)
 							appoggiatura={};
 							k=1;
 							While[k<=StringLength@comment,
@@ -139,6 +147,7 @@ parse[filename_,"qys"]:=Module[
 				"{",                               (* instrument *)
 					match=Select[Transpose[StringPosition[score[[i]],"}"]][[1]],#>j&][[1]];
 					instrument=StringTake[score[[i]],{j+1,match-1}];
+					If[debug && !MemberQ[instrData[["Style"]],instrument],Print[error[["InstrNotExist"]],"!"]];
 					instrList=Union[instrList,{instrument}];
 					j=match+1;
 					Continue[],
@@ -251,10 +260,11 @@ parse[filename_,"qys"]:=Module[
 				Print[error[["TerminatorAbsent"]]];
 				Print["[Info] Track:",trackCount];
 			];
-			audio+=volume*Audio[Sound[SoundNote@@#&/@track]]];
+			audio+=volume*AudioFade[Sound[SoundNote@@#&/@track],fade],
+			fadeAll=fade;
 		],
 	{i,Length[score]}];
-	If[fade,audio=AudioFade[audio,{0,2}]];
+	If[fadeAll!={0,0},audio=AudioFade[audio,fadeAll]];
 	Return[Audio[audio,MetaInformation-><|
 		"Format"->"qys",
 		"TrackCount"->trackCount,
@@ -282,7 +292,3 @@ parse[filename_,"qys"]:=Module[
 
 (* ::Input:: *)
 (*Export["e:\\1.mp3",parse["E:\\QingyunMusicPlayer\\Songs\\Bios.qys","qys"]];*)
-
-
-(* ::Input:: *)
-(*getScore["E:\\QingyunMusicPlayer\\Songs\\Bios_3.qys"]*)

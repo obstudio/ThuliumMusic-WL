@@ -1,5 +1,37 @@
 (* ::Package:: *)
 
+getPitch[dataString_,position_,tonality_]:=Module[
+	{
+		note,pitch,i
+	},
+	note=ToExpression@StringTake[dataString,{position}];
+	pitch=If[note==0,None,pitchDict[[note]]+tonality];
+	i=position-1;
+	While[i>=1,
+		Switch[StringTake[dataString,{i}],
+		"#",
+			pitch++,
+		"b",
+			pitch--,
+		_,
+			Break[]
+		];
+		i--;
+	];
+	i=position+1;
+	While[i<=StringLength[dataString],
+		Switch[StringTake[dataString,{i}],
+		"'",
+			pitch+=12,
+		",",
+			pitch-=12,
+		_,
+			Break[]
+		];
+		i++;
+	];
+	Return[{pitch,i}];
+];
 parse[filename_,"qym"]:=Module[
 	{
 		i,j,k,
@@ -7,9 +39,10 @@ parse[filename_,"qym"]:=Module[
 		music,musicrepeat,musicclip,voicepart,track,
 		instrument="Piano",instrumentList={},
 		tonality=0,beat=1,speed=88,volume=1,
-		pitch,sharp=0,time,space,tercet=0,tercetTime,
+		pitch,time,space,tercet=0,tercetTime,
 		repeatTime,chord=False,lastPitch,lastSpace,
-		comment,match,timeDot,note,duration,frequency
+		comment,match,timeDot,duration,frequency,
+		getPitchResult
 	},
 	If[!FileExistsQ[filename],
 		MessageDialog[TextCell["File not found!"],WindowTitle->"Error"];
@@ -40,28 +73,23 @@ parse[filename_,"qym"]:=Module[
 		While[j<=StringLength[filedata[[i]]],
 			midchar=StringTake[filedata[[i]],{j}];
 			If[MemberQ[{"0","1","2","3","4","5","6","7"},midchar],
-				note=ToExpression@midchar;
-				time=1;
+				getPitchResult=getPitch[filedata[[i]],j,tonality];
 				If[chord,
-					AppendTo[pitch,pitchDict[[note]]+tonality+sharp];
+					AppendTo[pitch,getPitchResult[[1]]];
 					chord=False,
-					pitch=If[note==0,None,pitchDict[[note]]+tonality+sharp];
+					pitch=getPitchResult[[1]];
 					lastSpace=space;
 					space=True;
 				];
-				sharp=0;
-				j++;
+				j=getPitchResult[[2]];
+				time=1;
 				midchar=StringTake[filedata[[i]],{j}];
-				While[j<=StringLength[filedata[[i]]] && MemberQ[{"-","_","'",",",".","^","&"},midchar],
+				While[j<=StringLength[filedata[[i]]] && MemberQ[{"-","_",".","^","&"},midchar],
 					Switch[midchar,
 					"-",
 						time+=1,
 					"_",
 						time/=2,
-					"'",
-						pitch+=12,
-					",",
-						pitch-=12,
 					".",
 						timeDot=1/2;
 						While[j<=StringLength[filedata[[i]]] && StringTake[filedata[[i]],{j+1}]==".",
@@ -99,10 +127,6 @@ parse[filename_,"qym"]:=Module[
 					lastPitch=pitch;
 				],
 				Switch[midchar,
-				"#",
-					sharp++,
-				"b",
-					sharp--,
 				"<",
 					match=Select[Transpose[StringPosition[filedata[[i]],">"]][[1]],#>j&][[1]];
 					comment=StringTake[filedata[[i]],{j+1,match-1}];

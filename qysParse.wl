@@ -78,7 +78,7 @@ parse[filename_,"qys"]:=Module[
 		j=1;
 		space=True;
 		portamento=False;
-		appoggiatura=False;
+		appoggiatura={};
 		tremolo=0;
 		barBeat=0;
 		barCount=0;
@@ -127,11 +127,10 @@ parse[filename_,"qys"]:=Module[
 						"=",                       (* tremolo *)
 							tremolo=ToExpression[comment],
 						"^",                       (* appoggiatura *)
-							lastPitch={};
-							appoggiatura=True;
+							appoggiatura={};
 							k=1;
 							While[k<=StringLength@comment,
-								AppendTo[lastPitch,getPitch[comment,k,tonality][[1]]];
+								AppendTo[appoggiatura,getPitch[comment,k,tonality][[1]]];
 								k=getPitch[comment,k,tonality][[2]];
 							];
 					];
@@ -196,13 +195,20 @@ parse[filename_,"qys"]:=Module[
 			];
 			If[tercet>0,beatCount*=tercetTime;tercet--];
 			barBeat+=beatCount;
-			If[appoggiatura,
-				beatCount-=1/4;
-				duration=15/speed/Length@lastPitch*beat;
-				Do[
-					AppendTo[track,{lastPitch[[k]],duration,instrument}],
-				{k,Length@lastPitch}];
-				appoggiatura=False;
+			If[appoggiatura!={},
+				If[Length@appoggiatura<4,
+					beatCount-=Length@appoggiatura/12;
+					duration=15/speed/12*beat;
+					Do[
+						AppendTo[track,{appoggiatura[[k]],duration,instrument}],
+					{k,Length@appoggiatura}],
+					beatCount-=1/3;
+					duration=15/speed/Length@appoggiatura/2*beat;
+					Do[
+						AppendTo[track,{appoggiatura[[k]],duration,instrument}],
+					{k,Length@appoggiatura}];
+				];
+				appoggiatura={};
 			];
 			duration=15/speed*beatCount*beat;
 			If[tremolo!=0,
@@ -225,7 +231,7 @@ parse[filename_,"qys"]:=Module[
 				portamento=False;
 				Continue[];
 			];
-			lastPitch=pitch;		
+			If[!pitch===None,lastPitch=pitch];
 			If[extend,
 				If[space,
 					track[[-1,2]]+=duration*7/8;
@@ -245,7 +251,7 @@ parse[filename_,"qys"]:=Module[
 				Print[error[["TerminatorAbsent"]]];
 				Print["[Info] Track:",trackCount];
 			];
-			AddTo[audio,volume*Audio[Sound[SoundNote@@#&/@track]]]
+			audio+=volume*Audio[Sound[SoundNote@@#&/@track]]];
 		],
 	{i,Length[score]}];
 	If[fade,audio=AudioFade[audio,{0,2}]];
@@ -263,7 +269,7 @@ parse[filename_,"qys"]:=Module[
 
 
 (* ::Input:: *)
-(*AudioStop[];AudioPlay@parse["E:\\QingyunMusicPlayer\\Songs\\Bios.qys","qys"];*)
+(*AudioStop[];AudioPlay@parse["E:\\QingyunMusicPlayer\\Songs\\Lonely_Night.qys","qys"];*)
 
 
 (* ::Input:: *)

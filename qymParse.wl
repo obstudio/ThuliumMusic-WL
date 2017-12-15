@@ -1,6 +1,6 @@
 (* ::Package:: *)
 
-getPitch[dataString_,position_,tonality_]:=Module[
+getPitch1[dataString_,position_,tonality_]:=Module[
 	{
 		note,pitch,i
 	},
@@ -73,7 +73,7 @@ parse[filename_,"qym"]:=Module[
 		While[j<=StringLength[filedata[[i]]],
 			midchar=StringTake[filedata[[i]],{j}];
 			If[MemberQ[{"0","1","2","3","4","5","6","7"},midchar],
-				getPitchResult=getPitch[filedata[[i]],j,tonality];
+				getPitchResult=getPitch1[filedata[[i]],j,tonality];
 				If[chord,
 					AppendTo[pitch,getPitchResult[[1]]];
 					chord=False,

@@ -1,7 +1,7 @@
 Format: qys;
-TrackCount: 2;
-Duration: 15.151;
-Instruments: {"ElectricGrandPiano", "Piano"};
+TrackCount: 3;
+Duration: 67.4656;
+Instruments: {"ElectricGrandPiano", "Piano", "Violin"};
 SongName: 宇宙中飞行的不可思议的巫女;
 Composer: ZUN;
 Adapter: 触手猴 LittleRed;

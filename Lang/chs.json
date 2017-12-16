@@ -33,11 +33,12 @@
         "Xylophone": "木琴"
     },
 	"Error": {
-		"FileNotFound": "文件未找到",
-		"BarLengthError": "小节长度错误",
-		"TerminatorAbsent": "缺少终止符",
-		"InstrNotExist": "乐器不存在",
-		"RepeatError": "反复标记不匹配"
+		"FileNotFound": "文件错误：文件未找到",
+		"BarLengthError": "解析错误：小节长度错误",
+		"TerminatorAbsent": "歌谱错误：缺少终止符",
+		"InstrNotExist": "乐器错误：乐器不存在",
+		"RepeatError": "歌谱错误：反复标记不匹配",
+		"ExpectPitch": "歌谱错误：存在非法字符"
 	},
 	"Button": {
 		"Play": "播放",

@@ -5,17 +5,26 @@ debug=True;
 
 getPitch[score_,pos_,tonality_]:=Module[
 	{i=pos,note,pitch},
-	note=ToExpression@StringPart[score,i];
-	pitch=If[note==0,None,pitchDict[[note]]+tonality];
-	i++;
-	While[i<=StringLength@score && MemberQ[{"#","b","'",","},StringPart[score,i]],
-		Switch[StringPart[score,i],
-			"#",pitch++,
-			"b",pitch--,
-			"'",pitch+=12,
-			",",pitch-=12
-		];
+	If[StringPart[score,i]=="[",
 		i++;
+		pitch={};
+		While[StringPart[score,i]!="]",
+			AppendTo[pitch,getPitch[score,i,tonality][[1]]];
+			i=getPitch[score,i,tonality][[2]]
+		];
+		i++,
+		note=ToExpression@StringPart[score,i];
+		pitch=If[note==0,None,pitchDict[[note]]+tonality];
+		i++;
+		While[i<=StringLength@score && MemberQ[{"#","b","'",","},StringPart[score,i]],
+			Switch[StringPart[score,i],
+				"#",pitch++,
+				"b",pitch--,
+				"'",pitch+=12,
+				",",pitch-=12
+			];
+			i++;
+		];
 	];
 	Return[{pitch,i}];
 ];
@@ -69,9 +78,9 @@ parse[filename_,"qys"]:=Module[
 		score,trackCount=0,track,audio=0,               (* score and tracks *)
 		instrument="Piano",instrList={},                (* instrument *)
 		tercet,tercetTime,                              (* tercet *)
-		portamento,rate,                                (* portamento *)
-		tremolo1,tremolo2,                              (* tremolo *)
-		appoggiatura,appogHarmony,                     (* appoggiatura *)
+		portamento=False,rate,                          (* portamento *)
+		tremolo1=0,tremolo2=0,                          (* tremolo *)
+		appoggiatura={},appogHarmony=False,             (* appoggiatura *)
 		note,pitch,scale,tonality=0,                    (* pitch *)
 		beatCount,extend,timeDot,beat=4,                (* number of beats *)
 		duration,space,speed=88,                        (* duration *)
@@ -84,10 +93,6 @@ parse[filename_,"qys"]:=Module[
 	Do[
 		j=1;
 		space=True;
-		portamento=False;
-		appogHarmony=False;
-		appoggiatura={};
-		tremolo2=0;
 		fade={0,0};
 		barBeat=0;
 		barCount=0;
@@ -131,10 +136,10 @@ parse[filename_,"qys"]:=Module[
 					match=Select[Transpose[StringPosition[score[[i]],")"]][[1]],#>j&][[1]];
 					content=StringTake[score[[i]],{j+1,match-2}];
 					Switch[StringTake[score[[i]],{match-1}],
-						"-",                            (* tercet *)
+						"~",                            (* tercet *)
 							tercet=ToExpression[content];
 							tercetTime=(2^Floor[Log2[tercet]])/tercet,
-						"~",                            (* single tremolo *)
+						"-",                            (* single tremolo *)
 							tremolo1=ToExpression[content],
 						"=",                            (* double tremolo *)
 							tremolo2=ToExpression[content],
@@ -311,7 +316,7 @@ parse[filename_,"qys"]:=Module[
 
 
 (* ::Input:: *)
-(*AudioStop[];AudioPlay@parse["E:\\QingyunMusicPlayer\\Songs\\Lonely_Night.qys","qys"];*)
+(*AudioStop[];AudioPlay@parse["E:\\QingyunMusicPlayer\\Songs\\test.qys","qys"];*)
 
 
 (* ::Input:: *)

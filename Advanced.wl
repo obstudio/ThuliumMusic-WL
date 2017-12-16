@@ -9,7 +9,7 @@ ModifySongInfo[song_]:=DynamicModule[{textInfo},
 			{Button[buttonName[["Save"]],putTextInfo[song,textInfo],ImageSize->150,Enabled->Dynamic[textInfo[["SongName"]]!=""]],
 			Button[buttonName[["Undo"]],textInfo=getTextInfo[song],ImageSize->150]},
 			{Button[buttonName[["Debug"]],DialogReturn[Debugger[song]],ImageSize->150],
-			Button[buttonName[["Return"]],DialogReturn[Management],ImageSize->150]}
+			Button[buttonName[["Return"]],DialogReturn[Management[1]],ImageSize->150]}
 		}],""
 	},Center,ItemSize->30,Spacings->1],
 	WindowTitle->"\:4fee\:6539\:6b4c\:66f2\:4fe1\:606f"];
@@ -34,10 +34,10 @@ AddNewSong:=DynamicModule[{songPath,textInfo},
 			metaInfo[["Instruments"]]=ToString[metaInfo[["Instruments"]],InputForm];
 			AppendTo[index,song->metaInfo];
 			putTextInfo[song,textInfo];
-			DialogReturn[Management],
+			DialogReturn[Management[1]],
 		ImageSize->150,Enabled->Dynamic[textInfo[["SongName"]]!=""]],
 		Spacer[20],
-		Button[buttonName[["Return"]],DialogReturn[Management],ImageSize->150]}],""
+		Button[buttonName[["Return"]],DialogReturn[Management[1]],ImageSize->150]}],""
 	},Center,ItemSize->30,Spacings->1],
 	WindowTitle->"\:6dfb\:52a0\:65b0\:66f2\:76ee"]
 ];
@@ -81,23 +81,28 @@ DeleteSong[song_]:=CreateDialog[Column[{"",
 		Button[buttonName[["Confirm"]],
 			index=Delete[index,song];
 			DeleteFile[path<>"Meta\\"<>song<>".meta"];
-			DialogReturn[Management],
+			DialogReturn[Management[1]],
 		ImageSize->100],
 		Spacer[20],
-		Button[buttonName[["Return"]],DialogReturn[Management],ImageSize->100]			
+		Button[buttonName[["Return"]],DialogReturn[Management[1]],ImageSize->100]			
 	}],""
 },Center,ItemSize->36],
 WindowTitle->"\:5220\:9664\:66f2\:76ee"];
 
 
-Management:=(refresh;
+Management[page_]:=Module[{},refresh;
 CreateDialog[Column[{"",
-	Style[buttonName[["Manage"]],Bold,32],"",
+	Row[{Style[buttonName[["Manage"]],Bold,32],Style[" (\:7b2c"<>ToString[page]<>"\:9875)",Gray,32]}],"",
 	Grid[{index[[#,"SongName"]],
 		Button[buttonName[["Modify"]],DialogReturn[ModifySongInfo[#]],ImageSize->Tiny],
 		Button[buttonName[["Delete"]],DialogReturn[DeleteSong[#]],ImageSize->Tiny]
-	}&/@songList],"",
+	}&/@songList16[[page]]],"",
+	Row[{
+		Button[buttonName[["PgPrev"]],DialogReturn[Management[page-1]],ImageSize->100,Enabled->(page>1)],
+		Spacer[10],
+		Button[buttonName[["PgNext"]],DialogReturn[Management[page+1]],ImageSize->100,Enabled->(page<Length@songList16)]
+	}],
 	Button[buttonName[["AddSong"]],DialogReturn[AddNewSong],ImageSize->150],
-	Button[buttonName[["Return"]],DialogReturn[QYMP],ImageSize->150],""
+	Button[buttonName[["Return"]],DialogReturn[QYMP[1]],ImageSize->150],""
 },Center,ItemSize->20],
-WindowTitle->"\:6b4c\:5355\:7ba1\:7406"]);
+WindowTitle->"\:6b4c\:5355\:7ba1\:7406"]];

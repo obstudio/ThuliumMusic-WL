@@ -101,19 +101,19 @@ Player[song_]:=DynamicModule[{playing=True,current},
 			Spacer[20],
 			Button[buttonName[["Stop"]],AudioStop[];playing=False,ImageSize->80],
 			Spacer[20],
-			Button[buttonName[["Return"]],AudioStop[];DialogReturn[QYMP],ImageSize->80]			
+			Button[buttonName[["Return"]],AudioStop[];DialogReturn[QYMP[1]],ImageSize->80]			
 		}],"",""
 	},Center,ItemSize->50],
 	WindowTitle->"\:6b63\:5728\:64ad\:653e\:ff1a"<>index[[song,"SongName"]]];
 ];
 
 
-QYMP:=DynamicModule[{song,page=1},
+QYMP[page_]:=DynamicModule[{song},
 	refresh;
 	AudioStop[];
 	CreateDialog[Column[{"",
-		Style["\:9752\:4e91\:64ad\:653e\:5668",Bold,32],,
-		Dynamic@SetterBar[Dynamic@song,
+		Row[{Style["\:9752\:4e91\:64ad\:653e\:5668",Bold,32],Style[" (\:7b2c"<>ToString[page]<>"\:9875)",Gray,32]}],,
+		SetterBar[Dynamic@song,
 			#->Row[{
 				Style[index[[#,"SongName"]],24,FontFamily->"\:5fae\:8f6f\:96c5\:9ed1"],
 				Spacer[20],
@@ -121,15 +121,15 @@ QYMP:=DynamicModule[{song,page=1},
 			}]&/@songList16[[page]],
 			Appearance->"Vertical"
 		],"",
-		Dynamic@Row[{
-			Button[buttonName[["PgPrev"]],page--,ImageSize->200,Enabled->(page>1)],
+		Row[{
+			Button[buttonName[["PgPrev"]],DialogReturn[QYMP[page-1]],ImageSize->200,Enabled->(page>1)],
 			Spacer[10],
-			Button[buttonName[["PgNext"]],page++,ImageSize->200,Enabled->(page<Length@songList16)]
+			Button[buttonName[["PgNext"]],DialogReturn[QYMP[page+1]],ImageSize->200,Enabled->(page<Length@songList16)]
 		}],
 		Row[{
 			Button[buttonName[["PlaySong"]],DialogReturn[Player[song]],ImageSize->200],
 			Spacer[10],
-			Button[buttonName[["Manage"]],DialogReturn[Management],ImageSize->200]
+			Button[buttonName[["Manage"]],DialogReturn[Management[1]],ImageSize->200]
 		}],
 		Row[{
 			Button[buttonName[["Settings"]],DialogReturn[settings],ImageSize->200,Enabled->False],
@@ -142,4 +142,8 @@ QYMP:=DynamicModule[{song,page=1},
 
 
 (* ::Input:: *)
-(*QYMP;*)
+(*QYMP[1];*)
+
+
+(* ::Input:: *)
+(*AudioStop[];AudioPlay@parse[path<>"Songs\\Gate_of_Steiner.qys","qys"];*)

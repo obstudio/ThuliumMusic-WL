@@ -13,6 +13,16 @@ pitchDict=<|"1"->0,"2"->2,"3"->4,"4"->5,"5"->7,"6"->9,"7"->11|>;
 toBase32[n_]:=StringDelete[ToString@BaseForm[n,32],"\n"~~__];
 
 
+generateMessage[tag_,arg_]:=Module[
+	{argRule},
+	argRule=Flatten@Array[{
+		"&"<>ToString[#]->ToString[arg[[#]]],
+		"$"<>ToString[#]->arg[[#]]
+	}&,Length@arg];
+	Return@StringReplace[errorDict[[tag]],argRule];
+];
+
+
 writeInfo[song_,info_]:=Export[
 	path<>"Meta\\"<>song<>".meta",
 	StringRiffle[KeyValueMap[#1<>": "<>#2<>";"&,info],"\n"],

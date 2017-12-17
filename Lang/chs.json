@@ -33,12 +33,15 @@
         "Xylophone": "木琴"
     },
 	"Error": {
-		"FileNotFound": "文件错误：文件未找到",
-		"BarLengthError": "解析错误：小节长度错误",
-		"TerminatorAbsent": "歌谱错误：缺少终止符",
-		"InstrNotExist": "乐器错误：乐器不存在",
-		"RepeatError": "歌谱错误：反复标记不匹配",
-		"ExpectPitch": "歌谱错误：存在非法字符"
+		"FileNotFound": "未找到文件\"$1\"",
+		"TerminatorAbsent": "(音轨&1) 缺少终止符",
+		"RepeatError": "(音轨&1) 反复标记不匹配",
+		"InvTonality": "(音轨&1,小节&2) 声明了无效调名\"$3\"",
+		"InvInstrument": "(音轨&1,小节&2) 声明了无效乐器\"$3\"",
+		"InvCharacter": "(音轨&1,小节&2) 匹配到无效字符\"$3\"",
+		"InvFunction": "(音轨&1,小节&2) 声明了无效函数名\"$3\"",
+		"BarLengthError": "(音轨&1,小节&2) 拍数错误: 应为&3拍, 实际为&4拍",
+		"NoFormerPitch": "(音轨&1,小节&2) %缺少前一个音符"
 	},
 	"Button": {
 		"Play": "播放",

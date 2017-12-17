@@ -32,7 +32,7 @@ getPitch[score_,pos_,key_]:=Module[
 
 getScore[filename_]:=Module[
 	{i,j,data1,data2,score,join,repeatL,repeatR},
-	If[!FileExistsQ[filename],Return[{}]];
+	If[!FileExistsQ[filename],Return[0]];
 	data1=StringJoin/@Import[filename,"Table"];             (* delete the spacings *)
 	data1=Select[data1,!StringContainsQ[#,"//"]&];          (* delete the comments *)
 	data1=Cases[data1,Except[""]];                          (* delete the blank lines *)
@@ -52,7 +52,7 @@ getScore[filename_]:=Module[
 			(* repeat *)
 			repeatL=Transpose[StringPosition[data2[[i]],"|:"]][[1]];
 			repeatR=Transpose[StringPosition[data2[[i]],":|"]][[1]];
-			If[Length@repeatL!=Length@repeatR,Print[error[["RepeatError"]],"!"]];
+			If[Length@repeatL!=Length@repeatR,Return[i]];
 			score[[i]]=StringTake[data2[[i]],repeatL[[1]]-1]<>"|";
 			Do[
 				score[[i]]=score[[i]]<>StringTake[data2[[i]],{repeatL[[j]]+2,repeatR[[j]]-1}]<>"|";
@@ -77,43 +77,45 @@ parse[filename_,"qys"]:=Module[
 		i,j,k,char,content,match,position,              (* loop related *)
 		score,trackCount=0,track,audio=0,               (* score and tracks *)
 		instrument="Piano",instrList={},                (* instrument *)
+		precussion=False,messages={},
 		
 		tercet,tercetTime,                              (* tercet *)
 		portamento=False,portaRate,                     (* portamento *)
 		tremolo1=0,tremolo2=0,                          (* tremolo *)
 		appoggiatura={},appogHarmony=False,             (* appoggiatura *)
+		function,argument,                              (* function *)
 		
 		keyG=0,fadeG={0,0},beatG=4,volumeG=1,           (* global *)
 		barLengthG=4,speedG=60,durRatioG=1,
 		key,scale,fade,beat,volume,                      (* local *)
 		barLength,speed,durRatio,
 		
-		note,pitch,                                      (* pitch *)
+		note,pitch,tonality,                             (* pitch *)
 		beatCount,beam=False,extend,timeDot,             (* number of beats *)
-		duration,                                        (* duration *)
+		duration,trackDuration,                          (* duration *)
 		lastPitch,lastBeat,
 		barCount,barBeat                                 (* trans-note *)
 	},
 	score=getScore[filename];
-	If[debug && score=={},Print[error[["FileNotFound"]],"!"]];
+	If[score===0,AppendTo[messages,generateMessage["FileNotFound",{filename}]]];
+	If[NumberQ[score]&&score!=0,AppendTo[messages,generateMessage["RepeatError",{score}]]];
 	Do[
 		j=1;
 		track={};
 		barBeat=0;
 		barCount=0;
 		beam=False;
+		lastPitch=Null;
 		(* local variables *)
 		{volume,key,fade,beat,speed,durRatio,barLength}={volumeG,keyG,fadeG,beatG,speedG,durRatioG,barLengthG};
-		
 		While[j<=StringLength[score[[i]]],
 			char=StringPart[score[[i]],j];
 			Switch[char,
 				"|",
 					If[debug && barBeat!=0,
 						barCount++;
-						If[debug && barBeat!=barLength && barBeat*barLength!=16,
-							Print[error[["BarLengthError"]],"!"];
-							Print["[Info] Track:",trackCount+1,"; Bar:",barCount,"; BarLength:",barLength,"; BarBeat:",barBeat];
+						If[barBeat!=barLength && barBeat*barLength!=16,
+							AppendTo[messages,generateMessage["BarLengthError",{trackCount+1,barCount,barLength,barBeat}]];
 						];
 						barBeat=0;
 					];
@@ -125,7 +127,11 @@ parse[filename_,"qys"]:=Module[
 					Which[
 						StringContainsQ[content,"="],            (* key *)
 							scale=StringCount[content,"'"]-StringCount[content,","];
-							key=12*scale+tonalityDict[[StringDelete[StringTake[content,{3,StringLength@content}],","|"'"]]],
+							tonality=StringDelete[StringTake[content,{3,StringLength@content}],","|"'"];
+							If[KeyExistsQ[tonalityDict,tonality],
+								key=12*scale+tonalityDict[[tonality]],
+								AppendTo[messages,generateMessage["InvTonality",{trackCount+1,barCount+1,content}]];
+							],
 						StringContainsQ[content,"/"],            (* beat *)
 							position=StringPosition[content,"/"][[1,1]];
 							beat=ToExpression[StringDrop[content,position]];
@@ -134,12 +140,24 @@ parse[filename_,"qys"]:=Module[
 							volume=ToExpression[content],
 						StringMatchQ[content,NumberString],      (* speed *)
 							speed=ToExpression[content],
-						StringContainsQ[content,"Fade:"],        (* fade *)
+						StringContainsQ[content,":"],            (* function *)
 							position=StringPosition[content,":"][[1,1]];
-							If[#>0,fade[[1]]=#,fade[[2]]=-#]&@ToExpression[StringDrop[content,position]],
-						StringContainsQ[content,"Dur:"],         (* duration ratio *)
-							position=StringPosition[content,":"][[1,1]];
-							durRatio=2^(-ToExpression[StringDrop[content,position]]);
+							function=StringTake[content,position-1];
+							argument=ToExpression@StringDrop[content,position];
+							Switch[function,
+								"Fade",                   (* fade *)
+									If[argument>0,fade[[1]]=argument,fade[[2]]=-argument],
+								"Dur",                    (* duration ratio *)
+									durRatio=2^(-ToExpression[StringDrop[content,position]]),
+								_,                        (* invalid function *)
+									AppendTo[messages,generateMessage["InvFunction",{trackCount+1,barCount+1,function}]];
+							],
+						True,                                    (* instrument *)
+							If[MemberQ[instrData[["Style"]],content],
+								instrument=content;
+								instrList=Union[instrList,{instrument}],						
+								AppendTo[messages,generateMessage["InvInstrument",{trackCount+1,barCount+1,content}]];
+							];
 					];
 					j=match+1;
 					Continue[],
@@ -165,9 +183,12 @@ parse[filename_,"qys"]:=Module[
 					Continue[],
 				"{",                               (* instrument *)
 					match=Select[Transpose[StringPosition[score[[i]],"}"]][[1]],#>j&][[1]];
-					instrument=StringTake[score[[i]],{j+1,match-1}];
-					If[debug && !MemberQ[instrData[["Style"]],instrument],Print[error[["InstrNotExist"]],"!"]];
-					instrList=Union[instrList,{instrument}];
+					content=StringTake[score[[i]],{j+1,match-1}];
+					If[MemberQ[instrData[["Style"]],content],
+						instrument=content;
+						instrList=Union[instrList,{instrument}],						
+						AppendTo[messages,generateMessage["InvInstrument",{trackCount+1,barCount+1,content}]];
+					];
 					j=match+1;
 					Continue[],
 				"~",                               (* portamento *)
@@ -179,8 +200,13 @@ parse[filename_,"qys"]:=Module[
 			j++;
 			extend=False;
 			Which[
+				char=="x"||char=="X",
+					1,
 				char=="%",                                  (* the same as the last pitch *)
-					pitch=lastPitch,
+					pitch=lastPitch;
+					If[lastPitch===Null,
+						AppendTo[messages,generateMessage["NoFormerPitch",{trackCount+1,barCount+1}]]
+					],
 				DigitQ[char],                               (* single tone *)
 					note=ToExpression@char;
 					pitch=If[note==0,None,pitchDict[[note]]+key],
@@ -204,8 +230,8 @@ parse[filename_,"qys"]:=Module[
 						]
 					];
 					j=match+1,
-				debug,
-					Print[error[["ExpectPitch"]]];
+				True,
+					AppendTo[messages,generateMessage["InvCharacter",{trackCount+1,barCount+1,char}]];
 			];
 			While[j<=StringLength[score[[i]]] && MemberQ[{"#","b","'",","},StringPart[score[[i]],j]],
 				char=StringPart[score[[i]],j];
@@ -299,20 +325,21 @@ parse[filename_,"qys"]:=Module[
 		];
 		If[track!={},
 			trackCount++;
-			If[debug && StringTake[score[[i]],{j-1}]!="|",
-				Print[error[["TerminatorAbsent"]]];
-				Print["[Info] Track:",trackCount];
+			If[StringTake[score[[i]],{j-1}]!="|",
+				AppendTo[messages,generateMessage["TerminatorAbsent",{track}]];
 			];
 			audio+=volume*AudioFade[Sound[SoundNote@@#&/@track],fade],
 			{volumeG,keyG,fadeG,beatG,speedG,durRatioG,barLengthG}={volume,key,fade,beat,speed,durRatio,barLength};			
 		],
 	{i,Length[score]}];
 	If[fadeG!={0,0},audio=AudioFade[audio,fadeG]];
+	If[debug,Print[Column@messages]];
 	Return[Audio[audio,MetaInformation-><|
 		"Format"->"qys",
 		"TrackCount"->trackCount,
 		"Duration"->QuantityMagnitude@UnitConvert[Duration@audio,"Seconds"],
-		"Instruments"->instrList
+		"Instruments"->instrList,
+		"Messages"->messages
 	|>]];
 ];
 
@@ -322,7 +349,11 @@ parse[filename_,"qys"]:=Module[
 
 
 (* ::Input:: *)
-(*AudioStop[];AudioPlay@parse["E:\\QingyunMusicPlayer\\Songs\\Necro_Fantasia.qys","qys"];*)
+(*AudioStop[];AudioPlay@parse["E:\\QingyunMusicPlayer\\Songs\\Dark_Side_of_Fate.qys","qys"];*)
+
+
+(* ::Input:: *)
+(*AudioStop[];AudioPlay@parse["E:\\QingyunMusicPlayer\\Songs\\test.qys","qys"];*)
 
 
 (* ::Input:: *)

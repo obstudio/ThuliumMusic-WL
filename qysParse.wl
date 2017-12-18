@@ -47,10 +47,8 @@ getScore[filename_]:=Module[
 	data2=StringDelete[#,"\\"]&/@data2;                     (* delete the joint marks *)
 	score=Array[""&,Length@data2];
 	Do[
-		If[StringPosition[data2[[i]],"|:"]=={},
-			score[[i]]=data2[[i]],
-			(* repeat *)
-			repeatL=Transpose[StringPosition[data2[[i]],"|:"]][[1]];
+		If[StringPosition[data2[[i]],"|:"]=={},score[[i]]=data2[[i]],
+			repeatL=Transpose[StringPosition[data2[[i]],"|:"]][[1]];			(* repeat *)
 			repeatR=Transpose[StringPosition[data2[[i]],":|"]][[1]];
 			If[Length@repeatL!=Length@repeatR,Return[i]];
 			score[[i]]=StringTake[data2[[i]],repeatL[[1]]-1]<>"|";
@@ -83,6 +81,8 @@ parse[filename_,"qys"]:=Module[
 		portamento=False,portaRate,                     (* portamento *)
 		tremolo1=0,tremolo2=0,                          (* tremolo *)
 		appoggiatura={},appogHarmony=False,             (* appoggiatura *)
+		staccato,stac,stacG=1/4,
+		fermata,
 		function,argument,                              (* function *)
 		
 		keyG=0,fadeG={0,0},beatG=4,volumeG=1,           (* global *)
@@ -105,9 +105,10 @@ parse[filename_,"qys"]:=Module[
 		barBeat=0;
 		barCount=0;
 		beam=False;
+		staccato=False;
 		lastPitch=Null;
 		(* local variables *)
-		{volume,key,fade,beat,speed,durRatio,barLength}={volumeG,keyG,fadeG,beatG,speedG,durRatioG,barLengthG};
+		{volume,key,fade,beat,speed,durRatio,barLength,stac}={volumeG,keyG,fadeG,beatG,speedG,durRatioG,barLengthG,stacG};
 		While[j<=StringLength[score[[i]]],
 			char=StringPart[score[[i]],j];
 			Switch[char,
@@ -125,6 +126,20 @@ parse[filename_,"qys"]:=Module[
 					match=Select[Transpose[StringPosition[score[[i]],">"]][[1]],#>j&][[1]];
 					content=StringTake[score[[i]],{j+1,match-1}];
 					Which[
+						StringContainsQ[content,":"],            (* function *)
+							position=StringPosition[content,":"][[1,1]];
+							function=StringTake[content,position-1];
+							argument=ToExpression@StringDrop[content,position];
+							Switch[function,
+								"Fade",                   (* fade *)
+									If[argument>0,fade[[1]]=argument,fade[[2]]=-argument],
+								"Dur",                    (* duration ratio *)
+									durRatio=2^(-argument),
+								"Stac",                    (* duration ratio *)
+									stac=argument,
+								_,                        (* invalid function *)
+									AppendTo[messages,generateMessage["InvFunction",{trackCount+1,barCount+1,function}]];
+							],
 						StringContainsQ[content,"="],            (* key *)
 							scale=StringCount[content,"'"]-StringCount[content,","];
 							tonality=StringDelete[StringTake[content,{3,StringLength@content}],","|"'"];
@@ -140,18 +155,6 @@ parse[filename_,"qys"]:=Module[
 							volume=ToExpression[content],
 						StringMatchQ[content,NumberString],      (* speed *)
 							speed=ToExpression[content],
-						StringContainsQ[content,":"],            (* function *)
-							position=StringPosition[content,":"][[1,1]];
-							function=StringTake[content,position-1];
-							argument=ToExpression@StringDrop[content,position];
-							Switch[function,
-								"Fade",                   (* fade *)
-									If[argument>0,fade[[1]]=argument,fade[[2]]=-argument],
-								"Dur",                    (* duration ratio *)
-									durRatio=2^(-ToExpression[StringDrop[content,position]]),
-								_,                        (* invalid function *)
-									AppendTo[messages,generateMessage["InvFunction",{trackCount+1,barCount+1,function}]];
-							],
 						True,                                    (* instrument *)
 							If[MemberQ[instrData[["Style"]],content],
 								instrument=content;
@@ -247,7 +250,7 @@ parse[filename_,"qys"]:=Module[
 			(* find out the duration *)
 			beatCount=1;
 			beam=False;
-			While[j<=StringLength[score[[i]]]&&MemberQ[{"-","_",".","^"},StringPart[score[[i]],j]],
+			While[j<=StringLength[score[[i]]] && MemberQ[{"-","_",".","^","`"},StringPart[score[[i]],j]],
 				char=StringPart[score[[i]],j];
 				Switch[char,
 					"-",beatCount+=1,
@@ -259,7 +262,8 @@ parse[filename_,"qys"]:=Module[
 							j++;
 						];
 						beatCount*=(2-timeDot),
-					"^",beam=True
+					"^",beam=True,
+					"`",staccato=True
 				];
 				j++;
 			];
@@ -267,40 +271,38 @@ parse[filename_,"qys"]:=Module[
 			beatCount*=durRatio;
 			barBeat+=beatCount;
 			duration=15/speed*beatCount*beat;
-			If[extend,
-				track[[-1,2]]+=duration;
-				lastBeat+=beatCount;
-				Continue[];
-			];
-			If[tremolo1!=0,
-				duration/=(beatCount*2^tremolo1);
-				Do[
-					AppendTo[track,{pitch,duration,instrument}],
-				{k,beatCount*2^tremolo1}];
-				tremolo1=0;
-				Continue[];
-			];
-			If[tremolo2!=0,
-				duration/=(beatCount*2^tremolo2);
-				barBeat=barBeat-lastBeat;
-				track=Drop[track,-1];
-				Do[
-					AppendTo[track,{lastPitch,duration,instrument}];
-					AppendTo[track,{pitch,duration,instrument}],
-				{k,beatCount*2^(tremolo2-1)}];
-				tremolo2=0;
-				Continue[];
-			];
-			If[portamento,
-				portaRate=(pitch-lastPitch+1)/beatCount/6;
-				duration/=(beatCount*6);
-				barBeat=barBeat-lastBeat;
-				track=Drop[track,-1];
-				Do[
-					AppendTo[track,{Floor[k],duration,instrument}],
-				{k,lastPitch,pitch,portaRate}];
-				portamento=False;
-				Continue[];
+			Which[
+				extend,
+					track[[-1,2]]+=duration;
+					lastBeat+=beatCount;
+					Continue[],
+				tremolo1!=0,
+					duration/=(beatCount*2^tremolo1);
+					Do[
+						AppendTo[track,{pitch,duration,instrument}],
+					{k,beatCount*2^tremolo1}];
+					tremolo1=0;
+					Continue[],
+				tremolo2!=0,
+					duration/=(beatCount*2^tremolo2);
+					barBeat=barBeat-lastBeat;
+					track=Drop[track,-1];
+					Do[
+						AppendTo[track,{lastPitch,duration,instrument}];
+						AppendTo[track,{pitch,duration,instrument}],
+					{k,beatCount*2^(tremolo2-1)}];
+					tremolo2=0;
+					Continue[],
+				portamento,
+					portaRate=(pitch-lastPitch+1)/beatCount/6;
+					duration/=(beatCount*6);
+					barBeat=barBeat-lastBeat;
+					track=Drop[track,-1];
+					Do[
+						AppendTo[track,{Floor[k],duration,instrument}],
+					{k,lastPitch,pitch,portaRate}];
+					portamento=False;
+					Continue[];
 			];
 			If[appoggiatura!={},
 				If[Length@appoggiatura<4,
@@ -321,7 +323,12 @@ parse[filename_,"qys"]:=Module[
 			];
 			lastBeat=beatCount;
 			If[!pitch===None,lastPitch=pitch];
-			AppendTo[track,{pitch,duration,instrument}];
+			If[staccato,
+				AppendTo[track,{pitch,duration*(1-stac),instrument}];
+				AppendTo[track,{None,duration*stac}];
+				staccato=False,
+				AppendTo[track,{pitch,duration,instrument}];
+			];
 		];
 		If[track!={},
 			trackCount++;
@@ -329,11 +336,11 @@ parse[filename_,"qys"]:=Module[
 				AppendTo[messages,generateMessage["TerminatorAbsent",{track}]];
 			];
 			audio+=volume*AudioFade[Sound[SoundNote@@#&/@track],fade],
-			{volumeG,keyG,fadeG,beatG,speedG,durRatioG,barLengthG}={volume,key,fade,beat,speed,durRatio,barLength};			
+			{volumeG,keyG,fadeG,beatG,speedG,durRatioG,barLengthG,stacG}={volume,key,fade,beat,speed,durRatio,barLength,stac};			
 		],
 	{i,Length[score]}];
 	If[fadeG!={0,0},audio=AudioFade[audio,fadeG]];
-	If[debug,Print[Column@messages]];
+	If[debug && messages!={},Print[Column@messages]];
 	Return[Audio[audio,MetaInformation-><|
 		"Format"->"qys",
 		"TrackCount"->trackCount,

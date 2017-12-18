@@ -136,7 +136,7 @@ QYMP[page_]:=DynamicModule[{song},
 			Spacer[10],
 			Button[buttonName[["Exit"]],DialogReturn[],ImageSize->200]
 		}],""
-	},Center,ItemSize->40],
+	},Center,ItemSize->50],
 	WindowTitle->"\:9752\:4e91\:64ad\:653e\:5668"]
 ];
 

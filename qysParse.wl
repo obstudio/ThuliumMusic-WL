@@ -62,7 +62,7 @@ trackData[score_,global_,trackCount_]:=Module[
 		char=StringPart[score,j];
 		Switch[char,
 			"|",
-				If[debug && barBeat!=0,
+				If[barBeat!=0,
 					barCount++;
 					If[barBeat!=parameter[["Bar"]] && barBeat*parameter[["Bar"]]!=16,
 						AppendTo[messages,generateMessage["BarLengthError",{trackCount+1,barCount,parameter[["Bar"]],barBeat}]];
@@ -282,33 +282,30 @@ trackData[score_,global_,trackCount_]:=Module[
 			AppendTo[soundData,{pitch,duration,parameter[["Instr"]]}];
 		];
 	];
-	If[soundData!={},
-		If[StringTake[score,{j-1}]!="|",
-			AppendTo[messages,generateMessage["TerminatorAbsent",{soundData}]];Return[1],
-			Return[<|
-				"Audio"->parameter[["Volume"]]*AudioFade[Sound[SoundNote@@#&/@soundData],parameter[["Fade"]]],
-				"Local"->parameter,
-				"Messages"->messages,
-				"Duration"->trackDuration,
-				"Instruments"->instrList
-			|>];
+	Return[<|
+		"Audio"->If[soundData=={},0,                     (* empty track *)
+			If[StringPart[score,j-1]!="|",
+				AppendTo[messages,generateMessage["TerminatorAbsent",{trackCount+1}]]
+			];
+			parameter[["Volume"]]*AudioFade[Sound[SoundNote@@#&/@soundData],parameter[["Fade"]]]
 		],
-		Return[<|
-			"Audio"->0,
-			"Local"->parameter,
-			"Messages"->messages,
-			"Duration"->trackDuration,
-			"Instruments"->instrList
-		|>];
-	];
+		"Local"->parameter,
+		"Messages"->messages,
+		"Duration"->trackDuration,
+		"Instruments"->instrList
+	|>];
 ];
 
 
 QYSParse[filename_]:=Module[
-	{i,j,data1,data2,score,join,repeatL,repeatR,
-		messages={},track,trackCount=0,audio=0,
+	{
+		i,j,
+		data1,data2,score,join,repeatL,repeatR,
 		parameter=defaultParameter,
-		duration=0,instrList={}
+		messages={},instrList={},track,
+		audio=0,duration=0,
+		trackCount=0,trackDuration,
+		sectionCount=0,sectionDuration=0
 	},
 	If[!FileExistsQ[filename],
 		AppendTo[messages,generateMessage["FileNotFound",{filename}]];
@@ -353,20 +350,32 @@ QYSParse[filename_]:=Module[
 		track=trackData[score[[i]],parameter,trackCount];
 		instrList=Union[instrList,track[["Instruments"]]];
 		messages=Join[messages,track[["Messages"]]];
-		If[!track[["Audio"]]===0,
-			trackCount++;
-			duration=track[["Duration"]];
-			audio+=track[["Audio"]],
-			(* used empty soundtrack to declare parameters *)
+		If[track[["Duration"]]==0,
+			(* empty soundtrack *)
 			parameter=track[["Local"]];
+			duration+=sectionDuration;
+			sectionCount++;
+			sectionDuration=0,
+			(* real soundtrack *)
+			trackCount++;
+			trackDuration=track[["Duration"]];
+			If[track[["Duration"]]!=sectionDuration && sectionDuration!=0,
+				AppendTo[messages,generateMessage["DiffDuration",{sectionCount}]];
+			];
+			sectionDuration=Max[trackDuration,sectionDuration];
+			If[duration!=0,
+				audio+=AudioPad[track[["Audio"]],{duration,0}],
+				audio+=track[["Audio"]]
+			];
 		],
 	{i,Length[score]}];
+	If[sectionDuration!={},duration+=Max@sectionDuration];
 	If[parameter[["Fade"]]!={0,0},audio=AudioFade[audio,parameter[["Fade"]]]];
-	If[debug && messages!={},Print[Column@messages]];
+	If[messages!={},Print[Column@messages]];
 	Return[Audio[audio,MetaInformation-><|
 		"Format"->"qys",
 		"TrackCount"->trackCount,
-		"Duration"->QuantityMagnitude@UnitConvert[Duration@audio,"Seconds"],
+		"Duration"->duration,
 		"Instruments"->instrList,
 		"Messages"->messages
 	|>]];
@@ -374,15 +383,11 @@ QYSParse[filename_]:=Module[
 
 
 (* ::Input:: *)
-(*debug=True;*)
-
-
-(* ::Input:: *)
 (*AudioStop[];AudioPlay@QYSParse["E:\\QingyunMusicPlayer\\Songs\\Bios.qys"];*)
 
 
 (* ::Input:: *)
-(*AudioStop[];AudioPlay@QYSParse["E:\\QingyunMusicPlayer\\Songs\\test.qys"];*)
+(*AudioStop[];AudioPlay@QYSParse["E:\\QingyunMusicPlayer\\Songs\\Dark_Side_of_Fate.qys"];*)
 
 
 (* ::Input:: *)

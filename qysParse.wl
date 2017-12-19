@@ -27,12 +27,18 @@ getPitch[score_,pos_,key_]:=Module[
 ];
 
 
+EmitSound@Sound@SoundNote["BassDrum"]
+
+
+EmitSound@Sound@SoundNote["BassDrum2"]
+
+
 trackData[score_,global_,trackCount_]:=Module[
 	{
 		i,j,k,char,content,match,position,              (* loop related *)
 		soundData,audio,                                (* score and tracks *)
 		instrList={},                                   (* instrument *)
-		precussion=False,messages={},
+		percussion=False,messages={},
 		parameter=global,
 		
 		tercet,tercetTime,                              (* tercet *)
@@ -107,10 +113,17 @@ trackData[score_,global_,trackCount_]:=Module[
 					StringMatchQ[content,NumberString],      (* speed *)
 						parameter[["Speed"]]=ToExpression[content],
 					True,                                    (* instrument *)
-						If[MemberQ[instrData[["Style"]],content],
-							parameter[["Instr"]]=content;
-							instrList=Union[instrList,{parameter[["Instr"]]}],						
-							AppendTo[messages,generateMessage["InvInstrument",{trackCount+1,barCount+1,content}]];
+						Which[
+							MemberQ[instrData[["Style"]],content],
+								parameter[["Instr"]]=content;
+								instrList=Union[instrList,{parameter[["Instr"]]}];
+								percussion=False,
+							MemberQ[instrData[["Percussion"]],content],
+								parameter[["Instr"]]=content;
+								instrList=Union[instrList,{parameter[["Instr"]]}];
+								percussion=True,
+							_,
+								AppendTo[messages,generateMessage["InvInstrument",{trackCount+1,barCount+1,content}]];
 						];
 				];
 				j=match+1;
@@ -135,16 +148,6 @@ trackData[score_,global_,trackCount_]:=Module[
 				];
 				j=match+1;
 				Continue[],
-			"{",                               (* instrument *)
-				match=Select[Transpose[StringPosition[score,"}"]][[1]],#>j&][[1]];
-				content=StringTake[score,{j+1,match-1}];
-				If[MemberQ[instrData[["Style"]],content],
-					parameter[["Instr"]]=content;
-					instrList=Union[instrList,{parameter[["Instr"]]}],						
-					AppendTo[messages,generateMessage["InvInstrument",{trackCount+1,barCount+1,content}]];
-				];
-				j=match+1;
-				Continue[],
 			"~",                               (* portamento *)
 				portamento=True;
 				j++;
@@ -155,7 +158,7 @@ trackData[score_,global_,trackCount_]:=Module[
 		extend=False;
 		Which[
 			char=="x"||char=="X",
-				1,
+				pitch=0,
 			char=="%",                                  (* the same as the last pitch *)
 				pitch=lastPitch;
 				If[lastPitch===Null,
@@ -224,6 +227,12 @@ trackData[score_,global_,trackCount_]:=Module[
 		duration=15/parameter[["Speed"]]*beatCount*parameter[["Beat"]];
 		trackDuration+=duration;
 		Which[
+			percussion,
+				If[pitch===None,
+					AppendTo[soundData,{None,duration}],
+					AppendTo[soundData,{parameter[["Instr"]],duration}]
+				];
+				Continue[],
 			extend,
 				soundData[[-1,2]]+=duration;
 				lastBeat+=beatCount;
@@ -383,7 +392,7 @@ QYSParse[filename_]:=Module[
 
 
 (* ::Input:: *)
-(*AudioStop[];AudioPlay@QYSParse["E:\\QingyunMusicPlayer\\Songs\\Bios.qys"];*)
+(*AudioStop[];AudioPlay@QYSParse["E:\\QingyunMusicPlayer\\Songs\\test.qys"];*)
 
 
 (* ::Input:: *)

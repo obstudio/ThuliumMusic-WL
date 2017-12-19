@@ -69,7 +69,10 @@ parse[song_]:=Module[{filename,hash,audio},
 		AppendTo[bufferHash,song->hash];
 	];
 	Export[userPath<>"Buffer.json",Normal@bufferHash];
-	audio=parse[filename,index[[song,"Format"]]];
+	If[index[[song,"Format"]]=="qys",
+		audio=QYSParse[filename],
+		audio=QYMParse[filename]
+	];
 	Export[userPath<>"Buffer\\"<>song<>".buffer",audio,"MP3"];
 	Return[audio];
 ];
@@ -141,9 +144,9 @@ QYMP[page_]:=DynamicModule[{song},
 ];
 
 
-(* ::Code::Initialization:: *)
+(* ::Input::Initialization:: *)
 QYMP[1];
 
 
 (* ::Input:: *)
-(*AudioStop[];AudioPlay@parse[path<>"Songs\\Gate_of_Steiner.qys","qys"];*)
+(*AudioStop[];AudioPlay@QYSParse[path<>"Songs\\Gate_of_Steiner.qys"];*)

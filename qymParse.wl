@@ -32,7 +32,7 @@ getPitch1[dataString_,position_,tonality_]:=Module[
 	];
 	Return[{pitch,i}];
 ];
-parse[filename_,"qym"]:=Module[
+QYMParse[filename_]:=Module[
 	{
 		i,j,k,
 		filedata,midchar,

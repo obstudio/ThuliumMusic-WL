@@ -80,9 +80,9 @@ parse[filename_,"qys"]:=Module[
 		tercet,tercetTime,                              (* tercet *)
 		portamento=False,portaRate,                     (* portamento *)
 		tremolo1=0,tremolo2=0,                          (* tremolo *)
-		appoggiatura={},appogHarmony=False,             (* appoggiatura *)
-		staccato,stac,stacG=1/4,
-		fermata,
+		appoggiatura={},appoChord=False,                (* appoggiatura *)
+		staccato,stac,stacG=1/2,
+		fermata,appo,appoG=1/4,
 		function,argument,                              (* function *)
 		
 		keyG=0,fadeG={0,0},beatG=4,volumeG=1,           (* global *)
@@ -108,7 +108,7 @@ parse[filename_,"qys"]:=Module[
 		staccato=False;
 		lastPitch=Null;
 		(* local variables *)
-		{volume,key,fade,beat,speed,durRatio,barLength,stac}={volumeG,keyG,fadeG,beatG,speedG,durRatioG,barLengthG,stacG};
+		{volume,key,fade,beat,speed,durRatio,barLength,stac,appo}={volumeG,keyG,fadeG,beatG,speedG,durRatioG,barLengthG,stacG,appoG};
 		While[j<=StringLength[score[[i]]],
 			char=StringPart[score[[i]],j];
 			Switch[char,
@@ -135,8 +135,10 @@ parse[filename_,"qys"]:=Module[
 									If[argument>0,fade[[1]]=argument,fade[[2]]=-argument],
 								"Dur",                    (* duration ratio *)
 									durRatio=2^(-argument),
-								"Stac",                    (* duration ratio *)
+								"Stac",                   (* staccato coefficient *)
 									stac=argument,
+								"Appo",                   (* appoggiatura coefficient *)
+									appo=argument,
 								_,                        (* invalid function *)
 									AppendTo[messages,generateMessage["InvFunction",{trackCount+1,barCount+1,function}]];
 							],
@@ -226,7 +228,7 @@ parse[filename_,"qys"]:=Module[
 							AppendTo[appoggiatura,pitch];
 						];
 						appoggiatura=Drop[appoggiatura,-1];
-						appogHarmony=True,
+						appoChord=True,
 						While[k<=StringLength@content,               (* common harmony *)
 							AppendTo[pitch,getPitch[content,k,key][[1]]];
 							k=getPitch[content,k,key][[2]];
@@ -239,10 +241,10 @@ parse[filename_,"qys"]:=Module[
 			While[j<=StringLength[score[[i]]] && MemberQ[{"#","b","'",","},StringPart[score[[i]],j]],
 				char=StringPart[score[[i]],j];
 				Switch[char,
-					"#",pitch++;If[appogHarmony,appoggiatura++],
-					"b",pitch--;If[appogHarmony,appoggiatura--],
-					"'",pitch+=12;If[appogHarmony,appoggiatura+=12],
-					",",pitch-=12;If[appogHarmony,appoggiatura-=12]
+					"#",pitch++;If[appoChord,appoggiatura++],
+					"b",pitch--;If[appoChord,appoggiatura--],
+					"'",pitch+=12;If[appoChord,appoggiatura+=12],
+					",",pitch-=12;If[appoChord,appoggiatura-=12]
 				];
 				j++;
 			];
@@ -306,19 +308,19 @@ parse[filename_,"qys"]:=Module[
 			];
 			If[appoggiatura!={},
 				If[Length@appoggiatura<4,
-					beatCount-=Length@appoggiatura/16;
-					duration=15/speed/16*beat;
+					beatCount-=Length@appoggiatura*appo/4;
+					duration=15/speed*appo/4*beat;
 					Do[
 						AppendTo[track,{appoggiatura[[k]],duration,instrument}],
 					{k,Length@appoggiatura}],
-					beatCount-=1/4;
-					duration=15/speed/Length@appoggiatura/2*beat;
+					beatCount-=appo;
+					duration=15/speed*appo/Length@appoggiatura*beat;
 					Do[
 						AppendTo[track,{appoggiatura[[k]],duration,instrument}],
 					{k,Length@appoggiatura}];
 				];
 				appoggiatura={};
-				appogHarmony=False;
+				appoChord=False;
 				duration=15/speed*beatCount*beat;
 			];
 			lastBeat=beatCount;
@@ -356,7 +358,7 @@ parse[filename_,"qys"]:=Module[
 
 
 (* ::Input:: *)
-(*AudioStop[];AudioPlay@parse["E:\\QingyunMusicPlayer\\Songs\\Dark_Side_of_Fate.qys","qys"];*)
+(*AudioStop[];AudioPlay@parse["E:\\QingyunMusicPlayer\\Songs\\Bios.qys","qys"];*)
 
 
 (* ::Input:: *)

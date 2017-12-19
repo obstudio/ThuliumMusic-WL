@@ -1,10 +1,8 @@
-
-# **QYS编写手册**
+﻿# **QYS编写手册**
 
 QYS是青云播放器支持的一种文件格式，功能强大却又简单易学。
 本文将介绍QYS文件的编写方法。
 
-- 目录
  - [音符与和弦][1]
  - [高级操作符][2]
  - [音轨与格式][3]
@@ -24,6 +22,7 @@ QYS是青云播放器支持的一种文件格式，功能强大却又简单易�
  - [小节号与换行符][10]
  - [添加注释][11]
  - [基本变量声明][12]
+ - [乐器的声明][13]
 
 ----------
 
@@ -70,7 +69,7 @@ QYS提供了符号%，用来快速地表示前一个音。具体用法如下：
 
  - `%`表示前一个音的音高，无论前一个音是单音还是和弦。
  - `%`只复制音高，不复制时值。
- - `%`不复制打击乐，休止符和修饰音。
+ - `%`不复制打击乐，休止符和倚音。
  - `%`后面可以继续使用音高操作符，改变`%`整体的音高
 
   范例：《Numb》的副歌部分第一句：`<1=F>[61'#6']%%[52'5'][61'6']%%%[747'][53'5']`（未标注时值）。
@@ -88,7 +87,7 @@ QYS提供了符号%，用来快速地表示前一个音。具体用法如下：
 
   范例：`0-..`占3.5拍，而`1.-_`占1.25拍（虽然我们并不推荐这种写法）。
 
-### **简单的实例**
+### **实例**
 
 下面展示了《彩虹》的副歌部分。
 
@@ -102,7 +101,7 @@ QYS提供了符号%，用来快速地表示前一个音。具体用法如下：
     2'_5_4#_5_|3'.%_4'_3'_2'_7_|1'_2'_3'_7'_
     6'.3'_|5'_4'_3'_4'_3'2'|1'-
 
-**[回到页首][13]**
+**[回到页首][14]**
 
 ----------
 
@@ -110,24 +109,39 @@ QYS提供了符号%，用来快速地表示前一个音。具体用法如下：
 
 在许多歌谱中使用了另外一些记号，而QYS也提供了对应的处理方案。
 本章将依次介绍这些符号的用法。
-注意：若无特殊声明，本章内的`X`，`Y`均指一个音，`ABC`指若干个音，`n`指一个正整数。
+
+> 注意：若无特殊声明，本章内的`X`，`Y`均指一个音，`ABC`指若干个音，`n`指一个整数，`r`指一个实数，`&`指一个单字符。
+
+### **前言**
+
+在这一章中，我们将学习许多不同的操作符，于是如何将它们有序地组合在一起就成了一件重要的事情。为了便于学习，QYS设计了一种非常简明的方案：
+
+    (前置结构)[音高结构]后置结构
+
+让我们简单地来看一下这三个结构。每个结构内部的元素都是并列的并且允许交换，而三个结构整体上必须按照上述的顺序排列。下面的说明能够让你快速地了解这三个结构分别是什么。
+
+ - 前置结构一般用圆括号表示，如`(n-)`，`(n=)`和`(n~)`。
+ - 音高结构是唱名，和弦，`%`以及音高操作符的整体。
+ - 后置结构由单字符组成，包括时值操作符以及`` `。
+ - 除此以外，还有跨音符操作符，包括`^`和`~`。
 
 ### **连音线**
 
  - 连音线用`^`表示。当`^`连接两个完全相同的音时，表示延长前一个音的时值。在这种情况下，我们推荐使用`^%`的组合，这能让阅读者一目了然。
  - 多个音之间的连音，应当在相邻每两个音之间都添加连音线。
- - 有关`^`的更多用法，参见[倚音][14]章节。
+ - 有关`^`的更多用法，参见[倚音][15]章节。
 
   范例：之前的实例`1.-_`中，更符合乐谱规范的表示方法是`1__^%`。
 
 > QYM播放器中，每一个音默认只播放原时值的7/8，因此`^`被用于强调播放一个音为满时值。而QYS播放器中，每一个音默认按照满时值播放，所以只保留了延长前一个音的功能。事实上，`1^2`和`12`在QYS下的播放效果是完全相同的，但在QYM下前者听起来更加连贯。
 
-### **多连音**
+### **n连音**
 
  - n连音用`(n~)ABC`表示，其功能为将之后的n个音符的时值变为原时值的(2^Floor[Log2[n]])/n倍。
+ - 多连音的时值缩短效果对休止符也生效。
+ - 应当注意到n连音与连音线混用时对时值产生的影响。比如`<4/4>(3~)XY^YZ-`共有4拍，而`<4/4>(3~)XY-Z-`只有10/3拍。
 
-  范例1：`(3~)4_4#_4_`共计1拍，`(5~)3'7415,`共计4拍。
-  范例2：《东方之珠》主歌第一句：`5,_6,_11-(3~)3_2_1_5,--`。
+  范例：《东方之珠》主歌第一句：`5,_6,_11-(3~)3_2_1_5,--`。
 
 > QYM中多连音的语法是`(n-)ABC`。
 
@@ -141,10 +155,9 @@ QYS提供了符号%，用来快速地表示前一个音。具体用法如下：
 
 ### **顿音**
 
- - 顿音用音符后的`` `表示，其功能为将时值缩短为其原时值的(r-1)/r，剩下的1/r时值将自动用休止符补齐。
- - 上述参数r可以通过函数`<Stac:n>`声明，缺省值为4。
-
-> 此功能暂未实装。因此先不给出实例。
+ - 顿音用音符后的`` `表示，其功能为将时值缩短为其原时值的(1-r)倍，剩下的时值将自动用休止符补齐。
+ - 上述参数r可以通过函数`<Stac:r>`声明，其中r是0到1之间的分数或小数，缺省值为1/2。
+ - 顿音不能与连音线连用。
 
 ### **震音**
 
@@ -154,6 +167,7 @@ QYS提供了符号%，用来快速地表示前一个音。具体用法如下：
  - 使用双震音时，应确保时值能够平分给X和Y，否则会出现由于多放了一个Y而导致的时值稍长的情况。
 
   范例1：《ラストリモート》片段：`7.1'#_(1-)2'-|(1-)1'#-(1-)2'-`
+
   范例2：《Gate of Steiner》片段：`3(4=)3'---`
 
 > QYM中暂不支持单震音。
@@ -166,11 +180,16 @@ QYS提供了符号%，用来快速地表示前一个音。具体用法如下：
  - 和弦倚音右侧出现音高操作符时，将同和弦的用法一致，改变内部所有音的音高。
 
   范例1：《寂しい夜》主歌最后一小节：`3_4#_(7,34#^)5#-(4#5#7^)3'`。
+  
   范例2：《宇宙を飛ぶ不思議な巫女》伴奏最后两小节：`[1#35#^1'#]--^|%--`
 
 > QYM中暂不支持和弦倚音。
 
-### **简单的实例**
+### **延长音**
+
+> QYS中暂不支持延长音。如果您想要使用延长音，可以使用QYM语言。
+
+### **实例**
 
 下面展示了《ネクロファンタジア》的片段。
 
@@ -189,7 +208,7 @@ QYS提供了符号%，用来快速地表示前一个音。具体用法如下：
     %[15]'[13]'[135]'_[72'6']_^|%[72'5'][72'3'][72'3'5']_[61#'3'6']_^
     %_3'-..(3=)1#'-..|3'-.(3=)1#'-.0
 
-**[快速上手][15]**
+**[回到页首][16]**
 
 ----------
 
@@ -224,7 +243,7 @@ QYS提供了符号%，用来快速地表示前一个音。具体用法如下：
 
  - 如果一个音轨内没有任何音符，则称之为一个空音轨；否则称之为一个实音轨。
  - 播放器会整合所有的实音轨并同时播放。
- - 关于空音轨的作用，请参见[变量与作用域][16]章节。
+ - 关于空音轨的作用，请参见[变量与作用域][17]章节。
 
 ### 子音轨
 
@@ -238,7 +257,7 @@ QYS提供了符号%，用来快速地表示前一个音。具体用法如下：
 
  - 我们推荐您在编写歌曲时留下您的注释，它能够让阅读者对于歌曲的信息一目了然。
  - 整行注释使用标记`//`，播放器将忽略其所在的整行。
- - 注释的使用方法形如：
+ - 下面是一个使用注释的例子（选自《ネクロファンタジア》）：
 
         // Necro_Fantasia
         // 亡灵幻想曲 (ネクロファンタジア) 
@@ -255,25 +274,72 @@ QYS提供了符号%，用来快速地表示前一个音。具体用法如下：
         <Piano><1=E><0.6>\
         ......
 
-**[回到页首][17]**
+**[回到页首][18]**
 
 ----------
 
 ## **变量与函数**
 
-### 变量与作用域
+QYS允许编写者使用`<>`命令调整乐曲的基本参数。
+之前看到的`<1=C>`，`<4/4>`以及`<Stac:1/2>`就是一些例子。
+本章将介绍`<>`命令的使用方法。
 
-### 基本变量声明
+### **基本变量声明**
 
-### 乐器的声明与使用
+QYS中目前有4个基本变量，分别为调名，节拍，速度和音量。这四个变量的声明方法与其他的变量不同，故需要单独说明。我们以《運命のダークサイド》的伴奏第一段为例：
 
-### 时值缩放函数
+    <ElectricPiano><168><1=bD,><4/4><0.4><Dur:0>\
+    :[3,6,3].%_[4,6,4].%_|[4#,6,4#].%_[5,6,5].%_:\
 
-### 渐弱与渐强函数
+ - 调名由`<1=bD>`声明，它也可以等价地替换为`<1=#C>`，甚至`<1=Db>`也是可以接受的。允许在其中加入音高操作符`'`和`,`以改变整段乐谱的音高。建议将音高操作符加在调名的后面。缺省值为`<1=C>`。
+ - 节拍由`<4/4>`声明。这两个数字会被播放器用来计算时值以及检查你的歌谱，因此请务必将每个小节按规范书写。缺省值为`<4/4>`。
+ - 速度由`<168>`声明，它表示一分钟播放90拍。这里的数字一定要是正整数，如果写小数则不会被识别。缺省值为`<90>`。
+ - 音量由`<0.4>`声明，它表示以标准音量的0.4播放。这里的数字一定要是小数，如果没有小数点则不会被识别。缺省值为`<1.0>`。
+ - 调名，节拍和速度只对声明后的乐谱生效，而音量对整个音轨生效。
 
-### 其他函数
+### **乐器的声明**
 
-**[回到页首][18]**
+QYS支持直接在`<>`中声明使用的乐器。乐器对声明后的乐谱生效，因此一个音轨内部运行切换乐器。乐器名区分大小写。缺省值为`<Piano>`。
+
+ - 目前QYS支持的普通乐器如下：
+
+> Accordion, Agogo, AltoSax, Applause, Atmosphere, Bagpipe, Bandoneon, Banjo, BaritoneSax, Bass, BassAndLead, Bassoon, Bird, BlownBottle, Bowed, BrassSection, Breath, Brightness, BrightPiano, Calliope, Celesta, Cello, Charang,Chiff, Choir, Clarinet, Clavi, Contrabass, Crystal, DrawbarOrgan, Dulcimer, Echoes, ElectricBass, ElectricGrandPiano, ElectricGuitar, ElectricPiano, ElectricPiano2, EnglishHorn, Fiddle, Fifths, Flute, FrenchHorn, FretlessBass, FretNoise, Glockenspiel, Goblins, Guitar, GuitarDistorted, GuitarHarmonics, GuitarMuted, GuitarOverdriven, Gunshot, Halo, Harmonica, Harp, Harpsichord, Helicopter, HonkyTonkPiano, JazzGuitar, Kalimba, Koto, Marimba, MelodicTom, Metallic, MusicBox, MutedTrumpet, NewAge, Oboe, Ocarina, OrchestraHit, Organ, PanFlute, PercussiveOrgan, Piano, Piccolo, PickedBass, PizzicatoStrings, Polysynth, Rain, Recorder, ReedOrgan, ReverseCymbal, RockOrgan, Sawtooth, SciFi, Seashore, Shakuhachi, Shamisen, Shanai, Sitar, SlapBass, SlapBass2, SopranoSax, Soundtrack, Square, Steeldrums, SteelGuitar, Strings, Strings2, Sweep, SynthBass, SynthBass2, SynthBrass, SynthBrass2, SynthDrum, SynthStrings ,SynthStrings2, SynthVoice, Taiko, Telephone, TenorSax, Timpani, Tinklebell, TremoloStrings, Trombone, Trumpet, Tuba, TubularBells, Vibraphone, Viola, Violin, Voice, VoiceAahs, VoiceOohs, Warm, Whistle, Woodblock, Xylophone
+
+ - 目前QYS支持的打击乐如下：
+
+> BassDrum, BassDrum2, BellTree, Cabasa, Castanets, ChineseCymbal, Clap, Claves, Cowbell, CrashCymbal, CrashCymbal2, ElectricSnare, GuiroLong, GuiroShort, HighAgogo, HighBongo, HighCongaMute, HighCongaOpen, HighFloorTom, HighTimbale, HighTom, HighWoodblock, HiHatClosed, HiHatOpen, HiHatPedal, JingleBell, LowAgogo, LowBongo, LowConga, LowFloorTom, LowTimbale, LowTom, LowWoodblock, Maracas, MetronomeBell, MetronomeClick, MidTom, MidTom2, MuteCuica, MuteSurdo, MuteTriangle, OpenCuica, OpenSurdo, OpenTriangle, RideBell, RideCymbal, RideCymbal2, ScratchPull, ScratchPush, Shaker, SideStick, Slap, Snare, SplashCymbal, SquareClick, Sticks, Tambourine, Vibraslap, WhistleLong, WhistleShort
+
+### **作用域与缺省值**
+
+ - QYS中的所有变量都有缺省值。未声明之前的变量默认取缺省值。
+ - 变量的作用域分为两种。第一种变量对所在音轨内声明处以后的乐谱生效；第二种变量对整个所在音轨生效。目前绝大部分变量属于第一类，因此我们只列出属于第二类的变量：
+
+ > volume(音量), fade(渐强/渐弱)
+
+ - 当音轨存在从属关系时，高级音轨中的变量的值将作为低级音轨中变量的缺省值。特别的，空音轨中声明的变量的值将成为所有音轨中变量的缺省值。
+
+### **时值缩放函数**
+
+### **渐弱与渐强函数**
+
+### **其他函数**
+
+下面的列表展示了QYS中其他函数的功能和缺省值。
+
+<table>
+    <tr>
+        <th>函数名</th>
+        <th>函数功能</th>
+        <th>缺省值</th>
+    </tr>
+    <tr>
+        <td><code>Stac:r</code></td>
+        <td>调整顿音参数r</td>
+        <td>1/2</td>
+    </tr>
+</table>
+
+**[回到页首][20]**
 
 
   [1]: #%E9%9F%B3%E7%AC%A6%E4%B8%8E%E5%92%8C%E5%BC%A6
@@ -288,9 +354,11 @@ QYS提供了符号%，用来快速地表示前一个音。具体用法如下：
   [10]: #%E5%B0%8F%E8%8A%82%E5%8F%B7%E4%B8%8E%E6%8D%A2%E8%A1%8C%E7%AC%A6
   [11]: #%E6%B7%BB%E5%8A%A0%E6%B3%A8%E9%87%8A
   [12]: #%E5%9F%BA%E6%9C%AC%E5%8F%98%E9%87%8F%E5%A3%B0%E6%98%8E
-  [13]: #%E5%BF%AB%E9%80%9F%E4%B8%8A%E6%89%8B
-  [14]: #%E5%80%9A%E9%9F%B3
-  [15]: #%E5%BF%AB%E9%80%9F%E4%B8%8A%E6%89%8B
-  [16]: #%E5%8F%98%E9%87%8F%E4%B8%8E%E4%BD%9C%E7%94%A8%E5%9F%9F
-  [17]: #%E5%BF%AB%E9%80%9F%E4%B8%8A%E6%89%8B
+  [13]: #%E4%B9%90%E5%99%A8%E7%9A%84%E5%A3%B0%E6%98%8E
+  [14]: #%E5%BF%AB%E9%80%9F%E4%B8%8A%E6%89%8B
+  [15]: #%E5%80%9A%E9%9F%B3
+  [16]: #%E5%BF%AB%E9%80%9F%E4%B8%8A%E6%89%8B
+  [17]: #%E5%8F%98%E9%87%8F%E4%B8%8E%E4%BD%9C%E7%94%A8%E5%9F%9F
   [18]: #%E5%BF%AB%E9%80%9F%E4%B8%8A%E6%89%8B
+  [19]: #%E9%A1%BF%E9%9F%B3
+  [20]: #%E5%BF%AB%E9%80%9F%E4%B8%8A%E6%89%8B

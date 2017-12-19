@@ -141,8 +141,8 @@ QYMP[page_]:=DynamicModule[{song},
 ];
 
 
-(* ::Input:: *)
-(*QYMP[1];*)
+(* ::Code::Initialization:: *)
+QYMP[1];
 
 
 (* ::Input:: *)

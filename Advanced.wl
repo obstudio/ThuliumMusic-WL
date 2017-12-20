@@ -8,7 +8,7 @@ ModifySongInfo[song_]:=DynamicModule[{textInfo},
 		Grid[{
 			{Button[buttonName[["Save"]],putTextInfo[song,textInfo],ImageSize->150,Enabled->Dynamic[textInfo[["SongName"]]!=""]],
 			Button[buttonName[["Undo"]],textInfo=getTextInfo[song],ImageSize->150]},
-			{Button[buttonName[["Debug"]],DialogReturn[Debugger[song]],ImageSize->150],
+			{Button[buttonName[["Debug"]],DialogReturn[Debugger[song]],ImageSize->150,Enabled->False],
 			Button[buttonName[["Return"]],DialogReturn[Management[1]],ImageSize->150]}
 		}],""
 	},Center,ItemSize->30,Spacings->1],

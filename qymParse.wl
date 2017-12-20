@@ -32,7 +32,7 @@ getPitch1[dataString_,position_,tonality_]:=Module[
 	];
 	Return[{pitch,i}];
 ];
-parse[filename_,"qym"]:=Module[
+QYMParse[filename_]:=Module[
 	{
 		i,j,k,
 		filedata,midchar,
@@ -42,7 +42,7 @@ parse[filename_,"qym"]:=Module[
 		pitch,time,space,tercet=0,tercetTime,
 		repeatTime,chord=False,lastPitch,lastSpace,
 		comment,match,timeDot,duration,frequency,
-		getPitchResult,appoggiatura={}
+		getPitchResult,appoggiatura={},delay=False
 	},
 	If[!FileExistsQ[filename],
 		MessageDialog[TextCell["File not found!"],WindowTitle->"Error"];
@@ -111,6 +111,10 @@ parse[filename_,"qym"]:=Module[
 						time*=tercetTime;
 						tercet--;
 					];
+					If[delay,
+						time*=2;
+						delay=False;
+					];
 					duration=60/speed*time*beat;
 					If[appoggiatura!={},
 						If[Length@appoggiatura<4,
@@ -160,7 +164,8 @@ parse[filename_,"qym"]:=Module[
 					j=match,
 				"(",
 					match=Select[Transpose[StringPosition[filedata[[i]],")"]][[1]],#>j&][[1]];
-					If[StringTake[filedata[[i]],{match-1}]=="^",
+					Switch[StringTake[filedata[[i]],{match-1}],
+					"^",
 						k=1;
 						comment=StringTake[filedata[[i]],{j+1,match-2}];
 						While[k<=StringLength@comment,
@@ -171,9 +176,12 @@ parse[filename_,"qym"]:=Module[
 							];
 							k++;
 						],
+					".",
+						delay=True,
+					_,
 						comment=StringTake[filedata[[i]],{j+1,match-1}];
 						tercet=ToExpression[comment];
-						tercetTime=(2^Floor[Log2[tercet]])/tercet;
+						tercetTime=(2^Floor[Log2[tercet]])/tercet
 					];
 					j=match,
 				"{",

@@ -41,7 +41,10 @@
 		"InvCharacter": "(音轨&1,小节&2) 匹配到无效字符\"$3\"",
 		"InvFunction": "(音轨&1,小节&2) 声明了无效函数名\"$3\"",
 		"BarLengthError": "(音轨&1,小节&2) 拍数错误: 应为&3拍, 实际为&4拍",
-		"NoFormerPitch": "(音轨&1,小节&2) %缺少前一个音符"
+		"NoFormerPitch": "(音轨&1,小节&2) %缺少前一个音符",
+		"ExpectPitch": "(音轨&1,小节&2) 应该使用音高1~7或和弦",
+		"ExpectPrecussion": "(音轨&1,小节&2) 应该使用打击乐标记x或X",
+		"DiffDuration": "(章节&1) 各音轨长度不统一"
 	},
 	"Button": {
 		"Play": "播放",

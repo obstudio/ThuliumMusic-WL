@@ -1,8 +1,5 @@
 (* ::Package:: *)
 
-debug=True;
-
-
 getPitch[score_,pos_,key_]:=Module[
 	{i=pos,note,pitch},
 	If[StringPart[score,i]=="[",
@@ -30,9 +27,298 @@ getPitch[score_,pos_,key_]:=Module[
 ];
 
 
-getScore[filename_]:=Module[
-	{i,j,data1,data2,score,join,repeatL,repeatR},
-	If[!FileExistsQ[filename],Return[0]];
+EmitSound@Sound@SoundNote["BassDrum"]
+
+
+EmitSound@Sound@SoundNote["BassDrum2"]
+
+
+trackData[score_,global_,trackCount_]:=Module[
+	{
+		i,j,k,char,content,match,position,              (* loop related *)
+		soundData,audio,                                (* score and tracks *)
+		instrList={},                                   (* instrument *)
+		percussion=False,messages={},
+		parameter=global,
+		
+		tercet,tercetTime,                              (* tercet *)
+		portamento=False,portaRate,                     (* portamento *)
+		tremolo1=0,tremolo2=0,                          (* tremolo *)
+		appoggiatura={},appoChord=False,                (* appoggiatura *)
+		staccato,
+		fermata,
+		function,argument,                              (* function *)
+		scale,
+		
+		note,pitch,tonality,                             (* pitch *)
+		beatCount,beam=False,extend,timeDot,             (* number of beats *)
+		duration,trackDuration=0,                        (* duration *)
+		lastPitch,lastBeat,
+		barCount,barBeat                                 (* trans-note *)
+	},
+	j=1;
+	soundData={};
+	barBeat=0;
+	barCount=0;
+	beam=False;
+	staccato=False;
+	lastPitch=Null;
+	(* local variables *)
+	While[j<=StringLength[score],
+		char=StringPart[score,j];
+		Switch[char,
+			"|",
+				If[barBeat!=0,
+					barCount++;
+					If[barBeat!=parameter[["Bar"]] && barBeat*parameter[["Bar"]]!=16,
+						AppendTo[messages,generateMessage["BarLengthError",{trackCount+1,barCount,parameter[["Bar"]],barBeat}]];
+					];
+					barBeat=0;
+				];
+				j++;
+				Continue[],
+			"<",
+				match=Select[Transpose[StringPosition[score,">"]][[1]],#>j&][[1]];
+				content=StringTake[score,{j+1,match-1}];
+				Which[
+					StringContainsQ[content,":"],            (* function *)
+						position=StringPosition[content,":"][[1,1]];
+						function=StringTake[content,position-1];
+						argument=ToExpression@StringDrop[content,position];
+						Switch[function,
+							"Fade",                   (* fade *)
+								If[argument>0,parameter[["Fade"]][[1]]=argument,parameter[["Fade"]][[2]]=-argument],
+							"Dur",                    (* duration ratio *)
+								parameter[["Dur"]]=2^(-argument),
+							"Stac",                   (* staccato coefficient *)
+								parameter[["Stac"]]=argument,
+							"Appo",                   (* appoggiatura coefficient *)
+								parameter[["Appo"]]=argument,
+							_,                        (* invalid function *)
+								AppendTo[messages,generateMessage["InvFunction",{trackCount+1,barCount+1,function}]];
+						],
+					StringContainsQ[content,"="],            (* key *)
+						scale=StringCount[content,"'"]-StringCount[content,","];
+						tonality=StringDelete[StringTake[content,{3,StringLength@content}],","|"'"];
+						If[KeyExistsQ[tonalityDict,tonality],
+							parameter[["Key"]]=12*scale+tonalityDict[[tonality]],
+							AppendTo[messages,generateMessage["InvTonality",{trackCount+1,barCount+1,content}]];
+						],
+					StringContainsQ[content,"/"],            (* parameter[["Beat"]] *)
+						position=StringPosition[content,"/"][[1,1]];
+						parameter[["Beat"]]=ToExpression[StringDrop[content,position]];
+						parameter[["Bar"]]=ToExpression[StringTake[content,position-1]],
+					StringContainsQ[content,"."],            (* parameter[["Volume"]] *)
+						parameter[["Volume"]]=ToExpression[content],
+					StringMatchQ[content,NumberString],      (* speed *)
+						parameter[["Speed"]]=ToExpression[content],
+					True,                                    (* instrument *)
+						Which[
+							MemberQ[instrData[["Style"]],content],
+								parameter[["Instr"]]=content;
+								instrList=Union[instrList,{parameter[["Instr"]]}];
+								percussion=False,
+							MemberQ[instrData[["Percussion"]],content],
+								parameter[["Instr"]]=content;
+								instrList=Union[instrList,{parameter[["Instr"]]}];
+								percussion=True,
+							_,
+								AppendTo[messages,generateMessage["InvInstrument",{trackCount+1,barCount+1,content}]];
+						];
+				];
+				j=match+1;
+				Continue[],
+			"(",
+				match=Select[Transpose[StringPosition[score,")"]][[1]],#>j&][[1]];
+				content=StringTake[score,{j+1,match-2}];
+				Switch[StringTake[score,{match-1}],
+					"~",                            (* tercet *)
+						tercet=ToExpression[content];
+						tercetTime=(2^Floor[Log2[tercet]])/tercet,
+					"-",                            (* single tremolo *)
+						tremolo1=ToExpression[content],
+					"=",                            (* double tremolo *)
+						tremolo2=ToExpression[content],
+					"^",                            (* appoggiatura *)
+						k=1;
+						While[k<=StringLength@content,
+							AppendTo[appoggiatura,getPitch[content,k,parameter[["Key"]]][[1]]];
+							k=getPitch[content,k,parameter[["Key"]]][[2]];
+						];
+				];
+				j=match+1;
+				Continue[],
+			"~",                               (* portamento *)
+				portamento=True;
+				j++;
+				Continue[];
+		];
+		(* find out the pitch *)
+		j++;
+		extend=False;
+		Which[
+			char=="x"||char=="X",
+				pitch=0,
+			char=="%",                                  (* the same as the last pitch *)
+				pitch=lastPitch;
+				If[lastPitch===Null,
+					AppendTo[messages,generateMessage["NoFormerPitch",{trackCount+1,barCount+1}]]
+				],
+			DigitQ[char],                               (* single tone *)
+				note=ToExpression@char;
+				pitch=If[note==0,None,pitchDict[[note]]+parameter[["Key"]]],
+			char=="[",                                  (* harmony *)
+				match=Select[Transpose[StringPosition[score,"]"]][[1]],#>=j&][[1]];
+				content=StringTake[score,{j,match-1}];
+				pitch={};
+				k=1;
+				If[StringContainsQ[content,"^"],
+					content=StringDelete[content,"^"];           (* appoggiatura & harmony *)
+					While[k<=StringLength@content,
+						AppendTo[pitch,getPitch[content,k,parameter[["Key"]]][[1]]];
+						k=getPitch[content,k,parameter[["Key"]]][[2]];
+						AppendTo[appoggiatura,pitch];
+					];
+					appoggiatura=Drop[appoggiatura,-1];
+					appoChord=True,
+					While[k<=StringLength@content,               (* common harmony *)
+						AppendTo[pitch,getPitch[content,k,parameter[["Key"]]][[1]]];
+						k=getPitch[content,k,parameter[["Key"]]][[2]];
+					]
+				];
+				j=match+1,
+			True,
+				AppendTo[messages,generateMessage["InvCharacter",{trackCount+1,barCount+1,char}]];
+		];
+		While[j<=StringLength[score] && MemberQ[{"#","b","'",","},StringPart[score,j]],
+			char=StringPart[score,j];
+			Switch[char,
+				"#",pitch++;If[appoChord,appoggiatura++],
+				"b",pitch--;If[appoChord,appoggiatura--],
+				"'",pitch+=12;If[appoChord,appoggiatura+=12],
+				",",pitch-=12;If[appoChord,appoggiatura-=12]
+			];
+			j++;
+		];
+		If[lastPitch==pitch && beam==True,extend=True];
+		(* find out the duration *)
+		beatCount=1;
+		beam=False;
+		While[j<=StringLength[score] && MemberQ[{"-","_",".","^","`"},StringPart[score,j]],
+			char=StringPart[score,j];
+			Switch[char,
+				"-",beatCount+=1,
+				"_",beatCount/=2,
+				".",
+					timeDot=1/2;
+					While[j<=StringLength[score] && StringPart[score,j+1]==".",
+						timeDot/=2;
+						j++;
+					];
+					beatCount*=(2-timeDot),
+				"^",beam=True,
+				"`",staccato=True
+			];
+			j++;
+		];
+		If[tercet>0,beatCount*=tercetTime;tercet--];
+		beatCount*=parameter[["Dur"]];
+		barBeat+=beatCount;
+		duration=15/parameter[["Speed"]]*beatCount*parameter[["Beat"]];
+		trackDuration+=duration;
+		Which[
+			percussion,
+				If[pitch===None,
+					AppendTo[soundData,{None,duration}],
+					AppendTo[soundData,{parameter[["Instr"]],duration}]
+				];
+				Continue[],
+			extend,
+				soundData[[-1,2]]+=duration;
+				lastBeat+=beatCount;
+				Continue[],
+			tremolo1!=0,
+				duration/=(beatCount*2^tremolo1);
+				Do[
+					AppendTo[soundData,{pitch,duration,parameter[["Instr"]]}],
+				{k,beatCount*2^tremolo1}];
+				tremolo1=0;
+				Continue[],
+			tremolo2!=0,
+				duration/=(beatCount*2^tremolo2);
+				barBeat=barBeat-lastBeat;
+				soundData=Drop[soundData,-1];
+				Do[
+					AppendTo[soundData,{lastPitch,duration,parameter[["Instr"]]}];
+					AppendTo[soundData,{pitch,duration,parameter[["Instr"]]}],
+				{k,beatCount*2^(tremolo2-1)}];
+				tremolo2=0;
+				Continue[],
+			portamento,
+				portaRate=(pitch-lastPitch+1)/beatCount/6;
+				duration/=(beatCount*6);
+				barBeat=barBeat-lastBeat;
+				soundData=Drop[soundData,-1];
+				Do[
+					AppendTo[soundData,{Floor[k],duration,parameter[["Instr"]]}],
+				{k,lastPitch,pitch,portaRate}];
+				portamento=False;
+				Continue[];
+		];
+		If[appoggiatura!={},
+			If[Length@appoggiatura<4,
+				beatCount-=Length@appoggiatura*parameter[["Appo"]]/4;
+				duration=15/parameter[["Speed"]]*parameter[["Appo"]]/4*parameter[["Beat"]];
+				Do[
+					AppendTo[soundData,{appoggiatura[[k]],duration,parameter[["Instr"]]}],
+				{k,Length@appoggiatura}],
+				beatCount-=parameter[["Appo"]];
+				duration=15/parameter[["Speed"]]*parameter[["Appo"]]/Length@appoggiatura*parameter[["Beat"]];
+				Do[
+					AppendTo[soundData,{appoggiatura[[k]],duration,parameter[["Instr"]]}],
+				{k,Length@appoggiatura}];
+			];
+			appoggiatura={};
+			appoChord=False;
+			duration=15/parameter[["Speed"]]*beatCount*parameter[["Beat"]];
+		];
+		lastBeat=beatCount;
+		If[!pitch===None,lastPitch=pitch];
+		If[staccato,
+			AppendTo[soundData,{pitch,duration*(1-parameter[["Stac"]]),parameter[["Instr"]]}];
+			AppendTo[soundData,{None,duration*parameter[["Stac"]]}];
+			staccato=False,
+			AppendTo[soundData,{pitch,duration,parameter[["Instr"]]}];
+		];
+	];
+	Return[<|
+		"Audio"->If[soundData=={},0,                     (* empty track *)
+			If[StringPart[score,j-1]!="|",
+				AppendTo[messages,generateMessage["TerminatorAbsent",{trackCount+1}]]
+			];
+			parameter[["Volume"]]*AudioFade[Sound[SoundNote@@#&/@soundData],parameter[["Fade"]]]
+		],
+		"Local"->parameter,
+		"Messages"->messages,
+		"Duration"->trackDuration,
+		"Instruments"->instrList
+	|>];
+];
+
+
+QYSParse[filename_]:=Module[
+	{
+		i,j,
+		data1,data2,score,join,repeatL,repeatR,
+		parameter=defaultParameter,
+		messages={},instrList={},track,
+		audio=0,duration=0,
+		trackCount=0,trackDuration,
+		sectionCount=0,sectionDuration=0
+	},
+	If[!FileExistsQ[filename],
+		AppendTo[messages,generateMessage["FileNotFound",{filename}]];
+	];
 	data1=StringJoin/@Import[filename,"Table"];             (* delete the spacings *)
 	data1=Select[data1,!StringContainsQ[#,"//"]&];          (* delete the comments *)
 	data1=Cases[data1,Except[""]];                          (* delete the blank lines *)
@@ -47,12 +333,13 @@ getScore[filename_]:=Module[
 	data2=StringDelete[#,"\\"]&/@data2;                     (* delete the joint marks *)
 	score=Array[""&,Length@data2];
 	Do[
-		If[StringPosition[data2[[i]],"|:"]=={},
-			score[[i]]=data2[[i]],
-			(* repeat *)
-			repeatL=Transpose[StringPosition[data2[[i]],"|:"]][[1]];
+		If[StringPosition[data2[[i]],"|:"]=={},score[[i]]=data2[[i]],
+			repeatL=Transpose[StringPosition[data2[[i]],"|:"]][[1]];			(* repeat *)
 			repeatR=Transpose[StringPosition[data2[[i]],":|"]][[1]];
-			If[Length@repeatL!=Length@repeatR,Return[i]];
+			If[Length@repeatL!=Length@repeatR,
+				AppendTo[messages,generateMessage["RepeatError",{score}]];
+				Continue[];
+			];
 			score[[i]]=StringTake[data2[[i]],repeatL[[1]]-1]<>"|";
 			Do[
 				score[[i]]=score[[i]]<>StringTake[data2[[i]],{repeatL[[j]]+2,repeatR[[j]]-1}]<>"|";
@@ -67,277 +354,37 @@ getScore[filename_]:=Module[
 				score[[i]]=score[[i]]<>StringTake[data2[[i]],{repeatR[[-1]]+2,StringLength@data2[[i]]}]
 			];
 		],
-	{i,Length@data2}];
-	Return[score];
-];
-
-
-parse[filename_,"qys"]:=Module[
-	{
-		i,j,k,char,content,match,position,              (* loop related *)
-		score,trackCount=0,track,audio=0,               (* score and tracks *)
-		instrument="Piano",instrList={},                (* instrument *)
-		precussion=False,messages={},
-		
-		tercet,tercetTime,                              (* tercet *)
-		portamento=False,portaRate,                     (* portamento *)
-		tremolo1=0,tremolo2=0,                          (* tremolo *)
-		appoggiatura={},appogHarmony=False,             (* appoggiatura *)
-		function,argument,                              (* function *)
-		
-		keyG=0,fadeG={0,0},beatG=4,volumeG=1,           (* global *)
-		barLengthG=4,speedG=60,durRatioG=1,
-		key,scale,fade,beat,volume,                      (* local *)
-		barLength,speed,durRatio,
-		
-		note,pitch,tonality,                             (* pitch *)
-		beatCount,beam=False,extend,timeDot,             (* number of beats *)
-		duration,trackDuration,                          (* duration *)
-		lastPitch,lastBeat,
-		barCount,barBeat                                 (* trans-note *)
-	},
-	score=getScore[filename];
-	If[score===0,AppendTo[messages,generateMessage["FileNotFound",{filename}]]];
-	If[NumberQ[score]&&score!=0,AppendTo[messages,generateMessage["RepeatError",{score}]]];
+	{i,Length@data2}];	
 	Do[
-		j=1;
-		track={};
-		barBeat=0;
-		barCount=0;
-		beam=False;
-		lastPitch=Null;
-		(* local variables *)
-		{volume,key,fade,beat,speed,durRatio,barLength}={volumeG,keyG,fadeG,beatG,speedG,durRatioG,barLengthG};
-		While[j<=StringLength[score[[i]]],
-			char=StringPart[score[[i]],j];
-			Switch[char,
-				"|",
-					If[debug && barBeat!=0,
-						barCount++;
-						If[barBeat!=barLength && barBeat*barLength!=16,
-							AppendTo[messages,generateMessage["BarLengthError",{trackCount+1,barCount,barLength,barBeat}]];
-						];
-						barBeat=0;
-					];
-					j++;
-					Continue[],
-				"<",
-					match=Select[Transpose[StringPosition[score[[i]],">"]][[1]],#>j&][[1]];
-					content=StringTake[score[[i]],{j+1,match-1}];
-					Which[
-						StringContainsQ[content,"="],            (* key *)
-							scale=StringCount[content,"'"]-StringCount[content,","];
-							tonality=StringDelete[StringTake[content,{3,StringLength@content}],","|"'"];
-							If[KeyExistsQ[tonalityDict,tonality],
-								key=12*scale+tonalityDict[[tonality]],
-								AppendTo[messages,generateMessage["InvTonality",{trackCount+1,barCount+1,content}]];
-							],
-						StringContainsQ[content,"/"],            (* beat *)
-							position=StringPosition[content,"/"][[1,1]];
-							beat=ToExpression[StringDrop[content,position]];
-							barLength=ToExpression[StringTake[content,position-1]],
-						StringContainsQ[content,"."],            (* volume *)
-							volume=ToExpression[content],
-						StringMatchQ[content,NumberString],      (* speed *)
-							speed=ToExpression[content],
-						StringContainsQ[content,":"],            (* function *)
-							position=StringPosition[content,":"][[1,1]];
-							function=StringTake[content,position-1];
-							argument=ToExpression@StringDrop[content,position];
-							Switch[function,
-								"Fade",                   (* fade *)
-									If[argument>0,fade[[1]]=argument,fade[[2]]=-argument],
-								"Dur",                    (* duration ratio *)
-									durRatio=2^(-ToExpression[StringDrop[content,position]]),
-								_,                        (* invalid function *)
-									AppendTo[messages,generateMessage["InvFunction",{trackCount+1,barCount+1,function}]];
-							],
-						True,                                    (* instrument *)
-							If[MemberQ[instrData[["Style"]],content],
-								instrument=content;
-								instrList=Union[instrList,{instrument}],						
-								AppendTo[messages,generateMessage["InvInstrument",{trackCount+1,barCount+1,content}]];
-							];
-					];
-					j=match+1;
-					Continue[],
-				"(",
-					match=Select[Transpose[StringPosition[score[[i]],")"]][[1]],#>j&][[1]];
-					content=StringTake[score[[i]],{j+1,match-2}];
-					Switch[StringTake[score[[i]],{match-1}],
-						"~",                            (* tercet *)
-							tercet=ToExpression[content];
-							tercetTime=(2^Floor[Log2[tercet]])/tercet,
-						"-",                            (* single tremolo *)
-							tremolo1=ToExpression[content],
-						"=",                            (* double tremolo *)
-							tremolo2=ToExpression[content],
-						"^",                            (* appoggiatura *)
-							k=1;
-							While[k<=StringLength@content,
-								AppendTo[appoggiatura,getPitch[content,k,key][[1]]];
-								k=getPitch[content,k,key][[2]];
-							];
-					];
-					j=match+1;
-					Continue[],
-				"{",                               (* instrument *)
-					match=Select[Transpose[StringPosition[score[[i]],"}"]][[1]],#>j&][[1]];
-					content=StringTake[score[[i]],{j+1,match-1}];
-					If[MemberQ[instrData[["Style"]],content],
-						instrument=content;
-						instrList=Union[instrList,{instrument}],						
-						AppendTo[messages,generateMessage["InvInstrument",{trackCount+1,barCount+1,content}]];
-					];
-					j=match+1;
-					Continue[],
-				"~",                               (* portamento *)
-					portamento=True;
-					j++;
-					Continue[];
-			];
-			(* find out the pitch *)
-			j++;
-			extend=False;
-			Which[
-				char=="x"||char=="X",
-					1,
-				char=="%",                                  (* the same as the last pitch *)
-					pitch=lastPitch;
-					If[lastPitch===Null,
-						AppendTo[messages,generateMessage["NoFormerPitch",{trackCount+1,barCount+1}]]
-					],
-				DigitQ[char],                               (* single tone *)
-					note=ToExpression@char;
-					pitch=If[note==0,None,pitchDict[[note]]+key],
-				char=="[",                                  (* harmony *)
-					match=Select[Transpose[StringPosition[score[[i]],"]"]][[1]],#>=j&][[1]];
-					content=StringTake[score[[i]],{j,match-1}];
-					pitch={};
-					k=1;
-					If[StringContainsQ[content,"^"],
-						content=StringDelete[content,"^"];           (* appoggiatura & harmony *)
-						While[k<=StringLength@content,
-							AppendTo[pitch,getPitch[content,k,key][[1]]];
-							k=getPitch[content,k,key][[2]];
-							AppendTo[appoggiatura,pitch];
-						];
-						appoggiatura=Drop[appoggiatura,-1];
-						appogHarmony=True,
-						While[k<=StringLength@content,               (* common harmony *)
-							AppendTo[pitch,getPitch[content,k,key][[1]]];
-							k=getPitch[content,k,key][[2]];
-						]
-					];
-					j=match+1,
-				True,
-					AppendTo[messages,generateMessage["InvCharacter",{trackCount+1,barCount+1,char}]];
-			];
-			While[j<=StringLength[score[[i]]] && MemberQ[{"#","b","'",","},StringPart[score[[i]],j]],
-				char=StringPart[score[[i]],j];
-				Switch[char,
-					"#",pitch++;If[appogHarmony,appoggiatura++],
-					"b",pitch--;If[appogHarmony,appoggiatura--],
-					"'",pitch+=12;If[appogHarmony,appoggiatura+=12],
-					",",pitch-=12;If[appogHarmony,appoggiatura-=12]
-				];
-				j++;
-			];
-			If[lastPitch==pitch && beam==True,extend=True];
-			(* find out the duration *)
-			beatCount=1;
-			beam=False;
-			While[j<=StringLength[score[[i]]]&&MemberQ[{"-","_",".","^"},StringPart[score[[i]],j]],
-				char=StringPart[score[[i]],j];
-				Switch[char,
-					"-",beatCount+=1,
-					"_",beatCount/=2,
-					".",
-						timeDot=1/2;
-						While[j<=StringLength[score[[i]]] && StringPart[score[[i]],j+1]==".",
-							timeDot/=2;
-							j++;
-						];
-						beatCount*=(2-timeDot),
-					"^",beam=True
-				];
-				j++;
-			];
-			If[tercet>0,beatCount*=tercetTime;tercet--];
-			beatCount*=durRatio;
-			barBeat+=beatCount;
-			duration=15/speed*beatCount*beat;
-			If[extend,
-				track[[-1,2]]+=duration;
-				lastBeat+=beatCount;
-				Continue[];
-			];
-			If[tremolo1!=0,
-				duration/=(beatCount*2^tremolo1);
-				Do[
-					AppendTo[track,{pitch,duration,instrument}],
-				{k,beatCount*2^tremolo1}];
-				tremolo1=0;
-				Continue[];
-			];
-			If[tremolo2!=0,
-				duration/=(beatCount*2^tremolo2);
-				barBeat=barBeat-lastBeat;
-				track=Drop[track,-1];
-				Do[
-					AppendTo[track,{lastPitch,duration,instrument}];
-					AppendTo[track,{pitch,duration,instrument}],
-				{k,beatCount*2^(tremolo2-1)}];
-				tremolo2=0;
-				Continue[];
-			];
-			If[portamento,
-				portaRate=(pitch-lastPitch+1)/beatCount/6;
-				duration/=(beatCount*6);
-				barBeat=barBeat-lastBeat;
-				track=Drop[track,-1];
-				Do[
-					AppendTo[track,{Floor[k],duration,instrument}],
-				{k,lastPitch,pitch,portaRate}];
-				portamento=False;
-				Continue[];
-			];
-			If[appoggiatura!={},
-				If[Length@appoggiatura<4,
-					beatCount-=Length@appoggiatura/16;
-					duration=15/speed/16*beat;
-					Do[
-						AppendTo[track,{appoggiatura[[k]],duration,instrument}],
-					{k,Length@appoggiatura}],
-					beatCount-=1/4;
-					duration=15/speed/Length@appoggiatura/2*beat;
-					Do[
-						AppendTo[track,{appoggiatura[[k]],duration,instrument}],
-					{k,Length@appoggiatura}];
-				];
-				appoggiatura={};
-				appogHarmony=False;
-				duration=15/speed*beatCount*beat;
-			];
-			lastBeat=beatCount;
-			If[!pitch===None,lastPitch=pitch];
-			AppendTo[track,{pitch,duration,instrument}];
-		];
-		If[track!={},
+		track=trackData[score[[i]],parameter,trackCount];
+		instrList=Union[instrList,track[["Instruments"]]];
+		messages=Join[messages,track[["Messages"]]];
+		If[track[["Duration"]]==0,
+			(* empty soundtrack *)
+			parameter=track[["Local"]];
+			duration+=sectionDuration;
+			sectionCount++;
+			sectionDuration=0,
+			(* real soundtrack *)
 			trackCount++;
-			If[StringTake[score[[i]],{j-1}]!="|",
-				AppendTo[messages,generateMessage["TerminatorAbsent",{track}]];
+			trackDuration=track[["Duration"]];
+			If[track[["Duration"]]!=sectionDuration && sectionDuration!=0,
+				AppendTo[messages,generateMessage["DiffDuration",{sectionCount}]];
 			];
-			audio+=volume*AudioFade[Sound[SoundNote@@#&/@track],fade],
-			{volumeG,keyG,fadeG,beatG,speedG,durRatioG,barLengthG}={volume,key,fade,beat,speed,durRatio,barLength};			
+			sectionDuration=Max[trackDuration,sectionDuration];
+			If[duration!=0,
+				audio+=AudioPad[track[["Audio"]],{duration,0}],
+				audio+=track[["Audio"]]
+			];
 		],
 	{i,Length[score]}];
-	If[fadeG!={0,0},audio=AudioFade[audio,fadeG]];
-	If[debug,Print[Column@messages]];
+	If[sectionDuration!={},duration+=Max@sectionDuration];
+	If[parameter[["Fade"]]!={0,0},audio=AudioFade[audio,parameter[["Fade"]]]];
+	If[messages!={},Print[Column@messages]];
 	Return[Audio[audio,MetaInformation-><|
 		"Format"->"qys",
 		"TrackCount"->trackCount,
-		"Duration"->QuantityMagnitude@UnitConvert[Duration@audio,"Seconds"],
+		"Duration"->duration,
 		"Instruments"->instrList,
 		"Messages"->messages
 	|>]];
@@ -345,15 +392,11 @@ parse[filename_,"qys"]:=Module[
 
 
 (* ::Input:: *)
-(*debug=True;*)
+(*AudioStop[];AudioPlay@QYSParse["E:\\QingyunMusicPlayer\\Songs\\test.qys"];*)
 
 
 (* ::Input:: *)
-(*AudioStop[];AudioPlay@parse["E:\\QingyunMusicPlayer\\Songs\\Dark_Side_of_Fate.qys","qys"];*)
-
-
-(* ::Input:: *)
-(*AudioStop[];AudioPlay@parse["E:\\QingyunMusicPlayer\\Songs\\test.qys","qys"];*)
+(*AudioStop[];AudioPlay@QYSParse["E:\\QingyunMusicPlayer\\Songs\\Dark_Side_of_Fate.qys"];*)
 
 
 (* ::Input:: *)
@@ -365,4 +408,4 @@ parse[filename_,"qys"]:=Module[
 
 
 (* ::Input:: *)
-(*Export["e:\\1.mp3",parse["E:\\QingyunMusicPlayer\\Songs\\Lonely_Night.qys","qys"]];*)
+(*Export["e:\\1.mp3",QYSParse["E:\\QingyunMusicPlayer\\Songs\\Lonely_Night.qys"]];*)

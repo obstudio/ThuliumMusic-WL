@@ -10,7 +10,7 @@ tonalityDict=<|
 pitchDict=<|"1"->0,"2"->2,"3"->4,"4"->5,"5"->7,"6"->9,"7"->11|>;
 defaultParameter=<|
 	"Volume"->1,"Speed"->90,"Key"->0,"Beat"->4,"Bar"->4,"Instr"->"Piano",
-	"Dur"->1,"FadeIn"->0,"FadeOut"->0,"Stac"->1/2,"Appo"->1/4,"Oct"->0,
+	"Dur"->0,"FadeIn"->0,"FadeOut"->0,"Stac"->1/2,"Appo"->1/4,"Oct"->0,
 	"Port"->6,"Spac"->0
 |>;
 functionList=Complement[Keys@defaultParameter,{"Volume","Speed","Key","Beat","Bar","Instr"}];

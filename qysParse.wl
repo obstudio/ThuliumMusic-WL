@@ -394,6 +394,11 @@ QYSParse[filename_]:=Module[
 (*Export["e:\\1.mp3",QYSParse["E:\\QingyunMusicPlayer\\Songs\\Noushyou_Sakuretsu_Garu.qys"]];*)
 
 
+(* ::Input:: *)
+(*AudioStop[];*)
+(*AudioPlay@QYSParse["C:\\Users\\kouch\\Documents\\QingyunMusicPlayer-WL\\Songs\\Seijyouki_no_Pierrot.qys"];*)
+
+
 (* ::Text:: *)
 (*ElectricSnare, BassDrum, Shaker, RideCymbal, Snare, CrashCymbal, HiHatPedal*)
 (*Ocarina, Oboe, Clarinet, Recorder*)

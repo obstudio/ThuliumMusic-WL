@@ -47,7 +47,7 @@ trackData[score_,global_,trackCount_]:=Module[
 		beatCount,beam=False,extend,timeDot,            (* number of beats *)
 		duration,trackDuration=0,                       (* duration *)
 		lastPitch,lastBeat,
-		barCount,barBeat                                 (* trans-note *)
+		barCount,barBeat                                (* trans-note *)
 	},
 	j=1;
 	soundData={};
@@ -78,15 +78,7 @@ trackData[score_,global_,trackCount_]:=Module[
 						position=StringPosition[content,":"][[1,1]];
 						function=StringTake[content,position-1];
 						argument=ToExpression@StringDrop[content,position];
-						Switch[function,
-							"Fade",                   (* fade *)
-								If[argument>0,parameter[["Fade"]][[1]]=argument,parameter[["Fade"]][[2]]=-argument],
-							"Dur",                    (* duration ratio *)
-								parameter[["Dur"]]=2^(-argument),
-							"Stac",                   (* staccato coefficient *)
-								parameter[["Appo"]]=argument,
-							"Port",                   (* appoggiatura coefficient *)
-								AppendTo[messages,generateMessage["InvFunction",{trackCount+1,barCount+1,function}]];
+						If[MemberQ[functionList,function],
 							parameter[[function]]=argument,
 							AppendTo[messages,generateMessage["InvFunction",{trackCount+1,barCount+1,function}]]
 						],
@@ -94,7 +86,6 @@ trackData[score_,global_,trackCount_]:=Module[
 						parameter[["Oct"]]=StringCount[content,"'"]-StringCount[content,","];
 						tonality=StringDelete[StringTake[content,{3,StringLength@content}],","|"'"];
 						If[KeyExistsQ[tonalityDict,tonality],
-							parameter[["Key"]]=12*scale+tonalityDict[[tonality]],
 							parameter[["Key"]]=tonalityDict[[tonality]],
 							AppendTo[messages,generateMessage["InvTonality",{trackCount+1,barCount+1,content}]];
 						],

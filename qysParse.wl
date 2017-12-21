@@ -27,12 +27,6 @@ getPitch[score_,pos_,key_]:=Module[
 ];
 
 
-EmitSound@Sound@SoundNote["BassDrum"]
-
-
-EmitSound@Sound@SoundNote["BassDrum2"]
-
-
 trackData[score_,global_,trackCount_]:=Module[
 	{
 		i,j,k,char,content,match,position,              (* loop related *)
@@ -94,6 +88,8 @@ trackData[score_,global_,trackCount_]:=Module[
 								parameter[["Stac"]]=argument,
 							"Appo",                   (* appoggiatura coefficient *)
 								parameter[["Appo"]]=argument,
+							"Port",                   (* appoggiatura coefficient *)
+								parameter[["Port"]]=argument,
 							_,                        (* invalid function *)
 								AppendTo[messages,generateMessage["InvFunction",{trackCount+1,barCount+1,function}]];
 						],
@@ -231,19 +227,16 @@ trackData[score_,global_,trackCount_]:=Module[
 				If[pitch===None,
 					AppendTo[soundData,{None,duration}],
 					AppendTo[soundData,{parameter[["Instr"]],duration}]
-				];
-				Continue[],
+				],
 			extend,
 				soundData[[-1,2]]+=duration;
-				lastBeat+=beatCount;
-				Continue[],
+				lastBeat+=beatCount,
 			tremolo1!=0,
 				duration/=(beatCount*2^tremolo1);
 				Do[
 					AppendTo[soundData,{pitch,duration,parameter[["Instr"]]}],
 				{k,beatCount*2^tremolo1}];
-				tremolo1=0;
-				Continue[],
+				tremolo1=0,
 			tremolo2!=0,
 				duration/=(beatCount*2^tremolo2);
 				barBeat=barBeat-lastBeat;
@@ -252,43 +245,42 @@ trackData[score_,global_,trackCount_]:=Module[
 					AppendTo[soundData,{lastPitch,duration,parameter[["Instr"]]}];
 					AppendTo[soundData,{pitch,duration,parameter[["Instr"]]}],
 				{k,beatCount*2^(tremolo2-1)}];
-				tremolo2=0;
-				Continue[],
+				tremolo2=0,
 			portamento,
-				portaRate=(pitch-lastPitch+1)/beatCount/6;
-				duration/=(beatCount*6);
+				portaRate=(pitch-lastPitch+1)/beatCount/parameter[["Port"]];
+				duration/=(beatCount*parameter[["Port"]]);
 				barBeat=barBeat-lastBeat;
 				soundData=Drop[soundData,-1];
 				Do[
 					AppendTo[soundData,{Floor[k],duration,parameter[["Instr"]]}],
 				{k,lastPitch,pitch,portaRate}];
-				portamento=False;
-				Continue[];
-		];
-		If[appoggiatura!={},
-			If[Length@appoggiatura<4,
-				beatCount-=Length@appoggiatura*parameter[["Appo"]]/4;
-				duration=15/parameter[["Speed"]]*parameter[["Appo"]]/4*parameter[["Beat"]];
-				Do[
-					AppendTo[soundData,{appoggiatura[[k]],duration,parameter[["Instr"]]}],
-				{k,Length@appoggiatura}],
-				beatCount-=parameter[["Appo"]];
-				duration=15/parameter[["Speed"]]*parameter[["Appo"]]/Length@appoggiatura*parameter[["Beat"]];
-				Do[
-					AppendTo[soundData,{appoggiatura[[k]],duration,parameter[["Instr"]]}],
-				{k,Length@appoggiatura}];
-			];
-			appoggiatura={};
-			appoChord=False;
-			duration=15/parameter[["Speed"]]*beatCount*parameter[["Beat"]];
-		];
-		lastBeat=beatCount;
-		If[!pitch===None,lastPitch=pitch];
-		If[staccato,
-			AppendTo[soundData,{pitch,duration*(1-parameter[["Stac"]]),parameter[["Instr"]]}];
-			AppendTo[soundData,{None,duration*parameter[["Stac"]]}];
-			staccato=False,
-			AppendTo[soundData,{pitch,duration,parameter[["Instr"]]}];
+				portamento=False,
+			True,
+				If[appoggiatura!={},
+					If[Length@appoggiatura<4,
+						beatCount-=Length@appoggiatura*parameter[["Appo"]]/4;
+						duration=15/parameter[["Speed"]]*parameter[["Appo"]]/4*parameter[["Beat"]];
+						Do[
+							AppendTo[soundData,{appoggiatura[[k]],duration,parameter[["Instr"]]}],
+						{k,Length@appoggiatura}],
+						beatCount-=parameter[["Appo"]];
+						duration=15/parameter[["Speed"]]*parameter[["Appo"]]/Length@appoggiatura*parameter[["Beat"]];
+						Do[
+							AppendTo[soundData,{appoggiatura[[k]],duration,parameter[["Instr"]]}],
+						{k,Length@appoggiatura}];
+					];
+					appoggiatura={};
+					appoChord=False;
+					duration=15/parameter[["Speed"]]*beatCount*parameter[["Beat"]];
+				];
+				lastBeat=beatCount;
+				If[!pitch===None,lastPitch=pitch];
+				If[staccato,
+					AppendTo[soundData,{pitch,duration*(1-parameter[["Stac"]]),parameter[["Instr"]]}];
+					AppendTo[soundData,{None,duration*parameter[["Stac"]]}];
+					staccato=False,
+					AppendTo[soundData,{pitch,duration,parameter[["Instr"]]}];
+				];
 		];
 	];
 	Return[<|
@@ -313,7 +305,7 @@ QYSParse[filename_]:=Module[
 		parameter=defaultParameter,
 		messages={},instrList={},track,
 		audio=0,duration=0,
-		trackCount=0,trackDuration,
+		trackCount=0,trackDuration={},
 		sectionCount=0,sectionDuration=0
 	},
 	If[!FileExistsQ[filename],
@@ -362,16 +354,15 @@ QYSParse[filename_]:=Module[
 		If[track[["Duration"]]==0,
 			(* empty soundtrack *)
 			parameter=track[["Local"]];
-			duration+=sectionDuration;
+			If[sectionDuration!={},duration+=Max@sectionDuration];
 			sectionCount++;
-			sectionDuration=0,
-			(* real soundtrack *)
-			trackCount++;
-			trackDuration=track[["Duration"]];
-			If[track[["Duration"]]!=sectionDuration && sectionDuration!=0,
+			If[!SameQ@@sectionDuration,
 				AppendTo[messages,generateMessage["DiffDuration",{sectionCount}]];
 			];
-			sectionDuration=Max[trackDuration,sectionDuration];
+			sectionDuration={},
+			(* real soundtrack *)
+			trackCount++;
+			AppendTo[sectionDuration,track[["Duration"]]];
 			If[duration!=0,
 				audio+=AudioPad[track[["Audio"]],{duration,0}],
 				audio+=track[["Audio"]]
@@ -379,8 +370,12 @@ QYSParse[filename_]:=Module[
 		],
 	{i,Length[score]}];
 	If[sectionDuration!={},duration+=Max@sectionDuration];
+	If[!SameQ@@sectionDuration,
+		AppendTo[messages,generateMessage["DiffDuration",{sectionCount}]];
+	];
 	If[parameter[["Fade"]]!={0,0},audio=AudioFade[audio,parameter[["Fade"]]]];
 	If[messages!={},Print[Column@messages]];
+	Print[sectionDuration];
 	Return[Audio[audio,MetaInformation-><|
 		"Format"->"qys",
 		"TrackCount"->trackCount,
@@ -396,7 +391,7 @@ QYSParse[filename_]:=Module[
 
 
 (* ::Input:: *)
-(*AudioStop[];AudioPlay@QYSParse["E:\\QingyunMusicPlayer\\Songs\\Dark_Side_of_Fate.qys"];*)
+(*AudioStop[];AudioPlay@QYSParse["E:\\QingyunMusicPlayer\\Songs\\Noushyou_Sakuretsu_Garu.qys"];*)
 
 
 (* ::Input:: *)
@@ -404,8 +399,13 @@ QYSParse[filename_]:=Module[
 
 
 (* ::Input:: *)
-(*EmitSound@Sound@SoundNote[0,1,"Xylophone"]*)
+(*EmitSound@Sound@SoundNote["Snare",1]*)
 
 
 (* ::Input:: *)
-(*Export["e:\\1.mp3",QYSParse["E:\\QingyunMusicPlayer\\Songs\\Lonely_Night.qys"]];*)
+(*Export["e:\\1.mp3",QYSParse["E:\\QingyunMusicPlayer\\Songs\\Noushyou_Sakuretsu_Garu.qys"]];*)
+
+
+(* ::Text:: *)
+(*ElectricSnare, BassDrum, Shaker, RideCymbal, Snare, CrashCymbal, HiHatPedal*)
+(*Ocarina, Oboe, Clarinet, Recorder*)

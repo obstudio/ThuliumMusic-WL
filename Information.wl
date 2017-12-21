@@ -10,7 +10,7 @@ tonalityDict=<|
 pitchDict=<|"1"->0,"2"->2,"3"->4,"4"->5,"5"->7,"6"->9,"7"->11|>;
 defaultParameter=<|
 	"Volume"->1,"Speed"->90,"Key"->0,"Beat"->4,"Bar"->4,"Instr"->"Piano",
-	"Dur"->1,"Fade"->{0,0},"Stac"->1/2,"Appo"->1/4	
+	"Dur"->1,"Fade"->{0,0},"Stac"->1/2,"Appo"->1/4,"Scale"->0,"Port"->6
 |>;
 
 

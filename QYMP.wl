@@ -121,13 +121,13 @@ QYMP[page_]:=DynamicModule[{song},
 				Style[index[[#,"SongName"]],24,FontFamily->"\:5fae\:8f6f\:96c5\:9ed1"],
 				Spacer[20],
 				If[KeyExistsQ[index[[#]],"Comment"],Style[index[[#,"Comment"]],20,Gray,FontFamily->"\:5fae\:8f6f\:96c5\:9ed1"],Nothing]
-			}]&/@songList16[[page]],
+			}]&/@songListPaged[[page]],
 			Appearance->"Vertical"
 		],"",
 		Row[{
 			Button[buttonName[["PgPrev"]],DialogReturn[QYMP[page-1]],ImageSize->200,Enabled->(page>1)],
 			Spacer[10],
-			Button[buttonName[["PgNext"]],DialogReturn[QYMP[page+1]],ImageSize->200,Enabled->(page<Length@songList16)]
+			Button[buttonName[["PgNext"]],DialogReturn[QYMP[page+1]],ImageSize->200,Enabled->(page<pageCount)]
 		}],
 		Row[{
 			Button[buttonName[["PlaySong"]],DialogReturn[Player[song]],ImageSize->200],

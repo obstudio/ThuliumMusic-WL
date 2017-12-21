@@ -42,11 +42,10 @@ trackData[score_,global_,trackCount_]:=Module[
 		staccato,
 		fermata,
 		function,argument,                              (* function *)
-		scale,
 		
-		note,pitch,tonality,                             (* pitch *)
-		beatCount,beam=False,extend,timeDot,             (* number of beats *)
-		duration,trackDuration=0,                        (* duration *)
+		note,pitch,tonality,                            (* pitch *)
+		beatCount,beam=False,extend,timeDot,            (* number of beats *)
+		duration,trackDuration=0,                       (* duration *)
 		lastPitch,lastBeat,
 		barCount,barBeat                                 (* trans-note *)
 	},
@@ -85,26 +84,25 @@ trackData[score_,global_,trackCount_]:=Module[
 							"Dur",                    (* duration ratio *)
 								parameter[["Dur"]]=2^(-argument),
 							"Stac",                   (* staccato coefficient *)
-								parameter[["Stac"]]=argument,
-							"Appo",                   (* appoggiatura coefficient *)
 								parameter[["Appo"]]=argument,
 							"Port",                   (* appoggiatura coefficient *)
-								parameter[["Port"]]=argument,
-							_,                        (* invalid function *)
 								AppendTo[messages,generateMessage["InvFunction",{trackCount+1,barCount+1,function}]];
+							parameter[[function]]=argument,
+							AppendTo[messages,generateMessage["InvFunction",{trackCount+1,barCount+1,function}]]
 						],
 					StringContainsQ[content,"="],            (* key *)
-						scale=StringCount[content,"'"]-StringCount[content,","];
+						parameter[["Oct"]]=StringCount[content,"'"]-StringCount[content,","];
 						tonality=StringDelete[StringTake[content,{3,StringLength@content}],","|"'"];
 						If[KeyExistsQ[tonalityDict,tonality],
 							parameter[["Key"]]=12*scale+tonalityDict[[tonality]],
+							parameter[["Key"]]=tonalityDict[[tonality]],
 							AppendTo[messages,generateMessage["InvTonality",{trackCount+1,barCount+1,content}]];
 						],
-					StringContainsQ[content,"/"],            (* parameter[["Beat"]] *)
+					StringContainsQ[content,"/"],            (* beat *)
 						position=StringPosition[content,"/"][[1,1]];
 						parameter[["Beat"]]=ToExpression[StringDrop[content,position]];
 						parameter[["Bar"]]=ToExpression[StringTake[content,position-1]],
-					StringContainsQ[content,"."],            (* parameter[["Volume"]] *)
+					StringContainsQ[content,"."],            (* volume *)
 						parameter[["Volume"]]=ToExpression[content],
 					StringMatchQ[content,NumberString],      (* speed *)
 						parameter[["Speed"]]=ToExpression[content],
@@ -138,8 +136,8 @@ trackData[score_,global_,trackCount_]:=Module[
 					"^",                            (* appoggiatura *)
 						k=1;
 						While[k<=StringLength@content,
-							AppendTo[appoggiatura,getPitch[content,k,parameter[["Key"]]][[1]]];
-							k=getPitch[content,k,parameter[["Key"]]][[2]];
+							AppendTo[appoggiatura,getPitch[content,k,12*parameter[["Oct"]]+parameter[["Key"]]][[1]]];
+							k=getPitch[content,k,12*parameter[["Oct"]]+parameter[["Key"]]][[2]];
 						];
 				];
 				j=match+1;
@@ -162,7 +160,7 @@ trackData[score_,global_,trackCount_]:=Module[
 				],
 			DigitQ[char],                               (* single tone *)
 				note=ToExpression@char;
-				pitch=If[note==0,None,pitchDict[[note]]+parameter[["Key"]]],
+				pitch=If[note==0,None,pitchDict[[note]]+12*parameter[["Oct"]]+parameter[["Key"]]],
 			char=="[",                                  (* harmony *)
 				match=Select[Transpose[StringPosition[score,"]"]][[1]],#>=j&][[1]];
 				content=StringTake[score,{j,match-1}];
@@ -171,15 +169,15 @@ trackData[score_,global_,trackCount_]:=Module[
 				If[StringContainsQ[content,"^"],
 					content=StringDelete[content,"^"];           (* appoggiatura & harmony *)
 					While[k<=StringLength@content,
-						AppendTo[pitch,getPitch[content,k,parameter[["Key"]]][[1]]];
-						k=getPitch[content,k,parameter[["Key"]]][[2]];
+						AppendTo[pitch,getPitch[content,k,12*parameter[["Oct"]]+parameter[["Key"]]][[1]]];
+						k=getPitch[content,k,12*parameter[["Oct"]]+parameter[["Key"]]][[2]];
 						AppendTo[appoggiatura,pitch];
 					];
 					appoggiatura=Drop[appoggiatura,-1];
 					appoChord=True,
 					While[k<=StringLength@content,               (* common harmony *)
-						AppendTo[pitch,getPitch[content,k,parameter[["Key"]]][[1]]];
-						k=getPitch[content,k,parameter[["Key"]]][[2]];
+						AppendTo[pitch,getPitch[content,k,12*parameter[["Oct"]]+parameter[["Key"]]][[1]]];
+						k=getPitch[content,k,12*parameter[["Oct"]]+parameter[["Key"]]][[2]];
 					]
 				];
 				j=match+1,
@@ -218,7 +216,7 @@ trackData[score_,global_,trackCount_]:=Module[
 			j++;
 		];
 		If[tercet>0,beatCount*=tercetTime;tercet--];
-		beatCount*=parameter[["Dur"]];
+		beatCount*=2^(-parameter[["Dur"]]);
 		barBeat+=beatCount;
 		duration=15/parameter[["Speed"]]*beatCount*parameter[["Beat"]];
 		trackDuration+=duration;
@@ -288,7 +286,7 @@ trackData[score_,global_,trackCount_]:=Module[
 			If[StringPart[score,j-1]!="|",
 				AppendTo[messages,generateMessage["TerminatorAbsent",{trackCount+1}]]
 			];
-			parameter[["Volume"]]*AudioFade[Sound[SoundNote@@#&/@soundData],parameter[["Fade"]]]
+			parameter[["Volume"]]*AudioFade[Sound[SoundNote@@#&/@soundData],{parameter[["FadeIn"]],parameter[["FadeOut"]]}]
 		],
 		"Local"->parameter,
 		"Messages"->messages,
@@ -371,11 +369,10 @@ QYSParse[filename_]:=Module[
 	{i,Length[score]}];
 	If[sectionDuration!={},duration+=Max@sectionDuration];
 	If[!SameQ@@sectionDuration,
-		AppendTo[messages,generateMessage["DiffDuration",{sectionCount}]];
+		AppendTo[messages,generateMessage["DiffDuration",{sectionCount,sectionDuration}]];
 	];
-	If[parameter[["Fade"]]!={0,0},audio=AudioFade[audio,parameter[["Fade"]]]];
+	If[parameter[["FadeIn"]]+parameter[["FadeOut"]]>0,audio=AudioFade[audio,{parameter[["FadeIn"]],parameter[["FadeOut"]]}]];
 	If[messages!={},Print[Column@messages]];
-	Print[sectionDuration];
 	Return[Audio[audio,MetaInformation-><|
 		"Format"->"qys",
 		"TrackCount"->trackCount,

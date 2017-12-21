@@ -44,7 +44,7 @@
 		"NoFormerPitch": "(音轨&1,小节&2) %缺少前一个音符",
 		"ExpectPitch": "(音轨&1,小节&2) 应该使用音高1~7或和弦",
 		"ExpectPrecussion": "(音轨&1,小节&2) 应该使用打击乐标记x或X",
-		"DiffDuration": "(章节&1) 各音轨长度不统一"
+		"DiffDuration": "(章节&1) 各音轨长度不统一：#2"
 	},
 	"Button": {
 		"Play": "播放",

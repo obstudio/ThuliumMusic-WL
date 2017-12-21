@@ -16,7 +16,7 @@ ModifySongInfo[song_]:=DynamicModule[{textInfo},
 ];
 
 
-AddNewSong:=DynamicModule[{songPath,textInfo},
+AddSongUI:=DynamicModule[{songPath,textInfo},
 	textInfo=AssociationMap[""&,textInfoTags];
 	SetDirectory[path<>"Songs\\"];
 	CreateDialog[Column[{"",
@@ -26,20 +26,32 @@ AddNewSong:=DynamicModule[{songPath,textInfo},
 		ImageSize->200]}],
 		Grid[{tagName[[#]],Spacer[20],InputField[Dynamic@textInfo[[#]],String]}&/@textInfoTags],"",
 		Row[{Button[buttonName[["Add"]],
-			song=StringDrop[songPath,-4];
-			audio=parse[path<>"Songs\\"<>songPath,StringTake[songPath,-3]];
-			metaInfo=Values[Options[audio,MetaInformation]][[1]];
-			metaInfo[["TrackCount"]]=ToString[metaInfo[["TrackCount"]]];
-			metaInfo[["Duration"]]=ToString[metaInfo[["Duration"]]];
-			metaInfo[["Instruments"]]=ToString[metaInfo[["Instruments"]],InputForm];
-			AppendTo[index,song->metaInfo];
-			putTextInfo[song,textInfo];
+			AddSong[songPath,textInfo];
 			DialogReturn[Management[1]],
 		ImageSize->150,Enabled->Dynamic[textInfo[["SongName"]]!=""]],
 		Spacer[20],
 		Button[buttonName[["Return"]],DialogReturn[Management[1]],ImageSize->150]}],""
 	},Center,ItemSize->30,Spacings->1],
 	WindowTitle->"\:6dfb\:52a0\:65b0\:66f2\:76ee"]
+];
+
+
+(* ::Input:: *)
+(*AddSong["Noushyou_Sakuretsu_Garu.qys",<|"SongName"->"\:8111\:6d46\:70b8\:88c2\:5c11\:5973","Lyricist"->"\:308c\:308b\:308a\:308a","Composer"->"\:308c\:308b\:308a\:308a","Adapter"->"Shigma","Comment"->"\:8133\:6d46\:70b8\:88c2\:30ac\:30fc\:30eb","Abstract"->""|>]*)
+
+
+AddSong[songPath_,textInfo_]:=Module[{metaInfo,audio,song},
+	song=StringDrop[songPath,-4];
+	AppendTo[bufferHash,song->toBase32@FileHash[songPath]];
+	Export[userPath<>"Buffer.json",Normal@bufferHash];
+	audio=If[StringTake[songPath,-3]=="qys",QYSParse,QYMParse][path<>"Songs\\"<>songPath];
+	Export[userPath<>"Buffer\\"<>song<>".buffer",audio,"MP3"];
+	metaInfo=Values[Options[audio,MetaInformation]][[1]];
+	metaInfo[["TrackCount"]]=ToString[metaInfo[["TrackCount"]]];
+	metaInfo[["Duration"]]=ToString[metaInfo[["Duration"]],InputForm];
+	metaInfo[["Instruments"]]=ToString[metaInfo[["Instruments"]],InputForm];
+	AppendTo[index,song->metaInfo];
+	putTextInfo[song,textInfo];
 ];
 
 
@@ -96,13 +108,13 @@ CreateDialog[Column[{"",
 	Grid[{index[[#,"SongName"]],
 		Button[buttonName[["Modify"]],DialogReturn[ModifySongInfo[#]],ImageSize->Tiny],
 		Button[buttonName[["Delete"]],DialogReturn[DeleteSong[#]],ImageSize->Tiny]
-	}&/@songList16[[page]]],"",
+	}&/@songListPaged[[page]]],"",
 	Row[{
 		Button[buttonName[["PgPrev"]],DialogReturn[Management[page-1]],ImageSize->100,Enabled->(page>1)],
 		Spacer[10],
-		Button[buttonName[["PgNext"]],DialogReturn[Management[page+1]],ImageSize->100,Enabled->(page<Length@songList16)]
+		Button[buttonName[["PgNext"]],DialogReturn[Management[page+1]],ImageSize->100,Enabled->(page<pageCount)]
 	}],
-	Button[buttonName[["AddSong"]],DialogReturn[AddNewSong],ImageSize->150],
+	Button[buttonName[["AddSong"]],DialogReturn[AddSongUI],ImageSize->150],
 	Button[buttonName[["Return"]],DialogReturn[QYMP[1]],ImageSize->150],""
 },Center,ItemSize->20],
 WindowTitle->"\:6b4c\:5355\:7ba1\:7406"]];

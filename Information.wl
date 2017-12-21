@@ -10,8 +10,10 @@ tonalityDict=<|
 pitchDict=<|"1"->0,"2"->2,"3"->4,"4"->5,"5"->7,"6"->9,"7"->11|>;
 defaultParameter=<|
 	"Volume"->1,"Speed"->90,"Key"->0,"Beat"->4,"Bar"->4,"Instr"->"Piano",
-	"Dur"->1,"Fade"->{0,0},"Stac"->1/2,"Appo"->1/4,"Scale"->0,"Port"->6
+	"Dur"->1,"FadeIn"->0,"FadeOut"->0,"Stac"->1/2,"Appo"->1/4,"Oct"->0,
+	"Port"->6,"Spac"->0
 |>;
+functionList=Complement[Keys@defaultParameter,{"Volume","Speed","Key","Beat","Bar","Instr"}];
 
 
 toBase32[n_]:=StringDelete[ToString@BaseForm[n,32],"\n"~~__];
@@ -21,7 +23,8 @@ generateMessage[tag_,arg_]:=Module[
 	{argRule},
 	argRule=Flatten@Array[{
 		"&"<>ToString[#]->ToString[arg[[#]]],
-		"$"<>ToString[#]->arg[[#]]
+		"$"<>ToString[#]->arg[[#]],
+		"#"<>ToString[#]->StringRiffle[ToString[#,FormatType->InputForm]&/@arg[[#]],", "]
 	}&,Length@arg];
 	Return@StringReplace[errorDict[[tag]],argRule];
 ];
@@ -63,5 +66,6 @@ refresh:=(
 	SetDirectory[path<>"Meta\\"];
 	songList=StringDrop[FileNames[],-5];
 	index=AssociationMap[readInfo,songList];
-	songList16=Partition[songList,UpTo@16];
+	pageCount=Ceiling[Length@songList/16];
+	songListPaged=Partition[songList,UpTo@Ceiling[Length@songList/pageCount]];
 );

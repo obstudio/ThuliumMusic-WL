@@ -69,7 +69,7 @@ parse[song_]:=Module[{filename,hash,audio},
 	filename=path<>"Songs\\"<>song<>"."<>index[[song,"Format"]];
 	hash=toBase32@FileHash[filename];
 	If[KeyExistsQ[bufferHash,song],
-		If[bufferHash[[song]]==hash,
+		If[bufferHash[[song]]==hash && FileExistsQ[userPath<>"Buffer\\"<>song<>".buffer"],
 			Return[Import[userPath<>"Buffer\\"<>song<>".buffer","MP3"]],
 			bufferHash[[song]]=hash;
 		],

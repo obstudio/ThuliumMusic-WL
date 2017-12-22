@@ -46,17 +46,17 @@
     },
 	"Error": {
 		"FileNotFound": "未找到文件\"$1\"",
-		"TerminatorAbsent": "(音轨&1) 缺少终止符",
-		"RepeatError": "(音轨&1) 反复标记不匹配",
-		"InvTonality": "(音轨&1,小节&2) 声明了无效调名\"$3\"",
-		"InvInstrument": "(音轨&1,小节&2) 声明了无效乐器\"$3\"",
-		"InvCharacter": "(音轨&1,小节&2) 匹配到无效字符\"$3\"",
-		"InvFunction": "(音轨&1,小节&2) 声明了无效函数名\"$3\"",
-		"BarLengthError": "(音轨&1,小节&2) 拍数错误: 应为&3拍, 实际为&4拍",
-		"NoFormerPitch": "(音轨&1,小节&2) %缺少前一个音符",
-		"ExpectPitch": "(音轨&1,小节&2) 应该使用音高1~7或和弦",
-		"ExpectPrecussion": "(音轨&1,小节&2) 应该使用打击乐标记x或X",
-		"DiffDuration": "(章节&1) 各音轨长度不统一：#2"
+		"TerminatorAbsent": "(章节&1,音轨&2) 缺少终止符",
+		"RepeatError": "(章节&1,音轨&2) 反复标记不匹配",
+		"InvTonality": "(章节&1,音轨&2,小节&3) 声明了无效调名\"$4\"",
+		"InvInstrument": "(章节&1,音轨&2,小节&3) 声明了无效乐器\"$4\"",
+		"InvCharacter": "(章节&1,音轨&2,小节&3) 匹配到无效字符\"$4\"",
+		"InvFunction": "(章节&1,音轨&2,小节&3) 声明了无效函数名\"$4\"",
+		"BarLengthError": "(章节&1,音轨&2,小节&3) 拍数错误: 应为&4拍, 实际为&5拍",
+		"NoFormerPitch": "(章节&1,音轨&2,小节&3) %缺少前一个音符",
+		"ExpectPitch": "(章节&1,音轨&2,小节&3) 应该使用音高1~7或和弦",
+		"ExpectPrecussion": "(章节&1,音轨&2,小节&3) 应该使用打击乐标记x或X",
+		"DiffDuration": "(章节&1,章节&2) 各音轨长度不统一：#3"
 	},
 	"Dialog": {
 		"QYMP": "青云播放器",

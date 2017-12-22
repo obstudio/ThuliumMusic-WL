@@ -27,30 +27,30 @@ getPitch[score_,pos_,key_]:=Module[
 ];
 
 
-trackData[score_,global_,trackCount_]:=Module[
+track[score_,global_,location_]:=Module[
 	{
-		i,j,k,char,content,match,position,              (* loop related *)
-		soundData,audio,                                (* score and tracks *)
-		instrList={},                                   (* instrument *)
-		percussion=False,messages={},
+		i,j,k,char,                                     (* loop related *)
+		content,match,position,                         (* operators *)
+		function,argument,                              (* functions *)
+		soundData={},audio,                             (* soundnotes *)
+		instrList={},messages={},                       (* metainformation *)
 		parameter=global,
 		
+		percussion=False,                               (* percussion *)
 		tercet,tercetTime,                              (* tercet *)
 		portamento=False,portaRate,                     (* portamento *)
 		tremolo1=0,tremolo2=0,                          (* tremolo *)
 		appoggiatura={},appoChord=False,                (* appoggiatura *)
-		staccato,
-		fermata,
-		function,argument,                              (* function *)
+		staccato,fermata,                               (* duration related *)
+		beam=False,extend,                              (* extend a note *)
 		
 		note,pitch,tonality,                            (* pitch *)
-		beatCount,beam=False,extend,timeDot,            (* number of beats *)
+		beatCount,timeDot,                              (* number of beats *)
 		duration,trackDuration=0,                       (* duration *)
-		lastPitch,lastBeat,
-		barCount,barBeat                                (* trans-note *)
+		barCount,barBeat,                               (* trans-note *)
+		lastPitch,lastBeat
 	},
 	j=1;
-	soundData={};
 	barBeat=0;
 	barCount=0;
 	beam=False;
@@ -64,7 +64,7 @@ trackData[score_,global_,trackCount_]:=Module[
 				If[barBeat!=0,
 					barCount++;
 					If[barBeat!=parameter[["Bar"]] && barBeat*parameter[["Bar"]]!=16,
-						AppendTo[messages,generateMessage["BarLengthError",{trackCount+1,barCount,parameter[["Bar"]],barBeat}]];
+						AppendTo[messages,generateMessage["BarLengthError",Join[location,{barCount,parameter[["Bar"]],barBeat}]]];
 					];
 					barBeat=0;
 				];
@@ -80,14 +80,14 @@ trackData[score_,global_,trackCount_]:=Module[
 						argument=ToExpression@StringDrop[content,position];
 						If[MemberQ[functionList,function],
 							parameter[[function]]=argument,
-							AppendTo[messages,generateMessage["InvFunction",{trackCount+1,barCount+1,function}]]
+							AppendTo[messages,generateMessage["InvFunction",Join[location,{barCount+1,function}]]]
 						],
 					StringContainsQ[content,"="],            (* key *)
 						parameter[["Oct"]]=StringCount[content,"'"]-StringCount[content,","];
 						tonality=StringDelete[StringTake[content,{3,StringLength@content}],","|"'"];
 						If[KeyExistsQ[tonalityDict,tonality],
 							parameter[["Key"]]=tonalityDict[[tonality]],
-							AppendTo[messages,generateMessage["InvTonality",{trackCount+1,barCount+1,content}]];
+							AppendTo[messages,generateMessage["InvTonality",Join[location,{barCount+1,content}]]];
 						],
 					StringContainsQ[content,"/"],            (* beat *)
 						position=StringPosition[content,"/"][[1,1]];
@@ -108,7 +108,7 @@ trackData[score_,global_,trackCount_]:=Module[
 								instrList=Union[instrList,{parameter[["Instr"]]}];
 								percussion=True,
 							_,
-								AppendTo[messages,generateMessage["InvInstrument",{trackCount+1,barCount+1,content}]];
+								AppendTo[messages,generateMessage["InvInstrument",Join[location,{barCount+1,content}]]];
 						];
 				];
 				j=match+1;
@@ -147,7 +147,7 @@ trackData[score_,global_,trackCount_]:=Module[
 			char=="%",                                  (* the same as the last pitch *)
 				pitch=lastPitch;
 				If[lastPitch===Null,
-					AppendTo[messages,generateMessage["NoFormerPitch",{trackCount+1,barCount+1}]]
+					AppendTo[messages,generateMessage["NoFormerPitch",Join[location,{barCount+1}]]]
 				],
 			DigitQ[char],                               (* single tone *)
 				note=ToExpression@char;
@@ -173,7 +173,7 @@ trackData[score_,global_,trackCount_]:=Module[
 				];
 				j=match+1,
 			True,
-				AppendTo[messages,generateMessage["InvCharacter",{trackCount+1,barCount+1,char}]];
+				AppendTo[messages,generateMessage["InvCharacter",Join[location,{barCount+1,char}]]];
 		];
 		While[j<=StringLength[score] && MemberQ[{"#","b","'",","},StringPart[score,j]],
 			char=StringPart[score,j];
@@ -275,7 +275,7 @@ trackData[score_,global_,trackCount_]:=Module[
 	Return[<|
 		"Audio"->If[soundData=={},0,                     (* empty track *)
 			If[StringPart[score,j-1]!="|",
-				AppendTo[messages,generateMessage["TerminatorAbsent",{trackCount+1}]]
+				AppendTo[messages,generateMessage["TerminatorAbsent",location]]
 			];
 			parameter[["Volume"]]*AudioFade[Sound[SoundNote@@#&/@soundData],{parameter[["FadeIn"]],parameter[["FadeOut"]]}]
 		],
@@ -292,10 +292,11 @@ QYSParse[filename_]:=Module[
 		i,j,
 		data1,data2,score,join,repeatL,repeatR,
 		parameter=defaultParameter,
-		messages={},instrList={},track,
+		messages={},instrList={},
+		trackCount=0,trackData,
+		sectionCount=0,sections={},
 		audio=0,duration=0,
-		trackCount=0,trackDuration={},
-		sectionCount=0,sectionDuration=0
+		sectionDuration={}
 	},
 	If[!FileExistsQ[filename],
 		AppendTo[messages,generateMessage["FileNotFound",{filename}]];
@@ -337,32 +338,36 @@ QYSParse[filename_]:=Module[
 		],
 	{i,Length@data2}];	
 	Do[
-		track=trackData[score[[i]],parameter,trackCount];
-		instrList=Union[instrList,track[["Instruments"]]];
-		messages=Join[messages,track[["Messages"]]];
-		If[track[["Duration"]]==0,
+		trackCount++;
+		trackData=track[score[[i]],parameter,{sectionCount,trackCount}];
+		instrList=Union[instrList,trackData[["Instruments"]]];
+		messages=Join[messages,trackData[["Messages"]]];
+		If[trackData[["Duration"]]==0,
 			(* empty soundtrack *)
-			parameter=track[["Local"]];
+			parameter=trackData[["Local"]];
 			If[sectionDuration!={},duration+=Max@sectionDuration];
 			sectionCount++;
 			If[!SameQ@@sectionDuration,
-				AppendTo[messages,generateMessage["DiffDuration",{sectionCount}]];
+				AppendTo[messages,generateMessage["DiffDuration",{sectionCount,sectionDuration}]];
 			];
-			sectionDuration={},
+			sectionDuration={};
+			trackCount=0;
+			AppendTo[sections,0],
 			(* real soundtrack *)
 			trackCount++;
-			AppendTo[sectionDuration,track[["Duration"]]];
-			If[duration!=0,
-				audio+=AudioPad[track[["Audio"]],{duration,0}],
-				audio+=track[["Audio"]]
-			];
+			If[sectionCount==0,sectionCount++;AppendTo[sections,0]];
+			AppendTo[sectionDuration,trackData[["Duration"]]];
+			sections[[sectionCount]]+=trackData[["Audio"]];
 		],
 	{i,Length[score]}];
 	If[sectionDuration!={},duration+=Max@sectionDuration];
 	If[!SameQ@@sectionDuration,
 		AppendTo[messages,generateMessage["DiffDuration",{sectionCount,sectionDuration}]];
 	];
-	If[parameter[["FadeIn"]]+parameter[["FadeOut"]]>0,audio=AudioFade[audio,{parameter[["FadeIn"]],parameter[["FadeOut"]]}]];
+	audio=AudioJoin@sections;
+	If[parameter[["FadeIn"]]+parameter[["FadeOut"]]>0,
+		audio=AudioFade[audio,{parameter[["FadeIn"]],parameter[["FadeOut"]]}]
+	];
 	If[messages!={},Print[Column@messages]];
 	Return[Audio[audio,MetaInformation-><|
 		"Format"->"qys",
@@ -375,11 +380,11 @@ QYSParse[filename_]:=Module[
 
 
 (* ::Input:: *)
-(*AudioStop[];AudioPlay@QYSParse["E:\\QingyunMusicPlayer\\Songs\\test.qys"];*)
+(*AbsoluteTiming[QYSParse["E:\\QingyunMusicPlayer\\Songs\\Noushyou_Sakuretsu_Garu.qys"]]*)
 
 
 (* ::Input:: *)
-(*AudioStop[];AudioPlay@QYSParse["E:\\QingyunMusicPlayer\\Songs\\Noushyou_Sakuretsu_Garu.qys"];*)
+(*AudioStop[];AudioPlay@QYSParse["E:\\QingyunMusicPlayer\\Songs\\Phantom_Ensemble.qys"];*)
 
 
 (* ::Input:: *)
@@ -387,7 +392,11 @@ QYSParse[filename_]:=Module[
 
 
 (* ::Input:: *)
-(*EmitSound@Sound@SoundNote["Snare",1]*)
+(*EmitSound@Sound@SoundNote[1,1,"PercussiveOrgan"]*)
+
+
+(* ::Input:: *)
+(*EmitSound@Sound@SoundNote["HiHatOpen",1]*)
 
 
 (* ::Input:: *)
@@ -400,5 +409,9 @@ QYSParse[filename_]:=Module[
 
 
 (* ::Text:: *)
-(*ElectricSnare, BassDrum, Shaker, RideCymbal, Snare, CrashCymbal, HiHatPedal*)
-(*Ocarina, Oboe, Clarinet, Recorder*)
+(*ElectricSnare, BassDrum, Shaker, RideCymbal, Snare, CrashCymbal, HiHatPedal, HiHatClosed*)
+(*Ocarina, Oboe, Clarinet, Recorder, BrassSection, Harpsichord,BrightPiano, Organ, DrawbarOrgan, FretlessBass*)
+
+
+(* ::Input:: *)
+(*QYMP[1];*)

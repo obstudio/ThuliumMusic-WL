@@ -22,7 +22,7 @@ toBase32[n_]:=StringDelete[ToString@BaseForm[n,32],"\n"~~__];
 generateMessage[tag_,arg_]:=Module[
 	{argRule},
 	argRule=Flatten@Array[{
-		"&"<>ToString[#]->ToString[arg[[#]]],
+		"&"<>ToString[#]->ToString[arg[[#]],FormatType->InputForm],
 		"$"<>ToString[#]->arg[[#]],
 		"#"<>ToString[#]->StringRiffle[ToString[#,FormatType->InputForm]&/@arg[[#]],", "]
 	}&,Length@arg];

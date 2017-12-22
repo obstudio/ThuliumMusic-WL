@@ -4,19 +4,20 @@
 (*Qingyun Music Player*)
 
 
-version=91;
+version=142;
 userPath="C:\\Users\\"<>$UserName<>"\\AppData\\Local\\QYMP\\";
 If[!DirectoryQ[userPath],CreateDirectory[userPath]];
 If[!DirectoryQ[userPath<>"export\\"],CreateDirectory[userPath<>"export\\"]];
 If[!DirectoryQ[userPath<>"buffer\\"],CreateDirectory[userPath<>"buffer\\"]];
 template={"Version"->version,"Language"->"chs","Developer"->False};
 If[!FileExistsQ[userPath<>"Default.json"],Export[userPath<>"Default.json",template]];
-default=Association@Import[userPath<>"Default.json"];
-If[default[["Version"]]<version,
+userInfo=Association@Import[userPath<>"Default.json"];
+If[userInfo[["Version"]]<version,
 	Do[
-		If[!KeyExistsQ[default,tag],AppendTo[default,tag->template[[tag]]]],
+		If[!KeyExistsQ[userInfo,tag],AppendTo[userInfo,tag->template[[tag]]]],
 	{tag,Keys@template}];
-	Export[userPath<>"Default.json",default];
+	userInfo[["Version"]]=version;
+	Export[userPath<>"Default.json",userInfo];
 ];
 If[!FileExistsQ[userPath<>"Instrument.json"],Export[userPath<>"Instrument.json",{"Piano","Violin","Guitar","Flute"}]];
 If[!FileExistsQ[userPath<>"Buffer.json"],Export[userPath<>"Buffer.json",{}]];
@@ -27,16 +28,16 @@ favorite=Import[userPath<>"Favorite.json"];
 
 path=NotebookDirectory[];
 <<(path<>"information.wl")
-<<(path<>"advanced.wl")
+<<(path<>"developer.wl")
 <<(path<>"qysParse.wl")
 <<(path<>"qymParse.wl")
 instrData=Association@Import[path<>"instr.json"];
-langList={"chs"->"\:7b80\:4f53\:4e2d\:6587","eng"->"\:82f1\:8bed"};
-langData=Association@Import[path<>"Lang\\"<>default[["Language"]]<>".json"];
+langList={"chs"->"\:7b80\:4f53\:4e2d\:6587"(*,"eng"->"\:82f1\:8bed"*)};
+langData=Association@Import[path<>"Lang\\"<>userInfo[["Language"]]<>".json"];
 tagName=Association@langData[["TagName"]];
 instrName=Association@langData[["Instrument"]];
 errorDict=Association@langData[["Error"]];
-buttonName=Association@langData[["Button"]];
+display=Association@langData[["Dialog"]];
 textInfoTags={"SongName","Lyricist","Composer","Adapter","Comment","Abstract"};
 metaInfoTags={"Format","TrackCount","Duration","Instruments"};
 refresh;
@@ -44,17 +45,23 @@ refresh;
 
 settings:=DynamicModule[{deveChoice,langChoice},
 	CreateDialog[Column[{"",
-		Style["\:8bbe\:7f6e",Bold,28],,
+		Style[display[["Settings"]],Bold,28],,
 		Grid[{
-		{"\:4f60\:7684\:8eab\:4efd\:ff1a",RadioButtonBar[Dynamic@deveChoice,{False->"\:666e\:901a\:7528\:6237",True->"\:5f00\:53d1\:8005"},Appearance->"Horizonal"]},
-		{"\:9009\:62e9\:8bed\:8a00\:ff1a",RadioButtonBar[Dynamic@langChoice,langList,Appearance->"Horizonal"]}}],,
+		{display[["Identity"]],": ",RadioButtonBar[Dynamic@deveChoice,
+			{False->display[["NormalUser"]],True->display[["Developer"]]},
+			Appearance->"Horizonal"
+		]},
+		{display[["Language"]],": ",RadioButtonBar[Dynamic@langChoice,langList,Appearance->"Horizonal"]}}],,
 		Row[{
-			Button["\:4fdd\:5b58\:66f4\:6539",DialogReturn[],ImageSize->150,Enabled->False],
+			Button[display[["Save"]],DialogReturn[
+				userInfo[["Language"]]=langChoice;
+				userInfo[["Developer"]]=deveChoice;
+			],ImageSize->150],
 			Spacer[10],
-			Button[buttonName[["Return"]],DialogReturn[],ImageSize->150]
+			Button[display[["Return"]],DialogReturn[],ImageSize->150]
 		}],""
 	},Center,ItemSize->40],
-	WindowTitle->"\:8bbe\:7f6e"]
+	WindowTitle->display[["Settings"]]]
 ];
 
 
@@ -89,25 +96,25 @@ Player[song_]:=DynamicModule[{playing=True,current},
 				Nothing
 			]
 		}],"",
-		If[KeyExistsQ[index[[song]],"Composer"],"\:4f5c\:66f2\:ff1a"<>index[[song,"Composer"]],Nothing],
-		If[KeyExistsQ[index[[song]],"Lyricist"],"\:4f5c\:8bcd\:ff1a"<>index[[song,"Lyricist"]],Nothing],
-		If[KeyExistsQ[index[[song]],"Adapter"],"\:6539\:7f16\:ff1a"<>index[[song,"Adapter"]],Nothing],"",
+		If[KeyExistsQ[index[[song]],"Composer"],tagName[["Composer"]]<>": "<>index[[song,"Composer"]],Nothing],
+		If[KeyExistsQ[index[[song]],"Lyricist"],tagName[["Lyricist"]]<>": "<>index[[song,"Lyricist"]],Nothing],
+		If[KeyExistsQ[index[[song]],"Adapter"],tagName[["Adapter"]]<>": "<>index[[song,"Adapter"]],Nothing],"",
 		If[KeyExistsQ[index[[song]],"Abstract"],
 			Column[StringSplit[index[[song,"Abstract"]],"\n"],Left],
 			Nothing
 		],"",
 		Row[{
 			Dynamic@If[playing,
-				Button[buttonName[["Pause"]],AudioPause[current];playing=False,ImageSize->80],
-				Button[buttonName[["Play"]],AudioPlay[current];playing=True,ImageSize->80]
+				Button[display[["Pause"]],AudioPause[current];playing=False,ImageSize->80],
+				Button[display[["Play"]],AudioPlay[current];playing=True,ImageSize->80]
 			],
 			Spacer[20],
-			Button[buttonName[["Stop"]],AudioStop[];playing=False,ImageSize->80],
+			Button[display[["Stop"]],AudioStop[];playing=False,ImageSize->80],
 			Spacer[20],
-			Button[buttonName[["Return"]],AudioStop[];DialogReturn[QYMP[1]],ImageSize->80]			
+			Button[display[["Return"]],AudioStop[];DialogReturn[QYMP[1]],ImageSize->80]			
 		}],"",""
 	},Center,ItemSize->50],
-	WindowTitle->"\:6b63\:5728\:64ad\:653e\:ff1a"<>index[[song,"SongName"]]];
+	WindowTitle->display[["Playing"]]<>": "<>index[[song,"SongName"]]];
 ];
 
 
@@ -115,7 +122,7 @@ QYMP[page_]:=DynamicModule[{song},
 	refresh;
 	AudioStop[];
 	CreateDialog[Column[{"",
-		Row[{Style["\:9752\:4e91\:64ad\:653e\:5668",Bold,32],Style[" (\:7b2c"<>ToString[page]<>"\:9875)",Gray,32]}],,
+		Row[{Style[display[["QYMP"]],Bold,32],Style[" (\:7b2c"<>ToString[page]<>"\:9875)",Gray,32]}],,
 		SetterBar[Dynamic@song,
 			#->Row[{
 				Style[index[[#,"SongName"]],24,FontFamily->"\:5fae\:8f6f\:96c5\:9ed1"],
@@ -125,22 +132,22 @@ QYMP[page_]:=DynamicModule[{song},
 			Appearance->"Vertical"
 		],"",
 		Row[{
-			Button[buttonName[["PgPrev"]],DialogReturn[QYMP[page-1]],ImageSize->200,Enabled->(page>1)],
+			Button[display[["PgPrev"]],DialogReturn[QYMP[page-1]],ImageSize->200,Enabled->(page>1)],
 			Spacer[10],
-			Button[buttonName[["PgNext"]],DialogReturn[QYMP[page+1]],ImageSize->200,Enabled->(page<pageCount)]
+			Button[display[["PgNext"]],DialogReturn[QYMP[page+1]],ImageSize->200,Enabled->(page<pageCount)]
 		}],
 		Row[{
-			Button[buttonName[["PlaySong"]],DialogReturn[Player[song]],ImageSize->200],
+			Button[display[["PlaySong"]],DialogReturn[Player[song]],ImageSize->200],
 			Spacer[10],
-			Button[buttonName[["Manage"]],DialogReturn[Management[1]],ImageSize->200]
+			Button[display[["Manage"]],DialogReturn[Management[1]],ImageSize->200]
 		}],
 		Row[{
-			Button[buttonName[["Settings"]],DialogReturn[settings],ImageSize->200,Enabled->False],
+			Button[display[["Settings"]],DialogReturn[settings],ImageSize->200],
 			Spacer[10],
-			Button[buttonName[["Exit"]],DialogReturn[],ImageSize->200]
+			Button[display[["Exit"]],DialogReturn[],ImageSize->200]
 		}],""
 	},Center,ItemSize->50],
-	WindowTitle->"\:9752\:4e91\:64ad\:653e\:5668"]
+	WindowTitle->display[["QYMP"]]]
 ];
 
 

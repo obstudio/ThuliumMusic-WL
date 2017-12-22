@@ -15,20 +15,32 @@
     "Instrument": {
         "Accordion": "手风琴",
 		"Bass": "贝司",
+		"BassDrum": "低音鼓",
+		"BassDrum2": "低音鼓",
         "Cello": "大提琴",
+		"Clarinet": "单簧管",
 		"ElectricBass": "电贝司",
 		"ElectricPiano": "电钢琴",
 		"ElectricPiano2": "电钢琴",
 		"ElectricGrandPiano": "电钢琴",
+		"ElectricGuitar": "电吉他",
+		"ElectricSnare": "电子军鼓",
         "Piano": "钢琴",
         "Guitar": "吉他",
+		"HiHatClosed": "闭音踩镲",
+		"HiHatOpen": "开音踩镲",
+		"HiHatPedal": "踏板踩镲",
         "Viola": "中提琴",
         "Violin": "小提琴",
         "Harp": "竖琴",
         "Tuba": "大号",
         "Flute": "长笛",
+		"Oboe": "双簧管",
         "PanFlute": "排萧",
         "Piccolo": "短笛",
+		"RideCymbal": "节奏镲",
+		"Snare": "军鼓",
+		"Strings": "弦乐器",
 		"Whistle": "口哨",
         "Xylophone": "木琴"
     },
@@ -46,7 +58,8 @@
 		"ExpectPrecussion": "(音轨&1,小节&2) 应该使用打击乐标记x或X",
 		"DiffDuration": "(章节&1) 各音轨长度不统一：#2"
 	},
-	"Button": {
+	"Dialog": {
+		"QYMP": "青云播放器",
 		"Play": "播放",
 		"Pause": "暂停",
 		"Stop": "停止",
@@ -65,6 +78,11 @@
 		"Undo": "撤销",
 		"Export": "导出文件",
 		"PgNext": "下一页",
-		"PgPrev": "上一页"
+		"PgPrev": "上一页",
+		"Identity": "你的身份",
+		"Language": "选择语言",
+		"NormalUser": "普通用户",
+		"Developer": "开发者",
+		"Playing": "正在播放"
 	}
 }

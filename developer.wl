@@ -37,12 +37,12 @@ AddSongUI:=DynamicModule[{songPath,textInfo},
 
 
 (* ::Input:: *)
-(*AddSong["Noushyou_Sakuretsu_Garu.qys",<|"SongName"->"\:8111\:6d46\:70b8\:88c2\:5c11\:5973","Lyricist"->"\:308c\:308b\:308a\:308a","Composer"->"\:308c\:308b\:308a\:308a","Adapter"->"Shigma","Comment"->"\:8133\:6d46\:70b8\:88c2\:30ac\:30fc\:30eb","Abstract"->""|>]*)
+(*AddSong["Phantom_Ensemble.qys",<|"SongName"->"\:5e7d\:7075\:4e50\:56e2","Composer"->"ZUN","Comment"->"\:5e7d\:970a\:697d\:56e3","Abstract"->"\:4e1c\:65b9\:5996\:5996\:68a64\:9762BOSS\n\:666e\:8389\:5179\:59c6\:5229\:5df4\:4e09\:59d0\:59b9\:7684\:4e3b\:9898\:66f2"|>]*)
 
 
 AddSong[songPath_,textInfo_]:=Module[{metaInfo,audio,song},
 	song=StringDrop[songPath,-4];
-	AppendTo[bufferHash,song->toBase32@FileHash[songPath]];
+	AppendTo[bufferHash,song->toBase32@FileHash[path<>"Songs\\"<>songPath]];
 	Export[userPath<>"Buffer.json",Normal@bufferHash];
 	audio=If[StringTake[songPath,-3]=="qys",QYSParse,QYMParse][path<>"Songs\\"<>songPath];
 	Export[userPath<>"Buffer\\"<>song<>".buffer",audio,"MP3"];
@@ -53,6 +53,14 @@ AddSong[songPath_,textInfo_]:=Module[{metaInfo,audio,song},
 	AppendTo[index,song->metaInfo];
 	putTextInfo[song,textInfo];
 ];
+
+
+(* ::Input:: *)
+(*index[["Phantom_Ensemble"]]*)
+
+
+(* ::Input:: *)
+(*putTextInfo["Phantom_Ensemble",<|"SongName"->"\:5e7d\:7075\:4e50\:56e2","Composer"->"ZUN","Comment"->"\:5e7d\:970a\:697d\:56e3","Abstract"->"\:4e1c\:65b9\:5996\:5996\:68a64\:9762BOSS\n\:666e\:8389\:5179\:59c6\:5229\:5df4\:4e09\:59d0\:59b9\:7684\:4e3b\:9898\:66f2","Lyricist"->"","Adapter"->""|>]*)
 
 
 Debugger[song_]:=Module[{filename,audio},DynamicModule[{playing=False,current},

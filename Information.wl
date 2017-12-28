@@ -58,7 +58,8 @@ putTextInfo[song_,textInfo_]:=Module[
 	Do[
 		AppendTo[info,If[textInfo[[tag]]!="",tag->textInfo[[tag]],Nothing]],
 	{tag,textInfoTags}];
-	writeInfo[song,Association@info];
+	index[[song]]=Association@info;
+	writeInfo[song,index[[song]]];
 ];
 
 

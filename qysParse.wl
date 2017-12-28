@@ -396,11 +396,11 @@ QYSParse[filename_]:=Module[
 
 
 (* ::Input:: *)
-(*EmitSound@Sound@SoundNote["HiHatOpen",1]*)
+(*EmitSound@Sound@SoundNote["HiHatPedal",1]*)
 
 
 (* ::Input:: *)
-(*Export["e:\\1.mp3",QYSParse["E:\\QingyunMusicPlayer\\Songs\\Noushyou_Sakuretsu_Garu.qys"]];*)
+(*Export["e:\\1.mp3",AudioFade[QYSParse["E:\\QingyunMusicPlayer\\Songs\\Phantom_Ensemble.qys"],{0,5}]];*)
 
 
 (* ::Input:: *)

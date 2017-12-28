@@ -157,3 +157,7 @@ QYMP[1];
 
 (* ::Input:: *)
 (*AudioStop[];AudioPlay@QYSParse[path<>"Songs\\Gate_of_Steiner.qys"];*)
+
+
+(* ::Input:: *)
+(*Options[QYSParse[path<>"Songs\\Phantom_Ensemble.qys"]]*)

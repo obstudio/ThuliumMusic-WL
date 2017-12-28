@@ -104,12 +104,24 @@ Player[song_]:=DynamicModule[{playing=True,current},
 			Nothing
 		],"",
 		Row[{
-			Dynamic@If[playing,
-				Button[display[["Pause"]],AudioPause[current];playing=False,ImageSize->80],
-				Button[display[["Play"]],AudioPlay[current];playing=True,ImageSize->80]
+			Dynamic[timeDisplay[current["Position"]]],
+			Spacer[8],
+			ProgressIndicator[Dynamic[current["Position"]/Duration[audio]],ImageSize->{240,16}],
+			Spacer[8],
+			timeDisplay[Duration[audio]]
+		}],"",
+		Row[{Button[
+			Dynamic[Switch[current["State"],
+				"Playing",display[["Pause"]],
+				"Paused"|"Stopped",display[["Play"]]
+			]],
+			Switch[current["State"],
+				"Playing",current["State"]="Paused",
+				"Paused"|"Stopped",current["State"]="Playing"
 			],
+			ImageSize->80],
 			Spacer[20],
-			Button[display[["Stop"]],AudioStop[];playing=False,ImageSize->80],
+			Button[display[["Stop"]],current["State"]="Stopped",ImageSize->80],
 			Spacer[20],
 			Button[display[["Return"]],AudioStop[];DialogReturn[QYMP[1]],ImageSize->80]			
 		}],"",""

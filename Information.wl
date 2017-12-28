@@ -19,6 +19,12 @@ functionList=Complement[Keys@defaultParameter,{"Volume","Speed","Key","Beat","Ba
 toBase32[n_]:=StringDelete[ToString@BaseForm[n,32],"\n"~~__];
 
 
+timeDisplay[t_]:=Module[
+	{sec=Floor[QuantityMagnitude[UnitConvert[t,"Seconds"]]]},
+	IntegerString[Floor[sec/60],10,2]<>":"<>IntegerString[Mod[sec,60],10,2]
+];
+
+
 generateMessage[tag_,arg_]:=Module[
 	{argRule},
 	argRule=Flatten@Array[{

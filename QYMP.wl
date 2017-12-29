@@ -85,49 +85,59 @@ parse[song_]:=Module[{filename,hash,audio},
 ];
 
 
-Player[song_]:=DynamicModule[{playing=True,current},
+PlayerPalette[song_]:={Spacer[{40,40}],
+	Row[{Style[index[[song,"SongName"]],Bold,28],
+		If[KeyExistsQ[index[[song]],"Comment"],
+			Style[" ("<>index[[song,"Comment"]]<>")",Gray,28],
+			Nothing
+		]
+	}],"",
+	If[KeyExistsQ[index[[song]],"Composer"],tagName[["Composer"]]<>": "<>index[[song,"Composer"]],Nothing],
+	If[KeyExistsQ[index[[song]],"Lyricist"],tagName[["Lyricist"]]<>": "<>index[[song,"Lyricist"]],Nothing],
+	If[KeyExistsQ[index[[song]],"Adapter"],tagName[["Adapter"]]<>": "<>index[[song,"Adapter"]],Nothing],"",
+	If[KeyExistsQ[index[[song]],"Abstract"],
+		Column[StringSplit[index[[song,"Abstract"]],"\n"],Left],
+		Nothing
+	],"",
+	Row[{
+		Dynamic[timeDisplay[current["Position"]]],
+		Spacer[8],
+		ProgressIndicator[Dynamic[current["Position"]/duration],ImageSize->{240,16}],
+		Spacer[8],
+		timeDisplay[duration]
+	}],"",
+	Row[{Button[
+		Dynamic[Switch[current["State"],
+			"Playing",display[["Pause"]],
+			"Paused"|"Stopped",display[["Play"]]
+		]],
+		Switch[current["State"],
+			"Playing",current["State"]="Paused",
+			"Paused"|"Stopped",current["State"]="Playing"
+		],
+		ImageSize->80],
+		Spacer[20],
+		Button[display[["Stop"]],current["State"]="Stopped",ImageSize->80],
+		Spacer[20],
+		Button[display[["Return"]],AudioStop[];DialogReturn[QYMP[1]],ImageSize->80]			
+	}],Spacer[{40,40}]
+};
+
+
+Player[song_]:=(
 	AudioStop[];
 	audio=parse[song];
+	duration=Duration[audio];
 	current=AudioPlay[audio];
-	CreateDialog[Column[{"","",
-		Row[{Style[index[[song,"SongName"]],Bold,28],
-			If[KeyExistsQ[index[[song]],"Comment"],
-				Style[" ("<>index[[song,"Comment"]]<>")",Gray,28],
-				Nothing
-			]
-		}],"",
-		If[KeyExistsQ[index[[song]],"Composer"],tagName[["Composer"]]<>": "<>index[[song,"Composer"]],Nothing],
-		If[KeyExistsQ[index[[song]],"Lyricist"],tagName[["Lyricist"]]<>": "<>index[[song,"Lyricist"]],Nothing],
-		If[KeyExistsQ[index[[song]],"Adapter"],tagName[["Adapter"]]<>": "<>index[[song,"Adapter"]],Nothing],"",
-		If[KeyExistsQ[index[[song]],"Abstract"],
-			Column[StringSplit[index[[song,"Abstract"]],"\n"],Left],
-			Nothing
-		],"",
-		Row[{
-			Dynamic[timeDisplay[current["Position"]]],
-			Spacer[8],
-			ProgressIndicator[Dynamic[current["Position"]/Duration[audio]],ImageSize->{240,16}],
-			Spacer[8],
-			timeDisplay[Duration[audio]]
-		}],"",
-		Row[{Button[
-			Dynamic[Switch[current["State"],
-				"Playing",display[["Pause"]],
-				"Paused"|"Stopped",display[["Play"]]
-			]],
-			Switch[current["State"],
-				"Playing",current["State"]="Paused",
-				"Paused"|"Stopped",current["State"]="Playing"
-			],
-			ImageSize->80],
-			Spacer[20],
-			Button[display[["Stop"]],current["State"]="Stopped",ImageSize->80],
-			Spacer[20],
-			Button[display[["Return"]],AudioStop[];DialogReturn[QYMP[1]],ImageSize->80]			
-		}],"",""
-	},Center,ItemSize->50],
-	WindowTitle->display[["Playing"]]<>": "<>index[[song,"SongName"]]];
-];
+	CreateDialog[If[KeyExistsQ[index[[song]],"Image"],
+		Row[{Spacer[50],
+			Column[{Spacer[{40,40}],Image[Import[path<>"Images\\"<>index[[song,"Image"]]],ImageSize->{360,Automatic}],Spacer[{40,40}]}],
+			Spacer[50],
+			Column[PlayerPalette[song],Alignment->Center,ItemSize->30],
+		Spacer[50]},Alignment->Center],
+		Column[PlayerPalette[song],Alignment->Center,ItemSize->50]
+	],WindowTitle->display[["Playing"]]<>": "<>index[[song,"SongName"]]];
+);
 
 
 QYMP[page_]:=DynamicModule[{song},

@@ -364,7 +364,7 @@ QYSParse[filename_]:=Module[
 	If[!SameQ@@sectionDuration,
 		AppendTo[messages,generateMessage["DiffDuration",{sectionCount,sectionDuration}]];
 	];
-	audio=AudioJoin@sections;
+	audio=AudioJoin@Cases[sections,Except[0]];
 	If[parameter[["FadeIn"]]+parameter[["FadeOut"]]>0,
 		audio=AudioFade[audio,{parameter[["FadeIn"]],parameter[["FadeOut"]]}]
 	];
@@ -380,11 +380,11 @@ QYSParse[filename_]:=Module[
 
 
 (* ::Input:: *)
-(*AbsoluteTiming[QYSParse["E:\\QingyunMusicPlayer\\Songs\\Noushyou_Sakuretsu_Garu.qys"]]*)
+(*AbsoluteTiming[QYSParse[path<>"Songs\\Noushyou_Sakuretsu_Garu.qys"]]*)
 
 
 (* ::Input:: *)
-(*AudioStop[];AudioPlay@QYSParse["E:\\QingyunMusicPlayer\\Songs\\Phantom_Ensemble.qys"];*)
+(*AudioStop[];AudioPlay@QYSParse[path<>"Songs\\Hartmann_No_Youkai_Otome.qys"];*)
 
 
 (* ::Input:: *)
@@ -392,7 +392,7 @@ QYSParse[filename_]:=Module[
 
 
 (* ::Input:: *)
-(*EmitSound@Sound@SoundNote[1,1,"PercussiveOrgan"]*)
+(*EmitSound@Sound@SoundNote[-30,1,"GuitarMuted"]*)
 
 
 (* ::Input:: *)
@@ -400,12 +400,12 @@ QYSParse[filename_]:=Module[
 
 
 (* ::Input:: *)
-(*Export["e:\\1.mp3",AudioFade[QYSParse["E:\\QingyunMusicPlayer\\Songs\\Phantom_Ensemble.qys"],{0,5}]];*)
+(*Export["e:\\1.mp3",AudioFade[QYSParse[path<>"Songs\\Phantom_Ensemble.qys"],{0,5}]];*)
 
 
 (* ::Input:: *)
 (*AudioStop[];*)
-(*AudioPlay@QYSParse["C:\\Users\\kouch\\Documents\\QingyunMusicPlayer-WL\\Songs\\Seijyouki_no_Pierrot.qys"];*)
+(*AudioPlay@QYSParse[path<>"Songs\\Seijyouki_no_Pierrot.qys"];*)
 
 
 (* ::Text:: *)

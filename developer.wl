@@ -9,7 +9,7 @@ ModifySongInfo[song_]:=DynamicModule[{textInfo},
 			{Button[display[["Save"]],putTextInfo[song,textInfo],ImageSize->150,Enabled->Dynamic[textInfo[["SongName"]]!=""]],
 			Button[display[["Undo"]],textInfo=getTextInfo[song],ImageSize->150]},
 			{Button[display[["Debug"]],DialogReturn[Debugger[song]],ImageSize->150,Enabled->False],
-			Button[display[["Return"]],DialogReturn[Management[1]],ImageSize->150]}
+			Button[display[["Return"]],DialogReturn[Management],ImageSize->150]}
 		}],""
 	},Center,ItemSize->30,Spacings->1],
 	WindowTitle->"\:4fee\:6539\:6b4c\:66f2\:4fe1\:606f"];
@@ -27,10 +27,10 @@ AddSongUI:=DynamicModule[{songPath,textInfo},
 		Grid[{tagName[[#]],Spacer[20],InputField[Dynamic@textInfo[[#]],String]}&/@textInfoTags],"",
 		Row[{Button[display[["Add"]],
 			AddSong[songPath,textInfo];
-			DialogReturn[Management[1]],
+			DialogReturn[Management],
 		ImageSize->150,Enabled->Dynamic[textInfo[["SongName"]]!=""]],
 		Spacer[20],
-		Button[display[["Return"]],DialogReturn[Management[1]],ImageSize->150]}],""
+		Button[display[["Return"]],DialogReturn[Management],ImageSize->150]}],""
 	},Center,ItemSize->30,Spacings->1],
 	WindowTitle->"\:6dfb\:52a0\:65b0\:66f2\:76ee"]
 ];
@@ -101,10 +101,10 @@ DeleteSong[song_]:=CreateDialog[Column[{"",
 		Button[display[["Confirm"]],
 			index=Delete[index,song];
 			DeleteFile[path<>"Meta\\"<>song<>".meta"];
-			DialogReturn[Management[1]],
+			DialogReturn[Management],
 		ImageSize->100],
 		Spacer[20],
-		Button[display[["Return"]],DialogReturn[Management[1]],ImageSize->100]			
+		Button[display[["Return"]],DialogReturn[Management],ImageSize->100]			
 	}],""
 },Center,ItemSize->36],
 WindowTitle->"\:5220\:9664\:66f2\:76ee"];

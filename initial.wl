@@ -111,6 +111,7 @@ putTextInfo[song_,textInfo_]:=Module[
 
 
 update:=Module[{updates={},song,filename,hash,audio,messages},
+	refresh;
 	Do[
 		filename=path<>"Songs\\"<>song<>"."<>index[[song,"Format"]];
 		hash=toBase32@FileHash[filename];

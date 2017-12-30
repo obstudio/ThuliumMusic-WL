@@ -368,7 +368,6 @@ QYSParse[filename_]:=Module[
 	If[parameter[["FadeIn"]]+parameter[["FadeOut"]]>0,
 		audio=AudioFade[audio,{parameter[["FadeIn"]],parameter[["FadeOut"]]}]
 	];
-	If[messages!={},Print[Column@messages]];
 	Return[Audio[audio,MetaInformation-><|
 		"Format"->"qys",
 		"TrackCount"->trackCount,

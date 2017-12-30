@@ -226,6 +226,7 @@ QYMParse[filename_]:=Module[
 	Return[Audio[music,MetaInformation-><|
 		"Format"->"qym",
 		"TrackCount"->Length@track,
+		"Messages"->{},
 		"Duration"->QuantityMagnitude@UnitConvert[Duration@music,"Seconds"],
 		"Instruments"->instrumentList
 	|>]];

@@ -33,26 +33,6 @@ settings:=DynamicModule[{deveChoice,langChoice},
 ];
 
 
-parse[song_]:=Module[{filename,hash,audio},
-	filename=path<>"Songs\\"<>song<>"."<>index[[song,"Format"]];
-	hash=toBase32@FileHash[filename];
-	If[KeyExistsQ[bufferHash,song],
-		If[bufferHash[[song]]==hash && FileExistsQ[userPath<>"Buffer\\"<>song<>".buffer"],
-			Return[Import[userPath<>"Buffer\\"<>song<>".buffer","MP3"]],
-			bufferHash[[song]]=hash;
-		],
-		AppendTo[bufferHash,song->hash];
-	];
-	Export[userPath<>"Buffer.json",Normal@bufferHash];
-	If[index[[song,"Format"]]=="qys",
-		audio=QYSParse[filename],
-		audio=QYMParse[filename]
-	];
-	Export[userPath<>"Buffer\\"<>song<>".buffer",audio,"MP3"];
-	Return[audio];
-];
-
-
 PlayerPalette[song_]:={Spacer[{40,40}],
 	Row[{Style[index[[song,"SongName"]],Bold,28],
 		If[KeyExistsQ[index[[song]],"Comment"],
@@ -87,18 +67,21 @@ PlayerPalette[song_]:={Spacer[{40,40}],
 		Spacer[20],
 		Button[display[["Stop"]],current["State"]="Stopped",ImageSize->80],
 		Spacer[20],
-		Button[display[["Return"]],AudioStop[];DialogReturn[QYMP[1]],ImageSize->80]			
+		Button[display[["Return"]],AudioStop[];DialogReturn[QYMP],ImageSize->80]			
 	}],Spacer[{40,40}]
 };
 
 
-Player[song_]:=Module[{image},
+Player[song_]:=Module[{image,audio,imageExist},
 	AudioStop[];
-	audio=parse[song];
+	If[KeyExistsQ[index[[song]],"Image"],
+		imageExist=True;image=Import[path<>"Images\\"<>index[[song,"Image"]]],
+		imageExist=False
+	];
+	audio=Import[userPath<>"Buffer\\"<>song<>".buffer","MP3"];
 	duration=Duration[audio];
 	current=AudioPlay[audio];
-	CreateDialog[If[KeyExistsQ[index[[song]],"Image"],
-		image=Import[path<>"Images\\"<>index[[song,"Image"]]];
+	CreateDialog[If[imageExist,
 		Row[{Spacer[50],
 			Column[{
 				Spacer[{40,40}],
@@ -122,7 +105,7 @@ Player[song_]:=Module[{image},
 ];
 
 
-QYMP[page_]:=DynamicModule[{song},
+QYMP:=DynamicModule[{song},
 	refresh;
 	AudioStop[];
 	CreateDialog[Column[{"",
@@ -136,14 +119,14 @@ QYMP[page_]:=DynamicModule[{song},
 			Appearance->"Vertical"
 		],"",
 		Row[{
-			Button[display[["PgPrev"]],DialogReturn[QYMP[page-1]],ImageSize->200,Enabled->(page>1)],
+			Button[display[["PgPrev"]],DialogReturn[page--;QYMP],ImageSize->200,Enabled->(page>1)],
 			Spacer[10],
-			Button[display[["PgNext"]],DialogReturn[QYMP[page+1]],ImageSize->200,Enabled->(page<pageCount)]
+			Button[display[["PgNext"]],DialogReturn[page++;QYMP],ImageSize->200,Enabled->(page<pageCount)]
 		}],
 		Row[{
 			Button[display[["PlaySong"]],DialogReturn[Player[song]],ImageSize->200],
 			Spacer[10],
-			Button[display[["Manage"]],DialogReturn[Management[1]],ImageSize->200]
+			Button[display[["Manage"]],DialogReturn[Management],ImageSize->200]
 		}],
 		Row[{
 			Button[display[["Settings"]],DialogReturn[settings],ImageSize->200],
@@ -156,7 +139,7 @@ QYMP[page_]:=DynamicModule[{song},
 
 
 (* ::Input::Initialization:: *)
-QYMP[1];
+update;QYMP;
 
 
 (* ::Input:: *)
@@ -164,11 +147,7 @@ QYMP[1];
 
 
 (* ::Input:: *)
-(*Options[QYSParse[path<>"Songs\\Phantom_Ensemble.qys"]]*)
-
-
-(* ::Input:: *)
-(*Export["E:\\"<>index["Hartmann_No_Youkai_Otome","Comment"]<>".mp3",parse["Hartmann_No_Youkai_Otome"]];*)
+(*Options[QYSParse[path<>"Songs\\TouHou\\Phantom_Ensemble.qys"]]*)
 
 
 (* ::Input:: *)

@@ -18,6 +18,8 @@ If[userInfo[["Version"]]<version,
 If[!FileExistsQ[userPath<>"Instrument.json"],Export[userPath<>"Instrument.json",{"Piano","Violin","Guitar","Flute"}]];
 If[!FileExistsQ[userPath<>"Buffer.json"],Export[userPath<>"Buffer.json",{}]];
 bufferHash=Association@Import[userPath<>"Buffer.json"];
+If[!FileExistsQ[userPath<>"ErrorLog.json"],Export[userPath<>"ErrorLog.json",{}]];
+errorLog=Association@Import[userPath<>"ErrorLog.json"];
 If[!FileExistsQ[userPath<>"Favorite.json"],Export[userPath<>"Favorite.json",{}]];
 favorite=Import[userPath<>"Favorite.json"];
 
@@ -94,8 +96,6 @@ readInfo[song_]:=Module[
 	{i,Length[data]}];
 	Return[Association@info];
 ];
-
-
 getTextInfo[song_]:=(
 	refresh;
 	AssociationMap[If[KeyExistsQ[index[[song]],#],index[[song,#]],""]&,textInfoTags]
@@ -108,3 +108,56 @@ putTextInfo[song_,textInfo_]:=Module[
 	index[[song]]=Association@info;
 	writeInfo[song,index[[song]]];
 ];
+
+
+update:=Module[{updates={},song,filename,hash,audio,messages},
+	Do[
+		filename=path<>"Songs\\"<>song<>"."<>index[[song,"Format"]];
+		hash=toBase32@FileHash[filename];
+		If[KeyExistsQ[bufferHash,song],
+			If[bufferHash[[song]]==hash && FileExistsQ[userPath<>"Buffer\\"<>song<>".buffer"],
+				Continue[],
+				AppendTo[updates,song];
+			],
+			AppendTo[bufferHash,song->hash];
+			AppendTo[updates,song];
+		],
+	{song,songList}];
+	If[updates=={},Return[]];
+	Monitor[Do[
+		song=updates[[i]];
+		filename=path<>"Songs\\"<>song<>"."<>index[[song,"Format"]];
+		bufferHash[[song]]=toBase32@FileHash[filename];
+		filename=path<>"Songs\\"<>song<>"."<>index[[song,"Format"]];
+		hash=toBase32@FileHash[filename];
+		If[KeyExistsQ[bufferHash,song],
+			If[bufferHash[[song]]==hash && FileExistsQ[userPath<>"Buffer\\"<>song<>".buffer"],
+				Continue[],
+				bufferHash[[song]]=hash;
+			],
+			AppendTo[bufferHash,song->hash];
+		];
+		If[index[[song,"Format"]]=="qys",
+			audio=QYSParse[filename],
+			audio=QYMParse[filename]
+		];
+		messages=Values[Options[audio,MetaInformation]][[1]][["Messages"]];
+		If[KeyExistsQ[errorLog,song],
+			errorLog[[song]]=messages,
+			AppendTo[errorLog,song->messages]
+		];
+		Export[userPath<>"Buffer\\"<>song<>".buffer",audio,"MP3"],
+	{i,Length@updates}],
+	Panel[Column[{Spacer[{4,4}],
+		"\:6b63\:5728\:66f4\:65b0\:672c\:5730\:6b4c\:66f2\:5e93\[Ellipsis]\[Ellipsis]",
+		Spacer[1],
+		ProgressIndicator[i,{1,Length@updates},ImageSize->{320,16}],
+		Spacer[1],
+		"(\:7b2c"<>ToString@i<>"\:9996, \:5171"<>ToString@Length@updates<>"\:9996) \:6b63\:5728\:8f7d\:5165: "<>index[[updates[[i]],"SongName"]],
+	Spacer[{4,4}]},Alignment->Center],ImageSize->400,Alignment->Center]];
+	Export[userPath<>"Buffer.json",Normal@bufferHash[[Intersection[Keys@bufferHash,songList]]]];
+	Export[userPath<>"ErrorLog.json",Normal@errorLog];
+];
+
+
+page=1;

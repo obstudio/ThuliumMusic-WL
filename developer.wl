@@ -110,7 +110,7 @@ DeleteSong[song_]:=CreateDialog[Column[{"",
 WindowTitle->"\:5220\:9664\:66f2\:76ee"];
 
 
-Management[page_]:=Module[{},refresh;
+Management:=Module[{},refresh;
 CreateDialog[Column[{"",
 	Row[{Style[display[["Manage"]],Bold,32],Style[" (\:7b2c"<>ToString[page]<>"\:9875)",Gray,32]}],"",
 	Grid[{index[[#,"SongName"]],
@@ -118,11 +118,11 @@ CreateDialog[Column[{"",
 		Button[display[["Delete"]],DialogReturn[DeleteSong[#]],ImageSize->Tiny]
 	}&/@songListPaged[[page]]],"",
 	Row[{
-		Button[display[["PgPrev"]],DialogReturn[Management[page-1]],ImageSize->100,Enabled->(page>1)],
+		Button[display[["PgPrev"]],DialogReturn[page--;Management],ImageSize->100,Enabled->(page>1)],
 		Spacer[10],
-		Button[display[["PgNext"]],DialogReturn[Management[page+1]],ImageSize->100,Enabled->(page<pageCount)]
+		Button[display[["PgNext"]],DialogReturn[page++;Management],ImageSize->100,Enabled->(page<pageCount)]
 	}],
 	Button[display[["AddSong"]],DialogReturn[AddSongUI],ImageSize->150],
-	Button[display[["Return"]],DialogReturn[QYMP[1]],ImageSize->150],""
+	Button[display[["Return"]],DialogReturn[QYMP],ImageSize->150],""
 },Center,ItemSize->20],
 WindowTitle->"\:6b4c\:5355\:7ba1\:7406"]];

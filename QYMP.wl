@@ -4,43 +4,11 @@
 (*Qingyun Music Player*)
 
 
-version=142;
-userPath="C:\\Users\\"<>$UserName<>"\\AppData\\Local\\QYMP\\";
-If[!DirectoryQ[userPath],CreateDirectory[userPath]];
-If[!DirectoryQ[userPath<>"export\\"],CreateDirectory[userPath<>"export\\"]];
-If[!DirectoryQ[userPath<>"buffer\\"],CreateDirectory[userPath<>"buffer\\"]];
-template={"Version"->version,"Language"->"chs","Developer"->False};
-If[!FileExistsQ[userPath<>"Default.json"],Export[userPath<>"Default.json",template]];
-userInfo=Association@Import[userPath<>"Default.json"];
-If[userInfo[["Version"]]<version,
-	Do[
-		If[!KeyExistsQ[userInfo,tag],AppendTo[userInfo,tag->template[[tag]]]],
-	{tag,Keys@template}];
-	userInfo[["Version"]]=version;
-	Export[userPath<>"Default.json",userInfo];
-];
-If[!FileExistsQ[userPath<>"Instrument.json"],Export[userPath<>"Instrument.json",{"Piano","Violin","Guitar","Flute"}]];
-If[!FileExistsQ[userPath<>"Buffer.json"],Export[userPath<>"Buffer.json",{}]];
-bufferHash=Association@Import[userPath<>"Buffer.json"];
-If[!FileExistsQ[userPath<>"Favorite.json"],Export[userPath<>"Favorite.json",{}]];
-favorite=Import[userPath<>"Favorite.json"];
-
-
 path=NotebookDirectory[];
-<<(path<>"information.wl")
+<<(path<>"initial.wl")
 <<(path<>"developer.wl")
 <<(path<>"qysParse.wl")
 <<(path<>"qymParse.wl")
-instrData=Association@Import[path<>"instr.json"];
-langList={"chs"->"\:7b80\:4f53\:4e2d\:6587"(*,"eng"->"\:82f1\:8bed"*)};
-langData=Association@Import[path<>"Lang\\"<>userInfo[["Language"]]<>".json"];
-tagName=Association@langData[["TagName"]];
-instrName=Association@langData[["Instrument"]];
-errorDict=Association@langData[["Error"]];
-display=Association@langData[["Dialog"]];
-textInfoTags={"SongName","Lyricist","Composer","Adapter","Comment","Abstract"};
-metaInfoTags={"Format","TrackCount","Duration","Instruments"};
-refresh;
 
 
 settings:=DynamicModule[{deveChoice,langChoice},
@@ -124,20 +92,34 @@ PlayerPalette[song_]:={Spacer[{40,40}],
 };
 
 
-Player[song_]:=(
+Player[song_]:=Module[{image},
 	AudioStop[];
 	audio=parse[song];
 	duration=Duration[audio];
 	current=AudioPlay[audio];
 	CreateDialog[If[KeyExistsQ[index[[song]],"Image"],
+		image=Import[path<>"Images\\"<>index[[song,"Image"]]];
 		Row[{Spacer[50],
-			Column[{Spacer[{40,40}],Image[Import[path<>"Images\\"<>index[[song,"Image"]]],ImageSize->{360,Automatic}],Spacer[{40,40}]}],
+			Column[{
+				Spacer[{40,40}],
+				Tooltip[Image[image,ImageSize->If[ImageAspectRatio[image]>1,{360,Automatic},{Automatic,400}]],
+					If[KeyExistsQ[imageData,index[[song,"Image"]]],
+						Column[If[KeyExistsQ[imageData[[index[[song,"Image"]]]],#],
+							tagName[[#]]<>": "<>imageData[[index[[song,"Image"]],#]],
+							Nothing
+						]&/@imageTags],
+						"\:6682\:65e0\:8be5\:56fe\:7247\:7684\:4fe1\:606f"
+					]
+				],
+				Spacer[{40,40}]
+			}],
 			Spacer[50],
 			Column[PlayerPalette[song],Alignment->Center,ItemSize->30],
 		Spacer[50]},Alignment->Center],
+		(* no image *)
 		Column[PlayerPalette[song],Alignment->Center,ItemSize->50]
 	],WindowTitle->display[["Playing"]]<>": "<>index[[song,"SongName"]]];
-);
+];
 
 
 QYMP[page_]:=DynamicModule[{song},
@@ -183,3 +165,11 @@ QYMP[1];
 
 (* ::Input:: *)
 (*Options[QYSParse[path<>"Songs\\Phantom_Ensemble.qys"]]*)
+
+
+(* ::Input:: *)
+(*Export["E:\\"<>index["Hartmann_No_Youkai_Otome","Comment"]<>".mp3",parse["Hartmann_No_Youkai_Otome"]];*)
+
+
+(* ::Input:: *)
+(*Print[index["Hartmann_No_Youkai_Otome","Comment"]];*)

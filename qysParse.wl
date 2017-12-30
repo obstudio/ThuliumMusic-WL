@@ -78,7 +78,7 @@ track[score_,global_,location_]:=Module[
 						position=StringPosition[content,":"][[1,1]];
 						function=StringTake[content,position-1];
 						argument=ToExpression@StringDrop[content,position];
-						If[MemberQ[functionList,function],
+						If[MemberQ[funcList,function],
 							parameter[[function]]=argument,
 							AppendTo[messages,generateMessage["InvFunction",Join[location,{barCount+1,function}]]]
 						],

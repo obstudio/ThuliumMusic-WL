@@ -10,7 +10,12 @@
         "Format": "格式",
         "TrackCount": "音轨数",
         "Duration": "时长",
-        "Instruments": "乐器"
+        "Instruments": "乐器",
+		"URL": "地址",
+		"Painter": "画师",
+		"PainterID": "画师ID",
+		"IllustID": "图片ID",
+		"Title": "标题"
     },
     "Instrument": {
         "Accordion": "手风琴",

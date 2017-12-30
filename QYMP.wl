@@ -91,8 +91,7 @@ Player[song_]:=Module[{image,audio,imageExist},
 							tagName[[#]]<>": "<>imageData[[index[[song,"Image"]],#]],
 							Nothing
 						]&/@imageTags],
-						Print[imageData,index[[song,"Image"]]];"\:6682\:65e0\:8be5\:56fe\:7247\:7684\:4fe1\:606f"
-						
+						"\:6682\:65e0\:8be5\:56fe\:7247\:7684\:4fe1\:606f"
 					]
 				],
 				Spacer[{40,40}]

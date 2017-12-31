@@ -37,7 +37,11 @@ AddSongUI:=DynamicModule[{songPath,textInfo},
 
 
 (* ::Input:: *)
-(*AddSong["Phantom_Ensemble.qys",<|"SongName"->"\:5e7d\:7075\:4e50\:56e2","Composer"->"ZUN","Comment"->"\:5e7d\:970a\:697d\:56e3","Abstract"->"\:4e1c\:65b9\:5996\:5996\:68a64\:9762BOSS\n\:666e\:8389\:5179\:59c6\:5229\:5df4\:4e09\:59d0\:59b9\:7684\:4e3b\:9898\:66f2"|>]*)
+(*AddSong["TouHou\\Dream_Battle.qys",<|"SongName"->"\:5c11\:5973\:7eee\:60f3\:66f2","Composer"->"ZUN","Comment"->"\:5c11\:5973\:7dba\:60f3\:66f2","Lyricist"->"","Adapter"->"","Abstract"->"\:4e1c\:65b9\:6c38\:591c\:62844\:9762BOSS\n\:535a\:4e3d\:7075\:68a6\:7684\:4e3b\:9898\:66f2"|>]*)
+
+
+(* ::Input:: *)
+(*refresh;Column[songList]*)
 
 
 AddSong[songPath_,textInfo_]:=Module[{metaInfo,audio,song},
@@ -53,14 +57,6 @@ AddSong[songPath_,textInfo_]:=Module[{metaInfo,audio,song},
 	AppendTo[index,song->metaInfo];
 	putTextInfo[song,textInfo];
 ];
-
-
-(* ::Input:: *)
-(*index[["Phantom_Ensemble"]]*)
-
-
-(* ::Input:: *)
-(*putTextInfo["Phantom_Ensemble",<|"SongName"->"\:5e7d\:7075\:4e50\:56e2","Composer"->"ZUN","Comment"->"\:5e7d\:970a\:697d\:56e3","Abstract"->"\:4e1c\:65b9\:5996\:5996\:68a64\:9762BOSS\n\:666e\:8389\:5179\:59c6\:5229\:5df4\:4e09\:59d0\:59b9\:7684\:4e3b\:9898\:66f2","Lyricist"->"","Adapter"->""|>]*)
 
 
 Debugger[song_]:=Module[{filename,audio},DynamicModule[{playing=False,current},

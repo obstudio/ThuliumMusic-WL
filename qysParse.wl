@@ -380,7 +380,7 @@ QYSParse[filename_]:=Module[
 
 
 (* ::Input:: *)
-(*AudioStop[];AudioPlay@QYSParse[path<>"Songs\\TouHou\\Dream_Battle.qys"];*)
+(*AudioStop[];AudioPlay@QYSParse[path<>"Songs\\TouHou\\Hartmann_No_Youkai_Otome.qys"];*)
 
 
 (* ::Input:: *)
@@ -388,7 +388,7 @@ QYSParse[filename_]:=Module[
 
 
 (* ::Input:: *)
-(*EmitSound@Sound@SoundNote[15,1,"FretlessBass"]*)
+(*EmitSound@Sound@SoundNote[-12,1,"Xylophone"]*)
 
 
 (* ::Input:: *)

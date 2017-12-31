@@ -407,7 +407,6 @@ QYSParse[filename_]:=Module[
 (* ::Text:: *)
 (*ElectricSnare, BassDrum, Shaker, RideCymbal, Snare, CrashCymbal, HiHatPedal, HiHatClosed*)
 (*Ocarina, Oboe, Clarinet, Recorder, BrassSection, Harpsichord, BrightPiano, Organ, DrawbarOrgan, FretlessBass*)
-(*+6*)
 
 
 (* ::Input:: *)

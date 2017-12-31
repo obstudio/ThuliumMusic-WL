@@ -147,7 +147,7 @@ QYMP;
 
 
 (* ::Input:: *)
-(*AudioStop[];AudioPlay@QYSParse[path<>"Songs\\Gate_of_Steiner.qys"];*)
+(*AudioStop[];AudioPlay@QYSParse[path<>"Songs\\TouHou\\Hartmann_No_Youkai_Otome.qys"];*)
 
 
 (* ::Input:: *)
@@ -155,4 +155,4 @@ QYMP;
 
 
 (* ::Input:: *)
-(*Print[index["Hartmann_No_Youkai_Otome","Comment"]];*)
+(*Print[index["TouHou\\Hartmann_No_Youkai_Otome","Comment"]];*)

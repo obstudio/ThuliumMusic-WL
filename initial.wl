@@ -124,20 +124,11 @@ update:=Module[{updates={},song,filename,hash,audio,messages},
 			AppendTo[updates,song];
 		],
 	{song,songList}];
-	If[updates=={},Return[]];
+	If[updates=={},Return[1111]];
 	Monitor[Do[
 		song=updates[[i]];
 		filename=path<>"Songs\\"<>song<>"."<>index[[song,"Format"]];
 		bufferHash[[song]]=toBase32@FileHash[filename];
-		filename=path<>"Songs\\"<>song<>"."<>index[[song,"Format"]];
-		hash=toBase32@FileHash[filename];
-		If[KeyExistsQ[bufferHash,song],
-			If[bufferHash[[song]]==hash && FileExistsQ[userPath<>"Buffer\\"<>song<>".buffer"],
-				Continue[],
-				bufferHash[[song]]=hash;
-			],
-			AppendTo[bufferHash,song->hash];
-		];
 		If[index[[song,"Format"]]=="qys",
 			audio=QYSParse[filename],
 			audio=QYMParse[filename]

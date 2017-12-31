@@ -85,7 +85,7 @@ Player[song_]:=Module[{image,audio,imageExist},
 		Row[{Spacer[50],
 			Column[{
 				Spacer[{40,40}],
-				Tooltip[Image[image,ImageSize->If[ImageAspectRatio[image]>1,{360,Automatic},{Automatic,400}]],
+				Tooltip[Image[image,ImageSize->If[ImageAspectRatio[image]>1,{360,UpTo[720]},{UpTo[800],400}]],
 					If[KeyExistsQ[imageData,index[[song,"Image"]]],
 						Column[If[KeyExistsQ[imageData[[index[[song,"Image"]]]],#],
 							tagName[[#]]<>": "<>imageData[[index[[song,"Image"]],#]],
@@ -147,7 +147,7 @@ QYMP;
 
 
 (* ::Input:: *)
-(*AudioStop[];AudioPlay@QYSParse[path<>"Songs\\Gate_of_Steiner.qys"];*)
+(*AudioStop[];AudioPlay@QYSParse[path<>"Songs\\TouHou\\Hartmann_No_Youkai_Otome.qys"];*)
 
 
 (* ::Input:: *)
@@ -155,4 +155,4 @@ QYMP;
 
 
 (* ::Input:: *)
-(*Print[index["Hartmann_No_Youkai_Otome","Comment"]];*)
+(*Print[index["TouHou\\Hartmann_No_Youkai_Otome","Comment"]];*)

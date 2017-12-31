@@ -2,6 +2,7 @@ Format: qys;
 TrackCount: 4;
 Duration: 99.869;
 Instruments: {"ElectricBass", "ElectricPiano2", "Piano", "Violin"};
+Image: TouHou\Mizuhashi_Parsee.jpg;
 SongName: 绿眼的嫉妒;
 Composer: ZUN;
 Comment: 緑眼のジェラシー;

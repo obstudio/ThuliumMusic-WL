@@ -368,6 +368,7 @@ QYSParse[filename_]:=Module[
 	If[parameter[["FadeIn"]]+parameter[["FadeOut"]]>0,
 		audio=AudioFade[audio,{parameter[["FadeIn"]],parameter[["FadeOut"]]}]
 	];
+	If[messages!={},Print[Column@messages]];
 	Return[Audio[audio,MetaInformation-><|
 		"Format"->"qys",
 		"TrackCount"->trackCount,
@@ -379,11 +380,7 @@ QYSParse[filename_]:=Module[
 
 
 (* ::Input:: *)
-(*AbsoluteTiming[QYSParse[path<>"Songs\\Noushyou_Sakuretsu_Garu.qys"]]*)
-
-
-(* ::Input:: *)
-(*AudioStop[];AudioPlay@QYSParse[path<>"Songs\\Hartmann_No_Youkai_Otome.qys"];*)
+(*AudioStop[];AudioPlay@QYSParse[path<>"Songs\\TouHou\\Hartmann_No_Youkai_Otome.qys"];*)
 
 
 (* ::Input:: *)
@@ -391,7 +388,7 @@ QYSParse[filename_]:=Module[
 
 
 (* ::Input:: *)
-(*EmitSound@Sound@SoundNote[-30,1,"GuitarMuted"]*)
+(*EmitSound@Sound@SoundNote[-12,1,"Xylophone"]*)
 
 
 (* ::Input:: *)
@@ -409,8 +406,8 @@ QYSParse[filename_]:=Module[
 
 (* ::Text:: *)
 (*ElectricSnare, BassDrum, Shaker, RideCymbal, Snare, CrashCymbal, HiHatPedal, HiHatClosed*)
-(*Ocarina, Oboe, Clarinet, Recorder, BrassSection, Harpsichord,BrightPiano, Organ, DrawbarOrgan, FretlessBass*)
+(*Ocarina, Oboe, Clarinet, Recorder, BrassSection, Harpsichord, BrightPiano, Organ, DrawbarOrgan, FretlessBass*)
 
 
 (* ::Input:: *)
-(*QYMP[1];*)
+(*QYMP;*)

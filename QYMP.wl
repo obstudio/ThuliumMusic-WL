@@ -85,7 +85,7 @@ Player[song_]:=Module[{image,audio,imageExist},
 		Row[{Spacer[50],
 			Column[{
 				Spacer[{40,40}],
-				Tooltip[Image[image,ImageSize->If[ImageAspectRatio[image]>1,{360,Automatic},{Automatic,400}]],
+				Tooltip[Image[image,ImageSize->If[ImageAspectRatio[image]>1,{360,UpTo[720]},{UpTo[800],400}]],
 					If[KeyExistsQ[imageData,index[[song,"Image"]]],
 						Column[If[KeyExistsQ[imageData[[index[[song,"Image"]]]],#],
 							tagName[[#]]<>": "<>imageData[[index[[song,"Image"]],#]],

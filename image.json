@@ -20,5 +20,32 @@
 	"TouHou\\Hakurei_Reimu.jpg": {
 		"Painter": "ke-ta",
 		"PainterID": "3104565"
+	},
+	"TouHou\\Yakumo_Yukari.png": {
+		"Title": "幻巣「飛光虫ネスト」",
+		"Painter": "菊月",
+		"IllustID": "59145259",
+		"PainterID": "429883"
+	},
+	"TouHou\\Ringo.png": {
+		"IllustID": "50411353"
+	},
+	"TouHou\\Clownpiece.png": {
+		"Title": "【速涂】Clownpiece",
+		"Painter": "蠢嵐嵐嵐",
+		"IllustID": "51971375",
+		"PainterID": "7930724"
+	},
+	"TouHou\\Mizuhashi_Parsee.jpg": {
+		"Title": "渡る者の途絶えた橋",
+		"Painter": "ryosios",
+		"IllustID": "42904052",
+		"PainterID": "1508165"
+	},
+	"TouHou\\Saigyouji_Yuyuko.jpg": {
+		"Title": "夏過ぎて",
+		"Painter": "ryosios",
+		"IllustID": "52485871",
+		"PainterID": "1508165"
 	}
 }

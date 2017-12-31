@@ -2,6 +2,7 @@ Format: qys;
 TrackCount: 2;
 Duration: 12.0279;
 Instruments: {"Cello", "Piano"};
+Image: TouHou\Clownpiece.png;
 SongName: 星条旗的小丑;
 Composer: ZUN;
 Adapter: 触手猴 LittleRed;

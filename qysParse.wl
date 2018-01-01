@@ -15,12 +15,16 @@ getPitch[score_,pos_]:=Module[
 		pitch=If[note==0,None,pitchDict[[note]]]
 	];
 	i++;
-	While[i<=StringLength@score && MemberQ[{"#","b","'",",","^"},StringPart[score,i]],
+	While[i<=StringLength@score && MemberQ[{"#","b","'",",","^","M","m","a","d"},StringPart[score,i]],
 		Switch[StringPart[score,i],
 			"#",pitch++,
 			"b",pitch--,
 			"'",pitch+=12,
 			",",pitch-=12,
+			"M",pitch+={0,4,7},
+			"m",pitch+={0,3,7},
+			"a",pitch+={0,4,8},
+			"d",pitch+={0,3,6},
 			"^",appoQ=True
 		];
 		i++;
@@ -167,14 +171,18 @@ track[score_,global_,location_]:=Module[
 			True,
 				AppendTo[messages,generateMessage["InvCharacter",Join[location,{barCount+1,char}]]];
 				pitch=None;
-		];
-		While[j<=StringLength[score] && MemberQ[{"#","b","'",","},StringPart[score,j]],
+		];		
+		While[j<=StringLength[score] && MemberQ[{"#","b","'",",","M","m","a","d"},StringPart[score,j]],
 			char=StringPart[score,j];
 			Switch[char,
 				"#",pitch++;If[appoChord,appoggiatura++],
 				"b",pitch--;If[appoChord,appoggiatura--],
 				"'",pitch+=12;If[appoChord,appoggiatura+=12],
-				",",pitch-=12;If[appoChord,appoggiatura-=12]
+				",",pitch-=12;If[appoChord,appoggiatura-=12],
+				"M",pitch+={0,4,7};If[appoChord,appoggiatura+={0,4,7}],
+				"m",pitch+={0,3,7};If[appoChord,appoggiatura+={0,3,7}],
+				"a",pitch+={0,4,8};If[appoChord,appoggiatura+={0,4,8}],
+				"d",pitch+={0,3,6};If[appoChord,appoggiatura+={0,3,6}]
 			];
 			j++;
 		];

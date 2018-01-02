@@ -49,14 +49,20 @@ tonalityDict=<|
 	"Eb"->3,"Ab"->-4,"Db"->1,"Cb"->-1
 |>;
 pitchDict=<|"1"->0,"2"->2,"3"->4,"4"->5,"5"->7,"6"->9,"7"->11|>;
+pitchOpDict=<|
+	"#"->1,"b"->-1,"'"->12,","->-12,"M"->{0,4,7},"m"->{0,3,7},
+	"a"->{0,4,8},"d"->{0,3,6},"p"->{0,7,12},"o"->{0,12}
+|>;
+pitchOpList=Append[Keys[pitchOpDict],"$"];
 defaultParameter=<|
 	"Volume"->1,"Speed"->90,"Key"->0,"Beat"->4,"Bar"->4,"Instr"->"Piano",
 	"Dur"->0,"FadeIn"->0,"FadeOut"->0,"Stac"->1/2,"Appo"->1/4,"Oct"->0,
-	"Port"->6,"Spac"->0
+	"Port"->6,"Spac"->0,"Chord"->{0,12}
 |>;
 funcList=Keys@defaultParameter;
 
 
+toArgument[str_]:=If[StringContainsQ[str,","],ToExpression/@StringSplit[str,","],ToExpression@str];
 toBase32[n_]:=StringDelete[ToString@BaseForm[n,32],"\n"~~__];
 timeDisplay[t_]:=Module[
 	{sec=Floor[QuantityMagnitude[UnitConvert[t,"Seconds"]]]},

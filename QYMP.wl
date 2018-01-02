@@ -147,12 +147,16 @@ QYMP;
 
 
 (* ::Input:: *)
-(*AudioStop[];AudioPlay@QYSParse[path<>"Songs\\TouHou\\Hartmann_No_Youkai_Otome.qys"];*)
+(*AudioStop[];*)
 
 
 (* ::Input:: *)
-(*Options[QYSParse[path<>"Songs\\TouHou\\Phantom_Ensemble.qys"]]*)
+(*AudioStop[];AudioPlay@QYSParse[path<>"Songs\\Touhou\\Hartmann_No_Youkai_Otome.qys"];*)
 
 
 (* ::Input:: *)
-(*Print[index["TouHou\\Hartmann_No_Youkai_Otome","Comment"]];*)
+(*Options[QYSParse[path<>"Songs\\Touhou\\Phantom_Ensemble.qys"]]*)
+
+
+(* ::Input:: *)
+(*Print[index["Touhou\\Hartmann_No_Youkai_Otome","Comment"]];*)

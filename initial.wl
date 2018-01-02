@@ -41,6 +41,7 @@ metaInfoTags={"Format","TrackCount","Duration","Instruments"};
 imageTags={"Title","Painter","PainterID","IllustID","URL"};
 
 
+matchDict=<|"["->"]","("->")","{"->"}","<"->">"|>;
 tonalityDict=<|
 	"C"->0,"G"->7,"D"->2,"A"->-3,"E"->4,
 	"B"->-1,"#F"->6,"#C"->1,"F"->5,"bB"->-2,
@@ -62,6 +63,19 @@ defaultParameter=<|
 funcList=Keys@defaultParameter;
 
 
+findMatch[score_,pos_]:=Module[
+	{i=pos+1,left,right,stack=1},
+	left=StringPart[score,pos];
+	right=matchDict[[left]];
+	While[i<=StringLength[score],
+		Switch[StringPart[score,i],
+			left,stack++,
+			right,stack--;If[stack==0,Break[]];
+		];
+		i++
+	];
+	Return[i];
+];
 toArgument[str_]:=If[StringContainsQ[str,","],ToExpression/@StringSplit[str,","],ToExpression@str];
 toBase32[n_]:=StringDelete[ToString@BaseForm[n,32],"\n"~~__];
 timeDisplay[t_]:=Module[

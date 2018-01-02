@@ -1,21 +1,24 @@
 (* ::Package:: *)
 
+(* ::Input:: *)
+(*path=NotebookDirectory[];*)
+(*<<(path<>"initial.wl")*)
+
+
 getPitch[score_,pos_,para_]:=Module[
-	{i=pos,note,pitch,pitchData,appoQ=False},
+	{i=pos,note,pitch,pitchData},
 	If[StringPart[score,i]=="[",
 		i++;
 		pitch={};
 		While[i<=StringLength[score] && StringPart[score,i]!="]",
 			pitchData=getPitch[score,i,para];
-			AppendTo[pitch,pitchData[[1]]+12*para[["Oct"]]+para[["Key"]]];
+			AppendTo[pitch,pitchData[[1]]];
 			i=pitchData[[2]];
-			appoQ=appoQ||pitchData[[3]];
 		],
 		note=ToExpression@StringPart[score,i];
 		pitch=If[note==0,None,pitchDict[[note]]+12*para[["Oct"]]+para[["Key"]]]
 	];
 	i++;
-	If[i<=StringLength@score && StringPart[score,i]=="^",appoQ=True;i++];
 	While[i<=StringLength@score && MemberQ[pitchOpList,StringPart[score,i]],
 		If[StringPart[score,i]=="$",
 			pitch+=para[["Chord"]],
@@ -23,7 +26,8 @@ getPitch[score_,pos_,para_]:=Module[
 		];
 		i++;
 	];
-	Return[{pitch,i,appoQ}];
+	If[i<=StringLength@score && StringPart[score,i]=="^",i++];
+	Return[{pitch,i}];
 ];
 
 
@@ -150,23 +154,27 @@ track[score_,global_,location_]:=Module[
 				pitch=lastPitch;
 				If[lastPitch===Null,
 					AppendTo[messages,generateMessage["NoFormerPitch",Join[location,{barCount+1}]]]
-				];
-				While[j<=StringLength@score && MemberQ[pitchOpList,StringPart[score,j]],
-					If[StringPart[score,j]=="$",
-						pitch+=parameter[["Chord"]],
-						pitch+=pitchOpDict[[StringPart[score,j]]]
-					];
-					j++;
 				],
-			DigitQ[char]||char=="[",
-				pitchData=getPitch[score,j-1,parameter];
-				pitch=pitchData[[1]];
-				j=pitchData[[2]];
-				If[pitchData[[3]],appoggiatura=Flatten/@Array[Take[pitch,#]&,Length@pitch-1]];
-				If[char=="[",pitch=Flatten@pitch],
+			DigitQ[char],
+				note=ToExpression@char;
+				pitch=If[note==0,None,pitchDict[[note]]+12*parameter[["Oct"]]+parameter[["Key"]]],				
+			char=="[",
+				match=findMatch[score,j-1];
+				content=StringTake[score,{j-1,match}];
+				pitch=getPitch[content,1,parameter][[1]];
+				j=match+1;
+				If[StringContainsQ[content,"^"],appoggiatura=Flatten/@Array[Take[pitch,#]&,Length@pitch-1]];
+				pitch=Flatten@pitch,
 			True,
 				AppendTo[messages,generateMessage["InvCharacter",Join[location,{barCount+1,char}]]];
 				pitch=None;
+		];
+		While[j<=StringLength@score && MemberQ[pitchOpList,StringPart[score,j]],
+			If[StringPart[score,j]=="$",
+				pitch+=parameter[["Chord"]],
+				pitch+=pitchOpDict[[StringPart[score,j]]]
+			];
+			j++;
 		];
 		If[lastPitch==pitch && beam==True,extend=True];
 		(* find out the duration *)
@@ -254,6 +262,7 @@ track[score_,global_,location_]:=Module[
 				];
 		];
 	];
+	(*Print[soundData];*)
 	Return[<|
 		"Audio"->If[soundData=={},0,                     (* empty track *)
 			If[StringPart[score,j-1]!="|",
@@ -381,6 +390,10 @@ QYSParse[filename_]:=Module[
 
 (* ::Input:: *)
 (*AudioStop[];AudioPlay@QYSParse[path<>"Songs\\temp.qys"];*)
+
+
+(* ::Input:: *)
+(*AudioStop[];AudioPlay@QYSParse[path<>"Songs\\Gate_of_Steiner.qys"];*)
 
 
 (* ::Text:: *)

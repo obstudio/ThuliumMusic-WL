@@ -75,7 +75,7 @@ PlayerPalette[song_]:={Spacer[{40,40}],
 Player[song_]:=Module[{image,audio,imageExist},
 	AudioStop[];
 	If[KeyExistsQ[index[[song]],"Image"],
-		imageExist=True;image=Import[path<>"Images\\"<>index[[song,"Image"]]],
+		imageExist=True;image=Import[userPath<>"Images\\"<>index[[song,"Image"]]],
 		imageExist=False
 	];
 	audio=Import[userPath<>"Buffer\\"<>song<>".buffer","MP3"];
@@ -139,7 +139,7 @@ QYMP:=DynamicModule[{song},
 
 
 (* ::Input::Initialization:: *)
-update;
+updateImage;updateBuffer;
 
 
 (* ::Input::Initialization:: *)

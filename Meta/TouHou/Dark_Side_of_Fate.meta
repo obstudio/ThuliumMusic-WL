@@ -2,7 +2,7 @@ Format: qys;
 TrackCount: 2;
 Duration: 102.841;
 Instruments: {"ElectricBass", "ElectricPiano", "ElectricPiano2", "Harp"};
-Image: TouHou\Kagiyama_Hina.jpg;
+Image: Touhou\Kagiyama_Hina.jpg;
 SongName: 命运的阴暗面;
 Composer: ZUN;
 Comment: 運命のダークサイド;

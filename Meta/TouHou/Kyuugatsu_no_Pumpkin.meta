@@ -2,7 +2,7 @@ Format: qys;
 TrackCount: 4;
 Duration: 92.8682;
 Instruments: {"Cello", "ElectricGrandPiano", "ElectricPiano", "Piano"};
-Image: TouHou\Ringo.png;
+Image: Touhou\Ringo.png;
 SongName: 九月的南瓜;
 Composer: ZUN;
 Adapter: 触手猴 LittleRed;

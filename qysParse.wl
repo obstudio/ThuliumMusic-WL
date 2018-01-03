@@ -1,28 +1,32 @@
 (* ::Package:: *)
 
-getPitch[score_,pos_,key_]:=Module[
-	{i=pos,note,pitch},
+(* ::Input:: *)
+(*path=NotebookDirectory[];*)
+(*<<(path<>"initial.wl")*)
+
+
+getPitch[score_,pos_,para_]:=Module[
+	{i=pos,note,pitch,pitchData},
 	If[StringPart[score,i]=="[",
 		i++;
 		pitch={};
-		While[i<=StringLength[score],
-			AppendTo[pitch,getPitch[score,i,key][[1]]];
-			i=getPitch[score,i,key][[2]]
-		];
-		i++,
+		While[i<=StringLength[score] && StringPart[score,i]!="]",
+			pitchData=getPitch[score,i,para];
+			AppendTo[pitch,pitchData[[1]]];
+			i=pitchData[[2]];
+		],
 		note=ToExpression@StringPart[score,i];
-		pitch=If[note==0,None,pitchDict[[note]]+key];
-		i++;
-		While[i<=StringLength@score && MemberQ[{"#","b","'",","},StringPart[score,i]],
-			Switch[StringPart[score,i],
-				"#",pitch++,
-				"b",pitch--,
-				"'",pitch+=12,
-				",",pitch-=12
-			];
-			i++;
-		];
+		pitch=If[note==0,None,pitchDict[[note]]+12*para[["Oct"]]+para[["Key"]]]
 	];
+	i++;
+	While[i<=StringLength@score && MemberQ[pitchOpList,StringPart[score,i]],
+		If[StringPart[score,i]=="$",
+			pitch+=para[["Chord"]],
+			pitch+=pitchOpDict[[StringPart[score,i]]]
+		];
+		i++;
+	];
+	If[i<=StringLength@score && StringPart[score,i]=="^",i++];
 	Return[{pitch,i}];
 ];
 
@@ -35,12 +39,13 @@ track[score_,global_,location_]:=Module[
 		soundData={},audio,                             (* soundnotes *)
 		instrList={},messages={},                       (* metainformation *)
 		parameter=global,
+		pitchData,
 		
 		percussion=False,                               (* percussion *)
 		tercet,tercetTime,                              (* tercet *)
 		portamento=False,portaRate,                     (* portamento *)
 		tremolo1=0,tremolo2=0,                          (* tremolo *)
-		appoggiatura={},appoChord=False,                (* appoggiatura *)
+		appoggiatura={},                                (* appoggiatura *)
 		staccato,fermata,                               (* duration related *)
 		beam=False,extend,                              (* extend a note *)
 		
@@ -77,7 +82,7 @@ track[score_,global_,location_]:=Module[
 					StringContainsQ[content,":"],            (* function *)
 						position=StringPosition[content,":"][[1,1]];
 						function=StringTake[content,position-1];
-						argument=ToExpression@StringDrop[content,position];
+						argument=toArgument@StringDrop[content,position];
 						If[MemberQ[funcList,function],
 							parameter[[function]]=argument,
 							AppendTo[messages,generateMessage["InvFunction",Join[location,{barCount+1,function}]]]
@@ -127,8 +132,9 @@ track[score_,global_,location_]:=Module[
 					"^",                            (* appoggiatura *)
 						k=1;
 						While[k<=StringLength@content,
-							AppendTo[appoggiatura,getPitch[content,k,12*parameter[["Oct"]]+parameter[["Key"]]][[1]]];
-							k=getPitch[content,k,12*parameter[["Oct"]]+parameter[["Key"]]][[2]];
+							pitchData=getPitch[content,k,parameter];
+							AppendTo[appoggiatura,pitchData[[1]]];
+							k=pitchData[[2]];
 						];
 				];
 				j=match+1;
@@ -149,39 +155,24 @@ track[score_,global_,location_]:=Module[
 				If[lastPitch===Null,
 					AppendTo[messages,generateMessage["NoFormerPitch",Join[location,{barCount+1}]]]
 				],
-			DigitQ[char],                               (* single tone *)
+			DigitQ[char],
 				note=ToExpression@char;
-				pitch=If[note==0,None,pitchDict[[note]]+12*parameter[["Oct"]]+parameter[["Key"]]],
-			char=="[",                                  (* harmony *)
-				match=Select[Transpose[StringPosition[score,"]"]][[1]],#>=j&][[1]];
-				content=StringTake[score,{j,match-1}];
-				pitch={};
-				k=1;
-				If[StringContainsQ[content,"^"],
-					content=StringDelete[content,"^"];           (* appoggiatura & harmony *)
-					While[k<=StringLength@content,
-						AppendTo[pitch,getPitch[content,k,12*parameter[["Oct"]]+parameter[["Key"]]][[1]]];
-						k=getPitch[content,k,12*parameter[["Oct"]]+parameter[["Key"]]][[2]];
-						AppendTo[appoggiatura,pitch];
-					];
-					appoggiatura=Drop[appoggiatura,-1];
-					appoChord=True,
-					While[k<=StringLength@content,               (* common harmony *)
-						AppendTo[pitch,getPitch[content,k,12*parameter[["Oct"]]+parameter[["Key"]]][[1]]];
-						k=getPitch[content,k,12*parameter[["Oct"]]+parameter[["Key"]]][[2]];
-					]
-				];
-				j=match+1,
+				pitch=If[note==0,None,pitchDict[[note]]+12*parameter[["Oct"]]+parameter[["Key"]]],				
+			char=="[",
+				match=findMatch[score,j-1];
+				content=StringTake[score,{j-1,match}];
+				pitch=getPitch[content,1,parameter][[1]];
+				j=match+1;
+				If[StringContainsQ[content,"^"],appoggiatura=Flatten/@Array[Take[pitch,#]&,Length@pitch-1]];
+				pitch=Flatten@pitch,
 			True,
 				AppendTo[messages,generateMessage["InvCharacter",Join[location,{barCount+1,char}]]];
+				pitch=None;
 		];
-		While[j<=StringLength[score] && MemberQ[{"#","b","'",","},StringPart[score,j]],
-			char=StringPart[score,j];
-			Switch[char,
-				"#",pitch++;If[appoChord,appoggiatura++],
-				"b",pitch--;If[appoChord,appoggiatura--],
-				"'",pitch+=12;If[appoChord,appoggiatura+=12],
-				",",pitch-=12;If[appoChord,appoggiatura-=12]
+		While[j<=StringLength@score && MemberQ[pitchOpList,StringPart[score,j]],
+			If[StringPart[score,j]=="$",
+				pitch+=parameter[["Chord"]],
+				pitch+=pitchOpDict[[StringPart[score,j]]]
 			];
 			j++;
 		];
@@ -259,7 +250,6 @@ track[score_,global_,location_]:=Module[
 						{k,Length@appoggiatura}];
 					];
 					appoggiatura={};
-					appoChord=False;
 					duration=15/parameter[["Speed"]]*beatCount*parameter[["Beat"]];
 				];
 				lastBeat=beatCount;
@@ -272,12 +262,15 @@ track[score_,global_,location_]:=Module[
 				];
 		];
 	];
+	(*Print[soundData];*)
 	Return[<|
 		"Audio"->If[soundData=={},0,                     (* empty track *)
 			If[StringPart[score,j-1]!="|",
 				AppendTo[messages,generateMessage["TerminatorAbsent",location]]
 			];
-			parameter[["Volume"]]*AudioFade[Sound[SoundNote@@#&/@soundData],{parameter[["FadeIn"]],parameter[["FadeOut"]]}]
+			parameter[["Volume"]]*AudioFade[Sound[
+				SoundNote@@#&/@soundData
+			],{parameter[["FadeIn"]],parameter[["FadeOut"]]}]
 		],
 		"Local"->parameter,
 		"Messages"->messages,
@@ -396,18 +389,13 @@ QYSParse[filename_]:=Module[
 
 
 (* ::Input:: *)
-(*Export["e:\\1.mp3",AudioFade[QYSParse[path<>"Songs\\Phantom_Ensemble.qys"],{0,5}]];*)
+(*AudioStop[];AudioPlay@QYSParse[path<>"Songs\\temp.qys"];*)
 
 
 (* ::Input:: *)
-(*AudioStop[];*)
-(*AudioPlay@QYSParse[path<>"Songs\\Seijyouki_no_Pierrot.qys"];*)
+(*AudioStop[];AudioPlay@QYSParse[path<>"Songs\\Gate_of_Steiner.qys"];*)
 
 
 (* ::Text:: *)
 (*ElectricSnare, BassDrum, Shaker, RideCymbal, Snare, CrashCymbal, HiHatPedal, HiHatClosed*)
 (*Ocarina, Oboe, Clarinet, Recorder, BrassSection, Harpsichord, BrightPiano, Organ, DrawbarOrgan, FretlessBass*)
-
-
-(* ::Input:: *)
-(*QYMP;*)

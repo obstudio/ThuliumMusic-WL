@@ -134,7 +134,6 @@ refresh:=(
 
 
 updateImage:=Module[{updates={},image,filename,meta},
-	refresh;
 	Do[
 		If[KeyExistsQ[index[[song]],"Image"]&&!FileExistsQ[userPath<>"Images\\"<>index[[song,"Image"]]],
 			AppendTo[updates,index[[song,"Image"]]]
@@ -163,7 +162,6 @@ updateImage:=Module[{updates={},image,filename,meta},
 
 
 updateBuffer:=Module[{updates={},song,filename,hash,audio,messages},
-	refresh;
 	Do[
 		filename=path<>"Songs\\"<>song<>"."<>index[[song,"Format"]];
 		hash=toBase32@FileHash[filename];
@@ -202,6 +200,3 @@ updateBuffer:=Module[{updates={},song,filename,hash,audio,messages},
 	Export[userPath<>"Buffer.json",Normal@bufferHash[[Intersection[Keys@bufferHash,songList]]]];
 	Export[userPath<>"ErrorLog.json",Normal@errorLog];
 ];
-
-
-page=1;

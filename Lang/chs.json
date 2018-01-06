@@ -74,6 +74,9 @@
 	},
 	"Dialog": {
 		"QYMP": "青云播放器",
+		"About": "关于",
+		"ModifySong": "修改歌曲",
+		"AddSong": "添加歌曲",
 		"Play": "播放",
 		"Pause": "暂停",
 		"Stop": "停止",
@@ -83,7 +86,6 @@
 		"Confirm": "确认",
 		"Settings": "设置",
 		"Debug": "调试",
-		"AddSong": "添加歌曲",
 		"PlaySong": "播放歌曲",
 		"Add": "添加",
 		"Manage": "歌单管理",

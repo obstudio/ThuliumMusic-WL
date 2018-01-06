@@ -11,23 +11,27 @@ path=NotebookDirectory[];
 <<(path<>"qymParse.wl")
 
 
-settings:=DynamicModule[{deveChoice,langChoice},
-	CreateDialog[Column[{"",
+uiSettings:=DynamicModule[{choices},
+	choices=userInfo;
+	CreateDialog[Column[{Spacer[{40,40}],
 		Style[display[["Settings"]],Bold,28],,
 		Grid[{
-		{display[["Identity"]],": ",RadioButtonBar[Dynamic@deveChoice,
-			{False->display[["NormalUser"]],True->display[["Developer"]]},
-			Appearance->"Horizonal"
-		]},
-		{display[["Language"]],": ",RadioButtonBar[Dynamic@langChoice,langList,Appearance->"Horizonal"]}}],,
+			{Style[display[["Identity"]]<>": ",20],
+				RadioButtonBar[Dynamic@choices[["Developer"]],{False->display[["NormalUser"]],True->display[["Developer"]]}]
+			},
+			{Style[display[["Language"]]<>": ",20],
+				RadioButtonBar[Dynamic@choices[["Language"]],langList]}
+			}
+		],,
 		Row[{
-			Button[display[["Save"]],DialogReturn[
-				userInfo[["Language"]]=langChoice;
-				userInfo[["Developer"]]=deveChoice;
-			],ImageSize->150],
+			Button[display[["Save"]],
+				userInfo=choices;
+				Export[userPath<>"Default.json",Normal@userInfo];
+				DialogReturn[QYMP],
+			ImageSize->150],
 			Spacer[10],
-			Button[display[["Return"]],DialogReturn[],ImageSize->150]
-		}],""
+			Button[display[["Return"]],DialogReturn[QYMP],ImageSize->150]
+		}],Spacer[{40,40}]
 	},Center,ItemSize->40],
 	WindowTitle->display[["Settings"]]]
 ];
@@ -108,7 +112,7 @@ Player[song_]:=Module[{image,audio,imageExist},
 QYMP:=DynamicModule[{song},
 	refresh;
 	AudioStop[];
-	CreateDialog[Column[{"",
+	CreateDialog[Column[{Spacer[{40,40}],
 		Row[{Style[display[["QYMP"]],Bold,32],Style[" (\:7b2c"<>ToString[page]<>"\:9875)",Gray,32]}],,
 		SetterBar[Dynamic@song,
 			#->Row[{
@@ -123,27 +127,32 @@ QYMP:=DynamicModule[{song},
 			Spacer[10],
 			Button[display[["PgNext"]],DialogReturn[page++;QYMP],ImageSize->200,Enabled->(page<pageCount)]
 		}],
+		If[userInfo[["Developer"]],Row[{
+			Button[display[["AddSong"]],DialogReturn[AddSongUI],ImageSize->200,Enabled->False],
+			Spacer[10],
+			Button[display[["ModifySong"]],DialogReturn[ModifySongInfo[song]],ImageSize->200]
+		}],Nothing],
 		Row[{
 			Button[display[["PlaySong"]],DialogReturn[Player[song]],ImageSize->200],
 			Spacer[10],
-			Button[display[["Manage"]],DialogReturn[Management],ImageSize->200]
+			Button[display[["Settings"]],DialogReturn[uiSettings],ImageSize->200]
 		}],
 		Row[{
-			Button[display[["Settings"]],DialogReturn[settings],ImageSize->200],
+			Button[display[["About"]],DialogReturn[],ImageSize->200,Enabled->False],
 			Spacer[10],
 			Button[display[["Exit"]],DialogReturn[],ImageSize->200]
-		}],""
+		}],Spacer[{40,40}]
 	},Center,ItemSize->50],
 	WindowTitle->display[["QYMP"]]]
 ];
 
 
 (* ::Input::Initialization:: *)
-updateImage;updateBuffer;
+refresh;updateImage;updateBuffer;
 
 
 (* ::Input::Initialization:: *)
-QYMP;
+page=1;QYMP;
 
 
 (* ::Input:: *)

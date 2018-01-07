@@ -5,145 +5,130 @@
 
 
 path=NotebookDirectory[];
-<<(path<>"initial.wl")
-<<(path<>"developer.wl")
+<<(path<>"library.wl")
+<<(path<>"interface.wl")
 <<(path<>"qysParse.wl")
 <<(path<>"qymParse.wl")
 
 
-uiSettings:=DynamicModule[{choices},
-	choices=userInfo;
-	CreateDialog[Column[{Spacer[{40,40}],
-		Style[display[["Settings"]],Bold,28],,
-		Grid[{
-			{Style[display[["Identity"]]<>": ",20],
-				RadioButtonBar[Dynamic@choices[["Developer"]],{False->display[["NormalUser"]],True->display[["Developer"]]}]
-			},
-			{Style[display[["Language"]]<>": ",20],
-				RadioButtonBar[Dynamic@choices[["Language"]],langList]}
-			}
-		],,
-		Row[{
-			Button[display[["Save"]],
-				userInfo=choices;
-				Export[userPath<>"Default.json",Normal@userInfo];
-				DialogReturn[QYMP],
-			ImageSize->150],
-			Spacer[10],
-			Button[display[["Return"]],DialogReturn[QYMP],ImageSize->150]
-		}],Spacer[{40,40}]
-	},Center,ItemSize->40],
-	WindowTitle->display[["Settings"]]]
+version=142;
+userPath="C:\\Users\\"<>$UserName<>"\\AppData\\Local\\QYMP\\";
+cloudPath="http://www.qymp.tk/assets/";
+If[!DirectoryQ[userPath],CreateDirectory[userPath]];
+If[!DirectoryQ[userPath<>"export\\"],CreateDirectory[userPath<>"export\\"]];
+If[!DirectoryQ[userPath<>"buffer\\"],CreateDirectory[userPath<>"buffer\\"]];
+If[!DirectoryQ[userPath<>"images\\"],CreateDirectory[userPath<>"images\\"]];
+template={"Version"->version,"Language"->"chs","Developer"->False};
+If[!FileExistsQ[userPath<>"Default.json"],Export[userPath<>"Default.json",template]];
+userInfo=Association@Import[userPath<>"Default.json"];
+If[userInfo[["Version"]]<version,
+	Do[
+		If[!KeyExistsQ[userInfo,tag],AppendTo[userInfo,tag->template[[tag]]]],
+	{tag,Keys@template}];
+	userInfo[["Version"]]=version;
+	Export[userPath<>"Default.json",userInfo];
 ];
+If[!FileExistsQ[userPath<>"Instrument.json"],Export[userPath<>"Instrument.json",{"Piano","Violin","Guitar","Flute"}]];
+If[!FileExistsQ[userPath<>"Buffer.json"],Export[userPath<>"Buffer.json",{}]];
+bufferHash=Association@Import[userPath<>"Buffer.json"];
+If[!FileExistsQ[userPath<>"ErrorLog.json"],Export[userPath<>"ErrorLog.json",{}]];
+errorLog=Association@Import[userPath<>"ErrorLog.json"];
+If[!FileExistsQ[userPath<>"Favorite.json"],Export[userPath<>"Favorite.json",{}]];
+favorite=Import[userPath<>"Favorite.json"];
+If[!FileExistsQ[userPath<>"Image.json"],Export[userPath<>"Image.json",{}]];
+imageData=Association/@Association@Import[userPath<>"image.json"];
 
 
-PlayerPalette[song_]:={Spacer[{40,40}],
-	Row[{Style[index[[song,"SongName"]],Bold,28],
-		If[KeyExistsQ[index[[song]],"Comment"],
-			Style[" ("<>index[[song,"Comment"]]<>")",Gray,28],
-			Nothing
-		]
-	}],"",
-	If[KeyExistsQ[index[[song]],"Composer"],tagName[["Composer"]]<>": "<>index[[song,"Composer"]],Nothing],
-	If[KeyExistsQ[index[[song]],"Lyricist"],tagName[["Lyricist"]]<>": "<>index[[song,"Lyricist"]],Nothing],
-	If[KeyExistsQ[index[[song]],"Adapter"],tagName[["Adapter"]]<>": "<>index[[song,"Adapter"]],Nothing],"",
-	If[KeyExistsQ[index[[song]],"Abstract"],
-		Column[StringSplit[index[[song,"Abstract"]],"\n"],Left],
-		Nothing
-	],"",
-	Row[{
-		Dynamic[timeDisplay[current["Position"]]],
-		Spacer[8],
-		ProgressIndicator[Dynamic[current["Position"]/duration],ImageSize->{240,16}],
-		Spacer[8],
-		timeDisplay[duration]
-	}],"",
-	Row[{Button[
-		Dynamic[Switch[current["State"],
-			"Playing",display[["Pause"]],
-			"Paused"|"Stopped",display[["Play"]]
-		]],
-		Switch[current["State"],
-			"Playing",current["State"]="Paused",
-			"Paused"|"Stopped",current["State"]="Playing"
+SetDirectory[path];
+instrData=Association@Import[path<>"instr.json"];
+langList={"chs"->"\:7b80\:4f53\:4e2d\:6587"(*,"eng"->"\:82f1\:8bed"*)};
+langData=Association@Import[path<>"Lang\\"<>userInfo[["Language"]]<>".json"];
+tagName=Association@langData[["TagName"]];
+instrName=Association@langData[["Instrument"]];
+errorDict=Association@langData[["Error"]];
+text=Association@langData[["Dialog"]];
+
+
+refresh:=(
+	metaTree=StringDrop[FileNames["*","Meta",Infinity],5];
+	songList=StringDrop[Select[metaTree,StringMatchQ[__~~".meta"]],-5];
+	dirList=Select[metaTree,!StringMatchQ[#,__~~".meta"]&];
+	Do[
+		If[!DirectoryQ[userPath<>"buffer\\"<>dir],CreateDirectory[userPath<>"buffer\\"<>dir]];
+		If[!DirectoryQ[userPath<>"images\\"<>dir],CreateDirectory[userPath<>"images\\"<>dir]],
+	{dir,dirList}];
+	index=AssociationMap[readInfo,songList];
+	pageCount=Ceiling[Length@songList/16];
+	songListPaged=Partition[songList,UpTo@Ceiling[Length@songList/pageCount]];
+);
+
+
+updateImage:=Module[{updates={},image,filename,meta},
+	Do[
+		If[KeyExistsQ[index[[song]],"Image"]&&!FileExistsQ[userPath<>"Images\\"<>index[[song,"Image"]]],
+			AppendTo[updates,index[[song,"Image"]]]
 		],
-		ImageSize->80],
-		Spacer[20],
-		Button[display[["Stop"]],current["State"]="Stopped",ImageSize->80],
-		Spacer[20],
-		Button[display[["Return"]],AudioStop[];DialogReturn[QYMP],ImageSize->80]			
-	}],Spacer[{40,40}]
-};
-
-
-uiPlayer[song_]:=Module[{image,audio,imageExist},
-	AudioStop[];
-	If[KeyExistsQ[index[[song]],"Image"],
-		imageExist=True;image=Import[userPath<>"Images\\"<>index[[song,"Image"]]],
-		imageExist=False
-	];
-	audio=Import[userPath<>"Buffer\\"<>song<>".buffer","MP3"];
-	duration=Duration[audio];
-	current=AudioPlay[audio];
-	CreateDialog[If[imageExist,
-		Row[{Spacer[50],
-			Column[{
-				Spacer[{40,40}],
-				Tooltip[Image[image,ImageSize->If[ImageAspectRatio[image]>1,{360,UpTo[720]},{UpTo[800],400}]],
-					If[KeyExistsQ[imageData,index[[song,"Image"]]],
-						Column[If[KeyExistsQ[imageData[[index[[song,"Image"]]]],#],
-							tagName[[#]]<>": "<>imageData[[index[[song,"Image"]],#]],
-							Nothing
-						]&/@imageTags],
-						"\:6682\:65e0\:8be5\:56fe\:7247\:7684\:4fe1\:606f"
-					]
-				],
-				Spacer[{40,40}]
-			}],
-			Spacer[50],
-			Column[PlayerPalette[song],Alignment->Center,ItemSize->30],
-		Spacer[50]},Alignment->Center],
-		(* no image *)
-		Column[PlayerPalette[song],Alignment->Center,ItemSize->50]
-	],WindowTitle->display[["Playing"]]<>": "<>index[[song,"SongName"]]];
+	{song,songList}];
+	If[updates=={},Return[]];
+	Monitor[Do[
+		filename=updates[[i]];
+		image=Import[cloudPath<>"images/"<>StringReplace[filename,"\\"->"/"]];
+		Export[userPath<>"Images\\"<>filename,image];
+		meta=Association@Import[cloudPath<>"images/"<>StringReplace[filename,{"\\"->"/","."~~__->".json"}]];
+		If[KeyExistsQ[imageData,filename],
+			imageData[[filename]]=meta,
+			AppendTo[imageData,filename->meta]
+		],
+	{i,Length@updates}],
+	Panel[Column[{Spacer[{4,4}],
+		"\:6b63\:5728\:66f4\:65b0\:672c\:5730\:56fe\:7247\:5e93\[Ellipsis]\[Ellipsis]",
+		Spacer[1],
+		ProgressIndicator[i,{1,Length@updates},ImageSize->{320,16}],
+		Spacer[1],
+		"(\:7b2c"<>ToString@i<>"\:5f20, \:5171"<>ToString@Length@updates<>"\:5f20) \:6b63\:5728\:8f7d\:5165: "<>updates[[i]],
+	Spacer[{4,4}]},Alignment->Center],ImageSize->400,Alignment->Center]];
+	Export[userPath<>"Image.json",Normal/@Normal@imageData];
 ];
 
 
-QYMP:=DynamicModule[{song},
-	refresh;
-	AudioStop[];
-	CreateDialog[Column[{Spacer[{40,40}],
-		Row[{Style[display[["QYMP"]],Bold,32],Style[" (\:7b2c"<>ToString[page]<>"\:9875)",Gray,32]}],,
-		SetterBar[Dynamic@song,
-			#->Row[{
-				Style[index[[#,"SongName"]],24,FontFamily->"\:5fae\:8f6f\:96c5\:9ed1"],
-				Spacer[20],
-				If[KeyExistsQ[index[[#]],"Comment"],Style[index[[#,"Comment"]],20,Gray,FontFamily->"\:5fae\:8f6f\:96c5\:9ed1"],Nothing]
-			}]&/@songListPaged[[page]],
-			Appearance->"Vertical"
-		],"",
-		Row[{
-			Button[display[["PgPrev"]],DialogReturn[page--;QYMP],ImageSize->200,Enabled->(page>1)],
-			Spacer[10],
-			Button[display[["PgNext"]],DialogReturn[page++;QYMP],ImageSize->200,Enabled->(page<pageCount)]
-		}],
-		If[userInfo[["Developer"]],Row[{
-			Button[display[["AddSong"]],DialogReturn[uiAddSong],ImageSize->200],
-			Spacer[10],
-			Button[display[["ModifySong"]],DialogReturn[uiModifySong[song]],ImageSize->200]
-		}],Nothing],
-		Row[{
-			Button[display[["PlaySong"]],DialogReturn[uiPlayer[song]],ImageSize->200],
-			Spacer[10],
-			Button[display[["Settings"]],DialogReturn[uiSettings],ImageSize->200]
-		}],
-		Row[{
-			Button[display[["About"]],DialogReturn[],ImageSize->200,Enabled->False],
-			Spacer[10],
-			Button[display[["Exit"]],DialogReturn[],ImageSize->200]
-		}],Spacer[{40,40}]
-	},Center,ItemSize->50],
-	WindowTitle->display[["QYMP"]]]
+updateBuffer:=Module[{updates={},song,filename,hash,audio,messages},
+	Do[
+		filename=path<>"Songs\\"<>song<>"."<>index[[song,"Format"]];
+		hash=toBase32@FileHash[filename];
+		If[KeyExistsQ[bufferHash,song],
+			If[bufferHash[[song]]==hash && FileExistsQ[userPath<>"Buffer\\"<>song<>".buffer"],
+				Continue[],
+				AppendTo[updates,song];
+			],
+			AppendTo[bufferHash,song->hash];
+			AppendTo[updates,song];
+		],
+	{song,songList}];
+	If[updates=={},Return[]];
+	Monitor[Do[
+		song=updates[[i]];
+		filename=path<>"Songs\\"<>song<>"."<>index[[song,"Format"]];
+		bufferHash[[song]]=toBase32@FileHash[filename];
+		If[index[[song,"Format"]]=="qys",
+			audio=QYSParse[filename],
+			audio=QYMParse[filename]
+		];
+		messages=Values[Options[audio,MetaInformation]][[1]][["Messages"]];
+		If[KeyExistsQ[errorLog,song],
+			errorLog[[song]]=messages,
+			AppendTo[errorLog,song->messages]
+		];
+		Export[userPath<>"Buffer\\"<>song<>".buffer",audio,"MP3"],
+	{i,Length@updates}],
+	Panel[Column[{Spacer[{4,4}],
+		"\:6b63\:5728\:66f4\:65b0\:672c\:5730\:6b4c\:66f2\:5e93\[Ellipsis]\[Ellipsis]",
+		Spacer[1],
+		ProgressIndicator[i,{1,Length@updates},ImageSize->{320,16}],
+		Spacer[1],
+		"(\:7b2c"<>ToString@i<>"\:9996, \:5171"<>ToString@Length@updates<>"\:9996) \:6b63\:5728\:8f7d\:5165: "<>index[[updates[[i]],"SongName"]],
+	Spacer[{4,4}]},Alignment->Center],ImageSize->400,Alignment->Center]];
+	Export[userPath<>"Buffer.json",Normal@bufferHash[[Intersection[Keys@bufferHash,songList]]]];
+	Export[userPath<>"ErrorLog.json",Normal@errorLog];
 ];
 
 

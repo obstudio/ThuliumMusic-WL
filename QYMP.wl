@@ -76,7 +76,7 @@ PlayerPalette[song_]:={Spacer[{40,40}],
 };
 
 
-Player[song_]:=Module[{image,audio,imageExist},
+uiPlayer[song_]:=Module[{image,audio,imageExist},
 	AudioStop[];
 	If[KeyExistsQ[index[[song]],"Image"],
 		imageExist=True;image=Import[userPath<>"Images\\"<>index[[song,"Image"]]],
@@ -128,12 +128,12 @@ QYMP:=DynamicModule[{song},
 			Button[display[["PgNext"]],DialogReturn[page++;QYMP],ImageSize->200,Enabled->(page<pageCount)]
 		}],
 		If[userInfo[["Developer"]],Row[{
-			Button[display[["AddSong"]],DialogReturn[AddSongUI],ImageSize->200,Enabled->False],
+			Button[display[["AddSong"]],DialogReturn[uiAddSong],ImageSize->200],
 			Spacer[10],
-			Button[display[["ModifySong"]],DialogReturn[ModifySongInfo[song]],ImageSize->200]
+			Button[display[["ModifySong"]],DialogReturn[uiModifySong[song]],ImageSize->200]
 		}],Nothing],
 		Row[{
-			Button[display[["PlaySong"]],DialogReturn[Player[song]],ImageSize->200],
+			Button[display[["PlaySong"]],DialogReturn[uiPlayer[song]],ImageSize->200],
 			Spacer[10],
 			Button[display[["Settings"]],DialogReturn[uiSettings],ImageSize->200]
 		}],
@@ -160,7 +160,7 @@ page=1;QYMP;
 
 
 (* ::Input:: *)
-(*AudioStop[];AudioPlay@QYSParse[path<>"Songs\\Touhou\\Hartmann_No_Youkai_Otome.qys"];*)
+(*AudioStop[];AudioPlay@QYSParse[path<>"Songs\\Nagisa.qys"];*)
 
 
 (* ::Input:: *)
@@ -169,3 +169,7 @@ page=1;QYMP;
 
 (* ::Input:: *)
 (*Print[index["Touhou\\Hartmann_No_Youkai_Otome","Comment"]];*)
+
+
+(* ::Input:: *)
+(*EmitSound@Sound@SoundNote[12,1,"Harp"]*)

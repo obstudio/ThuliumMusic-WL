@@ -1,0 +1,16 @@
+{
+	"Text": {
+		"FontSize": "20"
+	},
+	"Title": {
+		"FontSize": "32", 
+		"FontWeight": "Bold", 
+		"FontFamily": "\"微软雅黑\""
+	},
+	"TitleComment": {
+		"FontSize": "32", 
+		"FontWeight": "Bold", 
+		"FontFamily": "\"微软雅黑\"",
+		"FontColor": "Gray"
+	}
+}

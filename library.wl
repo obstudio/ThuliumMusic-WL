@@ -46,14 +46,12 @@ timeDisplay[t_]:=Module[
 	{sec=Floor[QuantityMagnitude[UnitConvert[t,"Seconds"]]]},
 	IntegerString[Floor[sec/60],10,2]<>":"<>IntegerString[Mod[sec,60],10,2]
 ];
-generateMessage[tag_,arg_]:=Module[{argRule},
-	argRule=Flatten@Array[{
-		"&"<>ToString[#]->ToString[arg[[#]],FormatType->InputForm],
-		"$"<>ToString[#]->arg[[#]],
-		"#"<>ToString[#]->StringRiffle[ToString[#,FormatType->InputForm]&/@arg[[#]],", "]
-	}&,Length@arg];
-	Return@StringReplace[errorDict[[tag]],argRule];
-];
+completeText[raw_,arg_]:=StringReplace[raw,Flatten@Array[{
+	"&"<>ToString[#]->ToString[arg[[#]],FormatType->InputForm],
+	"$"<>ToString[#]->arg[[#]],
+	"#"<>ToString[#]->StringRiffle[ToString[#,FormatType->InputForm]&/@arg[[#]],", "]
+}&,Length@arg]];
+generateMessage[tag_,arg_]:=completeText[errorDict[[tag]],arg];
 
 
 writeInfo[song_,info_]:=Export[

@@ -41,12 +41,13 @@ imageData=Association/@Association@Import[userPath<>"image.json"];
 
 SetDirectory[path];
 instrData=Association@Import[path<>"instr.json"];
-langList={"chs"->"\:7b80\:4f53\:4e2d\:6587"(*,"eng"->"\:82f1\:8bed"*)};
+styleData=ToExpression/@#&/@#&/@Association@Import[path<>"styles.json"];
+langList={"chs"->"\:7b80\:4f53\:4e2d\:6587","eng"->"English"};
 langData=Association@Import[path<>"Lang\\"<>userInfo[["Language"]]<>".json"];
 tagName=Association@langData[["TagName"]];
 instrName=Association@langData[["Instrument"]];
 errorDict=Association@langData[["Error"]];
-text=Association@langData[["Dialog"]];
+text=Association@langData[["Caption"]];
 
 
 refresh:=(
@@ -81,11 +82,15 @@ updateImage:=Module[{updates={},image,filename,meta},
 		],
 	{i,Length@updates}],
 	Panel[Column[{Spacer[{4,4}],
-		"\:6b63\:5728\:66f4\:65b0\:672c\:5730\:56fe\:7247\:5e93\[Ellipsis]\[Ellipsis]",
+		text[["UpdatingImage"]],
 		Spacer[1],
 		ProgressIndicator[i,{1,Length@updates},ImageSize->{320,16}],
 		Spacer[1],
-		"(\:7b2c"<>ToString@i<>"\:5f20, \:5171"<>ToString@Length@updates<>"\:5f20) \:6b63\:5728\:8f7d\:5165: "<>updates[[i]],
+		Row[{
+			caption["_Progression","Text",{i,Length@updates}],
+			Spacer[4],text[["Loading"]],
+			updates[[i]]
+		}],
 	Spacer[{4,4}]},Alignment->Center],ImageSize->400,Alignment->Center]];
 	Export[userPath<>"Image.json",Normal/@Normal@imageData];
 ];
@@ -121,11 +126,15 @@ updateBuffer:=Module[{updates={},song,filename,hash,audio,messages},
 		Export[userPath<>"Buffer\\"<>song<>".buffer",audio,"MP3"],
 	{i,Length@updates}],
 	Panel[Column[{Spacer[{4,4}],
-		"\:6b63\:5728\:66f4\:65b0\:672c\:5730\:6b4c\:66f2\:5e93\[Ellipsis]\[Ellipsis]",
+		text[["UpdatingBuffer"]],
 		Spacer[1],
 		ProgressIndicator[i,{1,Length@updates},ImageSize->{320,16}],
 		Spacer[1],
-		"(\:7b2c"<>ToString@i<>"\:9996, \:5171"<>ToString@Length@updates<>"\:9996) \:6b63\:5728\:8f7d\:5165: "<>index[[updates[[i]],"SongName"]],
+		Row[{
+			caption["_Progression","Text",{i,Length@updates}],
+			Spacer[4],text[["Loading"]],
+			index[[updates[[i]],"SongName"]]
+		}],
 	Spacer[{4,4}]},Alignment->Center],ImageSize->400,Alignment->Center]];
 	Export[userPath<>"Buffer.json",Normal@bufferHash[[Intersection[Keys@bufferHash,songList]]]];
 	Export[userPath<>"ErrorLog.json",Normal@errorLog];

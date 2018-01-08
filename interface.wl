@@ -46,11 +46,11 @@ PlayerPalette[song_]:={Spacer[{40,40}],
 			Nothing
 		]
 	}],Spacer[1],
-	If[KeyExistsQ[index[[song]],"Composer"],tagName[["Composer"]]<>": "<>index[[song,"Composer"]],Nothing],
-	If[KeyExistsQ[index[[song]],"Lyricist"],tagName[["Lyricist"]]<>": "<>index[[song,"Lyricist"]],Nothing],
-	If[KeyExistsQ[index[[song]],"Adapter"],tagName[["Adapter"]]<>": "<>index[[song,"Adapter"]],Nothing],"",
+	If[KeyExistsQ[index[[song]],"Composer"],caption[tagName[["Composer"]]<>": "<>index[[song,"Composer"]],"Text"],Nothing],
+	If[KeyExistsQ[index[[song]],"Lyricist"],caption[tagName[["Lyricist"]]<>": "<>index[[song,"Lyricist"]],"Text"],Nothing],
+	If[KeyExistsQ[index[[song]],"Adapter"],caption[tagName[["Adapter"]]<>": "<>index[[song,"Adapter"]],"Text"],Nothing],"",
 	If[KeyExistsQ[index[[song]],"Abstract"],
-		Column[StringSplit[index[[song,"Abstract"]],"\n"],Left],
+		Column[caption[#,"Text"]&/@StringSplit[index[[song,"Abstract"]],"\n"],Center],
 		Nothing
 	],Spacer[1],
 	Row[{
@@ -60,22 +60,24 @@ PlayerPalette[song_]:={Spacer[{40,40}],
 		Spacer[8],
 		timeDisplay[duration]
 	}],Spacer[1],
-	Row[{Button[
-		Dynamic[Switch[current["State"],
-			"Playing",text[["Pause"]],
-			"Paused"|"Stopped",text[["Play"]]
-		]],
-		Switch[current["State"],
+	Row[{
+		Dynamic@EventHandler[Switch[current["State"],
+			"Playing",button["Pause"],
+			"Paused"|"Stopped",button["Play"]
+		],{"MouseClicked":>Switch[current["State"],
 			"Playing",current["State"]="Paused",
 			"Paused"|"Stopped",current["State"]="Playing"
-		],
-		ImageSize->80],
+		]}],
 		Spacer[20],
-		Button[text[["Stop"]],current["State"]="Stopped",ImageSize->80],
+		EventHandler[button["Stop"],{"MouseClicked":>(current["State"]="Stopped")}],
 		Spacer[20],
-		Button[text[["Return"]],AudioStop[];DialogReturn[QYMP],ImageSize->80]			
-	}],Spacer[{40,40}]
+		EventHandler[button["Return"],{"MouseClicked":>(AudioStop[];DialogReturn[QYMP])}]			
+	},ImageSize->{300,60},Alignment->Center],Spacer[{60,60}]
 };
+
+
+(* ::Input:: *)
+(*uiPlayer["Numb"]*)
 
 
 uiPlayer[song_]:=Module[{image,audio,imageExist},
@@ -107,7 +109,7 @@ uiPlayer[song_]:=Module[{image,audio,imageExist},
 		Spacer[50]},Alignment->Center],
 		(* no image *)
 		Column[PlayerPalette[song],Alignment->Center,ItemSize->50]
-	],WindowTitle->text[["Playing"]]<>": "<>index[[song,"SongName"]]];
+	],Background->color[["Background"]],WindowTitle->text[["Playing"]]<>": "<>index[[song,"SongName"]]];
 ];
 
 

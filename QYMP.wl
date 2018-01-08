@@ -6,6 +6,7 @@
 
 path=NotebookDirectory[];
 <<(path<>"library.wl")
+<<(path<>"assets.wl")
 <<(path<>"interface.wl")
 <<(path<>"qysParse.wl")
 <<(path<>"qymParse.wl")

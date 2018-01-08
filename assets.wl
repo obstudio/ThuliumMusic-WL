@@ -20,10 +20,9 @@ button["Pause"]:=Graphics[{
 	color[["White"]],
 	Disk[{0,0},1],
 	color[["Gray"]],Thickness[0.06],
-	Circle[{0,0},0.94],
-	Thickness[0.1],CapForm["Round"],
-	Line[{{-0.3,-0.36},{-0.3,0.36}}],
-	Line[{{0.3,-0.36},{0.3,0.36}}]
+	Circle[{0,0},0.94],	
+	Rectangle[{-0.4,-0.4},{-0.08,0.4},RoundingRadius->{0.1,0.1}],
+	Rectangle[{0.08,-0.4},{0.4,0.4},RoundingRadius->{0.1,0.1}]
 }];
 button["Stop"]:=Graphics[{
 	color[["White"]],
@@ -41,8 +40,17 @@ button["Return"]:=Graphics[{
 	Line[{{-0.4,0},{0.4,0}}],
 	Line[{{0,-0.4},{-0.4,0},{0,0.4}}]
 }];
+button["Settings"]:=Graphics[{
+	color[["White"]],
+	Disk[{0,0},1],
+	color[["Gray"]],Thickness[0.06],
+	Circle[{0,0},0.94],
+	Thickness[0.12],
+	Circle[{0,0},0.3],
+	Table[Rotate[Rectangle[{-0.15,0.3},{0.15,0.53},RoundingRadius->{0.05,0.05}],\[Theta],{0,0}],{\[Theta],0,2Pi,Pi/3}]
+}];
 button[name_,size_]:=Graphics[button[name],ImageSize->size];
 
 
 (* ::Input:: *)
-(*button/@{"Play","Pause","Stop","Return"}*)
+(*button/@{"Play","Pause","Stop","Return","Settings"}*)

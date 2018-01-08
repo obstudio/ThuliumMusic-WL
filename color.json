@@ -6,24 +6,24 @@
 	},
     "ButtonColor": {
         "Default": {
-            "Grounding": "#EEEEFF",
-            "Margin": "#003333",
-            "Body": "#3333DD"
+            "Grounding": "#F9F9F9",
+            "Margin": "#00AFF0",
+            "Body": "#00AFF0"
         },
         "Clicked": {
-            "Grounding": "#BBEEFF",
-            "Margin": "#330033",
-            "Body": "#660066"
+            "Grounding": "#00AFF0",
+            "Margin": "#00AFF0",
+            "Body": "#F9F9F9"
         },
         "MouseOver": {
-            "Grounding": "#DDDDFF",
-            "Margin": "#003333",
-            "Body": "#446699"
+            "Grounding": "#AAE8FF",
+            "Margin": "#00AFF0",
+            "Body": "#00AFF0"
         },
-        "Unaccessible": {
-            "Grounding": "#AAAAAA",
-            "Margin": "#333333",
-            "Body": "#555555"
+        "Disabled": {
+            "Grounding": "#F9F9F9",
+            "Margin": "#C8C8C8",
+            "Body": "#C8C8C8"
         }
     }
 }

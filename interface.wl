@@ -177,6 +177,10 @@ uiAddSong:=DynamicModule[{songPath,textInfo,candidates},
 ];
 
 
+(* ::Input:: *)
+(*uiAddSong;*)
+
+
 uiDeleteSong[song_]:=CreateDialog[Column[{"",
 	text[["SureToRemove"]],"",
 	Row[{

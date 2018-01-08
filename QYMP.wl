@@ -158,7 +158,7 @@ page=1;QYMP;
 
 
 (* ::Input:: *)
-(*AudioStop[];AudioPlay@QYSParse[path<>"Songs\\Nagisa.qys"];*)
+(*AudioStop[];AudioPlay@QYSParse[path<>"Songs\\Shionari.qys"];*)
 
 
 (* ::Input:: *)
@@ -171,3 +171,7 @@ page=1;QYMP;
 
 (* ::Input:: *)
 (*EmitSound@Sound@SoundNote[12,1,"Harp"]*)
+
+
+(* ::Input:: *)
+(*EmitSound@Sound@SoundNote["RideCymbal"]*)

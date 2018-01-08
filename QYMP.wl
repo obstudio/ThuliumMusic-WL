@@ -41,9 +41,12 @@ imageData=Association/@Association@Import[userPath<>"image.json"];
 
 
 SetDirectory[path];
-instrData=Association@Import[path<>"instr.json"];
-styleData=ToExpression/@#&/@#&/@Association@Import[path<>"styles.json"];
-langList={"chs"->"\:7b80\:4f53\:4e2d\:6587","eng"->"English"};
+instrData=Association@Import[path<>"instr.json"];                            (* instruments *)
+styleData=ToExpression/@#&/@#&/@Association@Import[path<>"style.json"];     (* styles *)
+colorData=Association@Import[path<>"color.json"];                            (* colors *)
+styleColor=RGBColor/@Association@colorData[["StyleColor"]];
+buttonColor=RGBColor/@#&/@Association/@Association@colorData[["ButtonColor"]];
+langList={"chs"->"\:7b80\:4f53\:4e2d\:6587","eng"->"English"};                               (* languages *)
 langData=Association@Import[path<>"Lang\\"<>userInfo[["Language"]]<>".json"];
 tagName=Association@langData[["TagName"]];
 instrName=Association@langData[["Instrument"]];

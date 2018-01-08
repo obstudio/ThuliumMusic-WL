@@ -1,56 +1,104 @@
 (* ::Package:: *)
 
-color=RGBColor/@<|
-	"Gray"->"#707070",
-	"White"->"#F0F0F0",
-	"Background"->"#F9F9F9"
-|>;
+button[name_]:=button[name,"Default"];
+button[name_,style_]:=buttonData[name,buttonColor[[style]]];
 
 
-button["Play"]:=Graphics[{
-	color[["White"]],
+buttonData["Play",scheme_]:=Graphics[{
+	scheme[["Grounding"]],
 	Disk[{0,0},1],
-	color[["Gray"]],Thickness[0.06],
+	scheme[["Margin"]],Thickness[0.06],
 	Circle[{0,0},0.94],
+	scheme[["Body"]],Thickness[0.08],JoinForm["Round"],CapForm["Round"],
 	Triangle[{{-0.2,-0.4},{-0.2,0.4},{0.4,0}}],
-	Thickness[0.08],JoinForm["Round"],CapForm["Round"],
 	Line[{{-0.2,-0.4},{-0.2,0.4},{0.4,0},{-0.2,-0.4}}]
 }];
-button["Pause"]:=Graphics[{
-	color[["White"]],
+buttonData["Pause",scheme_]:=Graphics[{
+	scheme[["Grounding"]],
 	Disk[{0,0},1],
-	color[["Gray"]],Thickness[0.06],
+	scheme[["Margin"]],Thickness[0.06],
 	Circle[{0,0},0.94],	
+	scheme[["Body"]],
 	Rectangle[{-0.4,-0.4},{-0.08,0.4},RoundingRadius->{0.1,0.1}],
 	Rectangle[{0.08,-0.4},{0.4,0.4},RoundingRadius->{0.1,0.1}]
 }];
-button["Stop"]:=Graphics[{
-	color[["White"]],
+buttonData["Stop",scheme_]:=Graphics[{
+	scheme[["Grounding"]],
 	Disk[{0,0},1],
-	color[["Gray"]],Thickness[0.06],
+	scheme[["Margin"]],Thickness[0.06],
 	Circle[{0,0},0.94],	
+	scheme[["Body"]],
 	Rectangle[{-0.4,-0.4},{0.4,0.4},RoundingRadius->{0.1,0.1}]
 }];
-button["Return"]:=Graphics[{
-	color[["White"]],
+buttonData["ArrowL",scheme_]:=Graphics[{
+	scheme[["Grounding"]],
 	Disk[{0,0},1],
-	color[["Gray"]],Thickness[0.06],
+	scheme[["Margin"]],Thickness[0.06],
 	Circle[{0,0},0.94],	
-	Thickness[0.1],CapForm["Round"],JoinForm["Round"],
+	scheme[["Body"]],Thickness[0.1],CapForm["Round"],JoinForm["Round"],
 	Line[{{-0.4,0},{0.4,0}}],
 	Line[{{0,-0.4},{-0.4,0},{0,0.4}}]
 }];
-button["Settings"]:=Graphics[{
-	color[["White"]],
+buttonData["ArrowR",scheme_]:=Graphics[{
+	scheme[["Grounding"]],
 	Disk[{0,0},1],
-	color[["Gray"]],Thickness[0.06],
+	scheme[["Margin"]],Thickness[0.06],
+	Circle[{0,0},0.94],	
+	scheme[["Body"]],Thickness[0.1],CapForm["Round"],JoinForm["Round"],
+	Line[{{-0.4,0},{0.4,0}}],
+	Line[{{0,-0.4},{0.4,0},{0,0.4}}]
+}];
+buttonData["Settings",scheme_]:=Graphics[{
+	scheme[["Grounding"]],
+	Disk[{0,0},1],
+	scheme[["Margin"]],Thickness[0.06],
 	Circle[{0,0},0.94],
-	Thickness[0.12],
+	scheme[["Body"]],Thickness[0.12],
 	Circle[{0,0},0.3],
 	Table[Rotate[Rectangle[{-0.15,0.3},{0.15,0.53},RoundingRadius->{0.05,0.05}],\[Theta],{0,0}],{\[Theta],0,2Pi,Pi/3}]
 }];
-button[name_,size_]:=Graphics[button[name],ImageSize->size];
+buttonData["Add",scheme_]:=Graphics[{
+	scheme[["Grounding"]],
+	Disk[{0,0},1],
+	scheme[["Margin"]],Thickness[0.06],
+	Circle[{0,0},0.94],	
+	scheme[["Body"]],Thickness[0.12],CapForm["Round"],
+	Line[{{0,-0.4},{0,0.4}}],
+	Line[{{-0.4,0},{0.4,0}}]
+}];
+buttonData["About",scheme_]:=Graphics[{
+	scheme[["Grounding"]],
+	Disk[{0,0},1],
+	scheme[["Margin"]],Thickness[0.06],
+	Circle[{0,0},0.94],	
+	scheme[["Body"]],Thickness[0.1],CapForm["Round"],
+	Line[{{0,-0.44},{0,0.1}}],
+	PointSize[0.1],
+	Point[{0,0.44}]
+}];
+buttonData["Exit",scheme_]:=Graphics[{
+	scheme[["Grounding"]],
+	Disk[{0,0},1],
+	scheme[["Margin"]],Thickness[0.06],
+	Circle[{0,0},0.94],	
+	scheme[["Body"]],Thickness[0.08],JoinForm["Round"],CapForm["Round"],
+	Line[{{0.24,-0.24},{0.24,-0.4},{-0.36,-0.4},{-0.36,0.4},{0.24,0.4},{0.24,0.24}}],
+	Thickness[0.06],
+	Line[{{0,0},{0.52,0}}],
+	Line[{{0.4,0.12},{0.52,0},{0.4,-0.12}}]
+}];
+buttonData["Modify",scheme_]:=Graphics[{
+	scheme[["Grounding"]],
+	Disk[{0,0},1],
+	scheme[["Margin"]],Thickness[0.06],
+	Circle[{0,0},0.94],	
+	scheme[["Body"]],Thickness[0.06],JoinForm["Round"],CapForm["Round"],
+	Line[{{-0.36,-0.36},{-0.32,-0.12},{0.2,0.4},{0.4,0.2},{-0.12,-0.32},{-0.36,-0.36}}],
+	Thickness[0.04],
+	Line[{{0.08,0.28},{0.28,0.08}}],
+	Line[{{-0.08,-0.28},{-0.28,-0.08}}]
+}];
 
 
 (* ::Input:: *)
-(*button/@{"Play","Pause","Stop","Return","Settings"}*)
+(*Row[button/@{"Play","Pause","Stop","ArrowL","ArrowR","Settings","Add","About","Exit","Modify"},ImageSize->{3000,75}]*)

@@ -1,0 +1,29 @@
+{
+	"StyleColor": {
+		"Default": "#000000",
+		"Background": "#F9F9F9",
+		"Comment": "#707070"
+	},
+    "ButtonColor": {
+        "Default": {
+            "Grounding": "#EEEEFF",
+            "Margin": "#003333",
+            "Body": "#3333DD"
+        },
+        "Clicked": {
+            "Grounding": "#BBEEFF",
+            "Margin": "#330033",
+            "Body": "#660066"
+        },
+        "MouseOver": {
+            "Grounding": "#DDDDFF",
+            "Margin": "#003333",
+            "Body": "#446699"
+        },
+        "Unaccessible": {
+            "Grounding": "#AAAAAA",
+            "Margin": "#333333",
+            "Body": "#555555"
+        }
+    }
+}

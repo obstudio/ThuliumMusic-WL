@@ -34,64 +34,8 @@ uiSettings:=DynamicModule[{choices},
 ];
 
 
-PlayerPalette[song_]:={Spacer[{40,40}],
-	Row[{caption[index[[song,"SongName"]],"Title"],
-		If[KeyExistsQ[index[[song]],"Comment"],
-			caption[" ("<>index[[song,"Comment"]]<>")","TitleComment"],
-			Nothing
-		]
-	}],
-	Spacer[1],
-	If[KeyExistsQ[index[[song]],"Composer"],caption[tagName[["Composer"]]<>": "<>index[[song,"Composer"]],"Text"],Nothing],
-	If[KeyExistsQ[index[[song]],"Lyricist"],caption[tagName[["Lyricist"]]<>": "<>index[[song,"Lyricist"]],"Text"],Nothing],
-	If[KeyExistsQ[index[[song]],"Adapter"],caption[tagName[["Adapter"]]<>": "<>index[[song,"Adapter"]],"Text"],Nothing],
-	Spacer[1],
-	If[KeyExistsQ[index[[song]],"Abstract"],
-		Column[caption[#,"Text"]&/@StringSplit[index[[song,"Abstract"]],"\n"],Center],
-		Nothing
-	],
-	Spacer[1],
-	Row[{
-		Dynamic[timeDisplay[current["Position"]]],
-		Spacer[8],
-		ProgressIndicator[Dynamic[current["Position"]/duration],ImageSize->{240,16}],
-		Spacer[8],
-		timeDisplay[duration]
-	}],
-	Spacer[1],
-	Row[{
-		DynamicModule[{style="Default"},
-			Dynamic@Switch[current["State"],
-				"Playing",EventHandler[button["Pause",style],{
-					"MouseDown":>(style="Clicked"),
-					"MouseUp":>(style="Default";current["State"]="Paused")
-				}],
-				"Paused"|"Stopped",EventHandler[button["Play",style],{
-					"MouseDown":>(style="Clicked"),
-					"MouseUp":>(style="Default";current["State"]="Playing")
-				}]
-			]
-		],
-		Spacer[20],
-		DynamicModule[{style="Default"},
-			EventHandler[Dynamic@button["Stop",style],{
-				"MouseDown":>(style="Clicked"),
-				"MouseUp":>(style="Default";current["State"]="Stopped")
-			}]
-		],
-		Spacer[20],
-		DynamicModule[{style="Default"},
-			EventHandler[Dynamic@button["ArrowL",style],{
-				"MouseDown":>(style="Clicked";),
-				"MouseUp":>(style="Default";AudioStop[];DialogReturn[QYMP];)
-			}]
-		]		
-	},ImageSize->{300,60},Alignment->Center],Spacer[{60,60}]
-};
-
-
 (* ::Input:: *)
-(*uiPlayer["Numb"]*)
+(*uiPlayer["Touhou\\Dream_Battle"]*)
 
 
 uiPlayer[song_]:=Module[{image,audio,imageExist},
@@ -103,27 +47,75 @@ uiPlayer[song_]:=Module[{image,audio,imageExist},
 	audio=Import[userPath<>"Buffer\\"<>song<>".buffer","MP3"];
 	duration=Duration[audio];
 	current=AudioPlay[audio];
-	CreateDialog[If[imageExist,
-		Row[{Spacer[50],
-			Column[{
-				Spacer[{40,40}],
-				Tooltip[Image[image,ImageSize->If[ImageAspectRatio[image]>1,{360,UpTo[720]},{UpTo[800],400}]],
-					If[KeyExistsQ[imageData,index[[song,"Image"]]],
-						Column[If[KeyExistsQ[imageData[[index[[song,"Image"]]]],#],
-							tagName[[#]]<>": "<>imageData[[index[[song,"Image"]],#]],
-							Nothing
-						]&/@imageTags],
-						text[["NoImageInfo"]]
+	CreateDialog[Row[{
+		If[imageExist,Row[{Spacer[48],Column[{Spacer[{40,40}],
+			Tooltip[Image[image,ImageSize->If[ImageAspectRatio[image]>1,{360,UpTo[720]},{UpTo[800],400}]],
+				If[KeyExistsQ[imageData,index[[song,"Image"]]],
+					Column[If[KeyExistsQ[imageData[[index[[song,"Image"]]]],#],
+						tagName[[#]]<>": "<>imageData[[index[[song,"Image"]],#]],
+						Nothing
+					]&/@imageTags],
+					text[["NoImageInfo"]]
+				]
+			],
+		Spacer[{40,40}]}]}],Nothing],Spacer[48],
+		Column[{Spacer[{60,60}],
+			Row[{caption[index[[song,"SongName"]],"Title"],
+				If[KeyExistsQ[index[[song]],"Comment"],
+					caption[" ("<>index[[song,"Comment"]]<>")","TitleComment"],
+					Nothing
+				]
+			}],
+			Spacer[1],
+			Column[If[KeyExistsQ[index[[song]],#],
+				caption[tagName[[#]]<>": "<>index[[song,#]],"Text"],
+				Nothing
+			]&/@{"Composer","Lyricist","Adapter"},Alignment->Center],
+			Spacer[1],
+			If[KeyExistsQ[index[[song]],"Abstract"],
+				Column[caption[#,"Text"]&/@StringSplit[index[[song,"Abstract"]],"\n"],Center],
+				Nothing
+			],
+			Spacer[1],
+			Row[{
+				Dynamic[timeDisplay[current["Position"]]],
+				Spacer[8],
+				ProgressIndicator[Dynamic[current["Position"]/duration],ImageSize->{240,16}],
+				Spacer[8],
+				timeDisplay[duration]
+			}],
+			Spacer[1],
+			Row[{
+				DynamicModule[{style="Default"},
+					Dynamic@Switch[current["State"],
+						"Playing",EventHandler[button["Pause",style],{
+							"MouseDown":>(style="Clicked"),
+							"MouseUp":>(style="Default";current["State"]="Paused")
+						}],
+						"Paused"|"Stopped",EventHandler[button["Play",style],{
+							"MouseDown":>(style="Clicked"),
+							"MouseUp":>(style="Default";current["State"]="Playing")
+						}]
 					]
 				],
-				Spacer[{40,40}]
-			}],
-			Spacer[50],
-			Column[PlayerPalette[song],Alignment->Center,ItemSize->30],
-		Spacer[50]},Alignment->Center],
-		(* no image *)
-		Column[PlayerPalette[song],Alignment->Center,ItemSize->Full]
-	],Background->styleColor[["Background"]],WindowTitle->text[["Playing"]]<>": "<>index[[song,"SongName"]]];
+				Spacer[20],
+				DynamicModule[{style="Default"},
+					EventHandler[Dynamic@button["Stop",style],{
+						"MouseDown":>(style="Clicked"),
+						"MouseUp":>(style="Default";current["State"]="Stopped")
+					}]
+				],
+				Spacer[20],
+				DynamicModule[{style="Default"},
+					EventHandler[Dynamic@button["ArrowL",style],{
+						"MouseDown":>(style="Clicked";),
+						"MouseUp":>(style="Default";AudioStop[];DialogReturn[QYMP];)
+					}]
+				]		
+			},ImageSize->{300,60},Alignment->Center],Spacer[{60,60}]
+		},Alignment->Center,ItemSize->36],
+	Spacer[48]},Alignment->Center,ImageSize->Full],
+	Background->styleColor[["Background"]],WindowTitle->text[["Playing"]]<>": "<>index[[song,"SongName"]]];
 ];
 
 

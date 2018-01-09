@@ -130,10 +130,13 @@ getTextInfo[song_]:=(
 	AssociationMap[If[KeyExistsQ[index[[song]],#],index[[song,#]],""]&,textInfoTags]
 );
 putTextInfo[song_,textInfo_]:=Module[
-	{info=Normal@index[[song,metaInfoTags]]},
+	{info=index[[song]]},
 	Do[
-		AppendTo[info,If[textInfo[[tag]]!="",tag->textInfo[[tag]],Nothing]],
+		If[KeyExistsQ[info,tag],
+			If[textInfo[[tag]]!="",info[[tag]]=textInfo[[tag]],info=Delete[info,tag]],
+			If[textInfo[[tag]]!="",AppendTo[info,tag->textInfo[[tag]]]]
+		],
 	{tag,textInfoTags}];
-	index[[song]]=Association@info;
+	index[[song]]=info;
 	writeInfo[song,index[[song]]];
 ];

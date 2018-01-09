@@ -17,7 +17,6 @@ If[userInfo[["Version"]]<version,
 	userInfo[["Version"]]=version;
 	Export[userPath<>"Default.json",userInfo];
 ];
-If[!FileExistsQ[userPath<>"Instrument.json"],Export[userPath<>"Instrument.json",{"Piano","Violin","Guitar","Flute"}]];
 If[!FileExistsQ[userPath<>"Buffer.json"],Export[userPath<>"Buffer.json",{}]];
 bufferHash=Association@Import[userPath<>"Buffer.json"];
 If[!FileExistsQ[userPath<>"ErrorLog.json"],Export[userPath<>"ErrorLog.json",{}]];
@@ -29,55 +28,34 @@ imageData=Association/@Association@Import[userPath<>"image.json"];
 
 
 SetDirectory[path];
-instrData=Association@Import[path<>"instr.json"];                            (* instruments *)
-styleData=ToExpression/@#&/@#&/@Association@Import[path<>"style.json"];     (* styles *)
-colorData=Association@Import[path<>"color.json"];                            (* colors *)
+instrData=Association@Import[path<>"instr.json"];                               (* instruments *)
+colorData=Association@Import[path<>"color.json"];                               (* colors *)
 styleColor=RGBColor/@Association@colorData[["StyleColor"]];
 buttonColor=RGBColor/@#&/@Association/@Association@colorData[["ButtonColor"]];
 pageSelectorColor=RGBColor/@#&/@Association/@Association@colorData[["PageSelectorColor"]];
-langList={"chs"->"\:7b80\:4f53\:4e2d\:6587","eng"->"English"};                               (* languages *)
+styleData=Association/@Association@Import[path<>"style.json"];                  (* styles *)
+styleDict=Normal@Module[{outcome={}},
+	If[KeyExistsQ[#,"FontSize"],AppendTo[outcome,FontSize->#[["FontSize"]]]];
+	If[KeyExistsQ[#,"FontFamily"],AppendTo[outcome,FontFamily->#[["FontFamily"]]]];
+	If[KeyExistsQ[#,"FontWeight"],AppendTo[outcome,FontWeight->ToExpression@#[["FontWeight"]]]];
+	If[KeyExistsQ[#,"FontColor"],AppendTo[outcome,FontColor->styleColor[[#[["FontColor"]]]]]];
+outcome]&/@styleData;
+langList={"chs","eng"};                                                         (* languages *)
+langDict=#->caption[Association[Import[path<>"Lang\\"<>#<>".json"]][["LanguageName"]],"Text"]&/@langList;
 langData=Association@Import[path<>"Lang\\"<>userInfo[["Language"]]<>".json"];
 tagName=Association@langData[["TagName"]];
 instrName=Association@langData[["Instrument"]];
 errorDict=Association@langData[["Error"]];
 text=Association@langData[["Caption"]];
-
-
+metaInfoTags={"Format","TrackCount","Duration","Instruments"};                  (* tags *)
 textInfoTags={"SongName","Lyricist","Composer","Adapter","Comment","Abstract"};
-metaInfoTags={"Format","TrackCount","Duration","Instruments"};
+otherInfoTags={"Image","Uploader"};
 imageTags={"Title","Painter","PainterID","IllustID","URL"};
+aboutTags={"Version","Produce","Website"};
+aboutInfo=Association@text[["AboutQYMP"]];
 
 
-caption[string_,style_]:=caption[string,style,{}];
-caption[string_,style_,argument_]:=Style[
-	completeText[
-		If[StringPart[string,1]=="_",text[[StringDrop[string,1]]],string],
-	argument],
-styleData[[style]]];
-
-
-matchDict=<|"["->"]","("->")","{"->"}","<"->">"|>;
-tonalityDict=<|
-	"C"->0,"G"->7,"D"->2,"A"->-3,"E"->4,
-	"B"->-1,"#F"->6,"#C"->1,"F"->5,"bB"->-2,
-	"bE"->3,"bA"->-4,"bD"->1,"bG"->6,"bC"->-1,
-	"F#"->6,"C#"->1,"Bb"->-2,"Gb"->6,
-	"Eb"->3,"Ab"->-4,"Db"->1,"Cb"->-1
-|>;
-pitchDict=<|"1"->0,"2"->2,"3"->4,"4"->5,"5"->7,"6"->9,"7"->11|>;
-pitchOpDict=<|
-	"#"->1,"b"->-1,"'"->12,","->-12,"M"->{0,4,7},"m"->{0,3,7},
-	"a"->{0,4,8},"d"->{0,3,6},"p"->{0,7,12},"o"->{0,12}
-|>;
-pitchOpList=Append[Keys[pitchOpDict],"$"];
-defaultParameter=<|
-	"Volume"->1,"Speed"->90,"Key"->0,"Beat"->4,"Bar"->4,"Instr"->"Piano",
-	"Dur"->0,"FadeIn"->0,"FadeOut"->0,"Stac"->1/2,"Appo"->1/4,"Oct"->0,
-	"Port"->6,"Spac"->0,"Chord"->{0,12}
-|>;
-funcList=Keys@defaultParameter;
-
-
+(* some functions *)
 findMatch[score_,pos_]:=Module[
 	{i=pos+1,left,right,stack=1},
 	left=StringPart[score,pos];
@@ -103,6 +81,35 @@ completeText[raw_,arg_]:=StringReplace[raw,Flatten@Array[{
 	"#"<>ToString[#]->StringRiffle[ToString[#,FormatType->InputForm]&/@arg[[#]],", "]
 }&,Length@arg]];
 generateMessage[tag_,arg_]:=completeText[errorDict[[tag]],arg];
+caption[string_,style_]:=caption[string,style,{}];
+caption[string_,style_,argument_]:=Style[
+	completeText[
+		If[StringPart[string,1]=="_",text[[StringDrop[string,1]]],string],
+	argument],
+styleDict[[style]]];
+
+
+(* parse related *)
+matchDict=<|"["->"]","("->")","{"->"}","<"->">"|>;
+tonalityDict=<|
+	"C"->0,"G"->7,"D"->2,"A"->-3,"E"->4,
+	"B"->-1,"#F"->6,"#C"->1,"F"->5,"bB"->-2,
+	"bE"->3,"bA"->-4,"bD"->1,"bG"->6,"bC"->-1,
+	"F#"->6,"C#"->1,"Bb"->-2,"Gb"->6,
+	"Eb"->3,"Ab"->-4,"Db"->1,"Cb"->-1
+|>;
+pitchDict=<|"1"->0,"2"->2,"3"->4,"4"->5,"5"->7,"6"->9,"7"->11|>;
+pitchOpDict=<|
+	"#"->1,"b"->-1,"'"->12,","->-12,"M"->{0,4,7},"m"->{0,3,7},
+	"a"->{0,4,8},"d"->{0,3,6},"p"->{0,7,12},"o"->{0,12}
+|>;
+pitchOpList=Append[Keys[pitchOpDict],"$"];
+defaultParameter=<|
+	"Volume"->1,"Speed"->90,"Key"->0,"Beat"->4,"Bar"->4,"Instr"->"Piano",
+	"Dur"->0,"FadeIn"->0,"FadeOut"->0,"Stac"->1/2,"Appo"->1/4,"Oct"->0,
+	"Port"->6,"Spac"->0,"Chord"->{0,12}
+|>;
+funcList=Keys@defaultParameter;
 
 
 writeInfo[song_,info_]:=Export[

@@ -5,11 +5,14 @@ uiSettings:=DynamicModule[{choices},
 	CreateDialog[Column[{Spacer[{40,40}],
 		caption["_Settings","Title"],Spacer[1],
 		Grid[{
-			{Style[text[["ChooseIdentity"]]<>": ",20],
-				RadioButtonBar[Dynamic@choices[["Developer"]],{False->text[["NormalUser"]],True->text[["Developer"]]}]
+			{caption["_ChooseIdentity","Text"],
+				RadioButtonBar[Dynamic@choices[["Developer"]],{
+					False->caption["_NormalUser","Text"],
+					True->caption["_Developer","Text"]
+				}]
 			},
-			{Style[text[["ChooseLanguage"]]<>": ",20],
-				RadioButtonBar[Dynamic@choices[["Language"]],langList]}
+			{caption["_ChooseLanguage","Text"],
+				RadioButtonBar[Dynamic@choices[["Language"]],langDict]}
 			}
 		],Spacer[1],
 		Row[{
@@ -37,21 +40,25 @@ PlayerPalette[song_]:={Spacer[{40,40}],
 			caption[" ("<>index[[song,"Comment"]]<>")","TitleComment"],
 			Nothing
 		]
-	}],Spacer[1],
+	}],
+	Spacer[1],
 	If[KeyExistsQ[index[[song]],"Composer"],caption[tagName[["Composer"]]<>": "<>index[[song,"Composer"]],"Text"],Nothing],
 	If[KeyExistsQ[index[[song]],"Lyricist"],caption[tagName[["Lyricist"]]<>": "<>index[[song,"Lyricist"]],"Text"],Nothing],
-	If[KeyExistsQ[index[[song]],"Adapter"],caption[tagName[["Adapter"]]<>": "<>index[[song,"Adapter"]],"Text"],Nothing],"",
+	If[KeyExistsQ[index[[song]],"Adapter"],caption[tagName[["Adapter"]]<>": "<>index[[song,"Adapter"]],"Text"],Nothing],
+	Spacer[1],
 	If[KeyExistsQ[index[[song]],"Abstract"],
 		Column[caption[#,"Text"]&/@StringSplit[index[[song,"Abstract"]],"\n"],Center],
 		Nothing
-	],Spacer[1],
+	],
+	Spacer[1],
 	Row[{
 		Dynamic[timeDisplay[current["Position"]]],
 		Spacer[8],
 		ProgressIndicator[Dynamic[current["Position"]/duration],ImageSize->{240,16}],
 		Spacer[8],
 		timeDisplay[duration]
-	}],Spacer[1],
+	}],
+	Spacer[1],
 	Row[{
 		DynamicModule[{style="Default"},
 			Dynamic@Switch[current["State"],
@@ -115,23 +122,29 @@ uiPlayer[song_]:=Module[{image,audio,imageExist},
 			Column[PlayerPalette[song],Alignment->Center,ItemSize->30],
 		Spacer[50]},Alignment->Center],
 		(* no image *)
-		Column[PlayerPalette[song],Alignment->Center,ItemSize->50]
+		Column[PlayerPalette[song],Alignment->Center,ItemSize->Full]
 	],Background->styleColor[["Background"]],WindowTitle->text[["Playing"]]<>": "<>index[[song,"SongName"]]];
 ];
 
 
 uiModifySong[song_]:=DynamicModule[{textInfo},
 	textInfo=getTextInfo[song];
-	CreateDialog[Column[{"",
-		Style[textInfo[["SongName"]],FontSize->28,Bold],"",
-		Grid[{tagName[[#]],Spacer[20],InputField[Dynamic@textInfo[[#]],String]}&/@textInfoTags],"",
+	CreateDialog[Column[{Spacer[{20,20}],
+		caption[textInfo[["SongName"]],"Title"],
+		Spacer[1],
+		Column[Row[{Spacer[40],
+			caption[tagName[[#]],"Text"],
+			Spacer[16],
+			InputField[Dynamic@textInfo[[#]],String],
+		Spacer[40]}]&/@textInfoTags],
+		Spacer[1],
 		Grid[{
 			{Button[text[["Save"]],putTextInfo[song,textInfo],ImageSize->150,Enabled->Dynamic[textInfo[["SongName"]]!=""]],
 			Button[text[["Undo"]],textInfo=getTextInfo[song],ImageSize->150]},
 			{Button[text[["DeleteSong"]],DialogReturn[uiDeleteSong[song]],ImageSize->150],
 			Button[text[["Return"]],DialogReturn[QYMP],ImageSize->150]}
-		}],""
-	},Center,ItemSize->30,Spacings->1],
+		}],Spacer[{20,20}]
+	},Center,ItemSize->Full,Spacings->1],
 	WindowTitle->text[["ModifySong"]]];
 ];
 
@@ -145,9 +158,14 @@ uiAddSong:=DynamicModule[{songPath,textInfo,candidates},
 	];
 	CreateDialog[Column[{Spacer[{40,40}],
 		caption["_AddSong","Title"],
-		Spacer[5],
-		Row[{text[["SongPath"]],Spacer[20],PopupMenu[Dynamic@songPath,candidates,ImageSize->200]}],
-		Grid[{tagName[[#]],Spacer[20],InputField[Dynamic@textInfo[[#]],String]}&/@textInfoTags],"",
+		Spacer[4],
+		Row[{text[["SongPath"]],Spacer[12],PopupMenu[Dynamic@songPath,candidates,ImageSize->200]}],
+		Column[Row[{Spacer[40],
+			caption[tagName[[#]],"Text"],
+			Spacer[16],
+			InputField[Dynamic@textInfo[[#]],String],
+		Spacer[40]}]&/@textInfoTags],
+		Spacer[4],
 		Row[{Button[text[["Add"]],
 			song=StringDrop[songPath,-4];
 			AppendTo[bufferHash,song->toBase32@FileHash[path<>"Songs\\"<>songPath]];
@@ -164,7 +182,7 @@ uiAddSong:=DynamicModule[{songPath,textInfo,candidates},
 		ImageSize->150,Enabled->Dynamic[textInfo[["SongName"]]!=""]],
 		Spacer[20],
 		Button[text[["Return"]],DialogReturn[QYMP],ImageSize->150]}],
-	Spacer[{40,40}]},Center,ItemSize->30,Spacings->1],
+	Spacer[{40,40}]},Center,ItemSize->Full,Spacings->1],
 	WindowTitle->text[["AddSong"]]]
 ];
 
@@ -188,18 +206,16 @@ uiDeleteSong[song_]:=CreateDialog[Column[{"",
 WindowTitle->text[["DeleteSong"]]];
 
 
-aboutTags={"Version","Produce","Website"};
-aboutInfo=Association@text[["AboutQYMP"]];
 uiAbout:=CreateDialog[Column[{Spacer[{40,40}],
 	caption["_About","Title"],
 	Spacer[{20,20}],
-	Column[Join[
+	Row[{Spacer[60],Column[Join[
 		{caption["_QYMP","Subtitle"],Spacer[4]},
 		caption[tagName[[#]]<>": "<>aboutInfo[[#]],"Text"]&/@aboutTags
-	],Alignment->Left,ItemSize->20],
+	],Alignment->Left,ItemSize->20],Spacer[60]}],
 	Spacer[{20,20}],
 	Button[text[["Return"]],DialogReturn[QYMP],ImageSize->100],
-Spacer[{40,40}]},Center,ItemSize->36],
+Spacer[{40,40}]},Center,ItemSize->Full],
 WindowTitle->text[["About"]],Background->styleColor[["Background"]]];
 
 
@@ -212,7 +228,7 @@ QYMP:=DynamicModule[{song},
 	AudioStop[];
 	CreateDialog[Column[{Spacer[{40,40}],
 		Row[{
-			Row[{Spacer[40],caption["_QYMP","Title"]},Alignment->Left,ImageSize->320],
+			Row[{Spacer[40],caption["_QYMP","BigTitle"]},Alignment->Left,ImageSize->320],
 			Row[Join[{
 				DynamicModule[{style="Default"},
 					EventHandler[Dynamic@button["Play",style],{

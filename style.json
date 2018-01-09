@@ -1,21 +1,26 @@
 {
 	"Text": {
-		"FontSize": "20"
+		"FontSize": 20
 	},
 	"Title": {
-		"FontSize": "32", 
+		"FontSize": 32, 
 		"FontWeight": "Bold", 
-		"FontFamily": "\"微软雅黑\""
+		"FontFamily": "微软雅黑"
 	},
 	"TitleComment": {
-		"FontSize": "32", 
+		"FontSize": 32, 
 		"FontWeight": "Bold", 
-		"FontFamily": "\"微软雅黑\"",
-		"FontColor": "Gray"
+		"FontFamily": "微软雅黑",
+		"FontColor": "Comment"
 	},
 	"Subtitle": {
-		"FontSize": "24", 
+		"FontSize": 24, 
 		"FontWeight": "Bold", 
-		"FontFamily": "\"微软雅黑\""
+		"FontFamily": "微软雅黑"
+	},
+	"BigTitle": {
+		"FontSize": 40, 
+		"FontWeight": "Bold", 
+		"FontFamily": "微软雅黑"
 	}
 }

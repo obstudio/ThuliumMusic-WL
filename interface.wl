@@ -78,13 +78,12 @@ uiPlayer[song_]:=Module[{image,audio,imageExist},
 			],
 			Spacer[1],
 			Row[{
-				Dynamic[timeDisplay[current["Position"]]],
+				Column[{Dynamic[timeDisplay[current["Position"]]],Spacer[1]}],
 				Spacer[8],
-				ProgressIndicator[Dynamic[current["Position"]/duration],ImageSize->{240,16}],
+				Magnify[progressBar[Dynamic[current["Position"]/duration],40],4],
 				Spacer[8],
-				timeDisplay[duration]
-			}],
-			Spacer[1],
+				Column[{timeDisplay[duration],Spacer[1]}]
+			},ImageSize->Full,Alignment->Center],
 			Row[{
 				DynamicModule[{style="Default"},
 					Dynamic@Switch[current["State"],

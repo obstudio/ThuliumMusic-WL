@@ -144,3 +144,27 @@ pageSelector[name_,style_]:=If[style=="Default",
 		pageSelectorData[name]
 	}]]
 ];
+
+
+progressBar[prog_,len_]:=Graphics[{
+	CapForm["Round"],JoinForm["Round"],
+	Texture[Table[{c,1-c,1},{c,1/100,1/2,1/100}]],
+	Polygon[{{-0.04,-0.96},{-0.04,0.96},{prog*len,0.96},{prog*len,-0.96}},
+		VertexTextureCoordinates->{{0},{0},{1},{1}}
+	],
+	RGBColor["#00FFFF"],
+	Disk[{0,0},0.96,{Pi/2,3Pi/2}],
+	Rectangle[{0,-0.96},{0.2,0.96}],
+	RGBColor["#B0B0B0"],Thickness[0.004],
+	Circle[{0,0},0.96,{Pi/2,3Pi/2}],
+	Circle[{len,0},0.96,{-Pi/2,Pi/2}],
+	Line[{{0,0.96},{len,0.96}}],
+	Line[{{0,-0.96},{len,-0.96}}],
+	RGBColor["#F0F0F0"],
+	Disk[{prog*len,0},1.56],
+	RGBColor["#0088FF"],
+	Disk[{prog*len,0},0.56],
+	RGBColor["#909090"],Thickness[0.004],
+	Circle[{prog*len,0},1.6],
+	Circle[{prog*len,0},0.56]	
+}];

@@ -15,7 +15,10 @@
 		"Painter": "画师",
 		"PainterID": "画师ID",
 		"IllustID": "图片ID",
-		"Title": "标题"
+		"Title": "标题",
+		"Version": "版本",
+		"Produce": "制作",
+		"Website": "网址"
     },
     "Instrument": {
         "Accordion": "手风琴",
@@ -103,6 +106,11 @@
 		"UpdatingImage": "正在更新本地图片库……",
 		"UpdatingBuffer": "正在更新本地歌曲库……",
 		"Progression": "(&1/&2)",
-		"Loading": "正在载入: "
+		"Loading": "正在载入: ",
+		"AboutQYMP": {
+			"Version": "1.5",
+			"Produce": "Obstudio",
+			"Website": "http://qymp.tk"
+		}
 	}
 }

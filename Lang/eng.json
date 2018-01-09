@@ -15,7 +15,10 @@
 		"Painter": "Painter",
 		"PainterID": "Painter ID",
 		"IllustID": "Illust ID",
-		"Title": "Title"
+		"Title": "Title",
+		"Version": "Version",
+		"Produce": "Produce",
+		"Website": "Website"
     },
     "Instrument": {
         "Accordion": "Accordion",
@@ -103,6 +106,11 @@
 		"UpdatingImage": "Updating the local gallery ...",
 		"UpdatingBuffer": "Updating the local song library ...",
 		"Progression": "(&1/&2)",
-		"Loading": "Loading: "
+		"Loading": "Loading: ",
+		"AboutQYMP": {
+			"Version": "1.5",
+			"Produce": "Obstudio",
+			"Website": "http://qymp.tk"
+		}
 	}
 }

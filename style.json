@@ -12,5 +12,10 @@
 		"FontWeight": "Bold", 
 		"FontFamily": "\"微软雅黑\"",
 		"FontColor": "Gray"
+	},
+	"Subtitle": {
+		"FontSize": "24", 
+		"FontWeight": "Bold", 
+		"FontFamily": "\"微软雅黑\""
 	}
 }

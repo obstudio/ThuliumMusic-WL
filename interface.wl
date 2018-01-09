@@ -196,6 +196,25 @@ uiDeleteSong[song_]:=CreateDialog[Column[{"",
 WindowTitle->text[["DeleteSong"]]];
 
 
+aboutTags={"Version","Produce","Website"};
+aboutInfo=Association@text[["AboutQYMP"]];
+uiAbout:=CreateDialog[Column[{Spacer[{40,40}],
+	caption["_About","Title"],
+	Spacer[{20,20}],
+	Column[Join[
+		{caption["_QYMP","Subtitle"],Spacer[4]},
+		caption[tagName[[#]]<>": "<>aboutInfo[[#]],"Text"]&/@aboutTags
+	],Alignment->Left,ItemSize->20],
+	Spacer[{20,20}],
+	Button[text[["Return"]],DialogReturn[QYMP],ImageSize->100],
+Spacer[{40,40}]},Center,ItemSize->36],
+WindowTitle->text[["About"]],Background->styleColor[["Background"]]];
+
+
+(* ::Input:: *)
+(*uiAbout;*)
+
+
 QYMP:=DynamicModule[{song},
 	refresh;
 	AudioStop[];
@@ -206,11 +225,34 @@ QYMP:=DynamicModule[{song},
 				Spacer[20],
 				caption["_Page.x","TitleComment",{page}]
 			},Alignment->Left,ImageSize->400],
-			Row[{
+			Row[Join[{
 				DynamicModule[{style="Default"},
+					EventHandler[Dynamic@button["Play",style],{
+						"MouseDown":>(style="Clicked"),
+						"MouseUp":>(style="Default";DialogReturn[uiPlayer[song]];)
+					}]
+				],
+				Spacer[10]},
+				If[userInfo[["Developer"]],
+					{DynamicModule[{style="Default"},
+						EventHandler[Dynamic@button["Modify",style],{
+							"MouseDown":>(style="Clicked"),
+							"MouseUp":>(style="Default";DialogReturn[uiModifySong[song]];)
+						}]
+					],
+					Spacer[10],
+					DynamicModule[{style="Default"},
+						EventHandler[Dynamic@button["Add",style],{
+							"MouseDown":>(style="Clicked"),
+							"MouseUp":>(style="Default";DialogReturn[uiAddSong];)
+						}]
+					],
+					Spacer[10]},					
+				{Nothing}],
+				{DynamicModule[{style="Default"},
 					EventHandler[Dynamic@button["About",style],{
 						"MouseDown":>(style="Clicked"),
-						"MouseUp":>(style="Default";DialogReturn[];)
+						"MouseUp":>(style="Default";DialogReturn[uiAbout];)
 					}]
 				],
 				Spacer[10],
@@ -226,8 +268,8 @@ QYMP:=DynamicModule[{song},
 						"MouseDown":>(style="Clicked"),
 						"MouseUp":>(style="Default";DialogReturn[];)
 					}]
-				]
-			},Alignment->Right,ImageSize->{400,60}]
+				]}
+			],Alignment->Right,ImageSize->{400,56}]
 		}],
 		Spacer[1],
 		SetterBar[Dynamic@song,
@@ -235,28 +277,13 @@ QYMP:=DynamicModule[{song},
 				Style[index[[#,"SongName"]],24,FontFamily->"\:5fae\:8f6f\:96c5\:9ed1"],
 				Spacer[20],
 				If[KeyExistsQ[index[[#]],"Comment"],Style[index[[#,"Comment"]],20,Gray,FontFamily->"\:5fae\:8f6f\:96c5\:9ed1"],Nothing]
-			}]&/@songListPaged[[page]],
+			},ImageSize->{840,30}]&/@songListPaged[[page]],
 			Appearance->"Vertical"(*,Background\[Rule]styleColor[["Background"]]*)
 		],"",
 		Row[{
 			Button[text[["PgPrev"]],DialogReturn[page--;QYMP],ImageSize->200,Enabled->(page>1)],
 			Spacer[10],
 			Button[text[["PgNext"]],DialogReturn[page++;QYMP],ImageSize->200,Enabled->(page<pageCount)]
-		}],
-		If[userInfo[["Developer"]],Row[{
-			Button[text[["AddSong"]],DialogReturn[uiAddSong],ImageSize->200],
-			Spacer[10],
-			Button[text[["ModifySong"]],DialogReturn[uiModifySong[song]],ImageSize->200]
-		}],Nothing],
-		Row[{
-			Button[text[["PlaySong"]],DialogReturn[uiPlayer[song]],ImageSize->200],
-			Spacer[10],
-			Button[text[["Settings"]],DialogReturn[uiSettings],ImageSize->200]
-		}],
-		Row[{
-			Button[text[["About"]],DialogReturn[],ImageSize->200,Enabled->False],
-			Spacer[10],
-			Button[text[["Exit"]],DialogReturn[],ImageSize->200]
 		}],Spacer[{40,40}]
 	},Center,ItemSize->60],
 	WindowTitle->text[["QYMP"]],Background->styleColor[["Background"]]]

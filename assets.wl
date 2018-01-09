@@ -2,17 +2,16 @@
 
 button[name_,style_]:=If[style=="Default",
 	Mouseover[button[name,"Basic"],button[name,"Mouseover"]],
-	Block[{scheme=buttonColor[[style]]},buttonData[[name]]]
-];
-
-
-buttonData:=<|
 	Block[{scheme=buttonColor[[style]]},Graphics[{
 		scheme[["Grounding"]],
 		Disk[{0,0},1],
 		scheme[["Margin"]],Thickness[0.06],
 		Circle[{0,0},0.94],
-		scheme[["Body"]],Thickness[0.08],JoinForm["Round"],CapForm["Round"],
+		scheme[["Body"]],
+		buttonData[[name]]
+	}]]
+];
+
 
 buttonData=<|
 	"Play"->GraphicsGroup[{

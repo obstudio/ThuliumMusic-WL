@@ -164,7 +164,8 @@ QYMParse[filename_]:=Module[
 						comment=StringTake[filedata[[i]],{j+1,match-1}];
 						Switch[StringTake[comment,{2}],
 						"=",
-							tonality=tonalityDict[[StringTake[comment,{3,StringLength@comment}]]],
+							tonality=(StringCount[comment,"'"]-StringCount[comment,","])*12;
+							tonality+=tonalityDict[StringDelete[StringTake[comment,{3,StringLength@comment}],","|"'"]],
 						"/",
 							beat=ToExpression[StringTake[comment,{3}]]/4,
 						_,

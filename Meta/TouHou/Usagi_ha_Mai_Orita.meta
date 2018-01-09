@@ -2,6 +2,7 @@ Format: qys;
 TrackCount: 5;
 Duration: 56.4825;
 Instruments: {"Bass", "ElectricBass", "ElectricPiano2", "Piano", "Violin"};
+Image: Touhou\Seiran.png;
 SongName: 兔已着陆;
 Composer: ZUN;
 Adapter: 触手猴 LittleRed;

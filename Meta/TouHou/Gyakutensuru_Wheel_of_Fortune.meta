@@ -2,6 +2,7 @@ Format: qys;
 TrackCount: 2;
 Duration: 24.0327;
 Instruments: {"Piano", "Violin"};
+Image: Touhou\Kishin_Sagume.jpg;
 SongName: 逆转的命运之轮;
 Composer: ZUN;
 Adapter: 触手猴 LittleRed;

@@ -38,10 +38,12 @@ uiSettings:=DynamicModule[{choices},
 (*uiPlayer["Touhou\\Dream_Battle"]*)
 
 
-uiPlayer[song_]:=Module[{image,audio,imageExist},
+uiPlayer[song_]:=Module[{image,audio,imageExist,aspectRatio},
 	AudioStop[];
 	If[KeyExistsQ[index[[song]],"Image"],
-		imageExist=True;image=Import[userPath<>"Images\\"<>index[[song,"Image"]]],
+		imageExist=True;
+		image=Import[userPath<>"Images\\"<>index[[song,"Image"]]];
+		aspectRatio=ImageAspectRatio[image],
 		imageExist=False
 	];
 	audio=Import[userPath<>"Buffer\\"<>song<>".buffer","MP3"];
@@ -49,7 +51,12 @@ uiPlayer[song_]:=Module[{image,audio,imageExist},
 	current=AudioPlay[audio];
 	CreateDialog[Row[{
 		If[imageExist,Row[{Spacer[48],Column[{Spacer[{40,40}],
-			Tooltip[Image[image,ImageSize->If[ImageAspectRatio[image]>1,{360,UpTo[720]},{UpTo[800],400}]],
+			Tooltip[Image[image,ImageSize->Piecewise[{
+					{{Automatic,600},aspectRatio>2},
+					{{480,Automatic},aspectRatio<1/2},
+					{{Automatic,400},aspectRatio<1&&aspectRatio>1/2},
+					{{300,Automatic},aspectRatio>1&&aspectRatio<2}
+				}]],
 				If[KeyExistsQ[imageData,index[[song,"Image"]]],
 					Column[If[KeyExistsQ[imageData[[index[[song,"Image"]]]],#],
 						tagName[[#]]<>": "<>imageData[[index[[song,"Image"]],#]],
@@ -78,11 +85,11 @@ uiPlayer[song_]:=Module[{image,audio,imageExist},
 			],
 			Spacer[1],
 			Row[{
-				Column[{Dynamic[timeDisplay[current["Position"]]],Spacer[1]}],
+				Column[{Style[Dynamic[timeDisplay[current["Position"]]],20],Spacer[1]}],
 				Spacer[8],
 				Magnify[progressBar[Dynamic[current["Position"]/duration],40],4],
 				Spacer[8],
-				Column[{timeDisplay[duration],Spacer[1]}]
+				Column[{Style[timeDisplay[duration],20],Spacer[1]}]
 			},ImageSize->Full,Alignment->Center],
 			Row[{
 				DynamicModule[{style="Default"},
@@ -112,7 +119,7 @@ uiPlayer[song_]:=Module[{image,audio,imageExist},
 					}]
 				]		
 			},ImageSize->{300,60},Alignment->Center],Spacer[{60,60}]
-		},Alignment->Center,ItemSize->36],
+		},Alignment->Center,ItemSize->Full],
 	Spacer[48]},Alignment->Center,ImageSize->Full],
 	Background->styleColor[["Background"]],WindowTitle->text[["Playing"]]<>": "<>index[[song,"SongName"]]];
 ];

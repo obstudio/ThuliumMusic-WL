@@ -25,5 +25,37 @@
             "Margin": "#C8C8C8",
             "Body": "#C8C8C8"
         }
+    },
+    "PageSelectorColor": {
+        "Current-Basic": {
+            "Grounding": "#F9F9F9",
+            "Margin": "#00AFF0",
+            "Body": "#000000"
+        },
+        "Basic": {
+            "Grounding": "#F9F9F9",
+            "Margin": "#00AFF0",
+            "Body": "#00AFF0"
+        },
+        "Clicked": {
+            "Grounding": "#00AFF0",
+            "Margin": "#00AFF0",
+            "Body": "#F9F9F9"
+        },
+        "Current-Mouseover": {
+            "Grounding": "#AAE8FF",
+            "Margin": "#00AFF0",
+            "Body": "#000000"
+        },
+        "Mouseover": {
+            "Grounding": "#AAE8FF",
+            "Margin": "#00AFF0",
+            "Body": "#00AFF0"
+        },
+        "Disabled": {
+            "Grounding": "#F9F9F9",
+            "Margin": "#C8C8C8",
+            "Body": "#C8C8C8"
+        }
     }
 }

@@ -34,6 +34,7 @@ styleData=ToExpression/@#&/@#&/@Association@Import[path<>"style.json"];     (* s
 colorData=Association@Import[path<>"color.json"];                            (* colors *)
 styleColor=RGBColor/@Association@colorData[["StyleColor"]];
 buttonColor=RGBColor/@#&/@Association/@Association@colorData[["ButtonColor"]];
+pageSelectorColor=RGBColor/@#&/@Association/@Association@colorData[["PageSelectorColor"]];
 langList={"chs"->"\:7b80\:4f53\:4e2d\:6587","eng"->"English"};                               (* languages *)
 langData=Association@Import[path<>"Lang\\"<>userInfo[["Language"]]<>".json"];
 tagName=Association@langData[["TagName"]];
@@ -45,6 +46,14 @@ text=Association@langData[["Caption"]];
 textInfoTags={"SongName","Lyricist","Composer","Adapter","Comment","Abstract"};
 metaInfoTags={"Format","TrackCount","Duration","Instruments"};
 imageTags={"Title","Painter","PainterID","IllustID","URL"};
+
+
+caption[string_,style_]:=caption[string,style,{}];
+caption[string_,style_,argument_]:=Style[
+	completeText[
+		If[StringPart[string,1]=="_",text[[StringDrop[string,1]]],string],
+	argument],
+styleData[[style]]];
 
 
 matchDict=<|"["->"]","("->")","{"->"}","<"->">"|>;

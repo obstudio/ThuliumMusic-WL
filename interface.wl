@@ -1,13 +1,5 @@
 (* ::Package:: *)
 
-caption[string_,style_]:=caption[string,style,{}];
-caption[string_,style_,argument_]:=Style[
-	completeText[
-		If[StringPart[string,1]=="_",text[[StringDrop[string,1]]],string],
-	argument],
-styleData[[style]]];
-
-
 uiSettings:=DynamicModule[{choices},
 	choices=userInfo;
 	CreateDialog[Column[{Spacer[{40,40}],
@@ -269,19 +261,41 @@ QYMP:=DynamicModule[{song},
 			],Alignment->Right,ImageSize->{480,56}]
 		}],
 		Spacer[1],
-		Row[{Spacer[60],SetterBar[Dynamic@song,
+		Dynamic@Row[{Spacer[60],SetterBar[Dynamic@song,
 			#->Row[{
 				Style[index[[#,"SongName"]],24,FontFamily->"\:5fae\:8f6f\:96c5\:9ed1"],
 				Spacer[20],
 				If[KeyExistsQ[index[[#]],"Comment"],Style[index[[#,"Comment"]],20,Gray,FontFamily->"\:5fae\:8f6f\:96c5\:9ed1"],Nothing]
 			},ImageSize->{800,30}]&/@songListPaged[[page]],
-			Appearance->"Vertical"(*,Background\[Rule]styleColor[["Background"]]*)
+			Appearance->"Vertical"
 		],Spacer[60]}],Spacer[1],
-		Row[{
-			Button[text[["PgPrev"]],DialogReturn[page--;QYMP],ImageSize->200,Enabled->(page>1)],
-			Spacer[10],
-			Button[text[["PgNext"]],DialogReturn[page++;QYMP],ImageSize->200,Enabled->(page<pageCount)]
-		}],Spacer[{40,40}]
+		Row[Join[{
+			Dynamic@If[page<=1,pageSelector["Prev","Disabled"],
+			DynamicModule[{style="Default"},
+				EventHandler[Dynamic@pageSelector["Prev",style],{
+					"MouseDown":>(style="Clicked"),
+					"MouseUp":>(style="Default";page--;)
+				}]
+			]],
+			Spacer[20]},
+			Flatten@Array[{
+				Dynamic@If[page==#,pageSelector[#,"Current",32],
+				DynamicModule[{style="Default"},
+					EventHandler[Dynamic@pageSelector[#,style,32],{
+						"MouseDown":>(style="Clicked"),
+						"MouseUp":>(style="Default";page=#;)
+					}]
+				]
+			],Spacer[6]}&,pageCount],
+			{Spacer[14],
+			Dynamic@If[page>=pageCount,pageSelector["Next","Disabled"],
+			DynamicModule[{style="Default"},
+				EventHandler[Dynamic@pageSelector["Next",style],{
+					"MouseDown":>(style="Clicked"),
+					"MouseUp":>(style="Default";page++;)
+				}]
+			]]}
+		],ImageSize->{500,60},Alignment->Center],Spacer[{40,40}]
 	},Center,ItemSize->Full],
 	WindowTitle->text[["QYMP"]],Background->styleColor[["Background"]]]
 ];

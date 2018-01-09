@@ -12,48 +12,6 @@ path=NotebookDirectory[];
 <<(path<>"qymParse.wl")
 
 
-version=142;
-userPath="C:\\Users\\"<>$UserName<>"\\AppData\\Local\\QYMP\\";
-cloudPath="http://www.qymp.tk/assets/";
-If[!DirectoryQ[userPath],CreateDirectory[userPath]];
-If[!DirectoryQ[userPath<>"export\\"],CreateDirectory[userPath<>"export\\"]];
-If[!DirectoryQ[userPath<>"buffer\\"],CreateDirectory[userPath<>"buffer\\"]];
-If[!DirectoryQ[userPath<>"images\\"],CreateDirectory[userPath<>"images\\"]];
-template={"Version"->version,"Language"->"chs","Developer"->False};
-If[!FileExistsQ[userPath<>"Default.json"],Export[userPath<>"Default.json",template]];
-userInfo=Association@Import[userPath<>"Default.json"];
-If[userInfo[["Version"]]<version,
-	Do[
-		If[!KeyExistsQ[userInfo,tag],AppendTo[userInfo,tag->template[[tag]]]],
-	{tag,Keys@template}];
-	userInfo[["Version"]]=version;
-	Export[userPath<>"Default.json",userInfo];
-];
-If[!FileExistsQ[userPath<>"Instrument.json"],Export[userPath<>"Instrument.json",{"Piano","Violin","Guitar","Flute"}]];
-If[!FileExistsQ[userPath<>"Buffer.json"],Export[userPath<>"Buffer.json",{}]];
-bufferHash=Association@Import[userPath<>"Buffer.json"];
-If[!FileExistsQ[userPath<>"ErrorLog.json"],Export[userPath<>"ErrorLog.json",{}]];
-errorLog=Association@Import[userPath<>"ErrorLog.json"];
-If[!FileExistsQ[userPath<>"Favorite.json"],Export[userPath<>"Favorite.json",{}]];
-favorite=Import[userPath<>"Favorite.json"];
-If[!FileExistsQ[userPath<>"Image.json"],Export[userPath<>"Image.json",{}]];
-imageData=Association/@Association@Import[userPath<>"image.json"];
-
-
-SetDirectory[path];
-instrData=Association@Import[path<>"instr.json"];                            (* instruments *)
-styleData=ToExpression/@#&/@#&/@Association@Import[path<>"style.json"];     (* styles *)
-colorData=Association@Import[path<>"color.json"];                            (* colors *)
-styleColor=RGBColor/@Association@colorData[["StyleColor"]];
-buttonColor=RGBColor/@#&/@Association/@Association@colorData[["ButtonColor"]];
-langList={"chs"->"\:7b80\:4f53\:4e2d\:6587","eng"->"English"};                               (* languages *)
-langData=Association@Import[path<>"Lang\\"<>userInfo[["Language"]]<>".json"];
-tagName=Association@langData[["TagName"]];
-instrName=Association@langData[["Instrument"]];
-errorDict=Association@langData[["Error"]];
-text=Association@langData[["Caption"]];
-
-
 refresh:=(
 	metaTree=StringDrop[FileNames["*","Meta",Infinity],5];
 	songList=StringDrop[Select[metaTree,StringMatchQ[__~~".meta"]],-5];

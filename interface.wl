@@ -200,7 +200,35 @@ QYMP:=DynamicModule[{song},
 	refresh;
 	AudioStop[];
 	CreateDialog[Column[{Spacer[{40,40}],
-		Row[{caption["_QYMP","Title"],Spacer[20],caption["_Page.x","TitleComment",{page}]}],
+		Row[{
+			Row[{
+				caption["_QYMP","Title"],
+				Spacer[20],
+				caption["_Page.x","TitleComment",{page}]
+			},Alignment->Left,ImageSize->400],
+			Row[{
+				DynamicModule[{style="Default"},
+					EventHandler[Dynamic@button["About",style],{
+						"MouseDown":>(style="Clicked"),
+						"MouseUp":>(style="Default";DialogReturn[];)
+					}]
+				],
+				Spacer[10],
+				DynamicModule[{style="Default"},
+					EventHandler[Dynamic@button["Settings",style],{
+						"MouseDown":>(style="Clicked"),
+						"MouseUp":>(style="Default";DialogReturn[uiSettings];)
+					}]
+				],
+				Spacer[10],
+				DynamicModule[{style="Default"},
+					EventHandler[Dynamic@button["Exit",style],{
+						"MouseDown":>(style="Clicked"),
+						"MouseUp":>(style="Default";DialogReturn[];)
+					}]
+				]
+			},Alignment->Right,ImageSize->{400,60}]
+		}],
 		Spacer[1],
 		SetterBar[Dynamic@song,
 			#->Row[{
@@ -208,7 +236,7 @@ QYMP:=DynamicModule[{song},
 				Spacer[20],
 				If[KeyExistsQ[index[[#]],"Comment"],Style[index[[#,"Comment"]],20,Gray,FontFamily->"\:5fae\:8f6f\:96c5\:9ed1"],Nothing]
 			}]&/@songListPaged[[page]],
-			Appearance->"Vertical"
+			Appearance->"Vertical"(*,Background\[Rule]styleColor[["Background"]]*)
 		],"",
 		Row[{
 			Button[text[["PgPrev"]],DialogReturn[page--;QYMP],ImageSize->200,Enabled->(page>1)],
@@ -230,8 +258,8 @@ QYMP:=DynamicModule[{song},
 			Spacer[10],
 			Button[text[["Exit"]],DialogReturn[],ImageSize->200]
 		}],Spacer[{40,40}]
-	},Center,ItemSize->50],
-	WindowTitle->text[["QYMP"]]],Background->styleColor[["Background"]]
+	},Center,ItemSize->60],
+	WindowTitle->text[["QYMP"]],Background->styleColor[["Background"]]]
 ];
 
 

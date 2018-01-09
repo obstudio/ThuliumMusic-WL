@@ -1,7 +1,10 @@
 (* ::Package:: *)
 
 button[name_]:=button[name,"Default"];
-button[name_,style_]:=Block[{scheme=buttonColor[[style]]},buttonData[[name]]];
+button[name_,style_]:=If[style=="Default",
+	Mouseover[button[name,"Basic"],button[name,"Mouseover"]],
+	Block[{scheme=buttonColor[[style]]},buttonData[[name]]]
+];
 
 
 buttonData:=<|

@@ -5,7 +5,7 @@
 		"Comment": "#707070"
 	},
     "ButtonColor": {
-        "Default": {
+        "Basic": {
             "Grounding": "#F9F9F9",
             "Margin": "#00AFF0",
             "Body": "#00AFF0"
@@ -15,7 +15,7 @@
             "Margin": "#00AFF0",
             "Body": "#F9F9F9"
         },
-        "MouseOver": {
+        "Mouseover": {
             "Grounding": "#AAE8FF",
             "Margin": "#00AFF0",
             "Body": "#00AFF0"

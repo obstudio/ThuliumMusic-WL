@@ -17,7 +17,7 @@
 		"IllustID": "图片ID",
 		"Title": "标题",
 		"Version": "版本",
-		"Produce": "制作",
+		"Producer": "制作",
 		"Website": "网址"
     },
     "Instrument": {
@@ -112,8 +112,8 @@
 		"Loading": "正在载入: ",
 		"AboutQYMP": {
 			"Version": "1.5",
-			"Produce": "Obstudio",
-			"Website": "http://qymp.tk"
+			"Producer": "鄂毕工作室",
+			"Website": "www.qymp.tk"
 		}
 	}
 }

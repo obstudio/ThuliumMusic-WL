@@ -51,7 +51,7 @@ metaInfoTags={"Format","TrackCount","Duration","Instruments"};                  
 textInfoTags={"SongName","Lyricist","Composer","Adapter","Comment","Abstract"};
 otherInfoTags={"Image","Uploader"};
 imageTags={"Title","Painter","PainterID","IllustID","URL"};
-aboutTags={"Version","Produce","Website"};
+aboutTags={"Version","Producer","Website"};
 aboutInfo=Association@text[["AboutQYMP"]];
 
 

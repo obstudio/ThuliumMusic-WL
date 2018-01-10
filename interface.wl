@@ -35,7 +35,7 @@ uiSettings:=DynamicModule[{choices},
 			Spacer[10],
 			Button[text[["Return"]],DialogReturn[QYMP],ImageSize->150]
 		}],Spacer[{40,40}]
-	},Center,ItemSize->40],
+	},Center,ItemSize->Full],
 	Background->styleColor[["Background"]],WindowTitle->text[["Settings"]]]
 ];
 
@@ -254,7 +254,7 @@ uiAbout:=CreateDialog[Column[{Spacer[{40,40}],
 	Row[{Spacer[60],Column[Join[
 		{caption["_QYMP","Subtitle"],Spacer[4]},
 		caption[tagName[[#]]<>": "<>aboutInfo[[#]],"Text"]&/@aboutTags
-	],Alignment->Left,ItemSize->20],Spacer[60]}],
+	],Alignment->Left,ItemSize->Full],Spacer[60]}],
 	Spacer[{20,20}],
 	Button[text[["Return"]],DialogReturn[QYMP],ImageSize->100],
 Spacer[{40,40}]},Center,ItemSize->Full],

@@ -17,7 +17,7 @@
 		"IllustID": "Illust ID",
 		"Title": "Title",
 		"Version": "Version",
-		"Produce": "Produce",
+		"Producer": "Producer",
 		"Website": "Website"
     },
     "Instrument": {
@@ -112,8 +112,8 @@
 		"Loading": "Loading: ",
 		"AboutQYMP": {
 			"Version": "1.5",
-			"Produce": "Obstudio",
-			"Website": "http://qymp.tk"
+			"Producer": "Ob Studio",
+			"Website": "www.qymp.tk"
 		}
 	}
 }

@@ -85,14 +85,14 @@ track[score_,global_,location_]:=Module[
 						argument=toArgument@StringDrop[content,position];
 						If[MemberQ[funcList,function],
 							parameter[[function]]=argument,
-							AppendTo[messages,generateMessage["InvFunction",Join[location,{barCount+1,function}]]]
+							AppendTo[messages,generateMessage["InvalidFunction",Join[location,{barCount+1,function}]]]
 						],
 					StringContainsQ[content,"="],            (* key *)
 						parameter[["Oct"]]=StringCount[content,"'"]-StringCount[content,","];
 						tonality=StringDelete[StringTake[content,{3,StringLength@content}],","|"'"];
 						If[KeyExistsQ[tonalityDict,tonality],
 							parameter[["Key"]]=tonalityDict[[tonality]],
-							AppendTo[messages,generateMessage["InvTonality",Join[location,{barCount+1,content}]]];
+							AppendTo[messages,generateMessage["InvalidTonality",Join[location,{barCount+1,content}]]];
 						],
 					StringContainsQ[content,"/"],            (* beat *)
 						position=StringPosition[content,"/"][[1,1]];
@@ -113,7 +113,7 @@ track[score_,global_,location_]:=Module[
 								instrList=Union[instrList,{parameter[["Instr"]]}];
 								percussion=True,
 							_,
-								AppendTo[messages,generateMessage["InvInstrument",Join[location,{barCount+1,content}]]];
+								AppendTo[messages,generateMessage["InvalidInstrument",Join[location,{barCount+1,content}]]];
 						];
 				];
 				j=match+1;
@@ -166,7 +166,7 @@ track[score_,global_,location_]:=Module[
 				If[StringContainsQ[content,"^"],appoggiatura=Flatten/@Array[Take[pitch,#]&,Length@pitch-1]];
 				pitch=Flatten@pitch,
 			True,
-				AppendTo[messages,generateMessage["InvCharacter",Join[location,{barCount+1,char}]]];
+				AppendTo[messages,generateMessage["InvalidCharacter",Join[location,{barCount+1,char}]]];
 				pitch=None;
 		];
 		While[j<=StringLength@score && MemberQ[pitchOpList,StringPart[score,j]],

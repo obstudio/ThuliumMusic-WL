@@ -1,0 +1,61 @@
+{
+	"StyleColor": {
+		"Default": "#000000",
+		"Background": "#F9F9F9",
+		"Comment": "#707070"
+	},
+    "ButtonColor": {
+        "Basic": {
+            "Grounding": "#F9F9F9",
+            "Margin": "#00AFF0",
+            "Body": "#00AFF0"
+        },
+        "Clicked": {
+            "Grounding": "#00AFF0",
+            "Margin": "#00AFF0",
+            "Body": "#F9F9F9"
+        },
+        "Mouseover": {
+            "Grounding": "#AAE8FF",
+            "Margin": "#00AFF0",
+            "Body": "#00AFF0"
+        },
+        "Disabled": {
+            "Grounding": "#F9F9F9",
+            "Margin": "#C8C8C8",
+            "Body": "#C8C8C8"
+        }
+    },
+    "PageSelectorColor": {
+        "Current-Basic": {
+            "Grounding": "#1979CA",
+            "Margin": "#1979CA",
+            "Body": "#F9F9F9"
+        },
+        "Basic": {
+            "Grounding": "#F9F9F9",
+            "Margin": "#1979CA",
+            "Body": "#1979CA"
+        },
+        "Clicked": {
+            "Grounding": "#1979CA",
+            "Margin": "#1979CA",
+            "Body": "#F9F9F9"
+        },
+        "Current-Mouseover": {
+            "Grounding": "#1979CA",
+            "Margin": "#1979CA",
+            "Body": "#F9F9F9"
+        },
+        "Mouseover": {
+            "Grounding": "#9BCBF2",
+            "Margin": "#1979CA",
+            "Body": "#1979CA"
+        },
+        "Disabled": {
+            "Grounding": "#F9F9F9",
+            "Margin": "#C8C8C8",
+            "Body": "#C8C8C8"
+        }
+    }
+}

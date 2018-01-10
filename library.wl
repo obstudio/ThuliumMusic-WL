@@ -47,12 +47,12 @@ tagName=Association@langData[["TagName"]];
 instrName=Association@langData[["Instrument"]];
 errorDict=Association@langData[["Error"]];
 text=Association@langData[["Caption"]];
+aboutInfo=Association@text[["AboutQYMP"]];
 metaInfoTags={"Format","TrackCount","Duration","Instruments"};                  (* tags *)
 textInfoTags={"SongName","Lyricist","Composer","Adapter","Comment","Abstract"};
 otherInfoTags={"Image","Uploader"};
 imageTags={"Title","Painter","PainterID","IllustID","URL"};
 aboutTags={"Version","Producer","Website"};
-aboutInfo=Association@text[["AboutQYMP"]];
 
 
 (* some functions *)

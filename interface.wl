@@ -21,20 +21,21 @@ uiSettings:=DynamicModule[{choices},
 				RadioButtonBar[Dynamic@choices[["Language"]],langDict]}
 			}
 		],Spacer[1],
-		Row[{
+		Row[{Spacer[80],
 			Button[text[["Save"]],
 				langData=Association@Import[path<>"Lang\\"<>choices[["Language"]]<>".json"];
 				tagName=Association@langData[["TagName"]];
 				instrName=Association@langData[["Instrument"]];
 				errorDict=Association@langData[["Error"]];
 				text=Association@langData[["Caption"]];
+				aboutInfo=Association@text[["AboutQYMP"]];
 				userInfo=choices;
 				Export[userPath<>"Default.json",Normal@userInfo];
 				DialogReturn[QYMP],
 			ImageSize->150],
 			Spacer[10],
-			Button[text[["Return"]],DialogReturn[QYMP],ImageSize->150]
-		}],Spacer[{40,40}]
+			Button[text[["Return"]],DialogReturn[QYMP],ImageSize->150],
+		Spacer[80]}],Spacer[{40,40}]
 	},Center,ItemSize->Full],
 	Background->styleColor[["Background"]],WindowTitle->text[["Settings"]]]
 ];

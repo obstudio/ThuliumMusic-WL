@@ -2,5 +2,8 @@
 /Songs/test.qys
 /Songs/temp.qys
 /*.jpg
-/Res/*.*
-test.nb
+/Res/
+/test.nb
+*_.qys
+/*.docx
+*.png

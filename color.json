@@ -28,29 +28,29 @@
     },
     "PageSelectorColor": {
         "Current-Basic": {
-            "Grounding": "#F9F9F9",
-            "Margin": "#00AFF0",
-            "Body": "#000000"
+            "Grounding": "#1979CA",
+            "Margin": "#1979CA",
+            "Body": "#F9F9F9"
         },
         "Basic": {
             "Grounding": "#F9F9F9",
-            "Margin": "#00AFF0",
-            "Body": "#00AFF0"
+            "Margin": "#1979CA",
+            "Body": "#1979CA"
         },
         "Clicked": {
-            "Grounding": "#00AFF0",
-            "Margin": "#00AFF0",
+            "Grounding": "#1979CA",
+            "Margin": "#1979CA",
             "Body": "#F9F9F9"
         },
         "Current-Mouseover": {
-            "Grounding": "#AAE8FF",
-            "Margin": "#00AFF0",
-            "Body": "#000000"
+            "Grounding": "#1979CA",
+            "Margin": "#1979CA",
+            "Body": "#F9F9F9"
         },
         "Mouseover": {
-            "Grounding": "#AAE8FF",
-            "Margin": "#00AFF0",
-            "Body": "#00AFF0"
+            "Grounding": "#9BCBF2",
+            "Margin": "#1979CA",
+            "Body": "#1979CA"
         },
         "Disabled": {
             "Grounding": "#F9F9F9",

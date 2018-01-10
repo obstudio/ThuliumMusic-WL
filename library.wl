@@ -1,13 +1,13 @@
 (* ::Package:: *)
 
-version=142;
+version=201;
 userPath="C:\\Users\\"<>$UserName<>"\\AppData\\Local\\QYMP\\";
 cloudPath="http://www.qymp.tk/assets/";
 If[!DirectoryQ[userPath],CreateDirectory[userPath]];
 If[!DirectoryQ[userPath<>"export\\"],CreateDirectory[userPath<>"export\\"]];
 If[!DirectoryQ[userPath<>"buffer\\"],CreateDirectory[userPath<>"buffer\\"]];
 If[!DirectoryQ[userPath<>"images\\"],CreateDirectory[userPath<>"images\\"]];
-template={"Version"->version,"Language"->"chs","Developer"->False};
+template=<|"Version"->version,"Language"->"chs","Developer"->False,"Player"->"Old"|>;
 If[!FileExistsQ[userPath<>"Default.json"],Export[userPath<>"Default.json",template]];
 userInfo=Association@Import[userPath<>"Default.json"];
 If[userInfo[["Version"]]<version,

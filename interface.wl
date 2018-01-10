@@ -11,6 +11,12 @@ uiSettings:=DynamicModule[{choices},
 					True->caption["_Developer","Text"]
 				}]
 			},
+			{caption["_ChoosePlayer","Text"],
+				RadioButtonBar[Dynamic@choices[["Player"]],{
+					"Old"->caption["_OldVersion","Text"],
+					"New"->caption["_NewVersion","Text"]
+				}]
+			},
 			{caption["_ChooseLanguage","Text"],
 				RadioButtonBar[Dynamic@choices[["Language"]],langDict]}
 			}
@@ -30,12 +36,80 @@ uiSettings:=DynamicModule[{choices},
 			Button[text[["Return"]],DialogReturn[QYMP],ImageSize->150]
 		}],Spacer[{40,40}]
 	},Center,ItemSize->40],
-	WindowTitle->text[["Settings"]]]
+	Background->styleColor[["Background"]],WindowTitle->text[["Settings"]]]
 ];
 
 
 (* ::Input:: *)
 (*uiPlayer["Touhou\\Dream_Battle"]*)
+
+
+playerControlsOld:={
+	Row[{
+		Dynamic[Style[timeDisplay[current["Position"]],20]],
+		Spacer[8],
+		ProgressIndicator[Dynamic[current["Position"]/duration],ImageSize->{240,16}],
+		Spacer[8],
+		Style[timeDisplay[duration],20]
+	}],Spacer[1],
+	Row[{Button[
+		Dynamic[Switch[current["State"],
+			"Playing",text[["Pause"]],
+			"Paused"|"Stopped",text[["Play"]]
+		]],
+		Switch[current["State"],
+			"Playing",current["State"]="Paused",
+			"Paused"|"Stopped",current["State"]="Playing"
+		],
+		ImageSize->80],
+		Spacer[20],
+		Button[text[["Stop"]],current["State"]="Stopped",ImageSize->80],
+		Spacer[20],
+		Button[text[["Return"]],AudioStop[];DialogReturn[QYMP],ImageSize->80]			
+	}]
+};
+
+
+playerControlsNew:={
+	Row[{
+		Column[{Style[Dynamic[timeDisplay[current["Position"]]],20],Spacer[1]}],
+		Spacer[8],
+		Magnify[progressBar[Dynamic[current["Position"]/duration],40],4],
+		Spacer[8],
+		Column[{Style[timeDisplay[duration],20],Spacer[1]}]
+	},ImageSize->Full,Alignment->Center],
+	Row[{
+		DynamicModule[{style="Default"},
+			Dynamic@Switch[current["State"],
+				"Playing",EventHandler[button["Pause",style],{
+					"MouseDown":>(style="Clicked"),
+					"MouseUp":>(style="Default";current["State"]="Paused")
+				}],
+				"Paused"|"Stopped",EventHandler[button["Play",style],{
+					"MouseDown":>(style="Clicked"),
+					"MouseUp":>(style="Default";current["State"]="Playing")
+				}]
+			]
+		],
+		Spacer[20],
+		DynamicModule[{style="Default"},
+			EventHandler[Dynamic@button["Stop",style],{
+				"MouseDown":>(style="Clicked"),
+				"MouseUp":>(style="Default";current["State"]="Stopped")
+			}]
+		],
+		Spacer[20],
+		DynamicModule[{style="Default"},
+			EventHandler[Dynamic@button["ArrowL",style],{
+				"MouseDown":>(style="Clicked";),
+				"MouseUp":>(style="Default";
+					AudioStop[];
+					DialogReturn[QYMP];
+				)
+			}]
+		]		
+	},ImageSize->{300,60},Alignment->Center]
+};
 
 
 uiPlayer[song_]:=Module[{image,audio,imageExist,aspectRatio},
@@ -66,7 +140,7 @@ uiPlayer[song_]:=Module[{image,audio,imageExist,aspectRatio},
 				]
 			],
 		Spacer[{40,40}]}]}],Nothing],Spacer[48],
-		Column[{Spacer[{60,60}],
+		Column[Join[{Spacer[{60,60}],
 			Row[{caption[index[[song,"SongName"]],"Title"],
 				If[KeyExistsQ[index[[song]],"Comment"],
 					caption[" ("<>index[[song,"Comment"]]<>")","TitleComment"],
@@ -83,43 +157,13 @@ uiPlayer[song_]:=Module[{image,audio,imageExist,aspectRatio},
 				Column[caption[#,"Text"]&/@StringSplit[index[[song,"Abstract"]],"\n"],Center],
 				Nothing
 			],
-			Spacer[1],
-			Row[{
-				Column[{Style[Dynamic[timeDisplay[current["Position"]]],20],Spacer[1]}],
-				Spacer[8],
-				Magnify[progressBar[Dynamic[current["Position"]/duration],40],4],
-				Spacer[8],
-				Column[{Style[timeDisplay[duration],20],Spacer[1]}]
-			},ImageSize->Full,Alignment->Center],
-			Row[{
-				DynamicModule[{style="Default"},
-					Dynamic@Switch[current["State"],
-						"Playing",EventHandler[button["Pause",style],{
-							"MouseDown":>(style="Clicked"),
-							"MouseUp":>(style="Default";current["State"]="Paused")
-						}],
-						"Paused"|"Stopped",EventHandler[button["Play",style],{
-							"MouseDown":>(style="Clicked"),
-							"MouseUp":>(style="Default";current["State"]="Playing")
-						}]
-					]
-				],
-				Spacer[20],
-				DynamicModule[{style="Default"},
-					EventHandler[Dynamic@button["Stop",style],{
-						"MouseDown":>(style="Clicked"),
-						"MouseUp":>(style="Default";current["State"]="Stopped")
-					}]
-				],
-				Spacer[20],
-				DynamicModule[{style="Default"},
-					EventHandler[Dynamic@button["ArrowL",style],{
-						"MouseDown":>(style="Clicked";),
-						"MouseUp":>(style="Default";AudioStop[];DialogReturn[QYMP];)
-					}]
-				]		
-			},ImageSize->{300,60},Alignment->Center],Spacer[{60,60}]
-		},Alignment->Center,ItemSize->Full],
+			Spacer[1]},
+			Switch[userInfo[["Player"]],
+				"Old",playerControlsOld,
+				"New",playerControlsNew
+			],
+			{Spacer[{60,60}]}
+		],Alignment->Center,ItemSize->Full],
 	Spacer[48]},Alignment->Center,ImageSize->Full],
 	Background->styleColor[["Background"]],WindowTitle->text[["Playing"]]<>": "<>index[[song,"SongName"]]];
 ];
@@ -143,7 +187,7 @@ uiModifySong[song_]:=DynamicModule[{textInfo},
 			Button[text[["Return"]],DialogReturn[QYMP],ImageSize->150]}
 		}],Spacer[{20,20}]
 	},Center,ItemSize->Full,Spacings->1],
-	WindowTitle->text[["ModifySong"]]];
+	Background->styleColor[["Background"]],WindowTitle->text[["ModifySong"]]];
 ];
 
 
@@ -181,7 +225,7 @@ uiAddSong:=DynamicModule[{songPath,textInfo,candidates},
 		Spacer[20],
 		Button[text[["Return"]],DialogReturn[QYMP],ImageSize->150]}],
 	Spacer[{40,40}]},Center,ItemSize->Full,Spacings->1],
-	WindowTitle->text[["AddSong"]]]
+	Background->styleColor[["Background"]],WindowTitle->text[["AddSong"]]]
 ];
 
 
@@ -201,7 +245,7 @@ uiDeleteSong[song_]:=CreateDialog[Column[{"",
 		Button[text[["Return"]],DialogReturn[QYMP],ImageSize->100]			
 	}],""
 },Center,ItemSize->36],
-WindowTitle->text[["DeleteSong"]]];
+Background->styleColor[["Background"]],WindowTitle->text[["DeleteSong"]]];
 
 
 uiAbout:=CreateDialog[Column[{Spacer[{40,40}],

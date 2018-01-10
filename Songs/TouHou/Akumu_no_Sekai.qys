@@ -250,19 +250,15 @@ x_x__x__x_x__x__x_x__x__x_x__x__|x_x__x__x_x__x__x_x__x__x_x__x__|x_x__x__x_x__x
 
 <BassDrum2><1=C><0.6>\
 x_x_x_x__x__(2-)xx_x_|x_x_x_x__x__(2-)x(2-)x|x_x_x_x__x__(2-)xx_x_|x_x_x_x__x__(2-)x(2-)x\
-x_x_x_x__x__(2-)xx_x_|x_x_x_x__x__(2-)x(2-)x|x_x_x_x__x__(2-)xx_x_|x_x_x_x__x__(2-)x(2-)x||
+x_x_x_x__x__(2-)xx_x_|x_x_x_x__x__(2-)x(2-)x|x_x_x_x__x__(2-)xx_x_|x_x_x_x_xx||
 
 <HiHatPedal><1=C><0.4>\
 0_x_x0_x_x|0_x_x0_x_x|0_x_x0_x_x|0_x_x0_x_x\
-0_x_x0_x_x|0_x_x0_x_x|0_x_x0_x_x|0_x_x0_x_x||
-
-<Snare><1=C><0.3>\
-0---|0---|0---|0---\
-0---|0---|0---|(2-)x---||
+0_x_x0_x_x|0_x_x0_x_x|0_x_x0_x_x|0_x_x0-||
 
 <ChineseCymbal><1=C><0.3>\
 0x0x|0x0x|0x0x|0x0x\
-0x0x|0x0x|0x0x|0x0x||
+0x0x|0x0x|0x0x|0x0-||
 
 //------------------------------ Sec G ------------------------------
 

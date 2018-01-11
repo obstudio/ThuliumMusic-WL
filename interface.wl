@@ -209,24 +209,27 @@ uiAddSong:=DynamicModule[{songPath,textInfo,candidates},
 			InputField[Dynamic@textInfo[[#]],String],
 		Spacer[40]}]&/@textInfoTags],
 		Spacer[4],
-		Row[{Button[text[["Add"]],
-			song=StringDrop[songPath,-4];
-			AppendTo[bufferHash,song->toBase32@FileHash[path<>"Songs\\"<>songPath]];
-			Export[userPath<>"Buffer.json",Normal@bufferHash];
-			audio=If[StringTake[songPath,-3]=="qys",QYSParse,QYMParse][path<>"Songs\\"<>songPath];
-			Export[userPath<>"Buffer\\"<>song<>".buffer",audio,"MP3"];
-			metaInfo=Values[Options[audio,MetaInformation]][[1]];
-			metaInfo[["TrackCount"]]=ToString[metaInfo[["TrackCount"]]];
-			metaInfo[["Duration"]]=ToString[metaInfo[["Duration"]],InputForm];
-			metaInfo[["Instruments"]]=ToString[metaInfo[["Instruments"]],InputForm];
-			AppendTo[index,song->metaInfo];
-			putTextInfo[song,textInfo];
-			DialogReturn[QYMP],
+		Row[{Button[text[["Add"]],addSong[songPath,textInfo];DialogReturn[QYMP],
 		ImageSize->150,Enabled->Dynamic[textInfo[["SongName"]]!=""]],
 		Spacer[20],
 		Button[text[["Return"]],DialogReturn[QYMP],ImageSize->150]}],
 	Spacer[{40,40}]},Center,ItemSize->Full,Spacings->1],
 	Background->styleColor[["Background"]],WindowTitle->text[["AddSong"]]]
+];
+
+
+addSong[songPath_,textInfo_]:=Module[{song,metaInfo,audio},
+	song=StringDrop[songPath,-4];
+	AppendTo[bufferHash,song->toBase32@FileHash[path<>"Songs\\"<>songPath]];
+	Export[userPath<>"Buffer.json",Normal@bufferHash];
+	audio=If[StringTake[songPath,-3]=="qys",QYSParse,QYMParse][path<>"Songs\\"<>songPath];
+	Export[userPath<>"Buffer\\"<>song<>".buffer",audio,"MP3"];
+	metaInfo=Values[Options[audio,MetaInformation]][[1]];
+	metaInfo[["TrackCount"]]=ToString[metaInfo[["TrackCount"]]];
+	metaInfo[["Duration"]]=ToString[metaInfo[["Duration"]],InputForm];
+	metaInfo[["Instruments"]]=ToString[metaInfo[["Instruments"]],InputForm];
+	AppendTo[index,song->metaInfo];
+	putTextInfo[song,textInfo];
 ];
 
 

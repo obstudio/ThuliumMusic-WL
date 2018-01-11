@@ -128,7 +128,8 @@ track[score_,global_,location_]:=Module[
 					"-",                            (* single tremolo *)
 						tremolo1=ToExpression[content],
 					"=",                            (* double tremolo *)
-						tremolo2=ToExpression[content],
+						tremolo2=ToExpression[content];
+						trackDuration-=duration,
 					"^",                            (* appoggiatura *)
 						k=1;
 						While[k<=StringLength@content,
@@ -389,7 +390,7 @@ QYSParse[filename_]:=Module[
 
 
 (* ::Input:: *)
-(*AudioStop[];AudioPlay@QYSParse[path<>"Songs\\temp.qys"];*)
+(*AudioStop[];AudioPlay@QYSParse[path<>"Songs\\test.qys"];*)
 
 
 (* ::Input:: *)

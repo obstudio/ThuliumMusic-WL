@@ -66,7 +66,7 @@ uiPlayerControlsOld:={
 		Spacer[20],
 		Button[text[["Stop"]],current["State"]="Stopped",ImageSize->80],
 		Spacer[20],
-		Button[text[["Return"]],AudioStop[];DialogReturn[uiPlaylist[]],ImageSize->80]			
+		Button[text[["Return"]],AudioStop[];DialogReturn[uiPlaylist],ImageSize->80]			
 	}]
 };
 
@@ -105,7 +105,7 @@ uiPlayerControlsNew:={
 				"MouseDown":>(style="Clicked";),
 				"MouseUp":>(style="Default";
 					AudioStop[];
-					DialogReturn[uiPlaylist[]];
+					DialogReturn[uiPlaylist];
 				)
 			}]
 		]		
@@ -185,7 +185,7 @@ uiModifySong[song_]:=DynamicModule[{textInfo},
 			{Button[text[["Save"]],putTextInfo[song,textInfo],ImageSize->150,Enabled->Dynamic[textInfo[["SongName"]]!=""]],
 			Button[text[["Undo"]],textInfo=getTextInfo[song],ImageSize->150]},
 			{Button[text[["DeleteSong"]],DialogReturn[uiDeleteSong[song]],ImageSize->150],
-			Button[text[["Return"]],DialogReturn[uiPlaylist[]],ImageSize->150]}
+			Button[text[["Return"]],DialogReturn[uiPlaylist],ImageSize->150]}
 		}],Spacer[{20,20}]
 	},Center,ItemSize->Full,Spacings->1],
 	Background->styleColor[["Background"]],WindowTitle->text[["ModifySong"]]];
@@ -209,10 +209,10 @@ uiAddSong:=DynamicModule[{songPath,textInfo,candidates},
 			InputField[Dynamic@textInfo[[#]],String],
 		Spacer[40]}]&/@textInfoTags],
 		Spacer[4],
-		Row[{Button[text[["Add"]],addSong[songPath,textInfo];DialogReturn[uiPlaylist[]],
+		Row[{Button[text[["Add"]],addSong[songPath,textInfo];DialogReturn[uiPlaylist],
 		ImageSize->150,Enabled->Dynamic[textInfo[["SongName"]]!=""]],
 		Spacer[20],
-		Button[text[["Return"]],DialogReturn[uiPlaylist[]],ImageSize->150]}],
+		Button[text[["Return"]],DialogReturn[uiPlaylist],ImageSize->150]}],
 	Spacer[{40,40}]},Center,ItemSize->Full,Spacings->1],
 	Background->styleColor[["Background"]],WindowTitle->text[["AddSong"]]]
 ];
@@ -243,7 +243,7 @@ uiDeleteSong[song_]:=CreateDialog[Column[{"",
 		Button[text[["Confirm"]],
 			index=Delete[index,song];
 			DeleteFile[path<>"Meta\\"<>song<>".meta"];
-			DialogReturn[uiPlaylist[]],
+			DialogReturn[uiPlaylist],
 		ImageSize->100],
 		Spacer[20],
 		Button[text[["Return"]],DialogReturn[uiModifySong[song]],ImageSize->100]			
@@ -310,7 +310,7 @@ QYMP:=DynamicModule[{playlist="All"},
 				DynamicModule[{style="Default"},
 					EventHandler[Dynamic@button["Play",style],{
 						"MouseDown":>(style="Clicked"),
-						"MouseUp":>(style="Default";currentPlaylist=playlist;DialogReturn[uiPlaylist[]])
+						"MouseUp":>(style="Default";currentPlaylist=playlist;DialogReturn[uiPlaylist])
 					}]
 				],
 				Spacer[10],
@@ -342,8 +342,7 @@ QYMP:=DynamicModule[{playlist="All"},
 			#->Row[{
 				Spacer[8],
 				caption[playlistData[[#,"Title"]],"SongName"],
-				Row[{Spacer[24],caption[playlistData[[#,"Comment"]],"SongComment"]}],
-				
+				Row[{Spacer[24],caption[playlistData[[#,"Comment"]],"SongComment"]}]				
 			},ImageSize->{800,30}]&/@playlistListPaged[[page]],
 			Appearance->"Vertical"
 		],Spacer[60]}],Spacer[1],
@@ -354,7 +353,7 @@ QYMP:=DynamicModule[{playlist="All"},
 ];
 
 
-uiPlaylist[]:=DynamicModule[{song,songList,playlistInfo,playlist},
+uiPlaylist:=DynamicModule[{song},
 	page=1;
 	playlist=currentPlaylist;
 	playlistInfo=playlistData[[playlist]];
@@ -432,8 +431,8 @@ uiPlaylist[]:=DynamicModule[{song,songList,playlistInfo,playlist},
 
 
 (* ::Input:: *)
-(*uiPlaylist["TH15-Kanjuden.qyl"];*)
+(*currentPlaylist="TH15-Kanjuden.qyl";uiPlaylist;*)
 
 
 (* ::Input:: *)
-(*uiPlaylist["All"];*)
+(*currentPlaylist="All";uiPlaylist;*)

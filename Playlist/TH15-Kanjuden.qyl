@@ -1,0 +1,24 @@
+{
+	"Title": "东方绀珠传",
+	"Comment": "东方绀珠伝 ~ Legacy of Lunatic Kingdom",
+	"Abstract": "",
+	"Path": "Touhou\\TH15-Kanjuden\\",
+	"SongList": [
+		{"Index": "一面道中曲", "Song": "Wasuregataki"},
+		{"Index": "一面BOSS曲", "Song": "Usagi_ha_Mai_Orita"},
+		{"Index": "二面道中曲", "Song": "Mizuumi_Gekkou"},
+		{"Index": "二面BOSS曲", "Song": "Kyuugatsu_no_Pumpkin"},
+		{"Index": "三面道中曲", "Song": "Fushigi_Miko"},
+		{"Index": "三面BOSS曲", "Song": "Eien_no_Shyunmu"},
+		{"Index": "四面道中曲", "Song": "Koori_Tsuita_Eien_no_Miyako"},
+		{"Index": "四面BOSS曲", "Song": "Gyakutensuru_Wheel_of_Fortune"},
+		{"Index": "五面道中曲", "Song": "Haruka_38Man_Kilo_Voyage"},
+		{"Index": "五面BOSS曲", "Song": "Seijyouki_no_Pierrot"},
+		{"Index": "六面道中曲", "Song": "Kokyou_Hoshi_Utsuru_Umi"},
+		{"Index": "六面BOSS曲", "Song": "Pure_Furies"},
+		{"Index": "EX面道中曲", "Song": "Akumu_no_Sekai"}
+	],
+	"Indexed": true,
+	"HomeDisplay": true,
+	"SortEnabled": false
+}

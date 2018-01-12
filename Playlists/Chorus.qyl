@@ -1,0 +1,14 @@
+{
+	"Title": "合唱曲",
+	"Comment": "",
+	"Abstract": "",
+	"Path": "",
+	"SongList": [
+		{"Song": "NCU_School_Song"},
+		{"Song": "Red_Star_Song"},
+		{"Song": "Sunny_Light"},
+		{"Song": "Oriental_Pearl"}
+	],
+	"IndexWidth": 0,
+	"HomeDisplay": true
+}

@@ -77,6 +77,7 @@
 	},
 	"Caption": {
 		"QYMP": "Qingyun Music Player",
+		"Playlist": "Playlist",
 		"Settings": "Settings",
 		"About": "About",		
 		"ModifySong": "Modify Song",

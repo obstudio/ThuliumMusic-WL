@@ -14,16 +14,33 @@ path=NotebookDirectory[];
 
 refresh:=(
 	metaTree=StringDrop[FileNames["*","Meta",Infinity],5];
-	songList=StringDrop[Select[metaTree,StringMatchQ[__~~".meta"]],-5];
+	songListAll=StringDrop[Select[metaTree,StringMatchQ[__~~".meta"]],-5];
 	dirList=Select[metaTree,!StringMatchQ[#,__~~".meta"]&];
 	Do[
 		If[!DirectoryQ[userPath<>"buffer\\"<>dir],CreateDirectory[userPath<>"buffer\\"<>dir]];
 		If[!DirectoryQ[userPath<>"images\\"<>dir],CreateDirectory[userPath<>"images\\"<>dir]],
 	{dir,dirList}];
-	index=AssociationMap[readInfo,songList];
-	pageCount=Ceiling[Length@songList/16];
-	songListPaged=Partition[songList,UpTo@Ceiling[Length@songList/pageCount]];
+	index=AssociationMap[readInfo,songListAll];
+	playlistList=StringDrop[FileNames["*","Playlists"],10];
+	playlistData=Association[#->Association@Import[path<>"Playlists\\"<>#,"JSON"]&/@playlistList];
+	playlistList=Select[playlistList,playlistData[[#,"HomeDisplay"]]&];
+	PrependTo[playlistList,"All"];
+	PrependTo[playlistData,
+		"All"-><|
+			"Path"->"",
+			"Title"->"\:6240\:6709\:6b4c\:66f2",
+			"Abstract"->"",
+			"Comment"->"",
+			"SongList"->({"Song"->#}&/@songListAll),
+			"HomeDisplay"->True,
+			"IndexWidth"->0
+		|>
+	];
 );
+
+
+(* ::Input:: *)
+(*refresh;*)
 
 
 updateImage:=Module[{updates={},image,filename,meta},
@@ -31,7 +48,7 @@ updateImage:=Module[{updates={},image,filename,meta},
 		If[KeyExistsQ[index[[song]],"Image"]&&!FileExistsQ[userPath<>"Images\\"<>index[[song,"Image"]]],
 			AppendTo[updates,index[[song,"Image"]]]
 		],
-	{song,songList}];
+	{song,songListAll}];
 	If[updates=={},Return[]];
 	Monitor[Do[
 		filename=updates[[i]];
@@ -70,7 +87,7 @@ updateBuffer:=Module[{updates={},song,filename,hash,audio,messages},
 			AppendTo[bufferHash,song->hash];
 			AppendTo[updates,song];
 		],
-	{song,songList}];
+	{song,songListAll}];
 	If[updates=={},Return[]];
 	Monitor[Do[
 		song=updates[[i]];
@@ -98,7 +115,7 @@ updateBuffer:=Module[{updates={},song,filename,hash,audio,messages},
 			index[[updates[[i]],"SongName"]]
 		}],
 	Spacer[{4,4}]},Alignment->Center],ImageSize->400,Alignment->Center]];
-	Export[userPath<>"Buffer.json",Normal@bufferHash[[Intersection[Keys@bufferHash,songList]]]];
+	Export[userPath<>"Buffer.json",Normal@bufferHash[[Intersection[Keys@bufferHash,songListAll]]]];
 	Export[userPath<>"ErrorLog.json",Normal@errorLog];
 ];
 
@@ -108,7 +125,7 @@ refresh;updateImage;updateBuffer;
 
 
 (* ::Input::Initialization:: *)
-page=1;QYMP;
+QYMP;
 
 
 (* ::Input:: *)

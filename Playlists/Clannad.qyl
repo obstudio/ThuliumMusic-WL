@@ -1,0 +1,13 @@
+{
+	"Title": "Clannad",
+	"Comment": "",
+	"Abstract": "",
+	"Path": "",
+	"SongList": [
+		{"Song": "Nagisa"},
+		{"Song": "Shionari"},
+		{"Song": "Sora_ni_Hikaru"}
+	],
+	"IndexWidth": 0,
+	"HomeDisplay": false
+}

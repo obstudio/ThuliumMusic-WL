@@ -18,7 +18,6 @@
 		{"Index": "六面BOSS曲", "Song": "Pure_Furies"},
 		{"Index": "EX面道中曲", "Song": "Akumu_no_Sekai"}
 	],
-	"Indexed": true,
-	"HomeDisplay": true,
-	"SortEnabled": false
+	"IndexWidth": 160,
+	"HomeDisplay": true
 }

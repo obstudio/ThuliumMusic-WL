@@ -84,7 +84,7 @@ generateMessage[tag_,arg_]:=completeText[errorDict[[tag]],arg];
 caption[string_,style_]:=caption[string,style,{}];
 caption[string_,style_,argument_]:=Style[
 	completeText[
-		If[StringPart[string,1]=="_",text[[StringDrop[string,1]]],string],
+		If[StringLength@string>0&&StringPart[string,1]=="_",text[[StringDrop[string,1]]],string],
 	argument],
 styleDict[[style]]];
 

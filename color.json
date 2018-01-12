@@ -2,7 +2,8 @@
 	"StyleColor": {
 		"Default": "#000000",
 		"Background": "#F9F9F9",
-		"Comment": "#707070"
+		"Comment": "#707070",
+        "Index": "#303030"
 	},
     "ButtonColor": {
         "Basic": {

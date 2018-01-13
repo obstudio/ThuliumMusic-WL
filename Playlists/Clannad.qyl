@@ -6,8 +6,9 @@
 	"SongList": [
 		{"Song": "Nagisa"},
 		{"Song": "Shionari"},
+		{"Song": "Onaji_Takami_he"},
 		{"Song": "Sora_ni_Hikaru"}
 	],
 	"IndexWidth": 0,
-	"HomeDisplay": false
+	"HomeDisplay": true
 }

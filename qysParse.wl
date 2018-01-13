@@ -201,7 +201,7 @@ track[score_,global_,location_]:=Module[
 		If[tercet>0,beatCount*=tercetTime;tercet--];
 		beatCount*=2^(-parameter[["Dur"]]);
 		barBeat+=beatCount;
-		duration=15/parameter[["Speed"]]*beatCount*parameter[["Beat"]];
+		duration=240/parameter[["Speed"]]*beatCount/parameter[["Beat"]];
 		trackDuration+=duration;
 		Which[
 			percussion,
@@ -240,18 +240,18 @@ track[score_,global_,location_]:=Module[
 				If[appoggiatura!={},
 					If[Length@appoggiatura<4,
 						beatCount-=Length@appoggiatura*parameter[["Appo"]]/4;
-						duration=15/parameter[["Speed"]]*parameter[["Appo"]]/4*parameter[["Beat"]];
+						duration=240/parameter[["Speed"]]*parameter[["Appo"]]/4/parameter[["Beat"]];
 						Do[
 							AppendTo[soundData,{appoggiatura[[k]],duration,parameter[["Instr"]]}],
 						{k,Length@appoggiatura}],
 						beatCount-=parameter[["Appo"]];
-						duration=15/parameter[["Speed"]]*parameter[["Appo"]]/Length@appoggiatura*parameter[["Beat"]];
+						duration=240/parameter[["Speed"]]*parameter[["Appo"]]/Length@appoggiatura/parameter[["Beat"]];
 						Do[
 							AppendTo[soundData,{appoggiatura[[k]],duration,parameter[["Instr"]]}],
 						{k,Length@appoggiatura}];
 					];
 					appoggiatura={};
-					duration=15/parameter[["Speed"]]*beatCount*parameter[["Beat"]];
+					duration=240/parameter[["Speed"]]*beatCount/parameter[["Beat"]];
 				];
 				lastBeat=beatCount;
 				If[!pitch===None,lastPitch=pitch];

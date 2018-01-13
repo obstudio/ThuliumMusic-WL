@@ -16,7 +16,8 @@
 		{"Index": "五面BOSS曲", "Song": "Seijyouki_no_Pierrot"},
 		{"Index": "六面道中曲", "Song": "Kokyou_Hoshi_Utsuru_Umi"},
 		{"Index": "六面BOSS曲", "Song": "Pure_Furies"},
-		{"Index": "EX面道中曲", "Song": "Akumu_no_Sekai"}
+		{"Index": "EX面道中曲", "Song": "Akumu_no_Sekai"},
+		{"Index": "EX面BOSS曲", "Song": "Pandemonic_Planet"}
 	],
 	"IndexWidth": 160,
 	"HomeDisplay": true

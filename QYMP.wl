@@ -133,11 +133,15 @@ QYMP;
 
 
 (* ::Input:: *)
-(*AudioStop[];AudioPlay@QYSParse[path<>"Songs\\Shionari.qys"];*)
+(*AudioStop[];AudioPlay@QYSParse[path<>"Songs\\Touhou\\Houkainohi.qys"];*)
 
 
 (* ::Input:: *)
-(*Options[QYSParse[path<>"Songs\\Touhou\\Phantom_Ensemble.qys"]]*)
+(*AudioStop[];AudioPlay@QYSParse[path<>"Songs\\test.qys"];*)
+
+
+(* ::Input:: *)
+(*Options[QYSParse[path<>"Songs\\Touhou\\Houkainohi.qys"]]*)
 
 
 (* ::Input:: *)
@@ -145,8 +149,8 @@ QYMP;
 
 
 (* ::Input:: *)
-(*EmitSound@Sound@SoundNote[12,1,"Harp"]*)
+(*EmitSound@Sound@SoundNote[23,.5,"Halo"]*)
 
 
 (* ::Input:: *)
-(*EmitSound@Sound@SoundNote["RideCymbal"]*)
+(*EmitSound@Sound@SoundNote["PanFlute"]*)

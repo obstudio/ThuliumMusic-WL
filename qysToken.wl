@@ -27,6 +27,13 @@ getPitchOp[score_,pos_]:=Module[
 ];
 
 
+pitchOpDefault={
+	"SemitonesCount"->0,
+	"OctavesCount"->0,
+	"ChordSymbol"->""
+};
+
+
 trackTokenize[score_]:=Module[
 	{
 		tokens={},i=1,j,
@@ -140,47 +147,38 @@ trackTokenize[score_]:=Module[
 			_,
 				arpeggio=False;
 				staccato=False;
-				Switch[char,
-					"x",
-						pitches={{
-							"ScaleDegree"->10,
-							"SemitonesCount"->0,
-							"OctavesCount"->0,
-							"ChordSymbol"->""
-						}},
-					"%",
-						pitches={{
-							"ScaleDegree"->-1,
-							"SemitonesCount"->0,
-							"OctavesCount"->0,
-							"ChordSymbol"->""
-						}},
-					"[",
-						match=Select[Transpose[StringPosition[score,"]"]][[1]],#>i&][[1]];
-						content=StringTake[score,{i+1,match-1}];
-						arpeggio=StringContainsQ[content,"^"];
-						content=StringDelete[content,"^"];
-						j=1;
-						pitches={};
-						While[j<=StringLength[content] && DigitQ@StringPart[content,j],
-							pitchOpData=getPitchOp[content,j+1];
-							pitchOperators=pitchOpData[[1]];
-							AppendTo[pitches,Prepend[pitchOperators,"ScaleDegree"->ToExpression@StringPart[content,j]]];
-							j=pitchOpData[[2]];
-						];
-						i=match,
-					_,
-						pitches={{
-							"ScaleDegree"->ToExpression@char,
-							"SemitonesCount"->0,
-							"OctavesCount"->0,
-							"ChordSymbol"->""
-						}}
+				If[char=="[",
+					(* a list of pitches *)
+					match=Select[Transpose[StringPosition[score,"]"]][[1]],#>i&][[1]];
+					content=StringTake[score,{i+1,match-1}];
+					arpeggio=StringContainsQ[content,"^"];
+					content=StringDelete[content,"^"];
+					j=1;
+					pitches={};
+					While[j<=StringLength[content] && DigitQ@StringPart[content,j],
+						pitchOpData=getPitchOp[content,j+1];
+						pitchOperators=pitchOpData[[1]];
+						AppendTo[pitches,Prepend[pitchOperators,"ScaleDegree"->ToExpression@StringPart[content,j]]];
+						j=pitchOpData[[2]];
+					];
+					i=match+1;
+					pitchOpData=getPitchOp[score,i];
+					pitchOperators=pitchOpData[[1]];
+					i=pitchOpData[[2]],
+					(* one pitch *)
+					pitchOpData=getPitchOp[score,i+1];
+					pitchOperators=pitchOpData[[1]];
+					i=pitchOpData[[2]];
+					pitches={Prepend[
+						pitchOperators,
+						"ScaleDegree"->Switch[char,
+							"x",10,
+							"%",-1,
+							_,ToExpression@char
+						]
+					]};
+					pitchOperators=pitchOpDefault;
 				];
-				i++;
-				pitchOpData=getPitchOp[score,i];
-				pitchOperators=pitchOpData[[1]];
-				i=pitchOpData[[2]];
 				durOperators={};
 				While[i<=StringLength[score] && MemberQ[{"-","_",".","`"},StringPart[score,i]],
 					char=StringPart[score,i];
@@ -190,14 +188,15 @@ trackTokenize[score_]:=Module[
 					];
 					i++;
 				];
-				AppendTo[tokens,Join[
-					{"Type"->"Note",
-					"Pitches"->pitches},
-					pitchOperators,
-					{"Staccato"->staccato,
+				AppendTo[tokens,{
+					"Type"->"Note",
+					"Pitches"->pitches,
+					pitchOperators[[1]],
+					pitchOperators[[2]],
+					"Staccato"->staccato,
 					"Arpeggio"->arpeggio,
-					"DurationOperators"->durOperators}
-				]];
+					"DurationOperators"->durOperators
+				}];
 		];
 	];
 	Return[tokens];
@@ -205,4 +204,4 @@ trackTokenize[score_]:=Module[
 
 
 (* ::Input:: *)
-(*ExportString[trackTokenize["[13b^5]-"],"JSON"]*)
+(*ExportString[trackTokenize["1b-2#_"],"JSON"]*)

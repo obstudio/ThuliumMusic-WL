@@ -103,6 +103,7 @@ pitchOpDict=<|
 	"#"->1,"b"->-1,"'"->12,","->-12,"M"->{0,4,7},"m"->{0,3,7},
 	"a"->{0,4,8},"d"->{0,3,6},"p"->{0,7,12},"o"->{0,12}
 |>;
+pitchOpDefault={"SemitonesCount"->0,"OctavesCount"->0,"ChordSymbol"->""};
 pitchOpList=Append[Keys[pitchOpDict],"$"];
 defaultParameter=<|
 	"Volume"->1,"Speed"->90,"Key"->0,"Beat"->4,"Bar"->4,"Instr"->"Piano",

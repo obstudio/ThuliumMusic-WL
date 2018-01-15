@@ -2,11 +2,8 @@
 
 getPitchOp[score_,pos_]:=Module[
 	{
-		i=pos,
-		char,
-		semitones=0,
-		octaves=0,
-		chordSymbol=""
+		i=pos,char,
+		semitones=0,octaves=0,chordSymbol=""
 	},
 	While[i<=StringLength@score && MemberQ[pitchOpList,StringPart[score,i]],
 		char=StringPart[score,i];
@@ -27,14 +24,7 @@ getPitchOp[score_,pos_]:=Module[
 ];
 
 
-pitchOpDefault={
-	"SemitonesCount"->0,
-	"OctavesCount"->0,
-	"ChordSymbol"->""
-};
-
-
-trackTokenize[score_]:=Module[
+QYSTrackTokenize[score_]:=Module[
 	{
 		tokens={},i=1,j,
 		char,match,content,
@@ -63,7 +53,7 @@ trackTokenize[score_]:=Module[
 						function=StringTake[content,position-1];
 						argument=toArgument@StringDrop[content,position];
 						AppendTo[tokens,{
-							"Type"->"Function",
+							"Type"->"FunctionToken",
 							"Name"->function,
 							"Argument"->argument
 						}],
@@ -204,4 +194,57 @@ trackTokenize[score_]:=Module[
 
 
 (* ::Input:: *)
-(*ExportString[trackTokenize["1b-2#_"],"JSON"]*)
+(*ExportString[QYSTrackTokenize["<90><Oct:1>"],"JSON"]*)
+
+
+QYSTokenize[filename_]:=Module[
+	{
+		i,data,tokenizer={},
+		songComments={},
+		comments={},
+		sections={},
+		sectionInfo={},
+		tracks={},
+		trackToken,
+		score=""
+	},
+	data=Import[filename,"Lines"];
+	Do[
+		Which[
+			line=="",
+				If[sectionInfo=={}&&songComments=={},
+					songComments=comments;
+					comments={}
+				],
+			StringTake[line,2]=="//",
+				AppendTo[comments,StringDrop[line,2]],
+			True,
+				score=score<>line;
+				If[StringPart[line,-1]=="\\",Continue[]];
+				trackToken=QYSTrackTokenize[StringDelete[score,Whitespace]];
+				If[MemberQ[Association[#][["Type"]]&/@trackToken,"Note"],     (* empty track *)
+					AppendTo[tracks,trackToken],
+					If[sectionInfo!={},
+						AppendTo[sections,Append[sectionInfo,"Tracks"->tracks]];
+						tracks={};
+					];
+					sectionInfo={"Comments"->comments,"GlobalSettings"->trackToken};
+					comments={};
+				];
+				score=""
+		],
+	{line,data}];
+	If[sectionInfo!={},AppendTo[sections,Append[sectionInfo,"Tracks"->tracks]]];
+	Return[{
+		"Comments"->songComments,
+		"Sections"->sections
+	}];
+];
+
+
+(* ::Input:: *)
+(*Export["E:\\test-Tokenizer.json",QYSTokenize[path<>"Songs\\test.qys"]];*)
+
+
+(* ::Input:: *)
+(*ExportString[QYSTokenize[path<>"Songs\\test.qys"],"JSON"]*)

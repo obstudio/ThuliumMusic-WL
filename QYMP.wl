@@ -17,6 +17,7 @@ refresh:=Module[
 		metaTree,songsClassified,
 		playlistInfo,songList
 	},
+	SetDirectory[path];
 	metaTree=StringDrop[FileNames["*","Meta",Infinity],5];
 	songs=StringDrop[Select[metaTree,StringMatchQ[__~~".meta"]],-5];
 	dirList=Select[metaTree,!StringMatchQ[#,__~~".meta"]&];
@@ -93,7 +94,10 @@ updateImage:=Module[{updates={},image,filename,meta},
 ];
 
 
-updateBuffer:=Module[{updates={},song,filename,hash,audio,messages},
+updateBuffer:=Module[{updates={},song,filename,hash,audio,messages,bufferList},
+	SetDirectory[userPath];
+	bufferList=StringTake[FileNames["*.buffer","buffer",Infinity],{8,-8}];
+	DeleteFile[userPath<>"Buffer\\"<>#<>".buffer"]&/@Complement[bufferList,songs];
 	Do[
 		filename=path<>"Songs\\"<>song<>"."<>index[[song,"Format"]];
 		hash=toBase32@FileHash[filename];

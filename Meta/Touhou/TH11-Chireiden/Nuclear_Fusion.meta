@@ -2,6 +2,7 @@ Format: qys;
 TrackCount: 0;
 Duration: 232/3;
 Instruments: {"AltoSax", "Bass", "BassDrum", "BrightPiano", "Clap", "CrashCymbal", "GuitarMuted", "HighTom", "HiHatClosed", "HiHatOpen", "HiHatPedal", "LowTom", "MidTom", "Piano", "Snare", "SopranoSax", "Square", "Strings", "Trumpet"};
+Image: Touhou\Reiuji_Utsuho.jpg;
 Messages: (章节5) 各音轨长度不统一：24, 24, 24, 24, 24, 24, 24, 64/3, 64/3, 64/3, 64/3, 64/3, 64/3;
 SongName: 灵知的太阳信仰;
 Composer: ZUN;

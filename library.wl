@@ -1,7 +1,7 @@
 (* ::Package:: *)
 
 version=201;
-userPath="C:\\Users\\"<>$UserName<>"\\AppData\\Local\\QYMP\\";
+userPath=$HomeDirectory<>"\\AppData\\Local\\QYMP\\";
 cloudPath="http://www.qymp.tk/assets/";
 If[!DirectoryQ[userPath],CreateDirectory[userPath]];
 If[!DirectoryQ[userPath<>"export\\"],CreateDirectory[userPath<>"export\\"]];
@@ -27,7 +27,6 @@ If[!FileExistsQ[userPath<>"Image.json"],Export[userPath<>"Image.json",{}]];
 imageData=Association/@Association@Import[userPath<>"image.json"];
 
 
-SetDirectory[path];
 instrData=Association@Import[path<>"instr.json"];                               (* instruments *)
 colorData=Association@Import[path<>"color.json"];                               (* colors *)
 styleColor=RGBColor/@Association@colorData[["StyleColor"]];
@@ -69,6 +68,7 @@ findMatch[score_,pos_]:=Module[
 	];
 	Return[i];
 ];
+textLength[string_]:=2StringLength[string]-StringCount[string,Alternatives@CharacterRange[32,127]];
 toArgument[str_]:=If[StringContainsQ[str,","],ToExpression/@StringSplit[str,","],ToExpression@str];
 toBase32[n_]:=StringDelete[ToString@BaseForm[n,32],"\n"~~__];
 timeDisplay[t_]:=Module[

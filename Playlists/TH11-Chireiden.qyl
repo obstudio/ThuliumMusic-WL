@@ -5,6 +5,7 @@
 	"Path": "Touhou\\TH11-Chireiden\\",
 	"SongList": [
 		{"Index": "二面BOSS曲", "Song": "Ryokugann_No_Jealousy"},
+		{"Index": "六面BOSS曲", "Song": "Nuclear_Fusion"},
 		{"Index": "EX面BOSS曲", "Song": "Hartmann_No_Youkai_Otome"}
 	],
 	"IndexWidth": 160,

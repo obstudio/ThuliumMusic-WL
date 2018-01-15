@@ -374,7 +374,7 @@ QYSParse[filename_]:=Module[
 
 
 (* ::Input:: *)
-(*AudioStop[];AudioPlay@QYSParse[path<>"Songs\\TouHou\\Hartmann_No_Youkai_Otome.qys"];*)
+(*AudioStop[];AudioPlay@QYSParse[path<>"Songs\\TouHou\\TH11-Chireiden\\Nuclear_Fusion.qys"];*)
 
 
 (* ::Input:: *)
@@ -382,15 +382,15 @@ QYSParse[filename_]:=Module[
 
 
 (* ::Input:: *)
-(*EmitSound@Sound@SoundNote[-12,1,"Xylophone"]*)
+(*EmitSound@Sound@SoundNote[12,1,"SopranoSax"]*)
 
 
 (* ::Input:: *)
-(*EmitSound@Sound@SoundNote["HiHatPedal",1]*)
+(*EmitSound@Sound@SoundNote["HighTom",1]*)
 
 
 (* ::Input:: *)
-(*AudioStop[];AudioPlay@QYSParse[path<>"Songs\\test.qys"];*)
+(*Export["E:\\1.mp3",QYSParse[path<>"Songs\\temp.qys"]];*)
 
 
 (* ::Input:: *)
@@ -400,3 +400,7 @@ QYSParse[filename_]:=Module[
 (* ::Text:: *)
 (*ElectricSnare, BassDrum, Shaker, RideCymbal, Snare, CrashCymbal, HiHatPedal, HiHatClosed*)
 (*Ocarina, Oboe, Clarinet, Recorder, BrassSection, Harpsichord, BrightPiano, Organ, DrawbarOrgan, FretlessBass*)
+
+
+(* ::Input:: *)
+(*pitchDict[["2"]]+tonalityDict[["bE"]]+36*)

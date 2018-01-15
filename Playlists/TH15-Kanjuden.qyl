@@ -19,6 +19,5 @@
 		{"Index": "EX面道中曲", "Song": "Akumu_no_Sekai"},
 		{"Index": "EX面BOSS曲", "Song": "Pandemonic_Planet"}
 	],
-	"IndexWidth": 160,
-	"HomeDisplay": true
+	"IndexWidth": 160
 }

@@ -12,31 +12,49 @@ path=NotebookDirectory[];
 <<(path<>"qymParse.wl")
 
 
-refresh:=(
+refresh:=Module[
+	{
+		metaTree,songsClassified,
+		playlistInfo,songList
+	},
 	metaTree=StringDrop[FileNames["*","Meta",Infinity],5];
-	songListAll=StringDrop[Select[metaTree,StringMatchQ[__~~".meta"]],-5];
+	songs=StringDrop[Select[metaTree,StringMatchQ[__~~".meta"]],-5];
 	dirList=Select[metaTree,!StringMatchQ[#,__~~".meta"]&];
 	Do[
 		If[!DirectoryQ[userPath<>"buffer\\"<>dir],CreateDirectory[userPath<>"buffer\\"<>dir]];
 		If[!DirectoryQ[userPath<>"images\\"<>dir],CreateDirectory[userPath<>"images\\"<>dir]],
 	{dir,dirList}];
-	index=AssociationMap[readInfo,songListAll];
-	playlistList=StringDrop[FileNames["*","Playlists"],10];
-	playlistData=Association[#->Association@Import[path<>"Playlists\\"<>#,"JSON"]&/@playlistList];
-	playlistList=Select[playlistList,playlistData[[#,"HomeDisplay"]]&];
-	PrependTo[playlistList,"All"];
-	PrependTo[playlistData,
+	index=AssociationMap[readInfo,songs];
+	playlists=#&/@Import[path<>"playlist.json"];
+	playlistData=<||>;
+	songsClassified={};
+	Do[
+		playlistInfo=Association@Import[path<>"Playlists\\"<>playlist<>".qyl","JSON"];
+		songList=#Song&/@Association/@playlistInfo[["SongList"]];
+		AppendTo[playlistData,<|playlist->playlistInfo|>];
+		songsClassified=Union[songsClassified,playlistInfo[["Path"]]<>#&/@songList],
+	{playlist,playlists}];
+	playlists=Join[{"All","Unclassified"},playlists];
+	playlistData=Join[<|
 		"All"-><|
 			"Path"->"",
 			"Title"->"\:6240\:6709\:6b4c\:66f2",
 			"Abstract"->"",
 			"Comment"->"",
-			"SongList"->({"Song"->#}&/@songListAll),
-			"HomeDisplay"->True,
+			"SongList"->({"Song"->#}&/@songs),
+			"IndexWidth"->0
+		|>,
+		"Unclassified"-><|
+			"Path"->"",
+			"Title"->"\:672a\:5206\:7c7b\:7684\:6b4c\:66f2",
+			"Abstract"->"",
+			"Comment"->"",
+			"SongList"->({"Song"->#}&/@Complement[songs,songsClassified]),
 			"IndexWidth"->0
 		|>
-	];
-);
+	|>,playlistData];
+	pageData=AssociationMap[1&,Prepend[playlists,"Main"]];
+];
 
 
 (* ::Input:: *)
@@ -48,7 +66,7 @@ updateImage:=Module[{updates={},image,filename,meta},
 		If[KeyExistsQ[index[[song]],"Image"]&&!FileExistsQ[userPath<>"Images\\"<>index[[song,"Image"]]],
 			AppendTo[updates,index[[song,"Image"]]]
 		],
-	{song,songListAll}];
+	{song,songs}];
 	If[updates=={},Return[]];
 	Monitor[Do[
 		filename=updates[[i]];
@@ -87,7 +105,7 @@ updateBuffer:=Module[{updates={},song,filename,hash,audio,messages},
 			AppendTo[bufferHash,song->hash];
 			AppendTo[updates,song];
 		],
-	{song,songListAll}];
+	{song,songs}];
 	If[updates=={},Return[]];
 	Monitor[Do[
 		song=updates[[i]];
@@ -115,8 +133,7 @@ updateBuffer:=Module[{updates={},song,filename,hash,audio,messages},
 			index[[updates[[i]],"SongName"]]
 		}],
 	Spacer[{4,4}]},Alignment->Center],ImageSize->400,Alignment->Center]];
-	Export[userPath<>"Buffer.json",Normal@bufferHash[[Intersection[Keys@bufferHash,songListAll]]]];
-	Export[userPath<>"ErrorLog.json",Normal@errorLog];
+	Export[userPath<>"Buffer.json",Normal@bufferHash[[Intersection[Keys@bufferHash,songs]]]];
 ];
 
 

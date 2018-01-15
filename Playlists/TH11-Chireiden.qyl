@@ -8,6 +8,5 @@
 		{"Index": "六面BOSS曲", "Song": "Nuclear_Fusion"},
 		{"Index": "EX面BOSS曲", "Song": "Hartmann_No_Youkai_Otome"}
 	],
-	"IndexWidth": 160,
-	"HomeDisplay": false
+	"IndexWidth": 160
 }

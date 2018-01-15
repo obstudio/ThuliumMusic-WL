@@ -2,7 +2,7 @@ Format: qys;
 TrackCount: 20;
 Duration: 228;
 Instruments: {"BassDrum", "BassDrum2", "ChineseCymbal", "Clap", "ElectricBass", "ElectricGrandPiano", "EnglishHorn", "HiHatClosed", "Koto", "Maracas", "Snare", "Strings", "Violin", "Xylophone"};
-SongName: Pandemonic Planet;
+SongName: 嘈乱的星球;
 Composer: ZUN;
 Adapter: 触手猴 LittleRed;
 Comment: パンデモニックプラネット;

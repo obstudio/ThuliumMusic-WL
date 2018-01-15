@@ -66,7 +66,7 @@ uiPlayerControlsOld:={
 		Spacer[20],
 		Button[text[["Stop"]],current["State"]="Stopped",ImageSize->80],
 		Spacer[20],
-		Button[text[["Return"]],AudioStop[];DialogReturn[uiPlaylist],ImageSize->80]			
+		Button[text[["Return"]],AudioStop[];DialogReturn[uiPlaylist[currentPlaylist]],ImageSize->80]			
 	}]
 };
 
@@ -105,7 +105,7 @@ uiPlayerControlsNew:={
 				"MouseDown":>(style="Clicked";),
 				"MouseUp":>(style="Default";
 					AudioStop[];
-					DialogReturn[uiPlaylist];
+					DialogReturn[uiPlaylist[currentPlaylist]];
 				)
 			}]
 		]		
@@ -185,7 +185,7 @@ uiModifySong[song_]:=DynamicModule[{textInfo},
 			{Button[text[["Save"]],putTextInfo[song,textInfo],ImageSize->150,Enabled->Dynamic[textInfo[["SongName"]]!=""]],
 			Button[text[["Undo"]],textInfo=getTextInfo[song],ImageSize->150]},
 			{Button[text[["DeleteSong"]],DialogReturn[uiDeleteSong[song]],ImageSize->150],
-			Button[text[["Return"]],DialogReturn[uiPlaylist],ImageSize->150]}
+			Button[text[["Return"]],DialogReturn[refresh;uiPlaylist["All"]],ImageSize->150]}
 		}],Spacer[{20,20}]
 	},Center,ItemSize->Full,Spacings->1],
 	Background->styleColor[["Background"]],WindowTitle->text[["ModifySong"]]];
@@ -196,7 +196,7 @@ ignoreList={"temp.qys","test.qys"};
 uiAddSong:=DynamicModule[{songPath,textInfo,candidates},
 	textInfo=AssociationMap[""&,textInfoTags];
 	candidates=Complement[StringDrop[FileNames["*.qys"|"*.qym","Songs",Infinity],6],
-		#<>"."<>index[[#,"Format"]]&/@songListAll,
+		#<>"."<>index[[#,"Format"]]&/@songs,
 		ignoreList
 	];
 	CreateDialog[Column[{Spacer[{40,40}],
@@ -209,10 +209,10 @@ uiAddSong:=DynamicModule[{songPath,textInfo,candidates},
 			InputField[Dynamic@textInfo[[#]],String],
 		Spacer[40]}]&/@textInfoTags],
 		Spacer[4],
-		Row[{Button[text[["Add"]],addSong[songPath,textInfo];DialogReturn[uiPlaylist],
+		Row[{Button[text[["Add"]],addSong[songPath,textInfo];DialogReturn[QYMP],
 		ImageSize->150,Enabled->Dynamic[textInfo[["SongName"]]!=""]],
 		Spacer[20],
-		Button[text[["Return"]],DialogReturn[uiPlaylist],ImageSize->150]}],
+		Button[text[["Return"]],DialogReturn[refresh;uiPlaylist["All"]],ImageSize->150]}],
 	Spacer[{40,40}]},Center,ItemSize->Full,Spacings->1],
 	Background->styleColor[["Background"]],WindowTitle->text[["AddSong"]]]
 ];
@@ -243,7 +243,7 @@ uiDeleteSong[song_]:=CreateDialog[Column[{"",
 		Button[text[["Confirm"]],
 			index=Delete[index,song];
 			DeleteFile[path<>"Meta\\"<>song<>".meta"];
-			DialogReturn[uiPlaylist],
+			DialogReturn[refresh;uiPlaylist["All"]],
 		ImageSize->100],
 		Spacer[20],
 		Button[text[["Return"]],DialogReturn[uiModifySong[song]],ImageSize->100]			
@@ -298,11 +298,12 @@ uiPageSelector:=Row[{
 },ImageSize->{500,60},Alignment->Center];
 
 
-QYMP:=DynamicModule[{playlist="All"},
-	page=1;
+QYMP:=DynamicModule[{playlist},
 	refresh;
-	pageCount=Ceiling[Length@playlistList/16];
-	playlistListPaged=Partition[playlistList,UpTo@Ceiling[Length@playlistList/pageCount]];
+	pageCount=Ceiling[Length@playlists/16];
+	If[pageData[["Main"]]>pageCount,pageData[["Main"]]=pageCount];
+	playlistsPaged=Partition[playlists,UpTo@Ceiling[Length@playlists/pageCount]];
+	page=pageData[["Main"]];
 	CreateDialog[Column[{Spacer[{40,40}],
 		Row[{
 			Row[{Spacer[40],caption["_QYMP","BigTitle"]},Alignment->Left,ImageSize->320],
@@ -310,7 +311,7 @@ QYMP:=DynamicModule[{playlist="All"},
 				DynamicModule[{style="Default"},
 					EventHandler[Dynamic@button["Play",style],{
 						"MouseDown":>(style="Clicked"),
-						"MouseUp":>(style="Default";currentPlaylist=playlist;DialogReturn[uiPlaylist])
+						"MouseUp":>(style="Default";DialogReturn[uiPlaylist[playlist]];)
 					}]
 				],
 				Spacer[10],
@@ -343,7 +344,7 @@ QYMP:=DynamicModule[{playlist="All"},
 				Spacer[8],
 				caption[playlistData[[#,"Title"]],"SongName"],
 				Row[{Spacer[24],caption[playlistData[[#,"Comment"]],"SongComment"]}]				
-			},ImageSize->{800,30}]&/@playlistListPaged[[page]],
+			},ImageSize->{800,30}]&/@playlistsPaged[[page]],
 			Appearance->"Vertical"
 		],Spacer[60]}],Spacer[1],
 		uiPageSelector,
@@ -353,16 +354,18 @@ QYMP:=DynamicModule[{playlist="All"},
 ];
 
 
-uiPlaylist:=DynamicModule[{song},
-	page=1;
-	playlist=currentPlaylist;
+uiPlaylist[playlist_]:=DynamicModule[{song},
+	If[!MemberQ[playlists,playlist],Return[]];
+	currentPlaylist=playlist;
 	playlistInfo=playlistData[[playlist]];
-	songList=Association/@playlistInfo[["SongList"]];
-	Do[
-		songList[[i,"Song"]]=playlistInfo[["Path"]]<>songList[[i,"Song"]],
-	{i,Length@songList}];
+	songList=If[playlistInfo[["IndexWidth"]]>0,
+		<|"Song"->playlistInfo[["Path"]]<>#Song,"Index"->#Index|>&/@Association/@playlistInfo[["SongList"]],
+		<|"Song"->playlistInfo[["Path"]]<>#Song|>&/@Association/@playlistInfo[["SongList"]]
+	];
 	pageCount=Ceiling[Length@songList/16];
 	songListPaged=Partition[songList,UpTo@Ceiling[Length@songList/pageCount]];
+	If[pageData[[playlist]]>pageCount,pageData[[playlist]]=pageCount];
+	page=pageData[[playlist]];
 	CreateDialog[Column[{Spacer[{40,40}],
 		Row[{
 			Row[{Spacer[40],caption[playlistInfo[["Title"]],"BigTitle"]},Alignment->Left,ImageSize->320],
@@ -431,8 +434,8 @@ uiPlaylist:=DynamicModule[{song},
 
 
 (* ::Input:: *)
-(*currentPlaylist="TH15-Kanjuden.qyl";uiPlaylist;*)
+(*uiPlaylist["TH15-Kanjuden"];*)
 
 
 (* ::Input:: *)
-(*currentPlaylist="All";uiPlaylist;*)
+(*uiPlaylist["All"];*)

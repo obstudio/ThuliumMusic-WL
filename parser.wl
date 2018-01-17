@@ -11,17 +11,17 @@ beatCalc[operators_]:=Module[{beats=1,i=1},
 	Return[beats];
 ];
 pitchCalc[token_,settings_,previous_]:=Module[{pitches,chordSymbol,pitchDict},
-	pitchDict=<|0->None,1->0,2->2,3->4,4->5,5->7,6->9,7->11,10->10|>;
+	pitchDict=<|1->0,2->2,3->4,4->5,5->7,6->9,7->11,10->10|>;
 	If[KeyExistsQ[token,"Pitches"],
 		pitches=Flatten[pitchCalc[#,settings,previous]&/@Association/@token[["Pitches"]]],
 		pitches=Switch[token[["ScaleDegree"]],
 			-1,previous[[settings[["Trace"]]]],
-			_,Key[token[["ScaleDegree"]]]@pitchDict
+			0,None,
+			_,Key[token[["ScaleDegree"]]]@pitchDict+settings[["Key"]]+12*settings[["Oct"]]
 		]
 	];
-	pitches+=settings[["Key"]]+12*settings[["Oct"]];
 	If[KeyExistsQ[token,"SemitonesCount"],pitches+=token[["SemitonesCount"]]];
-	If[KeyExistsQ[token,"OctavesCount"],pitches+=token[["OctavesCount"]]];
+	If[KeyExistsQ[token,"OctavesCount"],pitches+=12*token[["OctavesCount"]]];
 	If[KeyExistsQ[token,"ChordSymbol"],
 		chordSymbol=token[["ChordSymbol"]];
 		Switch[chordSymbol,
@@ -33,17 +33,13 @@ pitchCalc[token_,settings_,previous_]:=Module[{pitches,chordSymbol,pitchDict},
 ];
 
 
-(* ::Input:: *)
-(*pitchCalc[Association[QYS`getTrackToken["00"][[1]]],defaultParameter,Array[None&,4]]*)
-
-
 restTemplate={"ScaleDegree"->0,"SemitonesCount"->0,"OctavesCount"->0,"ChordSymbol"->""};
 percTemplate={"ScaleDegree"->10,"SemitonesCount"->0,"OctavesCount"->0,"ChordSymbol"->""};(* of any use? *)
 
 
 trackParse[tokens_,global_]:=Module[
 	{
-		i,k,settings=global,
+		i,settings=global,
 		functionData,pitches,
 		beatCount,duration=0,
 		barBeat=0,prevBeat,
@@ -111,7 +107,7 @@ trackParse[tokens_,global_]:=Module[
 				Which[
 					MemberQ[instrData[["Percussion"]],settings[["Instr",1]]],
 						If[pitches==={None},
-							AppendTo[soundData,{False,duration}],
+							AppendTo[soundData,{None,duration}],
 							AppendTo[soundData,{True,duration}]
 						],
 					tie&&pitches==previous[[2]],
@@ -134,13 +130,13 @@ trackParse[tokens_,global_]:=Module[
 						{k,beatCount*2^(tremolo2-1)}];
 						tremolo2=0,
 					portamento,
-						portRate=(pitches-previous[[2]]+1)/beatCount/settings[["Port"]];
+						portRate=(pitches[[1]]-previous[[2,1]]+1)/beatCount/settings[["Port"]];
 						duration/=(beatCount*settings[["Port"]]);
 						barBeat=barBeat-prevBeat;
 						soundData=Drop[soundData,-1];
-						For[k=previous[[2,1]],k<pitches[[1]],k+=portRate,
-							AppendTo[soundData,{Floor[k],duration}]
-						];
+						Do[
+							AppendTo[soundData,{Floor[k],duration}],
+						{k,previous[[2,1]],pitches[[1]],portRate}];
 						portamento=False,
 					True,
 						If[appoggiatura!={},
@@ -151,6 +147,7 @@ trackParse[tokens_,global_]:=Module[
 							{pitch,appoggiatura}];
 							appoggiatura={};
 						];
+						duration=240/settings[["Speed"]]/settings[["Beat"]]*beatCount;
 						prevBeat=beatCount;
 						If[staccato,
 							AppendTo[soundData,{pitches,duration*(1-settings[["Stac"]])}];
@@ -162,25 +159,64 @@ trackParse[tokens_,global_]:=Module[
 		],
 	{token,Association/@tokens}];
 	Return[<|
-		"SoundData"->soundData,
+		"RealTracks"->{<|"SoundData"->soundData,"MetaSettings"->settings[[metaSettings]]|>},
 		"Duration"->trackDuration,
 		"Messages"->messages,
-		"LastRepeat"->lastRepeat,
-		"MetaSettings"->settings[[metaSettings]]
+		"LastRepeat"->{{}}
 	|>]
 ];
 
 
 (* ::Input:: *)
-(*trackParse[Association/@QYS`getTrackToken["<BassDrum,Shaker(0.3)>xx_0_x"],defaultParameter]*)
+(*QYS`getTrackToken["<Piano><0.6><1=bA,,>2_5o_%%#%|"]*)
 
 
 (* ::Input:: *)
-(*trackParse[Association/@QYS`getTrackToken["<60>10[%#5]-"],defaultParameter]*)
+(*tmp=trackParse[QYS`getTrackToken["<Piano><0.6><1=bA,,>2_5o_%%#%|"],defaultParameter]*)
 
 
 (* ::Input:: *)
-(*AudioStop[];AudioPlay@integrate@{trackParse[Association/@QYS`getTrackToken["<BassDrum,Shaker(0.3)><160>xx_xx_x|xx_xx_x|"],defaultParameter]};*)
+(*AudioStop[];AudioPlay@integrate@tmp[["RealTracks"]];*)
+
+
+parse[tokenizer_]:=Module[
+	{
+		audio,settings,
+		functionData,
+		trackData,
+		realTracks={},
+		sectionDuration,
+		duration=0
+	},
+	settings=defaultParameter;
+	Do[
+		sectionDuration=0;
+		Do[
+			functionData=Association@token[["Argument"]];
+			Do[
+				settings[[function]]=functionData[[function]],
+			{function,Keys@functionData}],
+		{token,Association/@sectionToken[["GlobalSettings"]]}];
+		Do[
+			trackData=trackParse[trackToken,settings];
+			realTracks=Join[realTracks,<|
+				"SoundData"->Prepend[#SoundData,{None,duration}],
+				"MetaSettings"->#MetaSettings
+			|>&/@trackData[["RealTracks"]]];
+			sectionDuration=Max[sectionDuration,trackData[["Duration"]]],
+		{trackToken,sectionToken[["Tracks"]]}];
+		duration+=sectionDuration,
+	{sectionToken,Association/@Association[tokenizer][["Sections"]]}];
+	Return[realTracks];
+];
+
+
+(* ::Input:: *)
+(*parse[QYS`Tokenize[path<>"Songs\\Anima.qys"]][[1,"SoundData"]]//Column*)
+
+
+(* ::Input:: *)
+(*AudioStop[];AudioPlay@integrate[parse[QYS`Tokenize[path<>"Songs\\Touhou\\TH11-Chireiden\\Nuclear_Fusion.qys"]]];*)
 
 
 integrate[tracks_]:=Module[
@@ -196,43 +232,12 @@ integrate[tracks_]:=Module[
 			soundData=trackData[["SoundData"]];
 			If[MemberQ[instrData[["Style"]],instrument],
 				generate=SoundNote[#[[1]],#[[2]],instrument]&,
-				generate=SoundNote[If[#[[1]],instrument,None],#[[2]]]&
+				generate=SoundNote[If[TrueQ@#[[1]],instrument,None],#[[2]]]&
 			];
-			audio+=settings[["Volume",i]]*AudioFade[Sound[
-				generate/@soundData
-			],{settings[["FadeIn"]],settings[["FadeOut"]]}],
+			audio+=settings[["Volume",i]]*AudioFade[
+				Sound[generate/@soundData],
+			{settings[["FadeIn"]],settings[["FadeOut"]]}],
 		{i,instrCount}],
 	{trackData,tracks}];
 	Return[audio];
 ];
-
-
-SoundNote[#[[1]],#[[2]],"Piano"]&@{1,2}
-
-
-parse[tokenizer_]:=Module[
-	{
-		audio,settings,
-		functionData,
-		trackData
-	},
-	settings=defaultParameter;
-	Do[
-		Do[
-			functionData=Association@token[["Argument"]];
-			Do[
-				settings[[function]]=functionData[[function]],
-			{function,Keys@functionData}],
-		{token,Association/@sectionToken[["GlobalSettings"]]}];
-		Do[
-			trackData=trackParse[trackToken,settings];
-			Print[trackData],
-		{trackToken,sectionToken[["Tracks"]]}];
-		,
-	{sectionToken,Association/@Association[tokenizer][["Sections"]]}];
-	Return[];
-];
-
-
-(* ::Input:: *)
-(*parse[QYSTokenize[path<>"Songs\\test.qys"]];*)

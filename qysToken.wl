@@ -45,7 +45,7 @@ getTrackToken[score_]:=StringCases[score,{
 		{"Type"->"FunctionToken","Simplified"->True,"Argument"->{"Speed"->ToExpression@speed}},
 	"<"~~bar:NumberString~~"/"~~beat:NumberString~~">":>
 		{"Type"->"FunctionToken","Simplified"->True,"Argument"->{"Bar"->ToExpression@bar,"Beat"->ToExpression@beat}},
-	"<1="~~cont:(LetterCharacter|","|"'")..~~">":>
+	"<1="~~cont:(LetterCharacter|","|"'"|"#")..~~">":>
 		{"Type"->"FunctionToken","Simplified"->True,"Argument"->{
 			"Key"->tonalityDict[[StringDelete[cont,","|"'"]]],
 			"Oct"->StringCount[cont,"'"]-StringCount[cont,","]
@@ -55,11 +55,11 @@ getTrackToken[score_]:=StringCases[score,{
 	
 	(* temporary operators *)
 	"("~~ns:NumberString~~"~)":>
-		{"Type"->"Tuplet","NoteCount"->ToExpression[ns]},
+		{"Type"->"Tuplet","NotesCount"->ToExpression[ns]},
 	"("~~ns:NumberString~~"-)":>
-		{"Type"->"Tremolo1","StrokeCount"->ToExpression[ns]},
+		{"Type"->"Tremolo1","StrokesCount"->ToExpression[ns]},
 	"("~~ns:NumberString~~"=)":>
-		{"Type"->"Tremolo2","StrokeCount"->ToExpression[ns]},
+		{"Type"->"Tremolo2","StrokesCount"->ToExpression[ns]},
 	"("~~pitch:Pitch..~~"^)":>
 		{"Type"->"Appoggiatura","Pitches"->getPitchToken[pitch]},
 	
@@ -90,7 +90,7 @@ Tokenize[filename_]:=Module[
 					songComments=comments;
 					comments={}
 				],
-			StringTake[line,2]=="//",
+			StringLength@line>2&&StringTake[line,2]=="//",
 				AppendTo[comments,StringDrop[line,2]],
 			True,
 				score=score<>line;

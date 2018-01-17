@@ -14,15 +14,15 @@ Pitch="%"|"x"|DigitCharacter~~PitOperator;
 getInsVolToken[ivList_]:={
 	"Instr"->StringDelete["("~~__~~")"]/@ivList,
 	If[Or@@StringContainsQ["("]/@ivList,
-		"Volume"->If[StringContainsQ[#,"("],
+		"Volume"->(If[StringContainsQ[#,"("],
 			StringCases[#,"("~~vol__~~")":>ToExpression@vol][[1]],
-		1.0]&/@ivList,
+		1.0]&)/@ivList,
 	Nothing]
 };
 getPitchToken[pitch_]:=StringCases[pitch,
 	pitSd:("%"|"x"|DigitCharacter)~~pitOp:PitOperator:>
 	{
-		"ScaleDegree"->Switch[pitSd,"%",-1,"x",10,_,pitSd],
+		"ScaleDegree"->Switch[pitSd,"%",-1,"x",10,_,ToExpression@pitSd],
 		"SemitonesCount"->StringCount[pitOp,"#"]-StringCount[pitOp,"b"],
 		"OctavesCount"->StringCount[pitOp,"'"]-StringCount[pitOp,","],
 		"ChordSymbol"->StringDelete[pitOp,"#"|"b"|"'"|","]
@@ -40,11 +40,11 @@ getTrackToken[score_]:=StringCases[score,{
 	"<"~~func:LetterCharacter..~~":"~~arg:Except[">"]..~~">":>
 		{"Type"->"FunctionToken","Simplified"->False,"Argument"->{func->getArgument[arg,func]}},
 	"<"~~vol:(DigitCharacter...~~"."~~DigitCharacter...)~~">":>
-		{"Type"->"FunctionToken","Simplified"->True,"Argument"->{"Volume"->{vol}}},
+		{"Type"->"FunctionToken","Simplified"->True,"Argument"->{"Volume"->{ToExpression@vol}}},
 	"<"~~speed:DigitCharacter..~~">":>
-		{"Type"->"FunctionToken","Simplified"->True,"Argument"->{"Speed"->speed}},
+		{"Type"->"FunctionToken","Simplified"->True,"Argument"->{"Speed"->ToExpression@speed}},
 	"<"~~bar:NumberString~~"/"~~beat:NumberString~~">":>
-		{"Type"->"FunctionToken","Simplified"->True,"Argument"->{"Bar"->bar,"Beat"->beat}},
+		{"Type"->"FunctionToken","Simplified"->True,"Argument"->{"Bar"->ToExpression@bar,"Beat"->ToExpression@beat}},
 	"<1="~~cont:(LetterCharacter|","|"'")..~~">":>
 		{"Type"->"FunctionToken","Simplified"->True,"Argument"->{
 			"Key"->tonalityDict[[StringDelete[cont,","|"'"]]],

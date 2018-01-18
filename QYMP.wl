@@ -10,6 +10,9 @@ path=NotebookDirectory[];
 <<(path<>"interface.wl")
 <<(path<>"qysParse.wl")
 <<(path<>"qymParse.wl")
+<<(path<>"qysToken.wl")
+<<(path<>"qymToken.wl")
+<<(path<>"parser.wl")
 
 
 refresh:=Module[

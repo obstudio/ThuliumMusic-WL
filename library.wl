@@ -1,5 +1,6 @@
 (* ::Package:: *)
 
+(* user data *)
 version=201;
 userPath=$HomeDirectory<>"\\AppData\\Local\\QYMP\\";
 cloudPath="http://www.qymp.tk/assets/";
@@ -27,6 +28,7 @@ If[!FileExistsQ[userPath<>"Image.json"],Export[userPath<>"Image.json",{}]];
 imageData=Association/@Association@Import[userPath<>"image.json"];
 
 
+(* local data *)
 path=NotebookDirectory[];
 instrData=Association@Import[path<>"instr.json"];                               (* instruments *)
 colorData=Association@Import[path<>"color.json"];                               (* colors *)
@@ -68,7 +70,7 @@ findMatch[score_,pos_]:=Module[
 		i++
 	];
 	Return[i];
-];
+];(* this part will be deleted before ver 1.6 release *)
 textLength[string_]:=2StringLength[string]-StringCount[string,Alternatives@CharacterRange[32,127]];
 toArgument[str_]:=If[StringContainsQ[str,","],
 	ToExpression/@StringSplit[str,","],
@@ -84,7 +86,7 @@ completeText[raw_,arg_]:=StringReplace[raw,Flatten@Array[{
 	"$"<>ToString[#]->arg[[#]],
 	"#"<>ToString[#]->StringRiffle[ToString[#,FormatType->InputForm]&/@arg[[#]],", "]
 }&,Length@arg]];
-generateMessage[tag_,arg_]:=completeText[errorDict[[tag]],arg];
+generateMessage[tag_,arg_]:=completeText[errorDict[[tag]],arg];(* this part will be deleted before ver 1.6 release *)
 caption[string_,style_]:=caption[string,style,{}];
 caption[string_,style_,argument_]:=Style[
 	completeText[
@@ -94,8 +96,12 @@ styleDict[[style]]];
 
 
 (* parse related *)
-matchDict=<|"["->"]","("->")","{"->"}","<"->">"|>;
-pitchDict=<|"1"->0,"2"->2,"3"->4,"4"->5,"5"->7,"6"->9,"7"->11|>;
+rep=#~~(","~~#)...&;
+int=DigitCharacter..;
+name=LetterCharacter~~WordCharacter...;
+real=DigitCharacter...~~"."~~DigitCharacter...;
+matchDict=<|"["->"]","("->")","{"->"}","<"->">"|>;(* this part will be deleted before ver 1.6 release *)
+pitchDict=<|"1"->0,"2"->2,"3"->4,"4"->5,"5"->7,"6"->9,"7"->11|>;(* this part will be deleted before ver 1.6 release *)
 tonalityDict=<|
 	"C"->0,"G"->7,"D"->2,"A"->-3,"E"->4,
 	"B"->-1,"#F"->6,"#C"->1,"F"->5,"bB"->-2,
@@ -112,7 +118,7 @@ chordDict=<|
 	"d"->{0,3,6},"p"->{0,7,12},"o"->{0,12}
 |>;
 pitchOpDefault={"SemitonesCount"->0,"OctavesCount"->0,"ChordSymbol"->""};
-pitchOpList=Append[Keys[pitchOpDict],"$"];
+pitchOpList=Append[Keys[pitchOpDict],"$"];(* this part will be deleted before ver 1.6 release *)
 getArgument[string_,function_]:=Switch[function,
 	"Instr",{string},
 	"Volume"|"Chord",ToExpression/@StringSplit[string,","],

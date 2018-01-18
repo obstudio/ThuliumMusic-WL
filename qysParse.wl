@@ -5,13 +5,13 @@
 (*<<(path<>"initial.wl")*)
 
 
-getPitch[score_,pos_,para_]:=Module[
+getPitch2[score_,pos_,para_]:=Module[
 	{i=pos,note,pitch,pitchData},
 	If[StringPart[score,i]=="[",
 		i++;
 		pitch={};
 		While[i<=StringLength[score] && StringPart[score,i]!="]",
-			pitchData=getPitch[score,i,para];
+			pitchData=getPitch2[score,i,para];
 			AppendTo[pitch,pitchData[[1]]];
 			i=pitchData[[2]];
 		],
@@ -133,7 +133,7 @@ track[score_,global_,location_]:=Module[
 					"^",                            (* appoggiatura *)
 						k=1;
 						While[k<=StringLength@content,
-							pitchData=getPitch[content,k,parameter];
+							pitchData=getPitch2[content,k,parameter];
 							AppendTo[appoggiatura,pitchData[[1]]];
 							k=pitchData[[2]];
 						];
@@ -162,7 +162,7 @@ track[score_,global_,location_]:=Module[
 			char=="[",
 				match=findMatch[score,j-1];
 				content=StringTake[score,{j-1,match}];
-				pitch=getPitch[content,1,parameter][[1]];
+				pitch=getPitch2[content,1,parameter][[1]];
 				j=match+1;
 				If[StringContainsQ[content,"^"],appoggiatura=Flatten/@Array[Take[pitch,#]&,Length@pitch-1]];
 				pitch=Flatten@pitch,

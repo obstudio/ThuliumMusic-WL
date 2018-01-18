@@ -15,8 +15,8 @@ pitchCalc[token_,settings_,previous_]:=Module[{pitches,chordSymbol,pitchDict},
 	If[KeyExistsQ[token,"Pitches"],
 		pitches=Flatten[pitchCalc[#,settings,previous]&/@Association/@token[["Pitches"]]],
 		pitches=Switch[token[["ScaleDegree"]],
-			-1,previous[[settings[["Trace"]]]],
 			0,None,
+			-1,previous[[settings[["Trace"]]]],
 			_,Key[token[["ScaleDegree"]]]@pitchDict+settings[["Key"]]+12*settings[["Oct"]]
 		]
 	];
@@ -31,10 +31,6 @@ pitchCalc[token_,settings_,previous_]:=Module[{pitches,chordSymbol,pitchDict},
 	];
 	Return[pitches];
 ];
-
-
-restTemplate={"ScaleDegree"->0,"SemitonesCount"->0,"OctavesCount"->0,"ChordSymbol"->""};
-percTemplate={"ScaleDegree"->10,"SemitonesCount"->0,"OctavesCount"->0,"ChordSymbol"->""};(* of any use? *)
 
 
 trackParse[tokens_,global_]:=Module[
@@ -91,9 +87,7 @@ trackParse[tokens_,global_]:=Module[
 				trackDuration-=duration,
 			"Note",
 				pitches=pitchCalc[token,settings,previous];
-				If[!MemberQ[token[["Pitches"]],restTemplate],
-					previous=Prepend[Drop[previous,-1],pitches];
-				];
+				If[!pitches==={None},previous=Prepend[Drop[previous,-1],pitches]];
 				beatCount=beatCalc[token[["DurationOperators"]]];
 				beatCount*=2^(-settings[["Dur"]]);
 				If[tuplet>0,beatCount*=tupletRatio;tuplet--];
@@ -156,6 +150,8 @@ trackParse[tokens_,global_]:=Module[
 							AppendTo[soundData,{pitches,duration}];
 						];
 				];
+			"Subtrack",
+				
 		],
 	{token,Association/@tokens}];
 	Return[<|
@@ -168,11 +164,11 @@ trackParse[tokens_,global_]:=Module[
 
 
 (* ::Input:: *)
-(*QYS`getTrackToken["<Piano><0.6><1=bA,,>2_5o_%%#%|"]*)
+(*QYS`getTrackToken["<Piano><0.6><1=bA,,>2030|"]*)
 
 
 (* ::Input:: *)
-(*tmp=trackParse[QYS`getTrackToken["<Piano><0.6><1=bA,,>2_5o_%%#%|"],defaultParameter]*)
+(*tmp=trackParse[QYS`getTrackToken["<Piano><0.6><1=bA,,>20%0|"],defaultParameter]*)
 
 
 (* ::Input:: *)

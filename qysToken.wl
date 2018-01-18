@@ -6,21 +6,19 @@
 
 (* Here is the beginning of context QYS` *)
 Begin["QYS`"];
-Subtrack=Nest[(("{"~~#~~"}")|Except["}"])...&,Except["}"],8];
-InstrVolume=(LetterCharacter~~WordCharacter...~~(""|("("~~NumberString~~")")));
-PitOperator=Alternatives[Characters@"abdMmop#$,'"]...;
-DurOperator=Alternatives[Characters@"-_.`"]...;
-Pitch="%"|"x"|DigitCharacter~~PitOperator;
-getInsVolToken[ivList_]:={
-	"Instr"->StringDelete["("~~__~~")"]/@ivList,
-	If[Or@@StringContainsQ["("]/@ivList,
-		"Volume"->(If[StringContainsQ[#,"("],
-			StringCases[#,"("~~vol__~~")":>ToExpression@vol][[1]],
-		1.0]&)/@ivList,
-	Nothing]
-};
-getPitchToken[pitch_]:=StringCases[pitch,
-	pitSd:("%"|"x"|DigitCharacter)~~pitOp:PitOperator:>
+
+subtrack=Nest[(("{"~~#~~"}")|Except["}"])...&,Except["}"]...,8];
+pitOp=Alternatives[Characters@"abdMmop#$,'"]...;
+durOp=Alternatives[Characters@"-_.`"]...;
+pitch="%"|"x"|DigitCharacter~~pitOp;
+index=rep[int~~""|(".."~~int)];
+
+getIndex[index_]:=Union@@StringCases[index,{
+	n:int~~".."~~m:int:>Range[ToExpression@n,ToExpression@m],
+	n:int:>{ToExpression@n}
+}];
+getPitch[pitches_]:=StringCases[pitches,
+	pitSd:("%"|"x"|DigitCharacter)~~pitOp:pitOp:>
 	{
 		"ScaleDegree"->Switch[pitSd,"%",-1,"x",10,_,ToExpression@pitSd],
 		"SemitonesCount"->StringCount[pitOp,"#"]-StringCount[pitOp,"b"],
@@ -30,46 +28,62 @@ getPitchToken[pitch_]:=StringCases[pitch,
 ];
 
 (* track tokenizer *)
-getTrackToken[score_]:=StringCases[score,{
-	"{"~~sub:Subtrack~~"}":>{"Type"->"Subtrack","Contents"->getTrackToken[sub]},
-	bl:"\\"|"|"|"/":>{"Type"->"BarLine","Newline"->(bl=="\\"),"Volta"->(bl=="/")},
-	"~":>{"Type"->"Portamento"},
-	"^":>{"Type"->"Tie"},
+getTrack[score_]:=StringCases[score,{
+	"{"~~n:int~~"*"~~sub:subtrack~~"}":>
+		{"Type"->"subtrack","Contents"->getTrack[sub],"Repeat"->-n},
+	"{"~~sub:subtrack~~"}":>
+		{"Type"->"subtrack","Contents"->getTrack[sub],"Repeat"->Max[0,
+			StringCases[sub,"\\"|"/"~~i:index~~":":>getIndex[i]]
+		]},
+	bl:"\\"|"/"~~i:index~~":":>
+		{"Type"->"Volta","Newline"->(bl=="\\"),"Index"->getIndex[i]},
+	bl:"\\"|"|"|"/":>
+		{"Type"->"BarLine","Newline"->(bl=="\\"),"Coda"->(bl=="/")},
 	
 	(* functions *)
-	"<"~~func:LetterCharacter..~~":"~~arg:Except[">"]..~~">":>
+	"<"~~func:name~~":"~~arg:Except[">"]..~~">":>
 		{"Type"->"FunctionToken","Simplified"->False,"Argument"->{func->getArgument[arg,func]}},
-	"<"~~vol:(DigitCharacter...~~"."~~DigitCharacter...)~~">":>
+	"<"~~vol:real~~">":>
 		{"Type"->"FunctionToken","Simplified"->True,"Argument"->{"Volume"->{ToExpression@vol}}},
-	"<"~~speed:DigitCharacter..~~">":>
+	"<"~~speed:int~~">":>
 		{"Type"->"FunctionToken","Simplified"->True,"Argument"->{"Speed"->ToExpression@speed}},
-	"<"~~bar:NumberString~~"/"~~beat:NumberString~~">":>
+	"<"~~bar:int~~"/"~~beat:int~~">":>
 		{"Type"->"FunctionToken","Simplified"->True,"Argument"->{"Bar"->ToExpression@bar,"Beat"->ToExpression@beat}},
 	"<1="~~cont:(LetterCharacter|","|"'"|"#")..~~">":>
 		{"Type"->"FunctionToken","Simplified"->True,"Argument"->{
 			"Key"->tonalityDict[[StringDelete[cont,","|"'"]]],
 			"Oct"->StringCount[cont,"'"]-StringCount[cont,","]
 		}},
-	"<"~~cont:(InstrVolume..~~(","~~InstrVolume)...)~~">":>
-		{"Type"->"FunctionToken","Simplified"->True,"Argument"->getInsVolToken[StringSplit[cont,","]]},
+	"<"~~cont:rep[name~~""|("("~~real~~")")]~~">":>
+		{"Type"->"FunctionToken","Simplified"->True,"Argument"->Module[{ivList=StringSplit[cont,","]},{
+			"Instr"->StringDelete["("~~__~~")"]/@ivList,
+			If[Or@@StringContainsQ["("]/@ivList,
+				"Volume"->(If[StringContainsQ[#,"("],
+					StringCases[#,"("~~vol__~~")":>ToExpression@vol][[1]],
+				1.0]&)/@ivList,
+			Nothing]
+		}]},
 	
 	(* temporary operators *)
-	"("~~ns:NumberString~~"~)":>
-		{"Type"->"Tuplet","NotesCount"->ToExpression[ns]},
-	"("~~ns:NumberString~~"-)":>
-		{"Type"->"Tremolo1","StrokesCount"->ToExpression[ns]},
-	"("~~ns:NumberString~~"=)":>
-		{"Type"->"Tremolo2","StrokesCount"->ToExpression[ns]},
-	"("~~pitch:Pitch..~~"^)":>
-		{"Type"->"Appoggiatura","Pitches"->getPitchToken[pitch]},
+	"("~~n:int~~"~)":>
+		{"Type"->"Tuplet","NotesCount"->ToExpression[n]},
+	"("~~n:int~~"-)":>
+		{"Type"->"Tremolo1","StrokesCount"->ToExpression[n]},
+	"("~~n:int~~"=)":>
+		{"Type"->"Tremolo2","StrokesCount"->ToExpression[n]},
+	"("~~pitches:pitch..~~"^)":>
+		{"Type"->"Appoggiatura","Pitches"->getPitch[pitches]},
 	
-	pitch:Pitch|("["~~(Pitch|"^")..~~"]")~~pitOp:PitOperator~~durOp:DurOperator:>{
+	(* note related *)
+	"~":>{"Type"->"Portamento"},
+	"^":>{"Type"->"Tie"},
+	pitches:pitch|("["~~(pitch|"^")..~~"]")~~pitOp:pitOp~~durOp:durOp:>{
 		"Type"->"Note",
-		"Pitches"->getPitchToken[StringDelete[pitch,"^"|"["|"]"]],
+		"Pitches"->getPitch[StringDelete[pitches,"^"|"["|"]"]],
 		"SemitonesCount"->StringCount[pitOp,"#"]-StringCount[pitOp,"b"],
 		"OctavesCount"->StringCount[pitOp,"'"]-StringCount[pitOp,","],
 		"Staccato"->StringContainsQ[durOp,"`"],
-		"Arpeggio"->StringContainsQ[pitch,"^"],
+		"Arpeggio"->StringContainsQ[pitches,"^"],
 		"DurationOperators"->StringDelete[durOp,"`"]
 	}
 }];
@@ -95,7 +109,7 @@ Tokenize[filename_]:=Module[
 			True,
 				score=score<>line;
 				If[StringPart[line,-1]=="\\",Continue[]];
-				trackToken=getTrackToken[StringDelete[score,Whitespace]];
+				trackToken=getTrack[StringDelete[score,Whitespace]];
 				If[MemberQ[Association[#][["Type"]]&/@trackToken,"Note"],     (* empty track *)
 					AppendTo[tracks,trackToken],
 					If[sectionMeta!={},
@@ -119,7 +133,7 @@ End[];
 
 
 (* ::Input:: *)
-(*QYS`getTrackToken["(6,^)1M-"]//Column*)
+(*QYS`getTrack["{2*1{/2..5,8:}}"]*)
 
 
 (* ::Input:: *)

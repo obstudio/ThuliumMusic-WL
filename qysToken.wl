@@ -36,9 +36,9 @@ getTrack[score_]:=StringCases[score,{
 			StringCases[sub,"\\"|"/"~~i:order~~":":>getOrder[i]]
 		]},
 	bl:"\\"|"/"~~i:order~~":":>
-		{"Type"->"Volta","Newline"->(bl=="\\"),"Order"->getOrder[i]},
+		{"Type"->"BarLine","Newline"->(bl=="\\"),"Skip"->False,"Order"->getOrder[i]},
 	bl:"\\"|"|"|"/":>
-		{"Type"->"BarLine","Newline"->(bl=="\\"),"Skip"->(bl=="/")},
+		{"Type"->"BarLine","Newline"->(bl=="\\"),"Skip"->(bl=="/"),"Order"->{0}},
 	
 	(* functions *)
 	"<"~~func:name~~":"~~arg:Except[">"]..~~">":>

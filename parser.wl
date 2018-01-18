@@ -169,6 +169,16 @@ trackParse[tokenizer_,global_]:=Module[
 				],
 			"BarLine",
 				If[token[["Skip"]],lastRepeat=<|"SoundData"->soundData,"Duration"->durCount|>];
+				If[token[["Order"]]!={0},
+					If[volta=={},
+						voltaSettings=settings;
+						master=<|"SoundData"->soundData,"Duration"->durCount|>,
+						voltaData[[volta]]=<|"SoundData"->soundData,"Duration"->durCount|>;
+					];
+					volta=If[#Order=={},voltaDefault,#Order]&[token];
+					settings=voltaSettings;
+					soundData={};durCount=0
+				];
 				If[barBeat!=0,
 					barCount++;
 					If[barBeat!=settings[["Bar"]],AppendTo[messages,<|
@@ -177,15 +187,6 @@ trackParse[tokenizer_,global_]:=Module[
 					|>]];
 					barBeat=0;
 				],
-			"Volta",
-				If[volta=={},
-					voltaSettings=settings;
-					master=<|"SoundData"->soundData,"Duration"->durCount|>,
-					voltaData[[volta]]=<|"SoundData"->soundData,"Duration"->durCount|>;
-				];
-				volta=If[#Index=={},voltaDefault,#Index]&[token];
-				settings=voltaSettings;
-				soundData={};durCount=0,
 			"Track",
 				trackData=trackParse[token,settings];
 				Do[
@@ -242,6 +243,7 @@ parse[tokenizer_]:=Module[
 		messages={},effects
 	},
 	settings=defaultSettings;
+	effects=settings[[effectSettingTag]];
 	Do[
 		sectionDuration=0;
 		Do[
@@ -250,6 +252,7 @@ parse[tokenizer_]:=Module[
 				settings[[function]]=functionData[[function]],
 			{function,Keys@functionData}],
 		{token,Association/@sectionToken[["GlobalSettings"]]}];
+		If[Length@sectionToken[["Tracks"]]==0,effects=settings[[effectSettingTag]]];
 		Do[
 			trackData=trackParse[trackToken,settings];
 			MusicClips=Join[MusicClips,<|
@@ -260,7 +263,12 @@ parse[tokenizer_]:=Module[
 		{trackToken,sectionToken[["Tracks"]]}];
 		duration+=sectionDuration,
 	{sectionToken,Association/@Association[tokenizer][["Sections"]]}];
-	Return[MusicClips];
+	Return[<|
+		"Infomation"-><|"Duration"->duration|>,
+		"MusicClips"->MusicClips,
+		"Messages"->messages,
+		"Effects"->effects
+	|>];
 ];
 
 
@@ -277,10 +285,11 @@ parse[tokenizer_]:=Module[
 (* ::Input:: *)
 (*AudioStop[];AudioPlay[#[[2]]]&@*)
 (*EchoFunction["time: ",#[[1]]&]@*)
-(*Timing[QYSParse[path<>"Songs\\Touhou\\TH11-Chireiden\\Hartmann_No_Youkai_Otome.qys"]];*)
+(*Timing[QYSParse[path<>"Songs\\Touhou\\Dark_Side_of_Fate.qys"]];*)
 
 
-integrate[tracks_]:=Module[
+integrate[tracks_]:=integrate[tracks,defaultSettings[[effectSettingTag]]];
+integrate[tracks_,effects_]:=Module[
 	{audio=0,settings,instrCount,instrument,soundData,generate},
 	Do[
 		settings=trackData[["MetaSettings"]];
@@ -300,6 +309,9 @@ integrate[tracks_]:=Module[
 			{settings[["FadeIn"]],settings[["FadeOut"]]}],
 		{i,instrCount}],
 	{trackData,tracks}];
+	If[effects[["FadeIn"]]+effects[["FadeOut"]]>0,
+		audio=AudioFade[audio,{effects[["FadeIn"]],effects[["FadeOut"]]}]
+	];
 	Return[audio];
 ];
 

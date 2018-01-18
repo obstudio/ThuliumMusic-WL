@@ -8,11 +8,15 @@ path=NotebookDirectory[];
 <<(path<>"library.wl")
 <<(path<>"assets.wl")
 <<(path<>"interface.wl")
-<<(path<>"qysParse.wl")
 <<(path<>"qymParse.wl")
 <<(path<>"qysToken.wl")
 <<(path<>"qymToken.wl")
 <<(path<>"parser.wl")
+
+
+(* temporary function *)
+QYMParse[filename_]:=QYMparse`QYMParse[filename];
+QYSParse[filename_]:=integrate[parse[QYS`Tokenize[filename]]];
 
 
 refresh:=Module[

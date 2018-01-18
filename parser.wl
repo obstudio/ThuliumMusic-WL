@@ -1,5 +1,15 @@
 (* ::Package:: *)
 
+defaultSettings=<|
+	"Volume"->{1},"Speed"->90,"Key"->0,"Beat"->4,"Bar"->4,"Instr"->{"Piano"},
+	"Dur"->0,"FadeIn"->0,"FadeOut"->0,"Stac"->1/2,"Appo"->1/4,"Oct"->0,
+	"Port"->6,"Spac"->0,"Chord"->{0,12},"Trace"->1
+|>;
+funcList=Keys@defaultSettings;
+metaSettingTag={"Instr","Volume","FadeIn","FadeOut"};
+effectSettingTag={"FadeIn","FadeOut"};
+
+
 beatCalc[operators_]:=Module[{beats=1,i=1},
 	Do[
 		Switch[operator,
@@ -10,8 +20,12 @@ beatCalc[operators_]:=Module[{beats=1,i=1},
 	{operator,StringCases[operators,{"-","_","."..}]}];
 	Return[beats];
 ];
-pitchCalc[token_,settings_,previous_]:=Module[{pitches,chordSymbol,pitchDict},
+pitchCalc[token_,settings_,previous_]:=Module[{pitches,chordSymbol,pitchDict,chordDict},
 	pitchDict=<|1->0,2->2,3->4,4->5,5->7,6->9,7->11,10->10|>;
+	chordDict=<|
+		"M"->{0,4,7},"m"->{0,3,7},"a"->{0,4,8},
+		"d"->{0,3,6},"p"->{0,7,12},"o"->{0,12}
+	|>;
 	If[KeyExistsQ[token,"Pitches"],
 		pitches=Flatten[pitchCalc[#,settings,previous]&/@Association/@token[["Pitches"]]],
 		pitches=Switch[token[["ScaleDegree"]],
@@ -33,9 +47,11 @@ pitchCalc[token_,settings_,previous_]:=Module[{pitches,chordSymbol,pitchDict},
 ];
 
 
-trackParse[tokens_,global_]:=Module[
+trackParse[tokenizer_,global_]:=Module[
 	{
-		i,settings=global,
+		tokens=Association/@tokenizer[["Contents"]],
+		repeat=tokenizer[["Repeat"]],
+		settings=global,
 		functionData,pitches,
 		beatCount,duration=0,
 		barBeat=0,prevBeat,
@@ -49,22 +65,23 @@ trackParse[tokens_,global_]:=Module[
 		portamento=False,portRate,
 		previous=Array[None&,4],
 		
+		voltaData,voltaSettings,
+		voltaDefault,volta={},
+		master,lastRepeat=<||>,
+		soundData={},durCount=0,
+		trackData,
 		(* return value *)
-		soundData={},lastRepeat={},
-		trackDuration=0,messages={}
+		trackDuration,MusicClips,messages={}
 	},
+	MusicClips=<|"Main"->Null,"Accent"->Nothing,"Subtracks"->{}|>;
+	If[repeat>0,
+		voltaData=ConstantArray[<||>,repeat];
+		voltaDefault=Complement[Range@repeat,Union@@Cases[tokens,
+			v:<|"Type"->"Volta",__|>:>v[["Order"]]
+		]]
+	];
 	Do[
 		Switch[token[["Type"]],
-			"BarLine",
-				If[token[["Volta"]],lastRepeat=soundData];
-				If[barBeat!=0,
-					barCount++;
-					If[barBeat!=settings[["Bar"]],AppendTo[messages,<|
-						"Type"->"BarLengthError",
-						"Info"->{barCount,settings[["Bar"]],barBeat}
-					|>]];
-					barBeat=0;
-				],
 			"FunctionToken",
 				functionData=Association@token[["Argument"]];
 				Do[
@@ -77,14 +94,14 @@ trackParse[tokens_,global_]:=Module[
 				tremolo1=token[["StrokesCount"]],
 			"Tremolo2",
 				tremolo2=token[["StrokesCount"]];
-				trackDuration-=duration,
+				durCount-=duration,
 			"Appoggiatura",
 				appoggiatura=pitchCalc[token,settings,previous],
 			"Tie",
 				tie=True,
 			"Portamento",
 				portamento=True;
-				trackDuration-=duration,
+				durCount-=duration,
 			"Note",
 				pitches=pitchCalc[token,settings,previous];
 				If[!pitches==={None},previous=Prepend[Drop[previous,-1],pitches]];
@@ -93,7 +110,7 @@ trackParse[tokens_,global_]:=Module[
 				If[tuplet>0,beatCount*=tupletRatio;tuplet--];
 				barBeat+=beatCount;
 				duration=240/settings[["Speed"]]/settings[["Beat"]]*beatCount;
-				trackDuration+=duration;
+				durCount+=duration;
 				staccato=token[["Staccato"]];
 				If[token[["Arpeggio"]],
 					appoggiatura=Flatten/@Array[Take[pitches,#]&,Length@pitches-1]
@@ -149,42 +166,82 @@ trackParse[tokens_,global_]:=Module[
 							staccato=False,
 							AppendTo[soundData,{pitches,duration}];
 						];
+				],
+			"BarLine",
+				If[token[["Skip"]],lastRepeat=<|"SoundData"->soundData,"Duration"->durCount|>];
+				If[barBeat!=0,
+					barCount++;
+					If[barBeat!=settings[["Bar"]],AppendTo[messages,<|
+						"Type"->"BarLengthError",
+						"Info"->{barCount,settings[["Bar"]],barBeat}
+					|>]];
+					barBeat=0;
+				],
+			"Volta",
+				If[volta=={},
+					voltaSettings=settings;
+					master=<|"SoundData"->soundData,"Duration"->durCount|>,
+					voltaData[[volta]]=<|"SoundData"->soundData,"Duration"->durCount|>;
 				];
-			"Subtrack",
-				
+				volta=If[#Index=={},voltaDefault,#Index]&[token];
+				settings=voltaSettings;
+				soundData={};durCount=0,
+			"Track",
+				trackData=trackParse[token,settings];
+				Do[
+					If[musicClip[["MetaSettings"]]==settings[[metaSettingTag]],
+						soundData=Join[soundData,musicClip[["SoundData"]]],
+						soundData=AppendTo[soundData,{None,trackData[["Duration"]]}];
+						AppendTo[MusicClips[["Subtracks"]],<|
+							"SoundData"->musicClip[["SoundData"]],
+							"Beginning"->musicClip[["Beginning"]]+durCount,
+							"Duration"->musicClip[["Duration"]],
+							"MetaSettings"->musicClip[["MetaSettings"]]
+						|>]
+					],
+				{musicClip,trackData[["MusicClips"]]}];
+				durCount+=trackData[["Duration"]];
 		],
 	{token,Association/@tokens}];
+	(* build main music clip *)
+	Switch[repeat,
+		_?Positive,
+			voltaData[[volta]]=<|"SoundData"->soundData,"Duration"->durCount|>;
+			trackDuration=repeat*master[["Duration"]]+Total[#Duration&/@voltaData];
+			MusicClips[["Main"]]=<|
+				"SoundData"->Flatten[Join[master[["SoundData"]],#SoundData]&/@voltaData,1],
+				"Beginning"->0,"Duration"->trackDuration,"MetaSettings"->settings[[metaSettingTag]]
+			|>,
+		_?Negative,
+			If[lastRepeat==<||>,lastRepeat=<|"SoundData"->soundData,"Duration"->durCount|>];
+			trackDuration=(-repeat-1)*durCount+lastRepeat[["Duration"]];
+			MusicClips[["Main"]]=<|
+				"SoundData"->Flatten[Append[ConstantArray[soundData,(-repeat-1)],lastRepeat[["SoundData"]]],1],
+				"Beginning"->0,"Duration"->trackDuration,"MetaSettings"->settings[[metaSettingTag]]
+			|>,
+		_,
+			trackDuration=durCount;
+			MusicClips[["Main"]]=<|
+				"SoundData"->soundData,"Beginning"->0,
+				"Duration"->trackDuration,"MetaSettings"->settings[[metaSettingTag]]
+			|>
+	];
 	Return[<|
-		"RealTracks"->{<|"SoundData"->soundData,"MetaSettings"->settings[[metaSettings]]|>},
+		"MusicClips"->Join[{#Main,#Accent},#Subtracks]&[MusicClips],
 		"Duration"->trackDuration,
-		"Messages"->messages,
-		"LastRepeat"->{{}}
+		"Messages"->messages
 	|>]
 ];
 
 
-(* ::Input:: *)
-(*QYS`getTrackToken["<Piano><0.6><1=bA,,>2030|"]*)
-
-
-(* ::Input:: *)
-(*tmp=trackParse[QYS`getTrackToken["<Piano><0.6><1=bA,,>20%0|"],defaultParameter]*)
-
-
-(* ::Input:: *)
-(*AudioStop[];AudioPlay@integrate@tmp[["RealTracks"]];*)
-
-
 parse[tokenizer_]:=Module[
 	{
-		audio,settings,
-		functionData,
-		trackData,
-		realTracks={},
-		sectionDuration,
-		duration=0
+		settings,functionData,
+		trackData,MusicClips={},
+		sectionDuration,duration=0,
+		messages={},effects
 	},
-	settings=defaultParameter;
+	settings=defaultSettings;
 	Do[
 		sectionDuration=0;
 		Do[
@@ -195,24 +252,32 @@ parse[tokenizer_]:=Module[
 		{token,Association/@sectionToken[["GlobalSettings"]]}];
 		Do[
 			trackData=trackParse[trackToken,settings];
-			realTracks=Join[realTracks,<|
-				"SoundData"->Prepend[#SoundData,{None,duration}],
+			MusicClips=Join[MusicClips,<|
+				"SoundData"->Prepend[#SoundData,{None,duration+#Beginning}],
 				"MetaSettings"->#MetaSettings
-			|>&/@trackData[["RealTracks"]]];
+			|>&/@trackData[["MusicClips"]]];
 			sectionDuration=Max[sectionDuration,trackData[["Duration"]]],
 		{trackToken,sectionToken[["Tracks"]]}];
 		duration+=sectionDuration,
 	{sectionToken,Association/@Association[tokenizer][["Sections"]]}];
-	Return[realTracks];
+	Return[MusicClips];
 ];
 
 
 (* ::Input:: *)
-(*parse[QYS`Tokenize[path<>"Songs\\Anima.qys"]][[1,"SoundData"]]//Column*)
+(*Export["E:\\1.mp3",AudioPad[QYSParse[path<>"Songs\\test.qys"],{1,3}]];*)
 
 
 (* ::Input:: *)
-(*AudioStop[];AudioPlay@integrate[parse[QYS`Tokenize[path<>"Songs\\Touhou\\TH11-Chireiden\\Nuclear_Fusion.qys"]]];*)
+(*AudioStop[];AudioPlay[#[[2]]]&@*)
+(*EchoFunction["time: ",#[[1]]&]@*)
+(*Timing[QYSParse[path<>"Songs\\test.qys"]];*)
+
+
+(* ::Input:: *)
+(*AudioStop[];AudioPlay[#[[2]]]&@*)
+(*EchoFunction["time: ",#[[1]]&]@*)
+(*Timing[QYSParse[path<>"Songs\\Touhou\\TH11-Chireiden\\Hartmann_No_Youkai_Otome.qys"]];*)
 
 
 integrate[tracks_]:=Module[
@@ -237,3 +302,36 @@ integrate[tracks_]:=Module[
 	{trackData,tracks}];
 	Return[audio];
 ];
+
+
+(* ::Input:: *)
+(*AudioStop[];AudioPlay@QYSParse[path<>"Songs\\TouHou\\TH11-Chireiden\\Nuclear_Fusion.qys"];*)
+
+
+(* ::Input:: *)
+(*AudioStop[];*)
+
+
+(* ::Input:: *)
+(*EmitSound@Sound@SoundNote[12,1,"SopranoSax"]*)
+
+
+(* ::Input:: *)
+(*EmitSound@Sound@SoundNote["HighTom",1]*)
+
+
+(* ::Input:: *)
+(*Export["E:\\1.mp3",QYSParse[path<>"Songs\\temp.qys"]];*)
+
+
+(* ::Input:: *)
+(*AudioStop[];AudioPlay@QYSParse[path<>"Songs\\Gate_of_Steiner.qys"];*)
+
+
+(* ::Text:: *)
+(*ElectricSnare, BassDrum, Shaker, RideCymbal, Snare, CrashCymbal, HiHatPedal, HiHatClosed*)
+(*Ocarina, Oboe, Clarinet, Recorder, BrassSection, Harpsichord, BrightPiano, Organ, DrawbarOrgan, FretlessBass*)
+
+
+(* ::Input:: *)
+(*pitchDict[["2"]]+tonalityDict[["bE"]]+36*)

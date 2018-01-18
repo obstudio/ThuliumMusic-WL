@@ -58,24 +58,7 @@ aboutTags={"Version","Producer","Website"};
 
 
 (* some functions *)
-findMatch[score_,pos_]:=Module[
-	{i=pos+1,left,right,stack=1},
-	left=StringPart[score,pos];
-	right=matchDict[[left]];
-	While[i<=StringLength[score],
-		Switch[StringPart[score,i],
-			left,stack++,
-			right,stack--;If[stack==0,Break[]];
-		];
-		i++
-	];
-	Return[i];
-];(* this part will be deleted before ver 1.6 release *)
 textLength[string_]:=2StringLength[string]-StringCount[string,Alternatives@CharacterRange[32,127]];
-toArgument[str_]:=If[StringContainsQ[str,","],
-	ToExpression/@StringSplit[str,","],
-	ToExpression@str
-];(* this part will be deleted before ver 1.6 release *)
 toBase32[n_]:=StringDelete[ToString@BaseForm[n,32],"\n"~~__];
 timeDisplay[t_]:=Module[
 	{sec=Floor[QuantityMagnitude[UnitConvert[t,"Seconds"]]]},
@@ -86,22 +69,18 @@ completeText[raw_,arg_]:=StringReplace[raw,Flatten@Array[{
 	"$"<>ToString[#]->arg[[#]],
 	"#"<>ToString[#]->StringRiffle[ToString[#,FormatType->InputForm]&/@arg[[#]],", "]
 }&,Length@arg]];
-generateMessage[tag_,arg_]:=completeText[errorDict[[tag]],arg];(* this part will be deleted before ver 1.6 release *)
 caption[string_,style_]:=caption[string,style,{}];
-caption[string_,style_,argument_]:=Style[
-	completeText[
+caption[string_,style_,argument_]:=Style[completeText[
 		If[StringLength@string>0&&StringPart[string,1]=="_",text[[StringDrop[string,1]]],string],
-	argument],
-styleDict[[style]]];
+argument],styleDict[[style]]];
 
 
-(* parse related *)
+(* tokenizer related *)
 rep=#~~(","~~#)...&;
 int=DigitCharacter..;
+expr=Except["("|")"]..;
 name=LetterCharacter~~WordCharacter...;
 real=DigitCharacter...~~"."~~DigitCharacter...;
-matchDict=<|"["->"]","("->")","{"->"}","<"->">"|>;(* this part will be deleted before ver 1.6 release *)
-pitchDict=<|"1"->0,"2"->2,"3"->4,"4"->5,"5"->7,"6"->9,"7"->11|>;(* this part will be deleted before ver 1.6 release *)
 tonalityDict=<|
 	"C"->0,"G"->7,"D"->2,"A"->-3,"E"->4,
 	"B"->-1,"#F"->6,"#C"->1,"F"->5,"bB"->-2,
@@ -109,28 +88,11 @@ tonalityDict=<|
 	"F#"->6,"C#"->1,"Bb"->-2,"Gb"->6,
 	"Eb"->3,"Ab"->-4,"Db"->1,"Cb"->-1
 |>;
-pitchOpDict=<|
-	"#"->1,"b"->-1,"'"->12,","->-12,"M"->{0,4,7},"m"->{0,3,7},
-	"a"->{0,4,8},"d"->{0,3,6},"p"->{0,7,12},"o"->{0,12}
-|>;(* this part will be deleted before ver 1.6 release *)
-chordDict=<|
-	"M"->{0,4,7},"m"->{0,3,7},"a"->{0,4,8},
-	"d"->{0,3,6},"p"->{0,7,12},"o"->{0,12}
-|>;
-pitchOpDefault={"SemitonesCount"->0,"OctavesCount"->0,"ChordSymbol"->""};
-pitchOpList=Append[Keys[pitchOpDict],"$"];(* this part will be deleted before ver 1.6 release *)
 getArgument[string_,function_]:=Switch[function,
 	"Instr",{string},
 	"Volume"|"Chord",ToExpression/@StringSplit[string,","],
 	_,ToExpression[string]
 ];
-defaultParameter=<|
-	"Volume"->{1},"Speed"->90,"Key"->0,"Beat"->4,"Bar"->4,"Instr"->{"Piano"},
-	"Dur"->0,"FadeIn"->0,"FadeOut"->0,"Stac"->1/2,"Appo"->1/4,"Oct"->0,
-	"Port"->6,"Spac"->0,"Chord"->{0,12},"Trace"->1
-|>;
-funcList=Keys@defaultParameter;
-metaSettings={"Instr","Volume","FadeIn","FadeOut"};
 
 
 writeInfo[song_,info_]:=Export[

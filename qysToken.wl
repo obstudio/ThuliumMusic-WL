@@ -11,9 +11,9 @@ subtrack=Nest[(("{"~~#~~"}")|Except["}"])...&,Except["}"]...,8];
 pitOp=Alternatives[Characters@"abdMmop#$,'"]...;
 durOp=Alternatives[Characters@"-_.`"]...;
 pitch="%"|"x"|DigitCharacter~~pitOp;
-index=rep[int~~""|(".."~~int)];
+order=""|rep[int~~""|(".."~~int)];
 
-getIndex[index_]:=Union@@StringCases[index,{
+getOrder[ord_]:=Union@@StringCases[ord,{
 	n:int~~".."~~m:int:>Range[ToExpression@n,ToExpression@m],
 	n:int:>{ToExpression@n}
 }];
@@ -30,21 +30,21 @@ getPitch[pitches_]:=StringCases[pitches,
 (* track tokenizer *)
 getTrack[score_]:=StringCases[score,{
 	"{"~~n:int~~"*"~~sub:subtrack~~"}":>
-		{"Type"->"subtrack","Contents"->getTrack[sub],"Repeat"->-n},
+		{"Type"->"Track","Contents"->getTrack[sub],"Repeat"->-ToExpression@n},
 	"{"~~sub:subtrack~~"}":>
-		{"Type"->"subtrack","Contents"->getTrack[sub],"Repeat"->Max[0,
-			StringCases[sub,"\\"|"/"~~i:index~~":":>getIndex[i]]
+		{"Type"->"Track","Contents"->getTrack[sub],"Repeat"->Max[0,
+			StringCases[sub,"\\"|"/"~~i:order~~":":>getOrder[i]]
 		]},
-	bl:"\\"|"/"~~i:index~~":":>
-		{"Type"->"Volta","Newline"->(bl=="\\"),"Index"->getIndex[i]},
+	bl:"\\"|"/"~~i:order~~":":>
+		{"Type"->"Volta","Newline"->(bl=="\\"),"Order"->getOrder[i]},
 	bl:"\\"|"|"|"/":>
-		{"Type"->"BarLine","Newline"->(bl=="\\"),"Coda"->(bl=="/")},
+		{"Type"->"BarLine","Newline"->(bl=="\\"),"Skip"->(bl=="/")},
 	
 	(* functions *)
 	"<"~~func:name~~":"~~arg:Except[">"]..~~">":>
 		{"Type"->"FunctionToken","Simplified"->False,"Argument"->{func->getArgument[arg,func]}},
-	"<"~~vol:real~~">":>
-		{"Type"->"FunctionToken","Simplified"->True,"Argument"->{"Volume"->{ToExpression@vol}}},
+	"<"~~vol:rep[real]~~">":>
+		{"Type"->"FunctionToken","Simplified"->True,"Argument"->{"Volume"->ToExpression/@StringSplit[vol,","]}},
 	"<"~~speed:int~~">":>
 		{"Type"->"FunctionToken","Simplified"->True,"Argument"->{"Speed"->ToExpression@speed}},
 	"<"~~bar:int~~"/"~~beat:int~~">":>
@@ -59,7 +59,7 @@ getTrack[score_]:=StringCases[score,{
 			"Instr"->StringDelete["("~~__~~")"]/@ivList,
 			If[Or@@StringContainsQ["("]/@ivList,
 				"Volume"->(If[StringContainsQ[#,"("],
-					StringCases[#,"("~~vol__~~")":>ToExpression@vol][[1]],
+					StringCases[#,"("~~volume__~~")":>ToExpression@volume][[1]],
 				1.0]&)/@ivList,
 			Nothing]
 		}]},
@@ -67,9 +67,9 @@ getTrack[score_]:=StringCases[score,{
 	(* temporary operators *)
 	"("~~n:int~~"~)":>
 		{"Type"->"Tuplet","NotesCount"->ToExpression[n]},
-	"("~~n:int~~"-)":>
+	"("~~n:expr~~"-)":>
 		{"Type"->"Tremolo1","StrokesCount"->ToExpression[n]},
-	"("~~n:int~~"=)":>
+	"("~~n:expr~~"=)":>
 		{"Type"->"Tremolo2","StrokesCount"->ToExpression[n]},
 	"("~~pitches:pitch..~~"^)":>
 		{"Type"->"Appoggiatura","Pitches"->getPitch[pitches]},
@@ -85,7 +85,8 @@ getTrack[score_]:=StringCases[score,{
 		"Staccato"->StringContainsQ[durOp,"`"],
 		"Arpeggio"->StringContainsQ[pitches,"^"],
 		"DurationOperators"->StringDelete[durOp,"`"]
-	}
+	},
+	undef__:>{"Type"->"Undefined","Content"->undef}
 }];
 
 (* tokenizer *)
@@ -110,14 +111,18 @@ Tokenize[filename_]:=Module[
 				score=score<>line;
 				If[StringPart[line,-1]=="\\",Continue[]];
 				trackToken=getTrack[StringDelete[score,Whitespace]];
-				If[MemberQ[Association[#][["Type"]]&/@trackToken,"Note"],     (* empty track *)
-					AppendTo[tracks,trackToken],
-					If[sectionMeta!={},
+				If[ContainsOnly[Association[#][["Type"]]&/@trackToken,{"FunctionToken"}],
+					If[sectionMeta!={},                                             (* empty track *)
 						AppendTo[sections,Append[sectionMeta,"Tracks"->tracks]];
 						tracks={};
 					];
 					sectionMeta={"Comments"->comments,"GlobalSettings"->trackToken};
-					comments={};
+					comments={},
+					AppendTo[tracks,<|                                              (* real track *)
+						"Type"->"Track",
+						"Contents"->trackToken,
+						"Repeat"->0
+					|>]
 				];
 				score=""
 		],
@@ -133,7 +138,7 @@ End[];
 
 
 (* ::Input:: *)
-(*QYS`getTrack["{2*1{/2..5,8:}}"]*)
+(*QYS`getTrack["<1=bE'><Dur:0>3(Log[2,12]=)3'---<FadeOut:1>|"]*)
 
 
 (* ::Input:: *)
@@ -141,4 +146,8 @@ End[];
 
 
 (* ::Input:: *)
-(*ExportString[QYS`Tokenize[NotebookDirectory[]<>"Songs\\test.qys"],"JSON"]*)
+(*ExportString[QYS`Tokenize[path<>"Songs\\test.qys"],"JSON"]*)
+
+
+(* ::Input:: *)
+(*QYS`Tokenize[path<>"Songs\\test.qys"]*)

@@ -1,5 +1,7 @@
 (* ::Package:: *)
 
+Begin["QYMparse`"];
+pitchDict=<|"1"->0,"2"->2,"3"->4,"4"->5,"5"->7,"6"->9,"7"->11|>;(* this part will be deleted before ver 1.6 release *)
 getPitch1[dataString_,position_,tonality_]:=Module[
 	{
 		note,pitch,i
@@ -246,3 +248,4 @@ QYMParse[filename_]:=Module[
 		"Instruments"->instrumentList
 	|>]];
 ]
+End[];

@@ -1,13 +1,49 @@
 (* ::Package:: *)
 
-qymTrackTokenizer[track_]:=Module[
+Begin["qym`"];
+trackTokenizer[track_]:=Block[
 	{
-		
+		match,
+		notations,
+		argument
 	},
+	notations={};
+	While[track!="",
+		Switch[track[[1]],
+		"<",
+			Which[
+			(match=StringCases[track[[1]],RegularExpression["^<1=[#b]?[A-G]>"],1])!={},
+				argument=keyAndOctTokenizer[match[[1]]],
+			(match=StringCases[track[[1]],RegularExpression["^<\\d+/\\d+>"],1])!={},
+				argument=barAndBeatTokenizer[match[[1]]],
+			(match=StringCases[track[[1]],RegularExpression["^<\\d+>"],1])!={},
+				argument={"Speed"->ToExpression[StringTake[match[[1]],{2,StringLength[match[[1]]]-1}]]},
+			True,
+				MessageDialog[TextCell["Undefined token found at "<>track],WindowTitle->"Error"];
+				Return[False];
+			];
+			AppendTo[notations,{
+				"Type"->"FunctionToken",
+				"Simplified"->True,
+				"Argument"->argument
+			}];
+			,
+		"{",
+			,
+		"(",
+			,
+		"[",
+			,
+		_,
+			
+		];
+		track=StringDrop[track,StringLength[match[[1]]]];
+	];
+	
 	Return[{}];
 ];
 
-qymTokenizer[filename_]:=Module[
+tokenizer[filename_]:=Block[
 	{
 		(* Define variables *)
 		i,
@@ -18,7 +54,7 @@ qymTokenizer[filename_]:=Module[
 	(* Read file *)
 	If[!FileExistsQ[filename],
 		MessageDialog[TextCell["File not found!"],WindowTitle->"Error"];
-		Return[];
+		Return[False];
 	];
 	content=Import[filename,"Lines"];
 	(* Global comments *)
@@ -44,13 +80,13 @@ qymTokenizer[filename_]:=Module[
 		(* Global settings *)
 		globalsettings={};
 		If[i<=Length[content] && content[[i]]!="" && StringTake[content[[i]],-1]==">",
-			globalsettings=qymTrackTokenizer[content[[i]]];
+			globalsettings=trackTokenizer[content[[i]]];
 			i++;
 		];
 		(* Tracks *)
 		tracks={};
 		While[i<=Length[content] && content[[i]]!="" && (StringLength[content[[i]]]<2 || StringTake[content[[i]],2]!="//"),
-			AppendTo[tracks,qymTrackTokenizer[content[[i]]]];
+			AppendTo[tracks,trackTokenizer[content[[i]]]];
 			i++;
 		];
 		(* Construct section *)
@@ -68,7 +104,8 @@ qymTokenizer[filename_]:=Module[
 		"Sections"->sections
 	}];
 ];
+End[];
 
 
 (* ::Input:: *)
-(*ExportString[qymTokenizer[NotebookDirectory[]<>"Songs\\Frozen\\Let_It_Go.qym"],"JSON"]*)
+(*ExportString[qym`tokenizer[NotebookDirectory[]<>"Songs\\Frozen\\Let_It_Go.qym"],"JSON"]*)

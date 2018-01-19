@@ -1,47 +1,162 @@
 (* ::Package:: *)
 
 Begin["qym`"];
-trackTokenizer[track_]:=Block[
+simitoneOp=Alternatives[Characters["b#"]]...;
+pitOp=Alternatives[Characters["adMmop$,'"]]...;
+durOp=Alternatives[Characters["-_."]]...;
+pitch=simitoneOp~~"x"|DigitCharacter~~pitOp;
+repeatcount=0;
+
+getOrder[ord_]:=Block[
 	{
-		match,
-		notations,
-		argument
+		order
 	},
-	notations={};
-	While[track!="",
-		Switch[track[[1]],
-		"<",
-			Which[
-			(match=StringCases[track[[1]],RegularExpression["^<1=[#b]?[A-G]>"],1])!={},
-				argument=keyAndOctTokenizer[match[[1]]],
-			(match=StringCases[track[[1]],RegularExpression["^<\\d+/\\d+>"],1])!={},
-				argument=barAndBeatTokenizer[match[[1]]],
-			(match=StringCases[track[[1]],RegularExpression["^<\\d+>"],1])!={},
-				argument={"Speed"->ToExpression[StringTake[match[[1]],{2,StringLength[match[[1]]]-1}]]},
-			True,
-				MessageDialog[TextCell["Undefined token found at "<>track],WindowTitle->"Error"];
-				Return[False];
-			];
-			AppendTo[notations,{
-				"Type"->"FunctionToken",
-				"Simplified"->True,
-				"Argument"->argument
-			}];
-			,
-		"{",
-			,
-		"(",
-			,
-		"[",
-			,
-		_,
-			
-		];
-		track=StringDrop[track,StringLength[match[[1]]]];
-	];
-	
-	Return[{}];
+	order=StringCases[ord,{
+		n:int~~".":>ToExpression@n
+	}];
+	repeatcount=Max[repeatcount,order];
+	Return[order];
 ];
+
+getPitch[pitches_]:=StringCases[pitches,
+	simitoneOps:simitoneOp~~pitSd:("x"|DigitCharacter)~~pitOps:pitOp:>{
+		"ScaleDegree"->Switch[pitSd,
+			"x",
+				10,
+			_,
+				ToExpression[pitSd]
+		],
+		"SemitonesCount"->StringCount[simitoneOps,"#"]-StringCount[simitoneOps,"b"],
+		"OctavesCount"->StringCount[pitOps,"'"]-StringCount[pitOps,","],
+		"ChordSymbol"->StringDelete[pitOps,"'"|","]
+	}
+];
+
+trackTokenizer[track_]:=StringCases[track,{
+	(* Repeat *)
+	(StartOfString|"|:")~~(subtrack__/;!StringContainsQ[subtrack,"|:"])~~lastvolta:(":||["~~(int~~".")..~~"]"):>{
+		"Type"->"Track",
+		"Contents"->trackTokenizer[StringDelete[subtrack<>lastvolta,":|"]],
+		"Repeat"->If[repeatcount==0,2,repeatcount]
+	},
+	(StartOfString|"|:")~~(subtrack__/;!StringContainsQ[subtrack,"|:"])~~":|":>{
+		"Type"->"Track",
+		"Contents"->trackTokenizer[StringDelete[subtrack,":|"]],
+		"Repeat"->If[repeatcount==0,2,repeatcount]
+	},
+	StartOfString~~(subtrack__/;!StringContainsQ[subtrack,"*|"])~~"*|":>{
+		"Type"->"Track",
+		"Contents"->trackTokenizer[subtrack],
+		"Repeat"->-2
+	},
+	"|["~~order:(int~~".")..~~"]":>{
+		"Type"->"BarLine",
+		"Newline"->False,
+		"Skip"->False,
+		"Order"->getOrder[order]
+	},
+	"|*":>{
+		"Type"->"BarLine",
+		"Newline"->False,
+		"Skip"->True,
+		"Order"->{0}
+	},
+	(* Barline *)
+	"|":>{
+		"Type"->"BarLine",
+		"Newline"->False,
+		"Skip"->False,
+		"Order"->{0}
+	},
+	(* Function Token *)
+	"<1="~~tonality:(LetterCharacter|","|"'"|"#")..~~">":>{
+		"Type"->"FunctionToken",
+		"Simplified"->True,
+		"Argument"->{
+			"Key"->tonalityDict[[StringDelete[tonality,","|"'"]]],
+			"Oct"->StringCount[tonality,"'"]-StringCount[tonality,","]
+		}
+	},
+	"<"~~bar:int~~"/"~~beat:int~~">":>{
+		"Type"->"FunctionToken",
+		"Simplified"->True,
+		"Argument"->{
+			"Bar"->ToExpression[bar],
+			"Beat"->ToExpression[beat]
+		}
+	},
+	"<"~~speed:int~~">":>{
+		"Type"->"FunctionToken",
+		"Simplified"->True,
+		"Argument"->{
+			"Speed"->ToExpression[speed]
+		}
+	},
+	"<"~~volume:int~~"%>":>{
+		"Type"->"FunctionToken",
+		"Simplified"->True,
+		"Argument"->{
+			"Volume"->ToExpression[volume]
+		}
+	},
+	(* Instrument *)
+	"{"~~instr:WordCharacter..~~"}":>{
+		"Type"->"FunctionToken",
+		"Simplified"->True,
+		"Argument"->{
+			"Instr"->instr
+		}
+	},
+	(* Tuplet *)
+	"("~~n:int~~")":>{
+		"Type"->"Tuplet",
+		"NotesCount"->ToExpression[n]
+	},
+	(* Tremolo *)
+	"("~~n:expr~~"-)":>{
+		"Type"->"Tremolo1",
+		"StrokesCount"->ToExpression[n]
+	},
+	"("~~n:expr~~"=)":>{
+		"Type"->"Tremolo2",
+		"StrokesCount"->ToExpression[n]
+	},
+	(* Fermata *)
+	"(.)":>{
+		"Type"->"Fermata",
+		"Ratio"->2
+	},
+	(* Appoggiatura *)
+	"("~~pitches:pitch..~~"^)":>{
+		"Type"->"Appoggiatura",
+		"Pitches"->getPitch[pitches]
+	},
+	(* Portamento *)
+	"~":>{
+		"Type"->"Portamento"
+	},
+	(* Tie *)
+	"^":>{
+		"Type"->"Tie"
+	},
+	(* Note *)
+	pitches:((pitch~~"&")...~~pitch)~~durOp:durOp:>{
+		"Type"->"Note",
+		"Pitches"->getPitch[StringDelete[pitches,"&"]],
+		"SemitonesCount"->0,
+		"OctavesCount"->0,
+		"Staccato"->False,
+		"Arpeggio"->False,
+		"DurationOperators"->durOp
+	},
+	(* Space *)
+	" "..:>Nothing,
+	(* Undefined *)
+	undef__:>{
+		"Type"->"Undefined",
+		"Content"->undef
+	}
+}];
 
 tokenizer[filename_]:=Block[
 	{
@@ -57,6 +172,8 @@ tokenizer[filename_]:=Block[
 		Return[False];
 	];
 	content=Import[filename,"Lines"];
+	(* Initialization *)
+	repeatcount=0;
 	(* Global comments *)
 	i=1;
 	globalcomments={};
@@ -108,4 +225,4 @@ End[];
 
 
 (* ::Input:: *)
-(*ExportString[qym`tokenizer[NotebookDirectory[]<>"Songs\\Frozen\\Let_It_Go.qym"],"JSON"]*)
+(*ExportString[tokenizer[NotebookDirectory[]<>"Songs\\Sunny_Light.qym"],"JSON"]*)

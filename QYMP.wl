@@ -8,13 +8,13 @@ path=NotebookDirectory[];
 <<(path<>"library.wl")
 <<(path<>"assets.wl")
 <<(path<>"interface.wl")
-<<(path<>"qymParse.wl")
+<<(path<>"qymToken.wl")
 <<(path<>"qysToken.wl")
 <<(path<>"parser.wl")
 
 
 (* temporary function *)
-QYMParse[filename_]:=QYMparse`QYMParse[filename];
+QYMParse[filename_]:=integrate[#MusicClips,#Effects]&@parse[qym`tokenizer[filename]];
 QYSParse[filename_]:=integrate[#MusicClips,#Effects]&@parse[QYS`Tokenize[filename]];
 
 

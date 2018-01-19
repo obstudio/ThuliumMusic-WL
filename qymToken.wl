@@ -5,6 +5,18 @@ simitoneOp=Alternatives[Characters["b#"]]...;
 pitOp=Alternatives[Characters["adMmop$,'"]]...;
 durOp=Alternatives[Characters["-_."]]...;
 pitch=simitoneOp~~"x"|DigitCharacter~~pitOp;
+repeatcount=0;
+
+getOrder[ord_]:=Block[
+	{
+		order
+	},
+	order=StringCases[ord,{
+		n:int~~".":>ToExpression@n
+	}];
+	repeatcount=Max[repeatcount,order];
+	Return[order];
+];
 
 getPitch[pitches_]:=StringCases[pitches,
 	simitoneOps:simitoneOp~~pitSd:("x"|DigitCharacter)~~pitOps:pitOp:>{
@@ -21,6 +33,36 @@ getPitch[pitches_]:=StringCases[pitches,
 ];
 
 trackTokenizer[track_]:=StringCases[track,{
+	(* Repeat *)
+	(StartOfString|"||:")~~subtrack_/;(!StringContainsQ[subtrack,":||"])~~":||":>{
+		"Type"->"Track",
+		"Contents"->trackTokenizer[subtrack],
+		"Repeat"->repeatcount
+	},
+	StartOfString~~subtrack_/;(!StringContainsQ[subtrack,"*||"])~~"*||":>{
+		"Type"->"Track",
+		"Contents"->trackTokenizer[subtrack],
+		"Repeat"->-2
+	},
+	"|["~~order:(int~~".")..~~"]":>{
+		"Type"->"BarLine",
+		"Newline"->False,
+		"Skip"->False,
+		"Order"->getOrder[order]
+	},
+	"|*":>{
+		"Type"->"BarLine",
+		"Newline"->False,
+		"Skip"->True,
+		"Order"->{0}
+	},
+	(* Barline *)
+	"|":>{
+		"Type"->"BarLine",
+		"Newline"->False,
+		"Skip"->False,
+		"Order"->{0}
+	},
 	(* Function Token *)
 	"<1="~~tonality:(LetterCharacter|","|"'"|"#")..~~">":>{
 		"Type"->"FunctionToken",
@@ -79,7 +121,7 @@ trackTokenizer[track_]:=StringCases[track,{
 		"Type"->"Tie"
 	},
 	(* Note *)
-	pitches:(pitch~~"&")...~~pitch~~durOp:durOp:>{
+	pitches:((pitch~~"&")...~~pitch)~~durOp:durOp:>{
 		"Type"->"Note",
 		"Pitches"->getPitch[StringDelete[pitches,"&"]],
 		"SemitonesCount"->0,
@@ -87,11 +129,6 @@ trackTokenizer[track_]:=StringCases[track,{
 		"Staccato"->False,
 		"Arpeggio"->False,
 		"DurationOperators"->durOp
-	},
-	(* Barline *)
-	"|":>{
-		"Type"->"BarLine",
-		"Newline"->False
 	},
 	(* Space *)
 	" "..:>Nothing,
@@ -102,7 +139,7 @@ trackTokenizer[track_]:=StringCases[track,{
 	}
 }];
 
-tokenizer[filename_]:=Module[
+tokenizer[filename_]:=Block[
 	{
 		(* Define variables *)
 		i,
@@ -116,6 +153,8 @@ tokenizer[filename_]:=Module[
 		Return[False];
 	];
 	content=Import[filename,"Lines"];
+	(* Initialization *)
+	repeatcount=0;
 	(* Global comments *)
 	i=1;
 	globalcomments={};
@@ -167,4 +206,4 @@ End[];
 
 
 (* ::Input:: *)
-(*ExportString[tokenizer[NotebookDirectory[]<>"Songs\\Frozen\\Let_It_Go.qym"],"JSON"]*)
+(*ExportString[tokenizer[NotebookDirectory[]<>"Songs\\Bracing_the_Chill.qym"],"JSON"]*)

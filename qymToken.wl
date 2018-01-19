@@ -34,12 +34,17 @@ getPitch[pitches_]:=StringCases[pitches,
 
 trackTokenizer[track_]:=StringCases[track,{
 	(* Repeat *)
-	(StartOfString|"||:")~~subtrack_/;(!StringContainsQ[subtrack,":||"])~~":||":>{
+	(StartOfString|"|:")~~(subtrack__/;!StringContainsQ[subtrack,"|:"])~~lastvolta:(":||["~~(int~~".")..~~"]"):>{
 		"Type"->"Track",
-		"Contents"->trackTokenizer[subtrack],
-		"Repeat"->repeatcount
+		"Contents"->trackTokenizer[StringDelete[subtrack<>lastvolta,":|"]],
+		"Repeat"->If[repeatcount==0,2,repeatcount]
 	},
-	StartOfString~~subtrack_/;(!StringContainsQ[subtrack,"*||"])~~"*||":>{
+	(StartOfString|"|:")~~(subtrack__/;!StringContainsQ[subtrack,"|:"])~~":|":>{
+		"Type"->"Track",
+		"Contents"->trackTokenizer[StringDelete[subtrack,":|"]],
+		"Repeat"->If[repeatcount==0,2,repeatcount]
+	},
+	StartOfString~~(subtrack__/;!StringContainsQ[subtrack,"*|"])~~"*|":>{
 		"Type"->"Track",
 		"Contents"->trackTokenizer[subtrack],
 		"Repeat"->-2
@@ -103,9 +108,23 @@ trackTokenizer[track_]:=StringCases[track,{
 		}
 	},
 	(* Tuplet *)
-	"("~~n:int~~"~)":>{
+	"("~~n:int~~")":>{
 		"Type"->"Tuplet",
 		"NotesCount"->ToExpression[n]
+	},
+	(* Tremolo *)
+	"("~~n:expr~~"-)":>{
+		"Type"->"Tremolo1",
+		"StrokesCount"->ToExpression[n]
+	},
+	"("~~n:expr~~"=)":>{
+		"Type"->"Tremolo2",
+		"StrokesCount"->ToExpression[n]
+	},
+	(* Fermata *)
+	"(.)":>{
+		"Type"->"Fermata",
+		"Ratio"->2
 	},
 	(* Appoggiatura *)
 	"("~~pitches:pitch..~~"^)":>{
@@ -206,4 +225,4 @@ End[];
 
 
 (* ::Input:: *)
-(*ExportString[tokenizer[NotebookDirectory[]<>"Songs\\Bracing_the_Chill.qym"],"JSON"]*)
+(*ExportString[tokenizer[NotebookDirectory[]<>"Songs\\Sunny_Light.qym"],"JSON"]*)

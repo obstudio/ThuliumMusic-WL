@@ -281,7 +281,7 @@ parse[tokenizer_,sections_]:=Module[
 	effects=settings[[effectSettingTag]];
 	tokenData=Association[tokenizer][["Sections"]];
 	sectionCount=Length[tokenData];
-	messages=ConstantArray[{},sectionCount];
+	messages=ConstantArray[<|"TrackMessages"->{},"GlobalMessages"->{}|>,sectionCount];
 	Switch[sections,
 		_?ListQ,{startSection,endSection}=sections,
 		_?NumberQ,{startSection,endSection}={sections,sections},
@@ -335,13 +335,13 @@ parse[tokenizer_,sections_]:=Module[
 
 
 (* ::Input:: *)
-(*debug[#Messages]&@parse[QYS`Tokenize[path<>"Songs\\Telegrapher.qys"],All]*)
+(*debug[#Messages]&@parse[QYS`Tokenize[path<>"Songs\\Noushyou_Sakuretsu_Garu.qys"],All]*)
 
 
 (* ::Input:: *)
 (*AudioStop[];AudioPlay[#[[2]]]&@*)
 (*EchoFunction["time: ",#[[1]]&]@*)
-(*Timing[integrate[#MusicClips,#Effects]&[parse[QYS`Tokenize[path<>"Songs\\Lonely_Night.qys"],All]]];*)
+(*Timing[integrate[#MusicClips,#Effects]&[parse[QYS`Tokenize[path<>"Songs\\Noushyou_Sakuretsu_Garu.qys"],5]]];*)
 
 
 (* ::Input:: *)
@@ -379,13 +379,15 @@ debug[messages_]:=Module[{output={},sectionOutput},
 ];
 
 
+generate=If[MemberQ[instrData[["Style"]],#[[3]]],
+	SoundNote[#[[1]],#[[2]],#[[3]]],
+	SoundNote[If[TrueQ@#[[1]],#[[3]],None],#[[2]]]
+]&;
 integrate[tracks_]:=integrate[tracks,defaultSettings[[effectSettingTag]]];
 integrate[tracks_,effects_]:=Module[
 	{
-		j,
-		settings,instrCount,
-		instrument,final={},
-		generate,audio=0
+		j,settings,instrCount,
+		final={},audio=0
 	},
 	
 	(* simplify *)
@@ -397,7 +399,6 @@ integrate[tracks_,effects_]:=Module[
 		];
 		Do[
 			j=LengthWhile[final,Or[
-				#Instr!=settings[["Instr",i]],
 				#Volume!=settings[["Volume",i]],
 				#Duration>trackData[["Beginning"]],
 				#FadeOut!=0,
@@ -405,15 +406,14 @@ integrate[tracks_,effects_]:=Module[
 			]&]+1;
 			If[j>Length@final,
 				AppendTo[final,<|
-					"SoundData"->Prepend[trackData[["SoundData"]],{None,trackData[["Beginning"]]}],
+					"SoundData"->(Append[#,settings[["Instr",i]]]&)/@Prepend[trackData[["SoundData"]],{None,trackData[["Beginning"]]}],
 					"Duration"->trackData[["End"]],
-					"Instr"->settings[["Instr",i]],
 					"Volume"->settings[["Volume",i]],
 					"FadeIn"->settings[["FadeIn"]],
 					"FadeOut"->settings[["FadeOut"]]
 				|>],
-				AppendTo[final[[j,"SoundData"]],{None,trackData[["Beginning"]]-final[[j,"Duration"]]}];
-				final[[j,"SoundData"]]=Join[final[[j,"SoundData"]],trackData[["SoundData"]]];
+				AppendTo[final[[j,"SoundData"]],{None,trackData[["Beginning"]]-final[[j,"Duration"]],"Piano"}];
+				final[[j,"SoundData"]]=Join[final[[j,"SoundData"]],Append[#,settings[["Instr",i]]]&/@trackData[["SoundData"]]];
 				final[[j,"Duration"]]=trackData[["End"]];
 			],
 		{i,instrCount}],
@@ -421,11 +421,6 @@ integrate[tracks_,effects_]:=Module[
 	
 	(* integrate *)
 	Do[
-		instrument=data[["Instr"]];
-		If[MemberQ[instrData[["Style"]],instrument],
-			generate=SoundNote[#[[1]],#[[2]],instrument]&,
-			generate=SoundNote[If[TrueQ@#[[1]],instrument,None],#[[2]]]&
-		];
 		audio+=data[["Volume"]]*AudioFade[
 			Sound[generate/@data[["SoundData"]]],
 		{data[["FadeIn"]],data[["FadeOut"]]}],

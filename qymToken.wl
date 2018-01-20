@@ -96,7 +96,7 @@ trackTokenizer[track_]:=StringCases[track,{
 		"Type"->"FunctionToken",
 		"Simplified"->True,
 		"Argument"->{
-			"Volume"->ToExpression[volume]/100
+			"Volume"->{ToExpression[volume]/100}
 		}
 	},
 	(* Instrument *)
@@ -104,7 +104,7 @@ trackTokenizer[track_]:=StringCases[track,{
 		"Type"->"FunctionToken",
 		"Simplified"->True,
 		"Argument"->{
-			"Instr"->instr
+			"Instr"->{instr}
 		}
 	},
 	(* Tuplet *)

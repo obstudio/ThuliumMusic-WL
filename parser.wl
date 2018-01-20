@@ -8,7 +8,6 @@ defaultSettings=<|
 functionList=Keys@defaultSettings;
 metaSettingTag={"Instr","Volume","FadeIn","FadeOut"};
 effectSettingTag={"FadeIn","FadeOut"};
-messageTemplate=<|"TrackMessages"->{},"GlobalMessages"->{}|>;
 
 
 beatCalc[operators_]:=Module[{beats=1,i=1},
@@ -69,7 +68,7 @@ trackParse[tokenizer_,global_]:=Module[
 		(* repeat and subtrack *)
 		voltaData,voltaSettings,
 		voltaDefault,volta={},
-		master,lastRepeat,trackData,
+		master,lastRepeat=<||>,trackData,
 		
 		(* return value *)
 		MusicClips,soundData={},
@@ -126,8 +125,7 @@ trackParse[tokenizer_,global_]:=Module[
 						],
 					tie&&pitches==previous[[2]],
 						soundData[[-1,2]]+=duration;
-						prevBeat+=beatCount;
-						tie=False,
+						prevBeat+=beatCount,
 					tremolo1!=0,
 						duration/=(beatCount*2^tremolo1);
 						Do[
@@ -169,7 +167,8 @@ trackParse[tokenizer_,global_]:=Module[
 							staccato=False,
 							AppendTo[soundData,{pitches,duration}];
 						];
-				],
+				];
+				tie=False,
 			"BarLine",
 				If[token[["Skip"]],lastRepeat=<|"SoundData"->soundData,"Duration"->durCount|>];
 				If[token[["Order"]]!={0},
@@ -256,6 +255,16 @@ trackParse[tokenizer_,global_]:=Module[
 ];
 
 
+(* ::Input:: *)
+(*debug[#Messages]&@parse[QYS`Tokenize[path<>"Songs\\test.qys"],All]*)
+
+
+(* ::Input:: *)
+(*AudioStop[];AudioPlay[#[[2]]]&@*)
+(*EchoFunction["time: ",#[[1]]&]@*)
+(*Timing[integrate[#MusicClips,#Effects]&[parse[QYS`Tokenize[path<>"Songs\\test.qys"],All]]];*)
+
+
 parse[tokenizer_]:=parse[tokenizer,All];
 parse[tokenizer_,sections_]:=Module[
 	{
@@ -272,7 +281,7 @@ parse[tokenizer_,sections_]:=Module[
 	effects=settings[[effectSettingTag]];
 	tokenData=Association[tokenizer][["Sections"]];
 	sectionCount=Length[tokenData];
-	messages=ConstantArray[messageTemplate,sectionCount];
+	messages=ConstantArray[{},sectionCount];
 	Switch[sections,
 		_?ListQ,{startSection,endSection}=sections,
 		_?NumberQ,{startSection,endSection}={sections,sections},
@@ -326,7 +335,13 @@ parse[tokenizer_,sections_]:=Module[
 
 
 (* ::Input:: *)
-(*debug[#Messages]&@parse[QYS`Tokenize[path<>"Songs\\test.qys"],All]*)
+(*debug[#Messages]&@parse[QYS`Tokenize[path<>"Songs\\Telegrapher.qys"],All]*)
+
+
+(* ::Input:: *)
+(*AudioStop[];AudioPlay[#[[2]]]&@*)
+(*EchoFunction["time: ",#[[1]]&]@*)
+(*Timing[integrate[#MusicClips,#Effects]&[parse[QYS`Tokenize[path<>"Songs\\Lonely_Night.qys"],All]]];*)
 
 
 (* ::Input:: *)
@@ -337,7 +352,7 @@ parse[tokenizer_,sections_]:=Module[
 
 debug[messages_]:=Module[{output={},sectionOutput},
 	Do[
-		If[messages[[i]]!=messageTemplate,
+		If[Flatten@Values@messages[[i]]!={},
 			sectionOutput={};
 			Do[
 				If[messages[[i,"TrackMessages",j]]!={},

@@ -303,7 +303,7 @@ parse[tokenizer_,sections_]:=Module[
 		messages[[i,"TrackMessages"]]=ConstantArray[{},trackCount];
 		trackDuration={};
 		Do[
-			trackData=trackParse[sectionToken[["Tracks",j]],settings];
+			trackData=trackParse[Association@sectionToken[["Tracks",j]],settings];
 			AppendTo[trackDuration,trackData[["Duration"]]];
 			MusicClips=Join[MusicClips,<|
 				"SoundData"->#SoundData,
@@ -347,7 +347,7 @@ parse[tokenizer_,sections_]:=Module[
 (* ::Input:: *)
 (*AudioStop[];AudioPlay[#[[2]]]&@*)
 (*EchoFunction["time: ",#[[1]]&]@*)
-(*Timing[integrate[#MusicClips,#Effects]&[parse[QYS`Tokenize[path<>"Songs\\Touhou\\Hana_ni_Kaze.qys"],All]]];*)
+(*Timing[integrate[#MusicClips,#Effects]&[parse[QYS`Tokenize[path<>"Songs\\Touhou\\Hana_ni_Kaze.qys"],{5,6}]]];*)
 
 
 debug[messages_]:=Module[{output={},sectionOutput},

@@ -335,13 +335,13 @@ parse[tokenizer_,sections_]:=Module[
 
 
 (* ::Input:: *)
-(*debug[#Messages]&@parse[QYS`Tokenize[path<>"Songs\\Noushyou_Sakuretsu_Garu.qys"],All]*)
+(*debug[#Messages]&@parse[QYS`Tokenize[path<>"Songs\\Touhou\\Hana_ni_Kaze.qys"],All]*)
 
 
 (* ::Input:: *)
 (*AudioStop[];AudioPlay[#[[2]]]&@*)
 (*EchoFunction["time: ",#[[1]]&]@*)
-(*Timing[integrate[#MusicClips,#Effects]&[parse[QYS`Tokenize[path<>"Songs\\Noushyou_Sakuretsu_Garu.qys"],5]]];*)
+(*Timing[integrate[#MusicClips,#Effects]&[parse[QYS`Tokenize[path<>"Songs\\test.qys"],5]]];*)
 
 
 (* ::Input:: *)
@@ -375,7 +375,7 @@ debug[messages_]:=Module[{output={},sectionOutput},
 			},True,Method->"Active"]]
 		],
 	{i,Length@messages}];
-	Return[Column[output]];
+	If[output!={},Print[Column[output]]];
 ];
 
 

@@ -116,11 +116,11 @@ Tokenize[filename_]:=Module[
 					];
 					sectionMeta={"Comments"->comments,"GlobalSettings"->trackToken};
 					comments={},
-					AppendTo[tracks,<|                                              (* real track *)
+					AppendTo[tracks,{                                              (* real track *)
 						"Type"->"Track",
 						"Contents"->trackToken,
 						"Repeat"->0
-					|>]
+					}]
 				];
 				score=""
 		],

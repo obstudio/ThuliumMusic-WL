@@ -203,7 +203,11 @@ tokenizer[filename_]:=Block[
 		(* Tracks *)
 		tracks={};
 		While[i<=Length[content] && content[[i]]!="" && (StringLength[content[[i]]]<2 || StringTake[content[[i]],2]!="//"),
-			AppendTo[tracks,trackTokenizer[content[[i]]]];
+			AppendTo[tracks,{
+				"Type"->"Track",
+				"Contents"->trackTokenizer[content[[i]]],
+				"Repeat"->0
+			}];
 			i++;
 		];
 		(* Construct section *)

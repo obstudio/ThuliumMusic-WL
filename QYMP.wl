@@ -5,12 +5,13 @@
 
 
 path=NotebookDirectory[];
-<<(path<>"library.wl")
-<<(path<>"assets.wl")
-<<(path<>"interface.wl")
-<<(path<>"qymToken.wl")
-<<(path<>"qysToken.wl")
-<<(path<>"parser.wl")
+<<(path<>"Lib\\library.wl")
+<<(path<>"Lib\\assets.wl")
+<<(path<>"Lib\\uiUser.wl")
+<<(path<>"Lib\\uiDeve.wl")
+<<(path<>"Lib\\qymToken.wl")
+<<(path<>"Lib\\qysToken.wl")
+<<(path<>"Lib\\parser.wl")
 
 
 (* temporary function *)

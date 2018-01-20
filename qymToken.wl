@@ -96,7 +96,7 @@ trackTokenizer[track_]:=StringCases[track,{
 		"Type"->"FunctionToken",
 		"Simplified"->True,
 		"Argument"->{
-			"Volume"->ToExpression[volume]
+			"Volume"->ToExpression[volume]/100
 		}
 	},
 	(* Instrument *)

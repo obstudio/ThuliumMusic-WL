@@ -26,7 +26,6 @@ uiSettings:=DynamicModule[{choices},
 				langData=Association@Import[path<>"Lang\\"<>choices[["Language"]]<>".json"];
 				tagName=Association@langData[["TagName"]];
 				instrName=Association@langData[["Instrument"]];
-				errorDict=Association@langData[["Error"]];
 				text=Association@langData[["Caption"]];
 				aboutInfo=Association@text[["AboutQYMP"]];
 				userInfo=choices;
@@ -115,7 +114,7 @@ uiPlayerControlsNew:={
 
 uiPlayer[song_]:=Module[{image,audio,imageExist,aspectRatio},
 	AudioStop[];
-	If[KeyExistsQ[index[[song]],"Image"],
+	If[index[[song,"Image"]]!="",
 		imageExist=True;
 		image=Import[userPath<>"Images\\"<>index[[song,"Image"]]];
 		aspectRatio=ImageAspectRatio[image],
@@ -142,7 +141,7 @@ uiPlayer[song_]:=Module[{image,audio,imageExist,aspectRatio},
 			],
 		Spacer[{40,40}]}]}],Nothing],Spacer[48],
 		Column[Join[{Spacer[{60,60}],
-			If[KeyExistsQ[index[[song]],"Comment"],
+			If[index[[song,"Comment"]]!="",
 				If[textLength@index[[song,"SongName"]]>16||textLength@index[[song,"Comment"]]>16,
 					Column,
 					Row
@@ -153,12 +152,12 @@ uiPlayer[song_]:=Module[{image,audio,imageExist,aspectRatio},
 				caption[index[[song,"SongName"]],"Title"]
 			],
 			Spacer[1],
-			Column[If[KeyExistsQ[index[[song]],#],
+			Column[If[index[[song,#]]!="",
 				caption[tagName[[#]]<>": "<>index[[song,#]],"Text"],
 				Nothing
 			]&/@{"Composer","Lyricist","Adapter"},Alignment->Center],
 			Spacer[1],
-			If[KeyExistsQ[index[[song]],"Abstract"],
+			If[index[[song,"Abstract"]]!="",
 				Column[caption[#,"Text"]&/@StringSplit[index[[song,"Abstract"]],"\n"],Center],
 				Nothing
 			],
@@ -175,7 +174,7 @@ uiPlayer[song_]:=Module[{image,audio,imageExist,aspectRatio},
 
 
 uiModifySong[song_]:=DynamicModule[{textInfo},
-	textInfo=getTextInfo[song];
+	textInfo=index[[song,textInfoTags]];
 	CreateDialog[Column[{Spacer[{20,20}],
 		caption[textInfo[["SongName"]],"Title"],
 		Spacer[1],
@@ -187,12 +186,35 @@ uiModifySong[song_]:=DynamicModule[{textInfo},
 		Spacer[1],
 		Grid[{
 			{Button[text[["Save"]],putTextInfo[song,textInfo],ImageSize->150,Enabled->Dynamic[textInfo[["SongName"]]!=""]],
-			Button[text[["Undo"]],textInfo=getTextInfo[song],ImageSize->150]},
+			Button[text[["Undo"]],textInfo=index[[song,textInfoTags]],ImageSize->150]},
 			{Button[text[["DeleteSong"]],DialogReturn[uiDeleteSong[song]],ImageSize->150],
 			Button[text[["Return"]],DialogReturn[refresh;uiPlaylist["All"]],ImageSize->150]}
 		}],Spacer[{20,20}]
 	},Center,ItemSize->Full,Spacings->1],
 	Background->styleColor[["Background"]],WindowTitle->text[["ModifySong"]]];
+];
+
+
+putTextInfo[song_,textInfo_]:=Module[
+	{info=index[[song]]},
+	Do[
+		info[[tag]]=textInfo[[tag]],
+	{tag,textInfoTags}];
+	index[[song]]=info;
+	Export[path<>"Meta\\"<>song<>".json",index[[song]]];
+];
+
+
+tagTemplate=<|"Image"->"","Uploader"->"","Tags"->{}|>;
+addSong[songPath_,textInfo_]:=Module[{song,metaInfo,audio,format},
+	song=StringDrop[songPath,-4];
+	format=StringTake[songPath,-3];
+	audio=If[format=="qys",QYSParse,QYMParse][path<>"Songs\\"<>songPath];
+	Export[userPath<>"Buffer\\"<>song<>".buffer",audio,"MP3"];
+	AppendTo[bufferHash,song->toBase32@FileHash[path<>"Songs\\"<>songPath]];
+	Export[userPath<>"Buffer.json",Normal@bufferHash];
+	AppendTo[index,song->Join[textInfo,tagTemplate,<|"Format"->format|>]];
+	putTextInfo[song,textInfo];
 ];
 
 
@@ -220,21 +242,6 @@ uiAddSong:=DynamicModule[{songPath,textInfo,candidates},
 		Button[text[["Return"]],DialogReturn[refresh;uiPlaylist["All"]],ImageSize->150]}],
 	Spacer[{40,40}]},Center,ItemSize->Full,Spacings->1],
 	Background->styleColor[["Background"]],WindowTitle->text[["AddSong"]]]
-];
-
-
-addSong[songPath_,textInfo_]:=Module[{song,metaInfo,audio},
-	song=StringDrop[songPath,-4];
-	AppendTo[bufferHash,song->toBase32@FileHash[path<>"Songs\\"<>songPath]];
-	Export[userPath<>"Buffer.json",Normal@bufferHash];
-	audio=If[StringTake[songPath,-3]=="qys",QYSParse,QYMParse][path<>"Songs\\"<>songPath];
-	Export[userPath<>"Buffer\\"<>song<>".buffer",audio,"MP3"];
-	metaInfo=Values[Options[audio,MetaInformation]][[1]];
-	metaInfo[["TrackCount"]]=ToString[metaInfo[["TrackCount"]]];
-	metaInfo[["Duration"]]=ToString[metaInfo[["Duration"]],InputForm];
-	metaInfo[["Instruments"]]=ToString[metaInfo[["Instruments"]],InputForm];
-	AppendTo[index,song->metaInfo];
-	putTextInfo[song,textInfo];
 ];
 
 

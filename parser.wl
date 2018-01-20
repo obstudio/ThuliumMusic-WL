@@ -8,6 +8,7 @@ defaultSettings=<|
 functionList=Keys@defaultSettings;
 metaSettingTag={"Instr","Volume","FadeIn","FadeOut"};
 effectSettingTag={"FadeIn","FadeOut"};
+messageTemplate=<|"TrackMessages"->{},"GlobalMessages"->{}|>;
 
 
 beatCalc[operators_]:=Module[{beats=1,i=1},
@@ -185,7 +186,8 @@ trackParse[tokenizer_,global_]:=Module[
 					barCount++;
 					If[barBeat!=settings[["Bar"]],AppendTo[messages,<|
 						"Type"->"BarLengthError",
-						"Info"->{barCount,settings[["Bar"]],barBeat}
+						"Bar"->barCount,
+						"Info"->{settings[["Bar"]],barBeat}
 					|>]];
 					barBeat=0;
 				],
@@ -203,9 +205,24 @@ trackParse[tokenizer_,global_]:=Module[
 						|>]
 					],
 				{musicClip,trackData[["MusicClips"]]}];
+				messages=Join[messages,<|
+					"Type"->#Type,
+					"Bar"->#Bar+barCount,
+					"Info"->#Info
+				|>&/@trackData[["Messages"]]];
 				durCount+=trackData[["Duration"]];
+				barCount+=trackData[["BarCount"]];
 		],
 	{token,Association/@tokens}];
+	If[barBeat!=0,
+		barCount++;
+		If[barBeat!=settings[["Bar"]],AppendTo[messages,<|
+			"Type"->"BarLengthError",
+			"Bar"->barCount,
+			"Info"->{settings[["Bar"]],barBeat}
+		|>]];
+		barBeat=0;
+	];
 	
 	(* build main music clip *)
 	Switch[repeat,
@@ -233,6 +250,7 @@ trackParse[tokenizer_,global_]:=Module[
 	Return[<|
 		"MusicClips"->Join[{#Main,#Accent},#Subtracks]&[MusicClips],
 		"Duration"->trackDuration,
+		"BarCount"->barCount,
 		"Messages"->messages
 	|>]
 ];
@@ -245,19 +263,22 @@ parse[tokenizer_,sections_]:=Module[
 		tokenData,sectionToken,
 		trackData,MusicClips={},
 		sectionDuration,duration=0,
-		messages={},effects,
-		sectionCount,
+		trackDuration,
+		messages,effects,
+		sectionCount,trackCount,
 		startSection,endSection
 	},
 	settings=defaultSettings;
 	effects=settings[[effectSettingTag]];
 	tokenData=Association[tokenizer][["Sections"]];
 	sectionCount=Length[tokenData];
+	messages=ConstantArray[messageTemplate,sectionCount];
 	Switch[sections,
 		_?ListQ,{startSection,endSection}=sections,
 		_?NumberQ,{startSection,endSection}={sections,sections},
 		_,{startSection,endSection}={1,sectionCount}
 	];
+	
 	Do[
 		sectionToken=Association@tokenData[[i]];
 		sectionDuration=0;
@@ -269,18 +290,28 @@ parse[tokenizer_,sections_]:=Module[
 		{token,Association/@sectionToken[["GlobalSettings"]]}];
 		If[Length@sectionToken[["Tracks"]]==0,effects=settings[[effectSettingTag]]];
 		If[i<startSection||i>endSection,Continue[]];
+		trackCount=Length@sectionToken[["Tracks"]];
+		messages[[i,"TrackMessages"]]=ConstantArray[{},trackCount];
+		trackDuration={};
 		Do[
-			trackData=trackParse[trackToken,settings];
+			trackData=trackParse[sectionToken[["Tracks",j]],settings];
+			AppendTo[trackDuration,trackData[["Duration"]]];
 			MusicClips=Join[MusicClips,<|
 				"SoundData"->#SoundData,
 				"Beginning"->duration+#Beginning,
 				"End"->duration+#Beginning+#Duration,
 				"MetaSettings"->#MetaSettings
 			|>&/@trackData[["MusicClips"]]];
-			sectionDuration=Max[sectionDuration,trackData[["Duration"]]],
-		{trackToken,sectionToken[["Tracks"]]}];
+			messages[[i,"TrackMessages",j]]=trackData[["Messages"]],
+		{j,trackCount}];
+		sectionDuration=Max[trackDuration];
+		If[!SameQ@@trackDuration,AppendTo[messages[[i,"GlobalMessages"]],<|
+			"Type"->"DiffDuration",
+			"Info"->{trackDuration}
+		|>]];
 		duration+=sectionDuration,
 	{i,sectionCount}];
+	
 	Return[<|
 		"Infomation"-><|"Duration"->duration|>,
 		"MusicClips"->MusicClips,
@@ -295,15 +326,42 @@ parse[tokenizer_,sections_]:=Module[
 
 
 (* ::Input:: *)
-(*AudioStop[];AudioPlay[#[[2]]]&@*)
-(*EchoFunction["time: ",#[[1]]&]@*)
-(*Timing[QYSParse[path<>"Songs\\test.qys"]];*)
+(*debug[#Messages]&@parse[QYS`Tokenize[path<>"Songs\\test.qys"],All]*)
 
 
 (* ::Input:: *)
 (*AudioStop[];AudioPlay[#[[2]]]&@*)
 (*EchoFunction["time: ",#[[1]]&]@*)
 (*Timing[integrate[#MusicClips,#Effects]&[parse[QYS`Tokenize[path<>"Songs\\Touhou\\Hana_ni_Kaze.qys"],All]]];*)
+
+
+debug[messages_]:=Module[{output={},sectionOutput},
+	Do[
+		If[messages[[i]]!=messageTemplate,
+			sectionOutput={};
+			Do[
+				If[messages[[i,"TrackMessages",j]]!={},
+					AppendTo[sectionOutput,OpenerView[{
+						caption["_Track",{j}],
+						Column[Row[{
+							caption["_Bar",{#Bar}],
+							caption[": "],
+							caption[text[[#Type]],#Info]
+						}]&/@messages[[i,"TrackMessages",j]]]
+					},True,Method->"Active"]]
+				],
+			{j,Length@messages[[i,"TrackMessages"]]}];
+			sectionOutput=Join[sectionOutput,Row[{
+				caption[text[[#Type]],#Info]
+			}]&/@messages[[i,"GlobalMessages"]]];
+			AppendTo[output,OpenerView[{
+				caption["_Section",{i}],
+				Column[sectionOutput]
+			},True,Method->"Active"]]
+		],
+	{i,Length@messages}];
+	Return[Column[output]];
+];
 
 
 integrate[tracks_]:=integrate[tracks,defaultSettings[[effectSettingTag]]];

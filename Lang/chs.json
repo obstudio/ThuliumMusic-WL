@@ -61,20 +61,6 @@
 		"Whistle": "口哨",
         "Xylophone": "木琴"
     },
-	"Error": {
-		"FileNotFound": "未找到文件\"$1\"",
-		"TerminatorAbsent": "(章节&1,音轨&2) 缺少终止符",
-		"RepeatError": "(章节&1,音轨&2) 反复标记不匹配",
-		"InvalidTonality": "(章节&1,音轨&2,小节&3) 声明了无效调名\"$4\"",
-		"InvalidInstrument": "(章节&1,音轨&2,小节&3) 声明了无效乐器\"$4\"",
-		"InvalidCharacter": "(章节&1,音轨&2,小节&3) 匹配到无效字符\"$4\"",
-		"InvalidFunction": "(章节&1,音轨&2,小节&3) 声明了无效函数名\"$4\"",
-		"BarLengthError": "(章节&1,音轨&2,小节&3) 拍数错误: 应为&4拍, 实际为&5拍",
-		"NoFormerPitch": "(章节&1,音轨&2,小节&3) %缺少前一个音符",
-		"ExpectPitch": "(章节&1,音轨&2,小节&3) 应该使用音高1~7或和弦",
-		"ExpectPrecussion": "(章节&1,音轨&2,小节&3) 应该使用打击乐标记x或X",
-		"DiffDuration": "(章节&1) 各音轨长度不统一：#2"
-	},
 	"Caption": {
 		"QYMP": "青云播放器",
 		"Playlist": "歌单",
@@ -115,6 +101,19 @@
 			"Version": "1.5",
 			"Producer": "鄂毕工作室",
 			"Website": "www.qymp.tk"
-		}
+		},
+		"Section": "章节&1",
+		"Track": "音轨&1",
+		"Bar": "小节&1",
+		"FileNotFound": "未找到文件$1",
+		"TerminatorAbsent": "缺少终止符",
+		"InvalidTonality": "声明了无效调名$1",
+		"InvalidInstrument": "声明了无效乐器$1",
+		"InvalidCharacter": "匹配到无效字符$1",
+		"InvalidFunction": "声明了无效函数名$1",
+		"BarLengthError": "拍数错误: 应为&1拍, 实际为&2拍",
+		"ExpectPitch": "应该使用音高1~7或和弦",
+		"ExpectPrecussion": "应该使用打击乐标记x或X",
+		"DiffDuration": "各音轨长度不统一：#1"
 	}
 }

@@ -42,12 +42,11 @@ styleDict=Normal@Module[{outcome={}},
 	If[KeyExistsQ[#,"FontWeight"],AppendTo[outcome,FontWeight->ToExpression@#[["FontWeight"]]]];
 	If[KeyExistsQ[#,"FontColor"],AppendTo[outcome,FontColor->styleColor[[#[["FontColor"]]]]]];
 outcome]&/@styleData;
-langList={"chs","eng"};                                                         (* languages *)
+langList={"chs"(*,"eng"*)};                                                     (* languages *)
 langDict=#->caption[Association[Import[path<>"Lang\\"<>#<>".json"]][["LanguageName"]],"Text"]&/@langList;
 langData=Association@Import[path<>"Lang\\"<>userInfo[["Language"]]<>".json"];
 tagName=Association@langData[["TagName"]];
 instrName=Association@langData[["Instrument"]];
-errorDict=Association@langData[["Error"]];
 text=Association@langData[["Caption"]];
 aboutInfo=Association@text[["AboutQYMP"]];
 metaInfoTags={"Format","TrackCount","Duration","Instruments"};                  (* tags *)
@@ -64,14 +63,16 @@ timeDisplay[t_]:=Module[
 	{sec=Floor[QuantityMagnitude[UnitConvert[t,"Seconds"]]]},
 	IntegerString[Floor[sec/60],10,2]<>":"<>IntegerString[Mod[sec,60],10,2]
 ];
-completeText[raw_,arg_]:=StringReplace[raw,Flatten@Array[{
-	"&"<>ToString[#]->ToString[arg[[#]],FormatType->InputForm],
-	"$"<>ToString[#]->arg[[#]],
-	"#"<>ToString[#]->StringRiffle[ToString[#,FormatType->InputForm]&/@arg[[#]],", "]
-}&,Length@arg]];
-caption[string_,style_]:=caption[string,style,{}];
-caption[string_,style_,argument_]:=Style[completeText[
-		If[StringLength@string>0&&StringPart[string,1]=="_",text[[StringDrop[string,1]]],string],
+completeText[raw_,arg_]:=StringReplace[raw,{
+	"&"~~i:int:>ToString[arg[[ToExpression@i]],FormatType->InputForm],
+	"$"~~i:int:>"\""<>arg[[ToExpression@i]]<>"\"",
+	"#"~~i:int:>StringRiffle[ToString[#,FormatType->InputForm]&/@arg[[ToExpression@i]],", "]
+}];
+caption[string_String]:=caption[string,"None",{}];
+caption[string_String,argument_List]:=caption[string,"None",argument];
+caption[string_String,style_String]:=caption[string,style,{}];
+caption[string_String,style_String,argument_List]:=Style[completeText[
+	If[StringLength@string>0&&StringPart[string,1]=="_",text[[StringDrop[string,1]]],string],
 argument],styleDict[[style]]];
 
 

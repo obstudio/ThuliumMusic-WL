@@ -49,11 +49,8 @@ getTrack[score_]:=StringCases[score,{
 		{"Type"->"FunctionToken","Simplified"->True,"Argument"->{"Speed"->ToExpression@speed}},
 	"<"~~bar:int~~"/"~~beat:int~~">":>
 		{"Type"->"FunctionToken","Simplified"->True,"Argument"->{"Bar"->ToExpression@bar,"Beat"->ToExpression@beat}},
-	"<1="~~cont:(LetterCharacter|","|"'"|"#")..~~">":>
-		{"Type"->"FunctionToken","Simplified"->True,"Argument"->{
-			"Key"->tonalityDict[[StringDelete[cont,","|"'"]]],
-			"Oct"->StringCount[cont,"'"]-StringCount[cont,","]
-		}},
+	"<1="~~k:key~~o:("'"|",")...~~">":>
+		{"Type"->"FunctionToken","Simplified"->True,"Argument"->{"Key"->tonalityDict[[k]],"Oct"->StringCount[o,"'"]-StringCount[o,","]}},
 	"<"~~cont:rep[name~~""|("("~~real~~")")]~~">":>
 		{"Type"->"FunctionToken","Simplified"->True,"Argument"->Module[{ivList=StringSplit[cont,","]},{
 			"Instr"->StringDelete["("~~__~~")"]/@ivList,
@@ -74,7 +71,7 @@ getTrack[score_]:=StringCases[score,{
 	"("~~pitches:pitch..~~"^)":>
 		{"Type"->"Appoggiatura","Pitches"->getPitch[pitches]},
 	
-	(* note related *)
+	(* others *)
 	"~":>{"Type"->"Portamento"},
 	"^":>{"Type"->"Tie"},
 	pitches:pitch|("["~~(pitch|"^")..~~"]")~~pitOp:pitOp~~durOp:durOp:>{
@@ -86,6 +83,7 @@ getTrack[score_]:=StringCases[score,{
 		"Arpeggio"->StringContainsQ[pitches,"^"],
 		"DurationOperators"->StringDelete[durOp,"`"]
 	},
+	space:Whitespace:>{"Type"->"Whitespace","Content"->space},
 	undef__:>{"Type"->"Undefined","Content"->undef}
 }];
 
@@ -110,7 +108,7 @@ Tokenize[filename_]:=Module[
 			True,
 				score=score<>line;
 				If[StringPart[line,-1]=="\\",Continue[]];
-				trackToken=getTrack[StringDelete[score,Whitespace]];
+				trackToken=getTrack[score];
 				If[ContainsOnly[Association[#][["Type"]]&/@trackToken,{"FunctionToken"}],
 					If[sectionMeta!={},                                             (* empty track *)
 						AppendTo[sections,Append[sectionMeta,"Tracks"->tracks]];
@@ -138,7 +136,7 @@ End[];
 
 
 (* ::Input:: *)
-(*QYS`getTrack["<1=bE'><Dur:0>3(Log[2,12]=)3'---<FadeOut:1>|"]*)
+(*QYS`getTrack["<1=bB,,>\t"]*)
 
 
 (* ::Input:: *)

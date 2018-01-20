@@ -1,6 +1,6 @@
 (* ::Package:: *)
 
-Begin["qym`"];
+Begin["QYM`"];
 simitoneOp=Alternatives[Characters["b#"]]...;
 pitOp=Alternatives[Characters["adMmop$,'"]]...;
 durOp=Alternatives[Characters["-_."]]...;

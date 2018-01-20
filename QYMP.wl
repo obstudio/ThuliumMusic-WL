@@ -14,7 +14,7 @@ path=NotebookDirectory[];
 
 
 (* temporary function *)
-QYMParse[filename_]:=integrate[#MusicClips,#Effects]&@parse[qym`tokenizer[filename]];
+QYMParse[filename_]:=integrate[#MusicClips,#Effects]&@parse[QYM`tokenizer[filename]];
 QYSParse[filename_]:=integrate[#MusicClips,#Effects]&@parse[QYS`Tokenize[filename]];
 
 

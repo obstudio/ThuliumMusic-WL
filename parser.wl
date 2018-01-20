@@ -49,15 +49,15 @@ pitchCalc[token_,settings_,previous_]:=Module[{pitches,chordSymbol,pitchDict,cho
 
 trackParse[tokenizer_,global_]:=Module[
 	{
+		(* basic variables *)
 		tokens=Association/@tokenizer[["Contents"]],
 		repeat=tokenizer[["Repeat"]],
 		settings=global,
+		
+		(* notations *)
 		functionData,pitches,
 		beatCount,duration=0,
 		barBeat=0,prevBeat,
-		barCount=0,
-		
-		(* notations *)
 		appoggiatura={},
 		tuplet=0,tupletRatio,
 		tremolo1=0,tremolo2=0,
@@ -65,13 +65,15 @@ trackParse[tokenizer_,global_]:=Module[
 		portamento=False,portRate,
 		previous=Array[None&,4],
 		
+		(* repeat and subtrack *)
 		voltaData,voltaSettings,
 		voltaDefault,volta={},
-		master,lastRepeat=<||>,
-		soundData={},durCount=0,
-		trackData,
+		master,lastRepeat,trackData,
+		
 		(* return value *)
-		trackDuration,MusicClips,messages={}
+		MusicClips,soundData={},
+		trackDuration,durCount=0,
+		messages={},barCount=0
 	},
 	MusicClips=<|"Main"->Null,"Accent"->Nothing,"Subtracks"->{}|>;
 	If[repeat>0,
@@ -204,6 +206,7 @@ trackParse[tokenizer_,global_]:=Module[
 				durCount+=trackData[["Duration"]];
 		],
 	{token,Association/@tokens}];
+	
 	(* build main music clip *)
 	Switch[repeat,
 		_?Positive,

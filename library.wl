@@ -3,7 +3,7 @@
 (* user data *)
 version=201;
 userPath=$HomeDirectory<>"\\AppData\\Local\\QYMP\\";
-cloudPath="http://www.qymp.tk/assets/";
+cloudPath="http://qymp.ob-studio.cn/assets/";
 If[!DirectoryQ[userPath],CreateDirectory[userPath]];
 If[!DirectoryQ[userPath<>"export\\"],CreateDirectory[userPath<>"export\\"]];
 If[!DirectoryQ[userPath<>"buffer\\"],CreateDirectory[userPath<>"buffer\\"]];
@@ -78,7 +78,7 @@ argument],styleDict[[style]]];
 (* tokenizer related *)
 rep=#~~(","~~#)...&;
 int=DigitCharacter..;
-expr=Except["("|")"]..;
+expr=Except["("|")"|"<"|">"]..;
 name=LetterCharacter~~WordCharacter...;
 real=DigitCharacter...~~"."~~DigitCharacter...;
 tonalityDict=<|
@@ -88,6 +88,7 @@ tonalityDict=<|
 	"F#"->6,"C#"->1,"Bb"->-2,"Gb"->6,
 	"Eb"->3,"Ab"->-4,"Db"->1,"Cb"->-1
 |>;
+key=Alternatives@Keys@tonalityDict;
 getArgument[string_,function_]:=Switch[function,
 	"Instr",{string},
 	"Volume"|"Chord",ToExpression/@StringSplit[string,","],

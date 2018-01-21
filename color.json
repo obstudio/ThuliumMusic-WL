@@ -28,7 +28,7 @@
         }
     },
     "PageSelectorColor": {
-        "Current-Basic": {
+        "Current": {
             "Grounding": "#1979CA",
             "Margin": "#1979CA",
             "Body": "#F9F9F9"
@@ -39,11 +39,6 @@
             "Body": "#1979CA"
         },
         "Clicked": {
-            "Grounding": "#1979CA",
-            "Margin": "#1979CA",
-            "Body": "#F9F9F9"
-        },
-        "Current-Mouseover": {
             "Grounding": "#1979CA",
             "Margin": "#1979CA",
             "Body": "#F9F9F9"

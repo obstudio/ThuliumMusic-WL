@@ -7,8 +7,9 @@
 path=NotebookDirectory[];
 <<(path<>"Lib\\library.wl")      (* library *)
 <<(path<>"Lib\\assets.wl")       (* graphics *)
+<<(path<>"Lib\\uiControls.wl")   (* controls *)
 <<(path<>"Lib\\uiUser.wl")       (* UI for common users *)
-<<(path<>"Lib\\uiDeve.wl")       (* UI for developers *)
+<<(path<>"Lib\\uiDeveloper.wl")  (* UI for developers *)
 <<(path<>"Lib\\qymToken.wl")     (* QYM tokenizer *)
 <<(path<>"Lib\\qysToken.wl")     (* QYS tokenizer *)
 <<(path<>"Lib\\parser.wl")       (* parser *)

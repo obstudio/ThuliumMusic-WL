@@ -45,74 +45,6 @@ uiSettings:=DynamicModule[{choices,langDict},
 (*uiPlayer["Touhou\\Dream_Battle"]*)
 
 
-uiPlayerControlsOld:={
-	Row[{
-		Dynamic[Style[timeDisplay[current["Position"]],20]],
-		Spacer[8],
-		ProgressIndicator[Dynamic[current["Position"]/duration],ImageSize->{240,16}],
-		Spacer[8],
-		Style[timeDisplay[duration],20]
-	}],Spacer[1],
-	Row[{Button[
-		Dynamic[Switch[current["State"],
-			"Playing",text[["Pause"]],
-			"Paused"|"Stopped",text[["Play"]]
-		]],
-		Switch[current["State"],
-			"Playing",current["State"]="Paused",
-			"Paused"|"Stopped",current["State"]="Playing"
-		],
-		ImageSize->80],
-		Spacer[20],
-		Button[text[["Stop"]],current["State"]="Stopped",ImageSize->80],
-		Spacer[20],
-		Button[text[["Return"]],AudioStop[];DialogReturn[uiPlaylist[currentPlaylist]],ImageSize->80]			
-	}]
-};
-
-
-uiPlayerControlsNew:={
-	Row[{
-		Column[{Style[Dynamic[timeDisplay[current["Position"]]],20],Spacer[1]}],
-		Spacer[8],
-		Magnify[progressBar[Dynamic[current["Position"]/duration],40],4],
-		Spacer[8],
-		Column[{Style[timeDisplay[duration],20],Spacer[1]}]
-	},ImageSize->Full,Alignment->Center],
-	Row[{
-		DynamicModule[{style="Default"},
-			Dynamic@Switch[current["State"],
-				"Playing",EventHandler[button["Pause",style],{
-					"MouseDown":>(style="Clicked"),
-					"MouseUp":>(style="Default";current["State"]="Paused")
-				}],
-				"Paused"|"Stopped",EventHandler[button["Play",style],{
-					"MouseDown":>(style="Clicked"),
-					"MouseUp":>(style="Default";current["State"]="Playing")
-				}]
-			]
-		],
-		Spacer[20],
-		DynamicModule[{style="Default"},
-			EventHandler[Dynamic@button["Stop",style],{
-				"MouseDown":>(style="Clicked"),
-				"MouseUp":>(style="Default";current["State"]="Stopped")
-			}]
-		],
-		Spacer[20],
-		DynamicModule[{style="Default"},
-			EventHandler[Dynamic@button["ArrowL",style],{
-				"MouseDown":>(style="Clicked";),
-				"MouseUp":>(style="Default";
-					AudioStop[];
-					DialogReturn[uiPlaylist[currentPlaylist]];
-				)
-			}]
-		]		
-	},ImageSize->{300,60},Alignment->Center]
-};
-
-
 uiPlayer[song_]:=Module[{image,audio,imageExist,aspectRatio},
 	AudioStop[];
 	If[index[[song,"Image"]]!="",
@@ -190,35 +122,6 @@ WindowTitle->text[["About"]],Background->styleColor[["Background"]]];
 (*uiAbout;*)
 
 
-uiPageSelector:=Row[{
-	Dynamic@If[page<=1,pageSelector["Prev","Disabled"],
-	DynamicModule[{style="Default"},
-		EventHandler[Dynamic@pageSelector["Prev",style],{
-			"MouseDown":>(style="Clicked"),
-			"MouseUp":>(style="Default";page--;)
-		}]
-	]],
-	Spacer[20],
-	Row[Flatten@Array[{
-		Dynamic@If[page==#,pageSelector[#,"Current",32],
-		DynamicModule[{style="Default"},
-			EventHandler[Dynamic@pageSelector[#,style,32],{
-				"MouseDown":>(style="Clicked"),
-				"MouseUp":>(style="Default";page=#;)
-			}]
-		]
-	],Spacer[6]}&,pageCount]],
-	Spacer[14],
-	Dynamic@If[page>=pageCount,pageSelector["Next","Disabled"],
-	DynamicModule[{style="Default"},
-		EventHandler[Dynamic@pageSelector["Next",style],{
-			"MouseDown":>(style="Clicked"),
-			"MouseUp":>(style="Default";page++;)
-		}]
-	]]
-},ImageSize->{500,60},Alignment->Center];
-
-
 QYMP:=DynamicModule[{playlist},
 	pageCount=Ceiling[Length@playlists/16];
 	If[pageData[["Main"]]>pageCount,pageData[["Main"]]=pageCount];
@@ -229,7 +132,7 @@ QYMP:=DynamicModule[{playlist},
 			Row[{Spacer[40],caption["_QYMP","BigTitle"]},Alignment->Left,ImageSize->320],
 			Row[{
 				DynamicModule[{style="Default"},
-					EventHandler[Dynamic@button["Play",style],{
+					EventHandler[Dynamic@button["EnterPlaylist",style],{
 						"MouseDown":>(style="Clicked"),
 						"MouseUp":>(style="Default";DialogReturn[pageData[["Main"]]=page;playlist;uiPlaylist[playlist]];)
 					}]
@@ -288,7 +191,9 @@ uiPlaylist[playlist_]:=DynamicModule[{song},
 	page=pageData[[playlist]];
 	CreateDialog[Column[{Spacer[{40,40}],
 		Row[{
-			Row[{Spacer[40],caption[playlistInfo[["Title"]],"BigTitle"]},Alignment->Left,ImageSize->480],
+			Row[{
+				Spacer[40],caption[playlistInfo[["Title"]],"BigTitle"]
+			},Alignment->Left,ImageSize->480],
 			Row[{
 				DynamicModule[{style="Default"},
 					EventHandler[Dynamic@button["Play",style],{
@@ -322,6 +227,10 @@ uiPlaylist[playlist_]:=DynamicModule[{song},
 				],
 			Spacer[40]},Alignment->Right,ImageSize->{480,56}]
 		}],
+		If[playlistInfo[["Comment"]]!="",
+			Row[{Spacer[40],caption[playlistInfo[["Comment"]],"Subtitle"]},Alignment->Left,ImageSize->960],
+			Nothing
+		],
 		Spacer[1],
 		Dynamic@Row[{Spacer[60],SetterBar[Dynamic@song,
 			#[["Song"]]->Row[{
@@ -331,7 +240,7 @@ uiPlaylist[playlist_]:=DynamicModule[{song},
 						caption[#[["Index"]],"SongIndex"],
 						Spacer[16]
 					},ImageSize->playlistInfo[["IndexWidth"]],Alignment->Center],
-					Nothing
+					Spacer[4]
 				],
 				caption[index[[#[["Song"]],"SongName"]],"SongName"],
 				If[KeyExistsQ[index[[#[["Song"]]]],"Comment"],

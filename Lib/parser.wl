@@ -335,19 +335,31 @@ parse[tokenizer_,sections_]:=Module[
 
 
 (* ::Input:: *)
-(*debug[#Messages]&@parse[QYS`Tokenize[path<>"Songs\\Touhou\\Hana_ni_Kaze.qys"],All]*)
+(*debug[#Messages]&@parse[QYS`Tokenize[path<>"Songs\\Touhou\\Hana_ni_Kaze.qys"],9]*)
 
 
 (* ::Input:: *)
 (*AudioStop[];AudioPlay[#[[2]]]&@*)
 (*EchoFunction["time: ",#[[1]]&]@*)
-(*Timing[integrate[#MusicClips,#Effects]&[parse[QYS`Tokenize[path<>"Songs\\test.qys"],5]]];*)
+(*Timing[integrate[#MusicClips,#Effects]&[parse[QYS`Tokenize[path<>"Songs\\temp.qys"],All]]];*)
 
 
 (* ::Input:: *)
 (*AudioStop[];AudioPlay[#[[2]]]&@*)
 (*EchoFunction["time: ",#[[1]]&]@*)
-(*Timing[integrate[#MusicClips,#Effects]&[parse[QYS`Tokenize[path<>"Songs\\Touhou\\Hana_ni_Kaze.qys"],{5,6}]]];*)
+(*Timing[integrate[#MusicClips,#Effects]&[parse[QYS`Tokenize[path<>"Songs\\Touhou\\Hana_ni_Kaze.qys"],9]]];*)
+
+
+(* ::Input:: *)
+(*EmitSound@Sound@SoundNote[0,1,"GuitarDistorted"]*)
+
+
+(* ::Input:: *)
+(*EmitSound@Sound@SoundNote[0,1,"Ocarina"]*)
+
+
+(* ::Input:: *)
+(*QYMP;*)
 
 
 debug[messages_]:=Module[{output={},sectionOutput},
@@ -440,10 +452,6 @@ integrate[tracks_,effects_]:=Module[
 
 (* ::Input:: *)
 (*AudioStop[];*)
-
-
-(* ::Input:: *)
-(*EmitSound@Sound@SoundNote[12,1,"SopranoSax"]*)
 
 
 (* ::Input:: *)

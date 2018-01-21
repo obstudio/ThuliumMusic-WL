@@ -171,10 +171,6 @@ updateBuffer:=Module[{updates={},song,filename,hash,audio,messages,bufferList},
 			audio=QYMParse[filename]
 		];
 		messages=Values[Options[audio,MetaInformation]][[1]][["Messages"]];
-		If[KeyExistsQ[errorLog,song],
-			errorLog[[song]]=messages,
-			AppendTo[errorLog,song->messages]
-		];
 		Export[userPath<>"Buffer\\"<>song<>".buffer",audio,"MP3"],
 	{i,Length@updates}],
 	Panel[Column[{Spacer[{4,4}],

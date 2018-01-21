@@ -143,9 +143,8 @@ uiPlayer[song_]:=Module[{image,audio,imageExist,aspectRatio},
 		Spacer[{40,40}]}]}],Nothing],Spacer[48],
 		Column[Join[{Spacer[{60,60}],
 			If[index[[song,"Comment"]]!="",
-				If[textLength@index[[song,"SongName"]]>16||textLength@index[[song,"Comment"]]>16,
-					Column,
-					Row
+				If[textLength@index[[song,"Comment"]]>16,
+					Column,Row
 				][{
 					caption[index[[song,"SongName"]],"Title"],
 					caption[" ("<>index[[song,"Comment"]]<>")","TitleComment"]
@@ -156,7 +155,7 @@ uiPlayer[song_]:=Module[{image,audio,imageExist,aspectRatio},
 			Column[If[index[[song,#]]!="",
 				caption[tagName[[#]]<>": "<>index[[song,#]],"Text"],
 				Nothing
-			]&/@{"Composer","Lyricist","Adapter"},Alignment->Center],
+			]&/@{"Origin","Composer","Lyricist","Adapter"},Alignment->Center],
 			Spacer[1],
 			If[index[[song,"Abstract"]]!="",
 				Column[caption[#,"Text"]&/@StringSplit[index[[song,"Abstract"]],"\n"],Center],

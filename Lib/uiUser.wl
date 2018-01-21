@@ -30,7 +30,7 @@ uiSettings:=DynamicModule[{choices,langDict},
 				DialogReturn[QYMP],
 			ImageSize->150],
 			Spacer[10],
-			Button[text[["Return"]],DialogReturn[QYMP],ImageSize->150],
+			Button[text[["Return"]],DialogReturn[QYMP],ImageSize->150]
 		}],Spacer[{40,40}]
 	},Center,ItemSize->Full],
 	Background->styleColor[["Background"]],WindowTitle->text[["Settings"]]]

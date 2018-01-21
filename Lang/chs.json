@@ -9,7 +9,8 @@
         "Abstract": "摘要",
         "Origin": "原曲",
         "Format": "格式",
-        "TrackCount": "音轨数",
+        "SectionCount": "乐章数",
+        "RealTrackCount": "实际音轨数",
         "Duration": "时长",
         "Instruments": "乐器",
 		"URL": "地址",
@@ -114,7 +115,7 @@
 		"InvalidFunction": "声明了无效函数名$1",
 		"BarLengthError": "拍数错误: 应为&1拍, 实际为&2拍",
 		"ExpectPitch": "应该使用音高1~7或和弦",
-		"ExpectPrecussion": "应该使用打击乐标记x或X",
+		"ExpectPrecussion": "应该使用打击乐标记x",
 		"DiffDuration": "各音轨长度不统一：#1"
 	}
 }

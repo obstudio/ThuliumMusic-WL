@@ -7,8 +7,10 @@
         "Adapter": "Adapter",
         "Comment": "Comment",
         "Abstract": "Abstract",
+        "Origin": "Origin",
         "Format": "Format",
-        "TrackCount": "Number of Tracks",
+        "SectionCount": "Number of Sections",
+        "RealTrackCount": "Number of Actual Tracks",
         "Duration": "Duration",
         "Instruments": "Instruments",
 		"URL": "URL",
@@ -61,20 +63,6 @@
 		"Whistle": "Whistle",
         "Xylophone": "Xylophone"
     },
-	"Error": {
-		"FileNotFound": "Cannot find file \"$1\".",
-		"TerminatorAbsent": "(Section &1, Track &2) Terminator cannot be found.",
-		"RepeatError": "(Section &1, Track &2) Cannot match the repeat marks.",
-		"InvalidTonality": "(Section &1, Track &2, Measure &3) Invalid tonality\"$4\".",
-		"InvalidInstrument": "(Section &1, Track &2, Measure &3) Invalid instrument\"$4\".",
-		"InvalidCharacter": "(Section &1, Track &2, Measure &3) Invalid character\"$4\".",
-		"InvalidFunction": "(Section &1, Track &2, Measure &3) Invalid function\"$4\".",
-		"BarLengthError": "(Section &1, Track &2, Measure &3) Wrong number of beats: should be &4, but actually is &5.",
-		"NoFormerPitch": "(Section &1, Track &2, Measure &3) Operator \"%\" needs a previous pitch.",
-		"ExpectPitch": "(Section &1, Track &2, Measure &3) Expect a pitch (1~7 or chord[]).",
-		"ExpectPrecussion": "(Section &1, Track &2, Measure &3) Expect a precussion sign (x or X).",
-		"DiffDuration": "(Section &1) The length of each track is not uniform：#2."
-	},
 	"Caption": {
 		"QYMP": "Qingyun Music Player",
 		"Playlist": "Playlist",
@@ -115,6 +103,19 @@
 			"Version": "1.5",
 			"Producer": "Ob Studio",
 			"Website": "www.qymp.tk"
-		}
+		},
+		"Section": "Section &1",
+		"Track": "Track &1",
+		"Bar": "Measure &1",
+		"FileNotFound": "Cannot find file $1.",
+		"TerminatorAbsent": "Terminator cannot be found.",
+		"InvalidTonality": "Invalid tonality $1 was found.",
+		"InvalidInstrument": "Invalid instrument $1 was found.",
+		"InvalidExpression": "Invalid expression $1 was found.",
+		"InvalidFunction": "Invalid function $1 was found.",
+		"BarLengthError": "Number of beats is expected to be &1, but &2 was found.",
+		"ExpectPitch": "Expect a pitch (1~7 or chord[]).",
+		"ExpectPrecussion": "Expect a precussion sign (x).",
+		"DiffDuration": "The length of each track is not uniform：#2."
 	}
 }

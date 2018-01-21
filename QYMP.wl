@@ -5,13 +5,13 @@
 
 
 path=NotebookDirectory[];
-<<(path<>"Lib\\library.wl")
-<<(path<>"Lib\\assets.wl")
-<<(path<>"Lib\\uiUser.wl")
-<<(path<>"Lib\\uiDeve.wl")
-<<(path<>"Lib\\qymToken.wl")
-<<(path<>"Lib\\qysToken.wl")
-<<(path<>"Lib\\parser.wl")
+<<(path<>"Lib\\library.wl")      (* library *)
+<<(path<>"Lib\\assets.wl")       (* graphics *)
+<<(path<>"Lib\\uiUser.wl")       (* UI for common users *)
+<<(path<>"Lib\\uiDeve.wl")       (* UI for developers *)
+<<(path<>"Lib\\qymToken.wl")     (* QYM tokenizer *)
+<<(path<>"Lib\\qysToken.wl")     (* QYS tokenizer *)
+<<(path<>"Lib\\parser.wl")       (* parser *)
 
 
 (* temporary function *)
@@ -24,7 +24,6 @@ version=201;
 userPath=$HomeDirectory<>"\\AppData\\Local\\QYMP\\";
 cloudPath="http://qymp.ob-studio.cn/assets/";
 If[!DirectoryQ[userPath],CreateDirectory[userPath]];
-If[!DirectoryQ[userPath<>"export\\"],CreateDirectory[userPath<>"export\\"]];
 If[!DirectoryQ[userPath<>"buffer\\"],CreateDirectory[userPath<>"buffer\\"]];
 If[!DirectoryQ[userPath<>"images\\"],CreateDirectory[userPath<>"images\\"]];
 template=<|"Version"->version,"Language"->"chs","Developer"->False,"Player"->"Old"|>;
@@ -39,8 +38,6 @@ If[userInfo[["Version"]]<version,
 ];
 If[!FileExistsQ[userPath<>"Buffer.json"],Export[userPath<>"Buffer.json",{}]];
 bufferHash=Association@Import[userPath<>"Buffer.json"];
-If[!FileExistsQ[userPath<>"ErrorLog.json"],Export[userPath<>"ErrorLog.json",{}]];
-errorLog=Association@Import[userPath<>"ErrorLog.json"];
 If[!FileExistsQ[userPath<>"Favorite.json"],Export[userPath<>"Favorite.json",{}]];
 favorite=Import[userPath<>"Favorite.json"];
 If[!FileExistsQ[userPath<>"Image.json"],Export[userPath<>"Image.json",{}]];
@@ -60,18 +57,8 @@ styleDict=Normal@Module[{outcome={}},
 	If[KeyExistsQ[#,"FontWeight"],AppendTo[outcome,FontWeight->ToExpression@#[["FontWeight"]]]];
 	If[KeyExistsQ[#,"FontColor"],AppendTo[outcome,FontColor->styleColor[[#[["FontColor"]]]]]];
 outcome]&/@styleData;
-langList={"chs"(*,"eng"*)};                                                     (* languages *)
-langDict=#->caption[Association[Import[path<>"Lang\\"<>#<>".json"]][["LanguageName"]],"Text"]&/@langList;
-langData=Association@Import[path<>"Lang\\"<>userInfo[["Language"]]<>".json"];
-tagName=Association@langData[["TagName"]];
-instrName=Association@langData[["Instrument"]];
-text=Association@langData[["Caption"]];
-aboutInfo=Association@text[["AboutQYMP"]];
-metaInfoTags={"Format","TrackCount","Duration","Instruments"};                  (* tags *)
-textInfoTags={"SongName","Lyricist","Composer","Adapter","Comment","Abstract","Origin"};
-otherInfoTags={"Format","Image","Uploader","Tags"};
-imageTags={"Title","Painter","PainterID","IllustID","URL"};
-aboutTags={"Version","Producer","Website"};
+dictionary=Association/@AssociationMap[Import[path<>"Lang\\"<>#<>".json"]&,langList];       (* languages *)
+refreshLanguage;
 
 
 (* ::Input::Initialization:: *)

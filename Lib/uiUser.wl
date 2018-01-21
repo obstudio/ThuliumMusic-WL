@@ -1,10 +1,11 @@
 (* ::Package:: *)
 
-uiSettings:=DynamicModule[{choices},
+uiSettings:=DynamicModule[{choices,langDict},
 	choices=userInfo;
+	langDict=#->caption[Association[Import[path<>"Lang\\"<>#<>".json"]][["LanguageName"]],"Text"]&/@langList;
 	CreateDialog[Column[{Spacer[{40,40}],
 		caption["_Settings","Title"],Spacer[1],
-		Grid[{
+		Row[{Spacer[40],Grid[{
 			{caption["_ChooseIdentity","Text"],
 				RadioButtonBar[Dynamic@choices[["Developer"]],{
 					False->caption["_NormalUser","Text"],
@@ -20,24 +21,24 @@ uiSettings:=DynamicModule[{choices},
 			{caption["_ChooseLanguage","Text"],
 				RadioButtonBar[Dynamic@choices[["Language"]],langDict]}
 			}
-		],Spacer[1],
-		Row[{Spacer[80],
+		],Spacer[40]}],Spacer[1],
+		Row[{
 			Button[text[["Save"]],
-				langData=Association@Import[path<>"Lang\\"<>choices[["Language"]]<>".json"];
-				tagName=Association@langData[["TagName"]];
-				instrName=Association@langData[["Instrument"]];
-				text=Association@langData[["Caption"]];
-				aboutInfo=Association@text[["AboutQYMP"]];
 				userInfo=choices;
 				Export[userPath<>"Default.json",Normal@userInfo];
+				refreshLanguage;
 				DialogReturn[QYMP],
 			ImageSize->150],
 			Spacer[10],
 			Button[text[["Return"]],DialogReturn[QYMP],ImageSize->150],
-		Spacer[80]}],Spacer[{40,40}]
+		}],Spacer[{40,40}]
 	},Center,ItemSize->Full],
 	Background->styleColor[["Background"]],WindowTitle->text[["Settings"]]]
 ];
+
+
+(* ::Input:: *)
+(*uiSettings;*)
 
 
 (* ::Input:: *)

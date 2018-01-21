@@ -5,11 +5,11 @@ uiModifySong[song_]:=DynamicModule[{textInfo},
 	CreateDialog[Column[{Spacer[{20,20}],
 		caption[textInfo[["SongName"]],"Title"],
 		Spacer[1],
-		Column[Row[{Spacer[40],
+		Grid[{Spacer[40],
 			caption[tagName[[#]],"Text"],
-			Spacer[16],
+			Spacer[2],
 			InputField[Dynamic@textInfo[[#]],String],
-		Spacer[40]}]&/@textInfoTags],
+		Spacer[40]}&/@textInfoTags,Alignment->Right],
 		Spacer[1],
 		Grid[{
 			{Button[text[["Save"]],putTextInfo[song,textInfo],ImageSize->150,Enabled->Dynamic[textInfo[["SongName"]]!=""]],
@@ -20,6 +20,10 @@ uiModifySong[song_]:=DynamicModule[{textInfo},
 	},Center,ItemSize->Full,Spacings->1],
 	Background->styleColor[["Background"]],WindowTitle->text[["ModifySong"]]];
 ];
+
+
+(* ::Input:: *)
+(*uiModifySong["Anima"];*)
 
 
 putTextInfo[song_,textInfo_]:=Module[
@@ -36,12 +40,12 @@ tagTemplate=<|"Image"->"","Uploader"->"","Tags"->{}|>;
 addSong[songPath_,textInfo_]:=Module[{song,metaInfo,audio,format},
 	song=StringDrop[songPath,-4];
 	format=StringTake[songPath,-3];
+	AppendTo[index,song->Join[textInfo,tagTemplate,<|"Format"->format|>]];
+	putTextInfo[song,textInfo];
 	audio=If[format=="qys",QYSParse,QYMParse][path<>"Songs\\"<>songPath];
 	Export[userPath<>"Buffer\\"<>song<>".buffer",audio,"MP3"];
 	AppendTo[bufferHash,song->toBase32@FileHash[path<>"Songs\\"<>songPath]];
 	Export[userPath<>"Buffer.json",Normal@bufferHash];
-	AppendTo[index,song->Join[textInfo,tagTemplate,<|"Format"->format|>]];
-	putTextInfo[song,textInfo];
 ];
 
 
@@ -81,7 +85,7 @@ uiDeleteSong[song_]:=CreateDialog[Column[{"",
 	Row[{
 		Button[text[["Confirm"]],
 			index=Delete[index,song];
-			DeleteFile[path<>"Meta\\"<>song<>".meta"];
+			DeleteFile[path<>"Meta\\"<>song<>".json"];
 			DialogReturn[refresh;uiPlaylist["All"]],
 		ImageSize->100],
 		Spacer[20],

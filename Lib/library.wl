@@ -1,5 +1,14 @@
 (* ::Package:: *)
 
+(* tags *)
+metaInfoTags={"SectionCount","RealTrackCount","Duration","Instruments"};
+textInfoTags={"SongName","Lyricist","Composer","Adapter","Comment","Abstract","Origin"};
+otherInfoTags={"Format","Image","Uploader","Tags"};
+imageTags={"Title","Painter","PainterID","IllustID","URL"};
+aboutTags={"Version","Producer","Website"};
+langList={"chs","eng"};
+
+
 (* some functions *)
 textLength[string_]:=2StringLength[string]-StringCount[string,Alternatives@CharacterRange[32,127]];
 toBase32[n_]:=StringDelete[ToString@BaseForm[n,32],"\n"~~__];
@@ -38,6 +47,19 @@ getArgument[string_,function_]:=Switch[function,
 	"Instr",{string},
 	"Volume"|"Chord",ToExpression/@StringSplit[string,","],
 	_,ToExpression[string]
+];
+
+
+(* ::Text:: *)
+(*Refresh & Update*)
+
+
+refreshLanguage:=Module[{langData},
+	langData=dictionary[[userInfo[["Language"]]]];
+	tagName=Association@langData[["TagName"]];
+	instrName=Association@langData[["Instrument"]];
+	text=Association@langData[["Caption"]];
+	aboutInfo=Association@text[["AboutQYMP"]]
 ];
 
 

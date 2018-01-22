@@ -140,13 +140,13 @@ trackTokenizer[track_]:=StringCases[track,{
 		"Type"->"Tie"
 	},
 	(* Note *)
-	pitches:((pitch~~"&")...~~pitch)~~durOp:durOp:>{
+	arpeggio:("$"...)~~pitches:((pitch~~"&")...~~pitch)~~durOp:durOp:>{
 		"Type"->"Note",
 		"Pitches"->getPitch[StringDelete[pitches,"&"]],
 		"SemitonesCount"->0,
 		"OctavesCount"->0,
 		"Staccato"->False,
-		"Arpeggio"->False,
+		"Arpeggio"->(StringLength[arpeggio]==1),
 		"DurationOperators"->durOp
 	},
 	(* Space *)

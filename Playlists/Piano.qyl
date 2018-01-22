@@ -1,0 +1,16 @@
+{
+	"Title": "钢琴曲",
+	"Comment": "",
+	"Abstract": "",
+	"Path": "",
+	"SongList": [
+		{"Song": "Anima"},
+		{"Song": "Gate_of_Steiner"},
+		{"Song": "If_You_Were_By_My_Side"},
+		{"Song": "Lonely_Night"},
+		{"Song": "Sora_ni_Hikaru"},
+		{"Song": "Onaji_Takami_he"},
+		{"Song": "Touhou\\Necro_Fantasia"}
+	],
+	"IndexWidth": 0
+}

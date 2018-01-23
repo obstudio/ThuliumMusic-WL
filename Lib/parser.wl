@@ -1,5 +1,10 @@
 (* ::Package:: *)
 
+pitchDict=<|1->0,2->2,3->4,4->5,5->7,6->9,7->11,10->10|>;
+chordDict=<|
+	"M"->{0,4,7},"m"->{0,3,7},"a"->{0,4,8},
+	"d"->{0,3,6},"p"->{0,7,12},"o"->{0,12}
+|>;
 defaultSettings=<|
 	"Volume"->{1},"Speed"->90,"Key"->0,"Beat"->4,"Bar"->4,"Instr"->{"Piano"},
 	"Dur"->0,"FadeIn"->0,"FadeOut"->0,"Stac"->1/2,"Appo"->1/4,"Oct"->0,
@@ -20,12 +25,7 @@ beatCalc[operators_]:=Module[{beats=1,i=1},
 	{operator,StringCases[operators,{"-","_","."..}]}];
 	Return[beats];
 ];
-pitchCalc[token_,settings_,previous_]:=Module[{pitches,chordSymbol,pitchDict,chordDict},
-	pitchDict=<|1->0,2->2,3->4,4->5,5->7,6->9,7->11,10->10|>;
-	chordDict=<|
-		"M"->{0,4,7},"m"->{0,3,7},"a"->{0,4,8},
-		"d"->{0,3,6},"p"->{0,7,12},"o"->{0,12}
-	|>;
+pitchCalc[token_,settings_,previous_]:=Module[{pitches,chordSymbol},
 	If[KeyExistsQ[token,"Pitches"],
 		pitches=Flatten[pitchCalc[#,settings,previous]&/@Association/@token[["Pitches"]]],
 		pitches=Switch[token[["ScaleDegree"]],
@@ -335,7 +335,7 @@ parse[tokenizer_,sections_]:=Module[
 
 
 (* ::Input:: *)
-(*debug[#Messages]&@parse[QYS`Tokenize[path<>"Songs\\Touhou\\Hana_ni_Kaze.qys"],9]*)
+(*debug[#Messages]&@parse[QYS`Tokenize[path<>"Songs\\PVZ\\Brainiac_Maniac.qys"],All]*)
 
 
 (* ::Input:: *)
@@ -347,15 +347,15 @@ parse[tokenizer_,sections_]:=Module[
 (* ::Input:: *)
 (*AudioStop[];AudioPlay[#[[2]]]&@*)
 (*EchoFunction["time: ",#[[1]]&]@*)
-(*Timing[integrate[#MusicClips,#Effects]&[parse[QYS`Tokenize[path<>"Songs\\Touhou\\Hana_ni_Kaze.qys"],9]]];*)
+(*Timing[integrate[#MusicClips,#Effects]&[parse[QYS`Tokenize[path<>"Songs\\PVZ\\Brainiac_Maniac.qys"],All]]];*)
 
 
 (* ::Input:: *)
-(*EmitSound@Sound@SoundNote[0,1,"GuitarDistorted"]*)
+(*EmitSound@Sound@SoundNote[0,1,"PercussiveOrgan"]*)
 
 
 (* ::Input:: *)
-(*EmitSound@Sound@SoundNote[0,1,"Ocarina"]*)
+(*EmitSound@Sound@SoundNote[0,1,"Organ"]*)
 
 
 (* ::Input:: *)

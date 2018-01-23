@@ -42,11 +42,11 @@ addSong[songPath_,textInfo_]:=Module[{song,metaInfo,audio,format},
 	format=StringTake[songPath,-3];
 	AppendTo[index,song->Join[textInfo,tagTemplate,<|"Format"->format|>]];
 	putTextInfo[song,textInfo];
-	audio=If[format=="qys",QYSParse,QYMParse][path<>"Songs\\"<>songPath];
-	Export[userPath<>"Buffer\\"<>song<>".buffer",audio,"MP3"];
-	AppendTo[bufferHash,song->toBase32@FileHash[path<>"Songs\\"<>songPath]];
-	Export[userPath<>"Buffer.json",Normal@bufferHash];
 ];
+
+
+(* ::Input:: *)
+(*uiAddSong;*)
 
 
 ignoreList={"temp.qys","test.qys"};
@@ -74,10 +74,6 @@ uiAddSong:=DynamicModule[{songPath,textInfo,candidates},
 	Spacer[{40,40}]},Center,ItemSize->Full,Spacings->1],
 	Background->styleColor[["Background"]],WindowTitle->text[["AddSong"]]]
 ];
-
-
-(* ::Input:: *)
-(*uiAddSong;*)
 
 
 uiDeleteSong[song_]:=CreateDialog[Column[{"",

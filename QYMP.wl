@@ -15,36 +15,6 @@ localPath=NotebookDirectory[];
 <<(localPath<>"Lib\\parser.wl")       (* parser *)
 
 
-(* temporary function *)
-QYMParse[filename_]:=integrate[#MusicClips,#Effects]&@parse[QYM`tokenizer[filename]];
-QYSParse[filename_]:=integrate[#MusicClips,#Effects]&@parse[QYS`Tokenize[filename]];
-
-
-(* user data *)
-version=201;
-userPath=$HomeDirectory<>"\\AppData\\Local\\QYMP\\";
-cloudPath="http://qymp.ob-studio.cn/assets/";
-If[!DirectoryQ[userPath],CreateDirectory[userPath]];
-If[!DirectoryQ[userPath<>"buffer\\"],CreateDirectory[userPath<>"buffer\\"]];
-If[!DirectoryQ[userPath<>"images\\"],CreateDirectory[userPath<>"images\\"]];
-template=<|"Version"->version,"Language"->"chs","Developer"->False,"Player"->"Old"|>;
-If[!FileExistsQ[userPath<>"Default.json"],Export[userPath<>"Default.json",template]];
-userInfo=Association@Import[userPath<>"Default.json"];
-If[userInfo[["Version"]]<version,
-	Do[
-		If[!KeyExistsQ[userInfo,tag],AppendTo[userInfo,tag->template[[tag]]]],
-	{tag,Keys@template}];
-	userInfo[["Version"]]=version;
-	Export[userPath<>"Default.json",userInfo];
-];
-If[!FileExistsQ[userPath<>"Buffer.json"],Export[userPath<>"Buffer.json",{}]];
-bufferHash=Association@Import[userPath<>"Buffer.json"];
-If[!FileExistsQ[userPath<>"Favorite.json"],Export[userPath<>"Favorite.json",{}]];
-favorite=Import[userPath<>"Favorite.json"];
-If[!FileExistsQ[userPath<>"Image.json"],Export[userPath<>"Image.json",{}]];
-imageData=Association/@Association@Import[userPath<>"image.json"];
-
-
 (* local data *)
 instrData=Association@Import[localPath<>"instr.json"];                               (* instruments *)
 colorData=Association@Import[localPath<>"color.json"];                               (* colors *)
@@ -59,7 +29,46 @@ styleDict=Normal@Module[{outcome={}},
 	If[KeyExistsQ[#,"FontColor"],AppendTo[outcome,FontColor->styleColor[[#[["FontColor"]]]]]];
 outcome]&/@styleData;
 dictionary=Association/@AssociationMap[Import[localPath<>"Lang\\"<>#<>".json"]&,langList];       (* languages *)
-refreshLanguage;
+
+
+(* ::Input:: *)
+(*refreshLanguage;*)
+
+
+(* ::Input:: *)
+(*userInfo*)
+
+
+(* user data *)
+If[!DirectoryQ[userPath],
+	CreateDirectory[userPath];
+	userInfo=userTemplate;
+	refreshLanguage;
+	uiSetPath;
+	Export[userPath<>"Default.json",userInfo],
+	userInfo=Association@Import[userPath<>"Default.json"];
+	refreshLanguage;
+	If[userInfo[["Version"]]<version,
+		Do[
+			If[!KeyExistsQ[userInfo,tag],AppendTo[userInfo,tag->userTemplate[[tag]]]],
+		{tag,Keys@userTemplate}];
+		userInfo[["Version"]]=version;
+		Export[userPath<>"Default.json",userInfo];
+	];
+];
+If[!FileExistsQ[userPath<>"Favorite.json"],Export[userPath<>"Favorite.json",{}]];
+favorite=Import[userPath<>"Favorite.json"];
+
+
+(* program data *)
+dataPath=userInfo[["DataPath"]];
+If[!DirectoryQ[dataPath],CreateDirectory[dataPath]];
+If[!DirectoryQ[dataPath<>"buffer\\"],CreateDirectory[dataPath<>"buffer\\"]];
+If[!DirectoryQ[dataPath<>"images\\"],CreateDirectory[dataPath<>"images\\"]];
+If[!FileExistsQ[dataPath<>"Buffer.json"],Export[dataPath<>"Buffer.json",{}]];
+bufferHash=Association@Import[dataPath<>"Buffer.json"];
+If[!FileExistsQ[dataPath<>"Image.json"],Export[dataPath<>"Image.json",{}]];
+imageData=Association/@Association@Import[dataPath<>"image.json"];
 
 
 (* ::Input::Initialization:: *)

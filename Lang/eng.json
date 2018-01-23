@@ -93,6 +93,8 @@
 		"NewVersion": "New version",
 		"Playing": "Playing",
 		"Page.x": "(Page &1)",
+		"BasicSettings": "Basic Settings",
+		"ChooseBasePath": "Please choose your base directory",
 		"SureToRemove": "Are you sure to remove the song \"$1\"? ",
 		"NoImageInfo": "Sorry, but we have no information about the picture.",
 		"UpdatingImage": "Updating the local gallery ...",

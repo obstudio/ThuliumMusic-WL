@@ -1,5 +1,36 @@
 (* ::Package:: *)
 
+uiSetPath:=DynamicModule[{path=dataPathTemplate},
+	CreateDialog[Row[{
+		Spacer[96],
+		Column[{
+			Spacer[{48,48}],
+			Image[logo,ImageSize->{512,Automatic}],
+			Spacer[1],
+			caption["_ChooseBasePath","Title"],
+			Row[{
+				button["ArrowL","Disabled"],
+				Spacer[8],
+				InputField[
+					Dynamic[path],String,
+					BaseStyle->{FontSize->20},
+					ImageSize->{384,40}
+				],
+				Spacer[8],
+				DynamicModule[{style="Default"},
+					EventHandler[Dynamic@button["ArrowR",style],{
+						"MouseDown":>(style="Clicked"),
+						"MouseUp":>(style="Default";userInfo[["DataPath"]]=path;DialogReturn[];)
+					}]
+				]
+			},ImageSize->{512,48},Alignment->Center,ImageMargins->4],
+			Spacer[{48,48}]
+		},Alignment->Center],
+		Spacer[96]
+	}],WindowTitle->text[["BasicSettings"]],Background->styleColor[["Background"]]];
+];
+
+
 uiSettings:=DynamicModule[{choices,langDict},
 	choices=userInfo;
 	langDict=#->caption[Association[Import[localPath<>"Lang\\"<>#<>".json"]][["LanguageName"]],"Text"]&/@langList;
@@ -49,11 +80,11 @@ uiPlayer[song_]:=Module[{image,audio,imageExist,aspectRatio},
 	AudioStop[];
 	If[index[[song,"Image"]]!="",
 		imageExist=True;
-		image=Import[userPath<>"Images\\"<>index[[song,"Image"]]];
+		image=Import[dataPath<>"Images\\"<>index[[song,"Image"]]];
 		aspectRatio=ImageAspectRatio[image],
 		imageExist=False
 	];
-	audio=Import[userPath<>"Buffer\\"<>song<>".buffer","MP3"];
+	audio=Import[dataPath<>"Buffer\\"<>song<>".buffer","MP3"];
 	duration=Duration[audio];
 	current=AudioPlay[audio];
 	CreateDialog[Row[{

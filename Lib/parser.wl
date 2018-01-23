@@ -1,5 +1,10 @@
 (* ::Package:: *)
 
+(* temporary function *)
+QYMParse[filename_]:=integrate[#MusicClips,#Effects]&@parse[QYM`tokenizer[filename]];
+QYSParse[filename_]:=integrate[#MusicClips,#Effects]&@parse[QYS`Tokenize[filename]];
+
+
 pitchDict=<|1->0,2->2,3->4,4->5,5->7,6->9,7->11,10->10|>;
 chordDict=<|
 	"M"->{0,4,7},"m"->{0,3,7},"a"->{0,4,8},

@@ -1,5 +1,9 @@
 (* ::Package:: *)
 
+localPath=NotebookDirectory[];
+logo=Import[localPath<>"Assets\\Logo.png"];
+
+
 (* basic graphics *)
 squareRounded[t_,r_,scheme_]:=If[r==1,
 	GraphicsGroup[{

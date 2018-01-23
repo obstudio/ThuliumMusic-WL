@@ -93,6 +93,8 @@
 		"NewVersion": "新版",
 		"Playing": "正在播放",
 		"Page.x": "(第&1页)",
+		"BasicSettings": "基本设置",
+		"ChooseBasePath": "请选择基础目录",
 		"SureToRemove": "你确定要将歌曲《$1》从歌单中移除吗？",
 		"NoImageInfo": "暂无该图片的信息",
 		"UpdatingImage": "正在更新本地图片库……",

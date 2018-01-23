@@ -1,5 +1,19 @@
 (* ::Package:: *)
 
+(* path and template *)
+version=281;
+cloudPath="http://qymp.ob-studio.cn/assets/";
+userPath=$HomeDirectory<>"\\AppData\\Local\\obstudio\\QYMP\\";
+dataPathTemplate="C:\\ProgramData\\obstudio\\QYMP\\";
+userTemplate=<|
+	"Version"->version,
+	"Language"->"chs",
+	"Developer"->False,
+	"Player"->"Old",
+	"DataPath"->dataPathTemplate
+|>;
+
+
 (* tags *)
 metaInfoTags={"SectionCount","RealTrackCount","Duration","Instruments"};
 textInfoTags={"SongName","Lyricist","Composer","Adapter","Comment","Abstract","Origin"};
@@ -7,6 +21,22 @@ otherInfoTags={"Format","Image","Uploader","Tags"};
 imageTags={"Title","Painter","PainterID","IllustID","URL"};
 aboutTags={"Version","Producer","Website"};
 langList={"chs","eng"};
+
+
+(* tokenizer related *)
+tonalityDict=<|
+	"C"->0,"G"->7,"D"->2,"A"->9,"E"->4,
+	"B"->-1,"#F"->6,"#C"->1,"F"->5,"bB"->-2,
+	"bE"->3,"bA"->8,"bD"->1,"bG"->6,"bC"->-1,
+	"F#"->6,"C#"->1,"Bb"->-2,"Gb"->6,
+	"Eb"->3,"Ab"->8,"Db"->1,"Cb"->-1
+|>;
+rep=#~~(","~~#)...&;
+int=DigitCharacter..;
+expr=Except["("|")"|"<"|">"]..;
+name=LetterCharacter~~WordCharacter...;
+real=DigitCharacter...~~"."~~DigitCharacter...;
+key=Alternatives@Keys@tonalityDict;
 
 
 (* some functions *)
@@ -27,22 +57,6 @@ caption[string_String,style_String]:=caption[string,style,{}];
 caption[string_String,style_String,argument_List]:=Style[completeText[
 	If[StringLength@string>0&&StringPart[string,1]=="_",text[[StringDrop[string,1]]],string],
 argument],styleDict[[style]]];
-
-
-(* tokenizer related *)
-rep=#~~(","~~#)...&;
-int=DigitCharacter..;
-expr=Except["("|")"|"<"|">"]..;
-name=LetterCharacter~~WordCharacter...;
-real=DigitCharacter...~~"."~~DigitCharacter...;
-tonalityDict=<|
-	"C"->0,"G"->7,"D"->2,"A"->9,"E"->4,
-	"B"->-1,"#F"->6,"#C"->1,"F"->5,"bB"->-2,
-	"bE"->3,"bA"->8,"bD"->1,"bG"->6,"bC"->-1,
-	"F#"->6,"C#"->1,"Bb"->-2,"Gb"->6,
-	"Eb"->3,"Ab"->8,"Db"->1,"Cb"->-1
-|>;
-key=Alternatives@Keys@tonalityDict;
 getArgument[string_,function_]:=Switch[function,
 	"Instr",{string},
 	"Volume"|"Chord",ToExpression/@StringSplit[string,","],
@@ -73,8 +87,7 @@ refresh:=Module[
 	songs=StringDrop[Select[metaTree,StringMatchQ[__~~".json"]],-5];
 	dirList=Select[metaTree,!StringMatchQ[#,__~~".json"]&];
 	Do[
-		If[!DirectoryQ[userPath<>"buffer\\"<>dir],CreateDirectory[userPath<>"buffer\\"<>dir]];
-		If[!DirectoryQ[userPath<>"images\\"<>dir],CreateDirectory[userPath<>"images\\"<>dir]],
+		If[!DirectoryQ[dataPath<>"buffer\\"<>dir],CreateDirectory[dataPath<>"buffer\\"<>dir]],
 	{dir,dirList}];
 	index=Association/@AssociationMap[Import[localPath<>"Meta\\"<>#<>".json"]&,songs];
 	playlists=Import[localPath<>"playlist.json"];
@@ -115,7 +128,7 @@ refresh:=Module[
 
 updateImage:=Module[{updates={},image,filename,meta},
 	Do[
-		If[KeyExistsQ[index[[song]],"Image"]&&!FileExistsQ[userPath<>"Images\\"<>index[[song,"Image"]]],
+		If[KeyExistsQ[index[[song]],"Image"]&&!FileExistsQ[dataPath<>"Images\\"<>index[[song,"Image"]]],
 			AppendTo[updates,index[[song,"Image"]]]
 		],
 	{song,songs}];
@@ -123,7 +136,7 @@ updateImage:=Module[{updates={},image,filename,meta},
 	Monitor[Do[
 		filename=updates[[i]];
 		image=Import[cloudPath<>"images/"<>StringReplace[filename,"\\"->"/"]];
-		Export[userPath<>"Images\\"<>filename,image];
+		Export[dataPath<>"Images\\"<>filename,image];
 		meta=Association@Import[cloudPath<>"images/"<>StringReplace[filename,{"\\"->"/","."~~__->".json"}]];
 		If[KeyExistsQ[imageData,filename],
 			imageData[[filename]]=meta,
@@ -141,19 +154,19 @@ updateImage:=Module[{updates={},image,filename,meta},
 			updates[[i]]
 		}],
 	Spacer[{4,4}]},Alignment->Center],ImageSize->400,Alignment->Center]];
-	Export[userPath<>"Image.json",Normal/@Normal@imageData];
+	Export[dataPath<>"Image.json",Normal/@Normal@imageData];
 ];
 
 
 updateBuffer:=Module[{updates={},song,filename,hash,audio,messages,bufferList},
-	SetDirectory[userPath];
+	SetDirectory[dataPath];
 	bufferList=StringTake[FileNames["*.buffer","buffer",Infinity],{8,-8}];
-	DeleteFile[userPath<>"Buffer\\"<>#<>".buffer"]&/@Complement[bufferList,songs];
+	DeleteFile[dataPath<>"Buffer\\"<>#<>".buffer"]&/@Complement[bufferList,songs];
 	Do[
 		filename=localPath<>"Songs\\"<>song<>"."<>index[[song,"Format"]];
 		hash=toBase32@FileHash[filename];
 		If[KeyExistsQ[bufferHash,song],
-			If[bufferHash[[song]]==hash && FileExistsQ[userPath<>"Buffer\\"<>song<>".buffer"],
+			If[bufferHash[[song]]==hash && FileExistsQ[dataPath<>"Buffer\\"<>song<>".buffer"],
 				Continue[],
 				AppendTo[updates,song];
 			],
@@ -171,7 +184,7 @@ updateBuffer:=Module[{updates={},song,filename,hash,audio,messages,bufferList},
 			audio=QYMParse[filename]
 		];
 		messages=Values[Options[audio,MetaInformation]][[1]][["Messages"]];
-		Export[userPath<>"Buffer\\"<>song<>".buffer",audio,"MP3"],
+		Export[dataPath<>"Buffer\\"<>song<>".buffer",audio,"MP3"],
 	{i,Length@updates}],
 	Panel[Column[{Spacer[{4,4}],
 		text[["UpdatingBuffer"]],
@@ -184,5 +197,5 @@ updateBuffer:=Module[{updates={},song,filename,hash,audio,messages,bufferList},
 			index[[updates[[i]],"SongName"]]
 		}],
 	Spacer[{4,4}]},Alignment->Center],ImageSize->400,Alignment->Center]];
-	Export[userPath<>"Buffer.json",Normal@bufferHash[[Intersection[Keys@bufferHash,songs]]]];
+	Export[dataPath<>"Buffer.json",Normal@bufferHash[[Intersection[Keys@bufferHash,songs]]]];
 ];

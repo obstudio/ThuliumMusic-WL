@@ -68,7 +68,7 @@ refresh:=Module[
 		metaTree,songsClassified,
 		playlistInfo,songList
 	},
-	SetDirectory[path];
+	SetDirectory[localPath];
 	metaTree=StringDrop[FileNames["*","Meta",Infinity],5];
 	songs=StringDrop[Select[metaTree,StringMatchQ[__~~".json"]],-5];
 	dirList=Select[metaTree,!StringMatchQ[#,__~~".json"]&];
@@ -76,12 +76,12 @@ refresh:=Module[
 		If[!DirectoryQ[userPath<>"buffer\\"<>dir],CreateDirectory[userPath<>"buffer\\"<>dir]];
 		If[!DirectoryQ[userPath<>"images\\"<>dir],CreateDirectory[userPath<>"images\\"<>dir]],
 	{dir,dirList}];
-	index=Association/@AssociationMap[Import[path<>"Meta\\"<>#<>".json"]&,songs];
-	playlists=Import[path<>"playlist.json"];
+	index=Association/@AssociationMap[Import[localPath<>"Meta\\"<>#<>".json"]&,songs];
+	playlists=Import[localPath<>"playlist.json"];
 	playlistData=<||>;
 	songsClassified={};
 	Do[
-		playlistInfo=Association@Import[path<>"Playlists\\"<>playlist<>".qyl","JSON"];
+		playlistInfo=Association@Import[localPath<>"Playlists\\"<>playlist<>".qyl","JSON"];
 		songList=#Song&/@Association/@playlistInfo[["SongList"]];
 		AppendTo[playlistData,<|playlist->playlistInfo|>];
 		songsClassified=Union[songsClassified,playlistInfo[["Path"]]<>#&/@songList],
@@ -150,7 +150,7 @@ updateBuffer:=Module[{updates={},song,filename,hash,audio,messages,bufferList},
 	bufferList=StringTake[FileNames["*.buffer","buffer",Infinity],{8,-8}];
 	DeleteFile[userPath<>"Buffer\\"<>#<>".buffer"]&/@Complement[bufferList,songs];
 	Do[
-		filename=path<>"Songs\\"<>song<>"."<>index[[song,"Format"]];
+		filename=localPath<>"Songs\\"<>song<>"."<>index[[song,"Format"]];
 		hash=toBase32@FileHash[filename];
 		If[KeyExistsQ[bufferHash,song],
 			If[bufferHash[[song]]==hash && FileExistsQ[userPath<>"Buffer\\"<>song<>".buffer"],
@@ -164,7 +164,7 @@ updateBuffer:=Module[{updates={},song,filename,hash,audio,messages,bufferList},
 	If[updates=={},Return[]];
 	Monitor[Do[
 		song=updates[[i]];
-		filename=path<>"Songs\\"<>song<>"."<>index[[song,"Format"]];
+		filename=localPath<>"Songs\\"<>song<>"."<>index[[song,"Format"]];
 		bufferHash[[song]]=toBase32@FileHash[filename];
 		If[index[[song,"Format"]]=="qys",
 			audio=QYSParse[filename],

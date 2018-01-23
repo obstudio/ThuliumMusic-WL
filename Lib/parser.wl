@@ -256,13 +256,13 @@ trackParse[tokenizer_,global_]:=Module[
 
 
 (* ::Input:: *)
-(*debug[#Messages]&@parse[QYS`Tokenize[path<>"Songs\\test.qys"],All]*)
+(*debug[#Messages]&@parse[QYS`Tokenize[localPath<>"Songs\\test.qys"],All]*)
 
 
 (* ::Input:: *)
 (*AudioStop[];AudioPlay[#[[2]]]&@*)
 (*EchoFunction["time: ",#[[1]]&]@*)
-(*Timing[integrate[#MusicClips,#Effects]&[parse[QYS`Tokenize[path<>"Songs\\test.qys"],All]]];*)
+(*Timing[integrate[#MusicClips,#Effects]&[parse[QYS`Tokenize[localPath<>"Songs\\test.qys"],All]]];*)
 
 
 parse[tokenizer_]:=parse[tokenizer,All];
@@ -335,19 +335,19 @@ parse[tokenizer_,sections_]:=Module[
 
 
 (* ::Input:: *)
-(*debug[#Messages]&@parse[QYS`Tokenize[path<>"Songs\\PVZ\\Brainiac_Maniac.qys"],All]*)
+(*debug[#Messages]&@parse[QYS`Tokenize[localPath<>"Songs\\PVZ\\Brainiac_Maniac.qys"],All]*)
 
 
 (* ::Input:: *)
 (*AudioStop[];AudioPlay[#[[2]]]&@*)
 (*EchoFunction["time: ",#[[1]]&]@*)
-(*Timing[integrate[#MusicClips,#Effects]&[parse[QYS`Tokenize[path<>"Songs\\temp.qys"],All]]];*)
+(*Timing[integrate[#MusicClips,#Effects]&[parse[QYS`Tokenize[localPath<>"Songs\\temp.qys"],All]]];*)
 
 
 (* ::Input:: *)
 (*AudioStop[];AudioPlay[#[[2]]]&@*)
 (*EchoFunction["time: ",#[[1]]&]@*)
-(*Timing[integrate[#MusicClips,#Effects]&[parse[QYS`Tokenize[path<>"Songs\\PVZ\\Brainiac_Maniac.qys"],All]]];*)
+(*Timing[integrate[#MusicClips,#Effects]&[parse[QYS`Tokenize[localPath<>"Songs\\PVZ\\Brainiac_Maniac.qys"],All]]];*)
 
 
 (* ::Input:: *)
@@ -447,7 +447,7 @@ integrate[tracks_,effects_]:=Module[
 
 
 (* ::Input:: *)
-(*AudioStop[];AudioPlay@QYSParse[path<>"Songs\\TouHou\\TH11-Chireiden\\Nuclear_Fusion.qys"];*)
+(*AudioStop[];AudioPlay@QYSParse[localPath<>"Songs\\TouHou\\TH11-Chireiden\\Nuclear_Fusion.qys"];*)
 
 
 (* ::Input:: *)
@@ -459,11 +459,11 @@ integrate[tracks_,effects_]:=Module[
 
 
 (* ::Input:: *)
-(*Export["E:\\1.mp3",QYSParse[path<>"Songs\\temp.qys"]];*)
+(*Export["E:\\1.mp3",QYSParse[localPath<>"Songs\\temp.qys"]];*)
 
 
 (* ::Input:: *)
-(*AudioStop[];AudioPlay@QYSParse[path<>"Songs\\Gate_of_Steiner.qys"];*)
+(*AudioStop[];AudioPlay@QYSParse[localPath<>"Songs\\Gate_of_Steiner.qys"];*)
 
 
 (* ::Text:: *)

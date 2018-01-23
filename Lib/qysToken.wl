@@ -140,12 +140,12 @@ End[];
 
 
 (* ::Input:: *)
-(*Export["E:\\test-Tokenizer.json",QYS`Tokenize[path<>"Songs\\test.qys"]];*)
+(*Export["E:\\test-Tokenizer.json",QYS`Tokenize[localPath<>"Songs\\test.qys"]];*)
 
 
 (* ::Input:: *)
-(*ExportString[QYS`Tokenize[path<>"Songs\\test.qys"],"JSON"]*)
+(*ExportString[QYS`Tokenize[localPath<>"Songs\\test.qys"],"JSON"]*)
 
 
 (* ::Input:: *)
-(*QYS`Tokenize[path<>"Songs\\test.qys"]*)
+(*QYS`Tokenize[localPath<>"Songs\\test.qys"]*)

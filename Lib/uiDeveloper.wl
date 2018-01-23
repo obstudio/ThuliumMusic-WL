@@ -32,7 +32,7 @@ putTextInfo[song_,textInfo_]:=Module[
 		info[[tag]]=textInfo[[tag]],
 	{tag,textInfoTags}];
 	index[[song]]=info;
-	Export[path<>"Meta\\"<>song<>".json",index[[song]]];
+	Export[localPath<>"Meta\\"<>song<>".json",index[[song]]];
 ];
 
 
@@ -52,7 +52,7 @@ addSong[songPath_,textInfo_]:=Module[{song,metaInfo,audio,format},
 ignoreList={"temp.qys","test.qys"};
 uiAddSong:=DynamicModule[{songPath,textInfo,candidates},
 	textInfo=AssociationMap[""&,textInfoTags];
-	SetDirectory[path];
+	SetDirectory[localPath];
 	candidates=Complement[StringDrop[FileNames["*.qys"|"*.qym","Songs",Infinity],6],
 		#<>"."<>index[[#,"Format"]]&/@songs,
 		ignoreList
@@ -81,7 +81,7 @@ uiDeleteSong[song_]:=CreateDialog[Column[{"",
 	Row[{
 		Button[text[["Confirm"]],
 			index=Delete[index,song];
-			DeleteFile[path<>"Meta\\"<>song<>".json"];
+			DeleteFile[localPath<>"Meta\\"<>song<>".json"];
 			DialogReturn[refresh;uiPlaylist["All"]],
 		ImageSize->100],
 		Spacer[20],

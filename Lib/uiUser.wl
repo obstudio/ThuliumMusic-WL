@@ -2,7 +2,7 @@
 
 uiSettings:=DynamicModule[{choices,langDict},
 	choices=userInfo;
-	langDict=#->caption[Association[Import[path<>"Lang\\"<>#<>".json"]][["LanguageName"]],"Text"]&/@langList;
+	langDict=#->caption[Association[Import[localPath<>"Lang\\"<>#<>".json"]][["LanguageName"]],"Text"]&/@langList;
 	CreateDialog[Column[{Spacer[{40,40}],
 		caption["_Settings","Title"],Spacer[1],
 		Row[{Spacer[40],Grid[{

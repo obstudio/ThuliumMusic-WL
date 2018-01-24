@@ -31,14 +31,6 @@ outcome]&/@styleData;
 dictionary=Association/@AssociationMap[Import[localPath<>"Lang\\"<>#<>".json"]&,langList];       (* languages *)
 
 
-(* ::Input:: *)
-(*refreshLanguage;*)
-
-
-(* ::Input:: *)
-(*userInfo*)
-
-
 (* user data *)
 If[!DirectoryQ[userPath],
 	CreateDirectory[userPath];

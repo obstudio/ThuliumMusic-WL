@@ -5,6 +5,7 @@ version=281;
 cloudPath="http://qymp.ob-studio.cn/assets/";
 userPath=$HomeDirectory<>"\\AppData\\Local\\obstudio\\QYMP\\";
 dataPathTemplate="C:\\ProgramData\\obstudio\\QYMP\\";
+If[!DirectoryQ[dataPathTemplate],CreateDirectory[dataPathTemplate]];
 userTemplate=<|
 	"Version"->version,
 	"Language"->"chs",

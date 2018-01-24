@@ -1,5 +1,9 @@
 (* ::Package:: *)
 
+(* ::Input:: *)
+(*uiSetPath;*)
+
+
 uiSetPath:=DynamicModule[{path=dataPathTemplate},
 	CreateDialog[Row[{
 		Spacer[96],
@@ -9,16 +13,20 @@ uiSetPath:=DynamicModule[{path=dataPathTemplate},
 			Spacer[1],
 			caption["_ChooseBasePath","Title"],
 			Row[{
-				button["ArrowL","Disabled"],
+				FileNameSetter[Dynamic[path],"Directory",
+					Appearance->button["Browse","Default"],
+					WindowTitle->text[["ChooseBasePath"]]
+				],
 				Spacer[8],
 				InputField[
 					Dynamic[path],String,
 					BaseStyle->{FontSize->20},
-					ImageSize->{384,40}
+					ImageSize->{384,40},
+					ContinuousAction->True
 				],
 				Spacer[8],
 				DynamicModule[{style="Default"},
-					EventHandler[Dynamic@button["ArrowR",style],{
+					EventHandler[Dynamic@button["Tick",style],{
 						"MouseDown":>(style="Clicked"),
 						"MouseUp":>(style="Default";userInfo[["DataPath"]]=path;DialogReturn[];)
 					}]

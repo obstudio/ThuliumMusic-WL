@@ -172,11 +172,25 @@ buttonData=<|
 		Line[{{q,p},{0.52,p}}],Line[{{q+a,p-a},{q,p},{q+a,p+a}}],
 		Line[{{l1,w1},{0.08,w1}}],Line[{{l1,w2},{0.08,w2}}],
 		Line[{{l1,-w2},{-0.04,-w2}}],Line[{{l1,-w1},{-0.04,-w1}}]
-	}]]
+	}]],
+	"Tick"->GraphicsGroup[{
+		Thickness[0.12],CapForm["Round"],JoinForm["Round"],
+		Line[{{-0.4,-0.04},{-0.12,-0.32},{0.44,0.24}}]
+	}],
+	"Cross"->GraphicsGroup[{
+		Thickness[0.12],CapForm["Round"],JoinForm["Round"],
+		Line[{{-0.3,-0.3},{0.3,0.3}}],
+		Line[{{-0.3,0.3},{0.3,-0.3}}]
+	}],
+	"Browse"->GraphicsGroup[{
+		Disk[{0,0},0.12],
+		Disk[{-0.4,0},0.12],
+		Disk[{0.4,0},0.12]
+	}]
 |>;
 
 
 (* ::Input:: *)
 (*buttonNames=Keys[buttonData];*)
-(*buttonNamePaged=Partition[buttonNames,UpTo@Ceiling[Length@buttonNames/Ceiling[Length@buttonNames/8]]];*)
+(*buttonNamePaged=Partition[buttonNames,UpTo@Ceiling[Length@buttonNames/Ceiling[Length@buttonNames/9]]];*)
 (*Grid[button/@#&/@buttonNamePaged,ItemSize->{6,6},Spacings->{.5,0}]*)

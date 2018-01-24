@@ -1,0 +1,22 @@
+{
+	"SongName": "曲名",
+	"Lyricist": "作词",
+	"Composer": "作曲",
+	"Adapter": "改编",
+	"Comment": "备注",
+	"Abstract": "摘要",
+	"Origin": "原曲",
+	"Format": "格式",
+	"SectionCount": "乐章数",
+	"RealTrackCount": "实际音轨数",
+	"Duration": "时长",
+	"Instruments": "乐器",
+	"URL": "地址",
+	"Painter": "画师",
+	"PainterID": "画师ID",
+	"IllustID": "图片ID",
+	"Title": "标题",
+	"Version": "版本",
+	"Producer": "制作",
+	"Website": "网址"
+}

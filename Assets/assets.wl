@@ -1,6 +1,6 @@
 (* ::Package:: *)
 
-localPath=NotebookDirectory[];
+(* load local assets *)
 logo=Import[localPath<>"Assets\\Logo.png"];
 
 
@@ -48,8 +48,8 @@ progressBar[prog_,len_]:=Graphics[{
 
 
 (* page selector *)
-pageSelectorNumber[num_Integer,style_,size_]:=If[style=="Default",
-	Mouseover[pageSelectorNumber[num,"Basic",size],pageSelectorNumber[num,"Mouseover",size]],
+pageSelectorDisplay[num_Integer,style_,size_]:=If[style=="Default",
+	Mouseover[pageSelectorDisplay[num,"Basic",size],pageSelectorDisplay[num,"Mouseover",size]],
 	Block[{scheme=pageSelectorColor[[style]]},Graphics[{
 		squareRounded[0.06,0.3,scheme],
 		Text[num,BaseStyle->{
@@ -59,8 +59,8 @@ pageSelectorNumber[num_Integer,style_,size_]:=If[style=="Default",
 		}]
 	}]]
 ];
-pageSelectorButton[name_,style_]:=If[style=="Default",
-	Mouseover[pageSelectorButton[name,"Basic"],pageSelectorButton[name,"Mouseover"]],
+pageSelectorDisplay[name_String,style_]:=If[style=="Default",
+	Mouseover[pageSelectorDisplay[name,"Basic"],pageSelectorDisplay[name,"Mouseover"]],
 	Block[{scheme=pageSelectorColor[[style]]},Graphics[{
 		squareRounded[0.06,0.3,scheme],
 		scheme[["Body"]],
@@ -90,9 +90,9 @@ pageSelectorData=<|
 
 
 (* button *)
-button[name_]:=button[name,"Default"];
-button[name_,style_]:=If[style=="Default",
-	Mouseover[button[name,"Basic"],button[name,"Mouseover"]],
+buttonDisplay[name_]:=buttonDisplay[name,"Default"];
+buttonDisplay[name_,style_]:=If[style=="Default",
+	Mouseover[buttonDisplay[name,"Basic"],buttonDisplay[name,"Mouseover"]],
 	Block[{scheme=buttonColor[[style]]},Graphics[{
 		squareRounded[0.06,1,scheme],
 		scheme[["Body"]],buttonData[[name]]
@@ -193,4 +193,4 @@ buttonData=<|
 (* ::Input:: *)
 (*buttonNames=Keys[buttonData];*)
 (*buttonNamePaged=Partition[buttonNames,UpTo@Ceiling[Length@buttonNames/Ceiling[Length@buttonNames/9]]];*)
-(*Grid[button/@#&/@buttonNamePaged,ItemSize->{6,6},Spacings->{.5,0}]*)
+(*Grid[buttonDisplay/@#&/@buttonNamePaged,ItemSize->{6,6},Spacings->{.5,0}]*)

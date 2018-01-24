@@ -69,29 +69,38 @@ uiPlayerControlsNew:={
 
 
 uiPageSelector:=Row[{
-	Dynamic@If[page<=1,pageSelectorButton["Prev","Disabled"],
+	Dynamic@If[page<=1,pageSelectorDisplay["Prev","Disabled"],
 	DynamicModule[{style="Default"},
-		EventHandler[Dynamic@pageSelectorButton["Prev",style],{
+		EventHandler[Dynamic@pageSelectorDisplay["Prev",style],{
 			"MouseDown":>(style="Clicked"),
 			"MouseUp":>(style="Default";page--;)
 		}]
 	]],
 	Spacer[20],
 	Row[Flatten@Array[{
-		Dynamic@If[page==#,pageSelectorNumber[#,"Current",32],
+		Dynamic@If[page==#,pageSelectorDisplay[#,"Current",32],
 		DynamicModule[{style="Default"},
-			EventHandler[Dynamic@pageSelectorNumber[#,style,32],{
+			EventHandler[Dynamic@pageSelectorDisplay[#,style,32],{
 				"MouseDown":>(style="Clicked"),
 				"MouseUp":>(style="Default";page=#;)
 			}]
 		]
 	],Spacer[6]}&,pageCount]],
 	Spacer[14],
-	Dynamic@If[page>=pageCount,pageSelectorButton["Next","Disabled"],
+	Dynamic@If[page>=pageCount,pageSelectorDisplay["Next","Disabled"],
 	DynamicModule[{style="Default"},
-		EventHandler[Dynamic@pageSelectorButton["Next",style],{
+		EventHandler[Dynamic@pageSelectorDisplay["Next",style],{
 			"MouseDown":>(style="Clicked"),
 			"MouseUp":>(style="Default";page++;)
 		}]
 	]]
 },ImageSize->{500,60},Alignment->Center];
+
+
+SetAttributes[button,HoldRest];
+button[buttonName_,action_]:=DynamicModule[{style="Default"},
+	EventHandler[Dynamic@buttonDisplay[buttonName,style],{
+		"MouseDown":>(style="Clicked"),
+		"MouseUp":>(style="Default";ReleaseHold[action];)
+	}]
+]

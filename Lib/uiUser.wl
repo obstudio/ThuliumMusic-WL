@@ -14,7 +14,7 @@ uiSetPath:=DynamicModule[{path=dataPathTemplate},
 			caption["_ChooseBasePath","Title"],
 			Row[{
 				FileNameSetter[Dynamic[path],"Directory",
-					Appearance->button["Browse","Default"],
+					Appearance->buttonDisplay["Browse","Default"],
 					WindowTitle->text[["ChooseBasePath"]]
 				],
 				Spacer[8],
@@ -25,12 +25,7 @@ uiSetPath:=DynamicModule[{path=dataPathTemplate},
 					ContinuousAction->True
 				],
 				Spacer[8],
-				DynamicModule[{style="Default"},
-					EventHandler[Dynamic@button["Tick",style],{
-						"MouseDown":>(style="Clicked"),
-						"MouseUp":>(style="Default";userInfo[["DataPath"]]=path;DialogReturn[];)
-					}]
-				]
+				button["Tick",userInfo[["DataPath"]]=path;DialogReturn[]]
 			},ImageSize->{512,48},Alignment->Center,ImageMargins->4],
 			Spacer[{48,48}]
 		},Alignment->Center],
@@ -170,33 +165,13 @@ QYMP:=DynamicModule[{playlist},
 		Row[{
 			Row[{Spacer[40],caption["_QYMP","BigTitle"]},Alignment->Left,ImageSize->320],
 			Row[{
-				DynamicModule[{style="Default"},
-					EventHandler[Dynamic@button["EnterPlaylist",style],{
-						"MouseDown":>(style="Clicked"),
-						"MouseUp":>(style="Default";DialogReturn[pageData[["Main"]]=page;playlist;uiPlaylist[playlist]];)
-					}]
-				],
+				button["EnterPlaylist",DialogReturn[pageData[["Main"]]=page;playlist;uiPlaylist[playlist]]],
 				Spacer[10],
-				DynamicModule[{style="Default"},
-					EventHandler[Dynamic@button["About",style],{
-						"MouseDown":>(style="Clicked"),
-						"MouseUp":>(style="Default";DialogReturn[pageData[["Main"]]=page;uiAbout];)
-					}]
-				],
+				button["About",DialogReturn[pageData[["Main"]]=page;uiAbout]],
 				Spacer[10],
-				DynamicModule[{style="Default"},
-					EventHandler[Dynamic@button["Settings",style],{
-						"MouseDown":>(style="Clicked"),
-						"MouseUp":>(style="Default";DialogReturn[pageData[["Main"]]=page;uiSettings];)
-					}]
-				],
+				button["Settings",DialogReturn[pageData[["Main"]]=page;uiSettings]],
 				Spacer[10],
-				DynamicModule[{style="Default"},
-					EventHandler[Dynamic@button["Exit",style],{
-						"MouseDown":>(style="Clicked"),
-						"MouseUp":>(style="Default";DialogReturn[pageData[["Main"]]=page;];)
-					}]
-				],
+				button["Exit",DialogReturn[pageData[["Main"]]=page;]],
 				Spacer[40]
 			},Alignment->Right,ImageSize->{320,56}]
 		}],
@@ -234,36 +209,15 @@ uiPlaylist[playlist_]:=DynamicModule[{song},
 				Spacer[40],caption[playlistInfo[["Title"]],"BigTitle"]
 			},Alignment->Left,ImageSize->480],
 			Row[{
-				DynamicModule[{style="Default"},
-					EventHandler[Dynamic@button["Play",style],{
-						"MouseDown":>(style="Clicked"),
-						"MouseUp":>(style="Default";DialogReturn[pageData[[playlist]]=page;uiPlayer[song]];)
-					}]
-				],
+				button["Play",DialogReturn[pageData[[playlist]]=page;uiPlayer[song]]],
 				Spacer[10],
 				If[userInfo[["Developer"]]&&playlist=="All",Row[{
-					DynamicModule[{style="Default"},
-						EventHandler[Dynamic@button["Modify",style],{
-							"MouseDown":>(style="Clicked"),
-							"MouseUp":>(style="Default";DialogReturn[pageData[[playlist]]=page;uiModifySong[song]];)
-						}]
-					],
+					button["Modify",DialogReturn[pageData[[playlist]]=page;uiModifySong[song]]],
 					Spacer[10],
-					DynamicModule[{style="Default"},
-						EventHandler[Dynamic@button["Add",style],{
-							"MouseDown":>(style="Clicked"),
-							"MouseUp":>(style="Default";DialogReturn[pageData[[playlist]]=page;uiAddSong];)
-						}]
-					],
-					Spacer[10]}],					
-					Nothing
-				],
-				DynamicModule[{style="Default"},
-					EventHandler[Dynamic@button["ArrowL",style],{
-						"MouseDown":>(style="Clicked"),
-						"MouseUp":>(style="Default";DialogReturn[pageData[[playlist]]=page;QYMP];)
-					}]
-				],
+					button["Add",DialogReturn[pageData[[playlist]]=page;uiAddSong]],
+					Spacer[10]}],
+				Nothing],
+				button["ArrowL",DialogReturn[pageData[[playlist]]=page;QYMP]],
 			Spacer[40]},Alignment->Right,ImageSize->{480,56}]
 		}],
 		If[playlistInfo[["Comment"]]!="",

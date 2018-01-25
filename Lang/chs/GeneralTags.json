@@ -16,6 +16,7 @@
 	"PainterID": "画师ID",
 	"IllustID": "图片ID",
 	"Title": "标题",
+	"Source": "来源",
 	"Version": "版本",
 	"Producer": "制作",
 	"Website": "网址"

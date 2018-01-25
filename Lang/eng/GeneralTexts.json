@@ -1,6 +1,8 @@
 {
 	"QYMP": "Qingyun Music Player",
 	"Playlist": "Playlist",
+	"AllSongs": "所有歌曲",
+	"Unclassified": "未分类的歌曲",
 	"Settings": "Settings",
 	"About": "About",		
 	"ModifySong": "Modify Song",

@@ -78,13 +78,15 @@ uiSettings:=DynamicModule[{choices},
 (*uiPlayer["Touhou\\Dream_Battle"]*)
 
 
-uiPlayer[song_]:=Module[{image,audio,imageExist,aspectRatio},
+imageData
+
+
+uiPlayer[song_]:=Module[{image,audio,imageExist=False,aspectRatio},
 	AudioStop[];
 	If[index[[song,"Image"]]!="",
 		imageExist=True;
 		image=Import[dataPath<>"Images\\"<>index[[song,"Image"]]];
-		aspectRatio=ImageAspectRatio[image],
-		imageExist=False
+		aspectRatio=ImageAspectRatio[image];
 	];
 	audio=Import[dataPath<>"Buffer\\"<>song<>".buffer","MP3"];
 	duration=Duration[audio];
@@ -97,7 +99,7 @@ uiPlayer[song_]:=Module[{image,audio,imageExist,aspectRatio},
 					{{Automatic,400},aspectRatio<1&&aspectRatio>1/2},
 					{{360,Automatic},aspectRatio>1&&aspectRatio<2}
 				}]],{"FadedFrame"}],
-				If[KeyExistsQ[imageData,index[[song,"Image"]]],
+				If[imageData[[index[[song,"Image"]]]]!=<||>,
 					Column[If[KeyExistsQ[imageData[[index[[song,"Image"]]]],#],
 						tagName[[#]]<>": "<>imageData[[index[[song,"Image"]],#]],
 						Nothing

@@ -19,7 +19,7 @@ userTemplate=<|
 metaInfoTags={"SectionCount","RealTrackCount","Duration","Instruments"};
 textInfoTags={"SongName","Lyricist","Composer","Adapter","Comment","Abstract","Origin"};
 otherInfoTags={"Format","Image","Uploader","Tags"};
-imageTags={"Title","Painter","PainterID","IllustID","URL"};
+imageTags={"Title","Painter","PainterID","IllustID","Source","URL"};
 aboutTags={"Version","Producer","Website"};
 langList={"chs","eng"};
 
@@ -92,6 +92,12 @@ refresh:=Module[
 		If[!DirectoryQ[dataPath<>"buffer\\"<>dir],CreateDirectory[dataPath<>"buffer\\"<>dir]],
 	{dir,dirList}];
 	index=Association/@AssociationMap[Import[localPath<>"Meta\\"<>#<>".json"]&,songs];
+	imageDirList=DeleteDuplicates@Flatten[
+		StringCases[dir__~~"\\"~~Except["\\"]..:>dir]/@Values@index[[songs,"Image"]]
+	];
+	Do[
+		If[!DirectoryQ[dataPath<>"image\\"<>dir],CreateDirectory[dataPath<>"image\\"<>dir]],
+	{dir,imageDirList}];
 	playlists=Import[localPath<>"playlist.json"];
 	playlistData=<||>;
 	songsClassified={};
@@ -105,7 +111,7 @@ refresh:=Module[
 	playlistData=Join[<|
 		"All"-><|
 			"Path"->"",
-			"Title"->"\:6240\:6709\:6b4c\:66f2",
+			"Title"->text[["AllSongs"]],
 			"Abstract"->"",
 			"Comment"->"",
 			"SongList"->({"Song"->#}&/@songs),
@@ -113,7 +119,7 @@ refresh:=Module[
 		|>,
 		"Unclassified"-><|
 			"Path"->"",
-			"Title"->"\:672a\:5206\:7c7b\:7684\:6b4c\:66f2",
+			"Title"->text[["Unclassified"]],
 			"Abstract"->"",
 			"Comment"->"",
 			"SongList"->({"Song"->#}&/@Complement[songs,songsClassified]),

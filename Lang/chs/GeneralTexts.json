@@ -36,5 +36,8 @@
 	"UpdatingBuffer": "正在更新本地歌曲库……",
 	"Progression": "(&1/&2)",
 	"Loading": "正在载入: ",
+	"Section": "章节&1",
+	"Track": "音轨&1",
+	"Bar": "小节&1",
 	"Obstudio": "鄂毕工作室"
 }

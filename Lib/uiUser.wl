@@ -34,9 +34,8 @@ uiSetPath:=DynamicModule[{path=dataPathTemplate},
 ];
 
 
-uiSettings:=DynamicModule[{choices,langDict},
+uiSettings:=DynamicModule[{choices},
 	choices=userInfo;
-	langDict=#->caption[Association[Import[localPath<>"Lang\\"<>#<>".json"]][["LanguageName"]],"Text"]&/@langList;
 	CreateDialog[Column[{Spacer[{40,40}],
 		caption["_Settings","Title"],Spacer[1],
 		Row[{Spacer[40],Grid[{
@@ -142,10 +141,15 @@ uiPlayer[song_]:=Module[{image,audio,imageExist,aspectRatio},
 uiAbout:=CreateDialog[Column[{Spacer[{40,40}],
 	caption["_About","Title"],
 	Spacer[{20,20}],
-	Row[{Spacer[60],Column[Join[
-		{caption["_QYMP","Subtitle"],Spacer[4]},
-		caption[tagName[[#]]<>": "<>aboutInfo[[#]],"Text"]&/@aboutTags
-	],Alignment->Left,ItemSize->Full],Spacer[60]}],
+	Row[{Spacer[60],Column[{
+		caption["_QYMP","Subtitle"],
+		Spacer[4],
+		Grid[{
+			{caption[tagName[["Version"]],"Text"],caption["1.7","Text"]},
+			{caption[tagName[["Producer"]],"Text"],caption["_Obstudio","Text"]},
+			{caption[tagName[["Website"]],"Text"],caption["qymp.ob-studio.cn","Text"]}
+		},Alignment->Left]
+	},Alignment->Left,ItemSize->Full],Spacer[60]}],
 	Spacer[{20,20}],
 	Button[text[["Return"]],DialogReturn[QYMP],ImageSize->100],
 Spacer[{40,40}]},Center,ItemSize->Full],

@@ -1,0 +1,22 @@
+{
+"SongName": "Title",
+"Lyricist": "Lyricist",
+"Composer": "Composer",
+"Adapter": "Adapter",
+"Comment": "Comment",
+"Abstract": "Abstract",
+"Origin": "Origin",
+"Format": "Format",
+"SectionCount": "Number of Sections",
+"RealTrackCount": "Number of Actual Tracks",
+"Duration": "Duration",
+"Instruments": "Instruments",
+"URL": "URL",
+"Painter": "Painter",
+"PainterID": "Painter ID",
+"IllustID": "Illust ID",
+"Title": "Title",
+"Version": "Version",
+"Producer": "Producer",
+"Website": "Website"
+}

@@ -1,7 +1,4 @@
 {
-	"Section": "章节&1",
-	"Track": "音轨&1",
-	"Bar": "小节&1",
 	"FileNotFound": "未找到文件$1",
 	"TerminatorAbsent": "缺少终止符",
 	"InvalidTonality": "声明了无效调名$1",

@@ -28,7 +28,7 @@ styleDict=Normal@Module[{outcome={}},
 	If[KeyExistsQ[#,"FontWeight"],AppendTo[outcome,FontWeight->ToExpression@#[["FontWeight"]]]];
 	If[KeyExistsQ[#,"FontColor"],AppendTo[outcome,FontColor->styleColor[[#[["FontColor"]]]]]];
 outcome]&/@styleData;
-dictionary=Association/@AssociationMap[Import[localPath<>"Lang\\"<>#<>".json"]&,langList];       (* languages *)
+langDict=Association@Import[localPath<>"Lang\\Languages.json"];                      (* languages *)
 
 
 (* user data *)

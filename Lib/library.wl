@@ -55,9 +55,10 @@ completeText[raw_,arg_]:=StringReplace[raw,{
 caption[string_String]:=caption[string,"None",{}];
 caption[string_String,argument_List]:=caption[string,"None",argument];
 caption[string_String,style_String]:=caption[string,style,{}];
-caption[string_String,style_String,argument_List]:=Style[completeText[
-	If[StringLength@string>0&&StringPart[string,1]=="_",text[[StringDrop[string,1]]],string],
-argument],styleDict[[style]]];
+caption[string_String,style_String,argument_List]:=Style[completeText[Which[
+	StringLength@string>0&&StringPart[string,1]=="_",text[[StringDrop[string,1]]],
+	True,string
+],argument],styleDict[[style]]];
 getArgument[string_,function_]:=Switch[function,
 	"Instr",{string},
 	"Volume"|"Chord",ToExpression/@StringSplit[string,","],
@@ -69,12 +70,12 @@ getArgument[string_,function_]:=Switch[function,
 (*Refresh & Update*)
 
 
-refreshLanguage:=Module[{langData},
-	langData=dictionary[[userInfo[["Language"]]]];
-	tagName=Association@langData[["TagName"]];
-	instrName=Association@langData[["Instrument"]];
-	text=Association@langData[["Caption"]];
-	aboutInfo=Association@text[["AboutQYMP"]]
+refreshLanguage:=Module[{langDataPath},
+	langDataPath=localPath<>"Lang\\"<>userInfo[["Language"]]<>"\\";
+	tagName=Association@Import[langDataPath<>"GeneralTags.json"];
+	instrName=Association@Import[langDataPath<>"Instruments.json"];
+	text=Association@Import[langDataPath<>"GeneralTexts.json"];
+	msgData=Association@Import[langDataPath<>"Messages.json"];
 ];
 
 

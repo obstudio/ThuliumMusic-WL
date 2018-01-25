@@ -378,7 +378,7 @@ debug[messages_]:=Module[{output={},sectionOutput},
 						Column[Row[{
 							caption["_Bar",{#Bar}],
 							caption[": "],
-							caption[text[[#Type]],#Info]
+							caption[msgData[[#Type]],#Info]
 						}]&/@messages[[i,"TrackMessages",j]]]
 					},True,Method->"Active"]]
 				],

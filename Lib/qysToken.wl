@@ -149,3 +149,73 @@ End[];
 
 (* ::Input:: *)
 (*QYS`Tokenize[localPath<>"Songs\\test.qys"]*)
+
+
+keyDictR=<|-2->"bB",-1->"B",0->"C",1->"#C",2->"D",3->"bE",4->"E",5->"F",6->"#F",7->"G",8->"#G",9->"A"|>;
+schemes=RGBColor/@Association@#&/@Association@Import[localPath<>"Lib\\Color.json"];
+
+
+schemes
+
+
+volDetok[vol_]:=If[StringPart[#,-1]==".",#<>"0",#]&@ToString[vol];
+
+
+detoken[tokenizer_,scheme_]:=Module[
+	{
+		token=Association@tokenizer,
+		argument,
+		detok={}
+	},
+	Switch[token[["Type"]],
+		"FunctionToken",
+			AppendTo[detok,Style["<",scheme[["Function"]]]];
+			argument=Association@token[["Argument"]];
+			If[token[["Simplified"]]==True,
+				Switch[Keys@token[["Argument"]],
+					{"Key","Oct"},
+						AppendTo[detok,Style["1=",scheme[["FuncName"]]]];
+						AppendTo[detok,Style[Key[argument[["Key"]]][keyDictR],scheme[["FuncArg"]]]];
+						AppendTo[detok,Style[Switch[argument[["Oct"]],
+							_?Positive,StringRepeat["'",argument[["Oct"]]],
+							_?Positive,StringRepeat[",",-argument[["Oct"]]],
+							0,""
+						],scheme[["FuncArg"]]]],
+					{"Bar","Beat"},
+						AppendTo[detok,Style[argument[["Bar"]],scheme[["FuncArg"]]]];
+						AppendTo[detok,Style["/",scheme[["FuncName"]]]];
+						AppendTo[detok,Style[argument[["Beat"]],scheme[["FuncArg"]]]],
+					{"Instr","Volume"},
+						detok=detok~Join~Flatten@Riffle[Table[{
+							Style[argument[["Instr",i]],scheme[["FuncArg"]]],
+							If[argument[["Volume",i]]!=1,{
+								Style["(",scheme[["FuncName"]]],
+								Style[argument[["Volume",i]],scheme[["FuncArg"]]],
+								Style[")",scheme[["FuncName"]]]
+							},{Nothing}]},{i,Length@argument[["Instr"]]}],
+						Style[",",scheme[["Function"]]]],
+					{"Volume"},
+						detok=detok~Join~Riffle[Style[
+							If[StringPart[#,-1]==".",#<>"0",#]&@ToString[#],scheme[["FuncArg"]]
+						]&/@argument[["Volume"]],
+						Style[",",scheme[["Function"]]]],
+					{"Instr"},
+						detok=detok~Join~Riffle[
+							Style[#,scheme[["FuncArg"]]]&/@argument[["Instr"]],
+						Style[",",scheme[["Function"]]]],
+					{"Speed"},
+						AppendTo[detok,Style[argument[["Speed"]],scheme[["FuncArg"]]]];
+				]
+			];
+			AppendTo[detok,Style[">",scheme[["Function"]]]];
+	];
+	Return[Row[detok,Background->scheme[["Background"]]]];
+];
+
+
+(* ::Input:: *)
+(*QYS`getTrack["<Piano,Violin(0.4)>"]//Column*)
+
+
+(* ::Input:: *)
+(*detoken[{"Type"->"FunctionToken","Simplified"->True,"Argument"->{"Instr"->{"Piano","Violin"},"Volume"->{1.`,0.4`}}},schemes[["Default"]]]*)

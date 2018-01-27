@@ -1,0 +1,16 @@
+{
+	"Default": {
+		"Pitch": "#007F7F",
+		"PitOp": "#007FBF",
+		"DurOp": "#00BF7F",
+		"Chord": "#00BFBF",
+		"Function": "#7F7F7F",
+		"FuncName": "#000000",
+		"FuncArg": "#7F007F",
+		"Modifier": "#7F7F7F",
+		"ModifOp": "#000000",
+		"ModifArg": "#7F007F",
+		"BarLine": "#000000",
+		"Background": "#FFFFFF"
+	}
+}

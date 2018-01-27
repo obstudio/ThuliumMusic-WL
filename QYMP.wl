@@ -5,14 +5,14 @@
 
 
 localPath=NotebookDirectory[];
-<<(localPath<>"Assets\\assets.wl")    (* graphics *)
-<<(localPath<>"Lib\\library.wl")      (* library *)
-<<(localPath<>"Lib\\uiControls.wl")   (* controls *)
-<<(localPath<>"Lib\\uiUser.wl")       (* UI for common users *)
-<<(localPath<>"Lib\\uiDeveloper.wl")  (* UI for developers *)
-<<(localPath<>"Lib\\qymToken.wl")     (* QYM tokenizer *)
-<<(localPath<>"Lib\\qysToken.wl")     (* QYS tokenizer *)
-<<(localPath<>"Lib\\parser.wl")       (* parser *)
+<<(localPath<>"Assets\\assets.wl")         (* graphics *)
+<<(localPath<>"Assets\\uiControls.wl")     (* controls *)
+<<(localPath<>"Assets\\uiUser.wl")         (* UI for common users *)
+<<(localPath<>"Assets\\uiDeveloper.wl")    (* UI for developers *)
+<<(localPath<>"Lib\\library.wl")           (* library *)
+<<(localPath<>"Lib\\QYM\\qymToken.wl")     (* QYM tokenizer *)
+<<(localPath<>"Lib\\QYS\\qysToken.wl")     (* QYS tokenizer *)
+<<(localPath<>"Lib\\parser.wl")            (* parser *)
 
 
 (* local data *)
@@ -28,7 +28,7 @@ styleDict=Normal@Module[{outcome={}},
 	If[KeyExistsQ[#,"FontWeight"],AppendTo[outcome,FontWeight->ToExpression@#[["FontWeight"]]]];
 	If[KeyExistsQ[#,"FontColor"],AppendTo[outcome,FontColor->styleColor[[#[["FontColor"]]]]]];
 outcome]&/@styleData;
-dictionary=Association/@AssociationMap[Import[localPath<>"Lang\\"<>#<>".json"]&,langList];       (* languages *)
+langDict=Association@Import[localPath<>"Lang\\Languages.json"];                      (* languages *)
 
 
 (* user data *)

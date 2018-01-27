@@ -19,7 +19,7 @@ userTemplate=<|
 metaInfoTags={"SectionCount","RealTrackCount","Duration","Instruments"};
 textInfoTags={"SongName","Lyricist","Composer","Adapter","Comment","Abstract","Origin"};
 otherInfoTags={"Format","Image","Uploader","Tags"};
-imageTags={"Title","Painter","PainterID","IllustID","URL"};
+imageTags={"Title","Painter","PainterID","IllustID","Source","URL"};
 aboutTags={"Version","Producer","Website"};
 langList={"chs","eng"};
 
@@ -32,9 +32,9 @@ tonalityDict=<|
 	"F#"->6,"C#"->1,"Bb"->-2,"Gb"->6,
 	"Eb"->3,"Ab"->8,"Db"->1,"Cb"->-1
 |>;
-rep=#~~(","~~#)...&;
+rep[pat_]:=rep[pat,","];
+rep[pat_,sep_]:=pat~~(sep~~pat)...&;
 int=DigitCharacter..;
-expr=Except["("|")"|"<"|">"]..;
 name=LetterCharacter~~WordCharacter...;
 real=DigitCharacter...~~"."~~DigitCharacter...;
 key=Alternatives@Keys@tonalityDict;
@@ -55,9 +55,10 @@ completeText[raw_,arg_]:=StringReplace[raw,{
 caption[string_String]:=caption[string,"None",{}];
 caption[string_String,argument_List]:=caption[string,"None",argument];
 caption[string_String,style_String]:=caption[string,style,{}];
-caption[string_String,style_String,argument_List]:=Style[completeText[
-	If[StringLength@string>0&&StringPart[string,1]=="_",text[[StringDrop[string,1]]],string],
-argument],styleDict[[style]]];
+caption[string_String,style_String,argument_List]:=Style[completeText[Which[
+	StringLength@string>0&&StringPart[string,1]=="_",text[[StringDrop[string,1]]],
+	True,string
+],argument],styleDict[[style]]];
 getArgument[string_,function_]:=Switch[function,
 	"Instr",{string},
 	"Volume"|"Chord",ToExpression/@StringSplit[string,","],
@@ -69,12 +70,12 @@ getArgument[string_,function_]:=Switch[function,
 (*Refresh & Update*)
 
 
-refreshLanguage:=Module[{langData},
-	langData=dictionary[[userInfo[["Language"]]]];
-	tagName=Association@langData[["TagName"]];
-	instrName=Association@langData[["Instrument"]];
-	text=Association@langData[["Caption"]];
-	aboutInfo=Association@text[["AboutQYMP"]]
+refreshLanguage:=Module[{langDataPath},
+	langDataPath=localPath<>"Lang\\"<>userInfo[["Language"]]<>"\\";
+	tagName=Association@Import[langDataPath<>"GeneralTags.json"];
+	instrName=Association@Import[langDataPath<>"Instruments.json"];
+	text=Association@Import[langDataPath<>"GeneralTexts.json"];
+	msgData=Association@Import[langDataPath<>"Messages.json"];
 ];
 
 
@@ -91,6 +92,12 @@ refresh:=Module[
 		If[!DirectoryQ[dataPath<>"buffer\\"<>dir],CreateDirectory[dataPath<>"buffer\\"<>dir]],
 	{dir,dirList}];
 	index=Association/@AssociationMap[Import[localPath<>"Meta\\"<>#<>".json"]&,songs];
+	imageDirList=DeleteDuplicates@Flatten[
+		StringCases[dir__~~"\\"~~Except["\\"]..:>dir]/@Values@index[[songs,"Image"]]
+	];
+	Do[
+		If[!DirectoryQ[dataPath<>"image\\"<>dir],CreateDirectory[dataPath<>"image\\"<>dir]],
+	{dir,imageDirList}];
 	playlists=Import[localPath<>"playlist.json"];
 	playlistData=<||>;
 	songsClassified={};
@@ -104,7 +111,7 @@ refresh:=Module[
 	playlistData=Join[<|
 		"All"-><|
 			"Path"->"",
-			"Title"->"\:6240\:6709\:6b4c\:66f2",
+			"Title"->text[["AllSongs"]],
 			"Abstract"->"",
 			"Comment"->"",
 			"SongList"->({"Song"->#}&/@songs),
@@ -112,7 +119,7 @@ refresh:=Module[
 		|>,
 		"Unclassified"-><|
 			"Path"->"",
-			"Title"->"\:672a\:5206\:7c7b\:7684\:6b4c\:66f2",
+			"Title"->text[["Unclassified"]],
 			"Abstract"->"",
 			"Comment"->"",
 			"SongList"->({"Song"->#}&/@Complement[songs,songsClassified]),

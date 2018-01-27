@@ -34,9 +34,8 @@ uiSetPath:=DynamicModule[{path=dataPathTemplate},
 ];
 
 
-uiSettings:=DynamicModule[{choices,langDict},
+uiSettings:=DynamicModule[{choices},
 	choices=userInfo;
-	langDict=#->caption[Association[Import[localPath<>"Lang\\"<>#<>".json"]][["LanguageName"]],"Text"]&/@langList;
 	CreateDialog[Column[{Spacer[{40,40}],
 		caption["_Settings","Title"],Spacer[1],
 		Row[{Spacer[40],Grid[{
@@ -79,13 +78,15 @@ uiSettings:=DynamicModule[{choices,langDict},
 (*uiPlayer["Touhou\\Dream_Battle"]*)
 
 
-uiPlayer[song_]:=Module[{image,audio,imageExist,aspectRatio},
+imageData
+
+
+uiPlayer[song_]:=Module[{image,audio,imageExist=False,aspectRatio},
 	AudioStop[];
 	If[index[[song,"Image"]]!="",
 		imageExist=True;
 		image=Import[dataPath<>"Images\\"<>index[[song,"Image"]]];
-		aspectRatio=ImageAspectRatio[image],
-		imageExist=False
+		aspectRatio=ImageAspectRatio[image];
 	];
 	audio=Import[dataPath<>"Buffer\\"<>song<>".buffer","MP3"];
 	duration=Duration[audio];
@@ -98,7 +99,7 @@ uiPlayer[song_]:=Module[{image,audio,imageExist,aspectRatio},
 					{{Automatic,400},aspectRatio<1&&aspectRatio>1/2},
 					{{360,Automatic},aspectRatio>1&&aspectRatio<2}
 				}]],{"FadedFrame"}],
-				If[KeyExistsQ[imageData,index[[song,"Image"]]],
+				If[imageData[[index[[song,"Image"]]]]!=<||>,
 					Column[If[KeyExistsQ[imageData[[index[[song,"Image"]]]],#],
 						tagName[[#]]<>": "<>imageData[[index[[song,"Image"]],#]],
 						Nothing
@@ -142,10 +143,15 @@ uiPlayer[song_]:=Module[{image,audio,imageExist,aspectRatio},
 uiAbout:=CreateDialog[Column[{Spacer[{40,40}],
 	caption["_About","Title"],
 	Spacer[{20,20}],
-	Row[{Spacer[60],Column[Join[
-		{caption["_QYMP","Subtitle"],Spacer[4]},
-		caption[tagName[[#]]<>": "<>aboutInfo[[#]],"Text"]&/@aboutTags
-	],Alignment->Left,ItemSize->Full],Spacer[60]}],
+	Row[{Spacer[60],Column[{
+		caption["_QYMP","Subtitle"],
+		Spacer[4],
+		Grid[{
+			{caption[tagName[["Version"]],"Text"],caption["1.7","Text"]},
+			{caption[tagName[["Producer"]],"Text"],caption["_Obstudio","Text"]},
+			{caption[tagName[["Website"]],"Text"],caption["qymp.ob-studio.cn","Text"]}
+		},Alignment->Left]
+	},Alignment->Left,ItemSize->Full],Spacer[60]}],
 	Spacer[{20,20}],
 	Button[text[["Return"]],DialogReturn[QYMP],ImageSize->100],
 Spacer[{40,40}]},Center,ItemSize->Full],

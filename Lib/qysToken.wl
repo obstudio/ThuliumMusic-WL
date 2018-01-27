@@ -12,6 +12,7 @@ pitOp=Alternatives[Characters@"abdMmop#$,'"]...;
 durOp=Alternatives[Characters@"-_.`"]...;
 pitch="%"|"x"|DigitCharacter~~pitOp;
 order=""|rep[int~~""|(".."~~int)];
+expr=Except["("|")"|"<"|">"]..;
 
 getOrder[ord_]:=Union@@StringCases[ord,{
 	n:int~~".."~~m:int:>Range[ToExpression@n,ToExpression@m],
@@ -155,12 +156,6 @@ keyDictR=<|-2->"bB",-1->"B",0->"C",1->"#C",2->"D",3->"bE",4->"E",5->"F",6->"#F",
 schemes=RGBColor/@Association@#&/@Association@Import[localPath<>"Lib\\Color.json"];
 
 
-schemes
-
-
-volDetok[vol_]:=If[StringPart[#,-1]==".",#<>"0",#]&@ToString[vol];
-
-
 detoken[tokenizer_,scheme_]:=Module[
 	{
 		token=Association@tokenizer,
@@ -172,13 +167,13 @@ detoken[tokenizer_,scheme_]:=Module[
 			AppendTo[detok,Style["<",scheme[["Function"]]]];
 			argument=Association@token[["Argument"]];
 			If[token[["Simplified"]]==True,
-				Switch[Keys@token[["Argument"]],
+				Switch[Keys@argument,
 					{"Key","Oct"},
 						AppendTo[detok,Style["1=",scheme[["FuncName"]]]];
 						AppendTo[detok,Style[Key[argument[["Key"]]][keyDictR],scheme[["FuncArg"]]]];
 						AppendTo[detok,Style[Switch[argument[["Oct"]],
 							_?Positive,StringRepeat["'",argument[["Oct"]]],
-							_?Positive,StringRepeat[",",-argument[["Oct"]]],
+							_?Negative,StringRepeat[",",-argument[["Oct"]]],
 							0,""
 						],scheme[["FuncArg"]]]],
 					{"Bar","Beat"},
@@ -205,7 +200,24 @@ detoken[tokenizer_,scheme_]:=Module[
 						Style[",",scheme[["Function"]]]],
 					{"Speed"},
 						AppendTo[detok,Style[argument[["Speed"]],scheme[["FuncArg"]]]];
-				]
+				],
+				Do[
+					AppendTo[detok,Style[function,scheme[["FuncName"]]]];
+					AppendTo[detok,Style[":",scheme[["Function"]]]];
+					Switch[function,
+						"Chord"|"Instr",
+							detok=detok~Join~Riffle[
+								Style[#,scheme[["FuncArg"]]]&/@argument[[function]],
+							Style[",",scheme[["Function"]]]],
+						"Volume",
+							detok=detok~Join~Riffle[Style[
+								If[StringPart[#,-1]==".",#<>"0",#]&@ToString[#],scheme[["FuncArg"]]
+							]&/@argument[["Volume"]],
+							Style[",",scheme[["Function"]]]],
+						_,
+							AppendTo[detok,Style[argument[[function]],scheme[["FuncArg"]]]];
+					],
+				{function,Keys@argument}];
 			];
 			AppendTo[detok,Style[">",scheme[["Function"]]]];
 	];
@@ -214,8 +226,4 @@ detoken[tokenizer_,scheme_]:=Module[
 
 
 (* ::Input:: *)
-(*QYS`getTrack["<Piano,Violin(0.4)>"]//Column*)
-
-
-(* ::Input:: *)
-(*detoken[{"Type"->"FunctionToken","Simplified"->True,"Argument"->{"Instr"->{"Piano","Violin"},"Volume"->{1.`,0.4`}}},schemes[["Default"]]]*)
+(*Row[detoken[#,schemes[["Default"]]]&/@QYS`getTrack["<1=bD'><Chord:0,12><1.0>"]]*)

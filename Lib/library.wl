@@ -32,9 +32,9 @@ tonalityDict=<|
 	"F#"->6,"C#"->1,"Bb"->-2,"Gb"->6,
 	"Eb"->3,"Ab"->8,"Db"->1,"Cb"->-1
 |>;
-rep=#~~(","~~#)...&;
+rep[pat_]:=rep[pat,","];
+rep[pat_,sep_]:=pat~~(sep~~pat)...&;
 int=DigitCharacter..;
-expr=Except["("|")"|"<"|">"]..;
 name=LetterCharacter~~WordCharacter...;
 real=DigitCharacter...~~"."~~DigitCharacter...;
 key=Alternatives@Keys@tonalityDict;

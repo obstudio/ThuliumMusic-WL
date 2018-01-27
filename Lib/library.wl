@@ -33,7 +33,7 @@ tonalityDict=<|
 	"Eb"->3,"Ab"->8,"Db"->1,"Cb"->-1
 |>;
 rep[pat_]:=rep[pat,","];
-rep[pat_,sep_]:=pat~~(sep~~pat)...&;
+rep[pat_,sep_]:=pat~~(sep~~pat)...;
 int=DigitCharacter..;
 name=LetterCharacter~~WordCharacter...;
 real=DigitCharacter...~~"."~~DigitCharacter...;

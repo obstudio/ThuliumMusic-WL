@@ -340,7 +340,7 @@ parse[tokenizer_,sections_]:=Module[
 
 
 (* ::Input:: *)
-(*debug[#Messages]&@parse[QYS`Tokenize[localPath<>"Songs\\PVZ\\Brainiac_Maniac.qys"],All]*)
+(*debug[#Messages]&@parse[QYS`Tokenize[localPath<>"Songs\\PVZ\\Celebrawl.qys"],All]*)
 
 
 (* ::Input:: *)
@@ -352,15 +352,15 @@ parse[tokenizer_,sections_]:=Module[
 (* ::Input:: *)
 (*AudioStop[];AudioPlay[#[[2]]]&@*)
 (*EchoFunction["time: ",#[[1]]&]@*)
-(*Timing[integrate[#MusicClips,#Effects]&[parse[QYS`Tokenize[localPath<>"Songs\\PVZ\\Brainiac_Maniac.qys"],All]]];*)
+(*Timing[integrate[#MusicClips,#Effects]&[parse[QYS`Tokenize[localPath<>"Songs\\PVZ\\Celebrawl.qys"],{4,5}]]];*)
 
 
 (* ::Input:: *)
-(*EmitSound@Sound@SoundNote[0,1,"PercussiveOrgan"]*)
+(*EmitSound@Sound@SoundNote[0,1,"Applause"]*)
 
 
 (* ::Input:: *)
-(*EmitSound@Sound@SoundNote[0,1,"Organ"]*)
+(*EmitSound@Sound@SoundNote[0,1,"SynthBass"]*)
 
 
 (* ::Input:: *)

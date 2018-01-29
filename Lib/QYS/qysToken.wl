@@ -9,7 +9,7 @@ Begin["QYS`"];
 
 subtrack=Nest[(("{"~~#~~"}")|Except["}"])...&,Except["}"]...,8];
 pitOp=Alternatives[Characters@"abdMmop#$,'"]...;
-durOp=Alternatives[Characters@"-_.`"]...;
+durOp=Alternatives[Characters@"-_.=`"]...;
 pitch="%"|"x"|DigitCharacter~~pitOp;
 order=""|rep[int~~""|(".."~~int)];
 expr=Except["("|")"|"<"|">"]..;

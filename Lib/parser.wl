@@ -25,9 +25,10 @@ beatCalc[operators_]:=Module[{beats=1,i=1},
 		Switch[operator,
 			"-",beats+=1,
 			"_",beats/=2,
+			"=",beats/=4,
 			_,beats*=2-2^(-StringLength@operator)
 		],
-	{operator,StringCases[operators,{"-","_","."..}]}];
+	{operator,StringCases[operators,{"-","_","=","."..}]}];
 	Return[beats];
 ];
 pitchCalc[token_,settings_,previous_]:=Module[{pitches,chordSymbol},

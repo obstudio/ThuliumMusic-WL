@@ -8,7 +8,7 @@
 Begin["QYS`"];
 
 subtrack=Nest[(("{"~~#~~"}")|Except["}"])...&,Except["}"]...,8];
-pitOp=Alternatives[Characters@"abdMmop#$,'"]...;
+pitOp=Alternatives[Characters@"abdMmopu#$,'"]...;
 durOp=Alternatives[Characters@"-_.=`"]...;
 pitch="%"|"x"|DigitCharacter~~pitOp;
 order=""|rep[int~~""|(".."~~int)];

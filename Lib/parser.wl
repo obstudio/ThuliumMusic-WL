@@ -8,7 +8,7 @@ QYSParse[filename_]:=integrate[#MusicClips,#Effects]&@parse[QYS`Tokenize[filenam
 pitchDict=<|1->0,2->2,3->4,4->5,5->7,6->9,7->11,10->10|>;
 chordDict=<|
 	"M"->{0,4,7},"m"->{0,3,7},"a"->{0,4,8},
-	"d"->{0,3,6},"p"->{0,7,12},"o"->{0,12}
+	"d"->{0,3,6},"p"->{0,7,12},"o"->{0,12},"u"->{-12,0}
 |>;
 defaultSettings=<|
 	"Volume"->{1},"Speed"->90,"Key"->0,"Beat"->4,"Bar"->4,"Instr"->{"Piano"},
@@ -341,7 +341,7 @@ parse[tokenizer_,sections_]:=Module[
 
 
 (* ::Input:: *)
-(*debug[#Messages]&@parse[QYS`Tokenize[localPath<>"Songs\\PVZ\\Celebrawl.qys"],All]*)
+(*debug[#Messages]&@parse[QYS`Tokenize[localPath<>"Songs\\Touhou\\TH11-Chireiden\\Good_Cheer.qys"],All]*)
 
 
 (* ::Input:: *)
@@ -353,15 +353,15 @@ parse[tokenizer_,sections_]:=Module[
 (* ::Input:: *)
 (*AudioStop[];AudioPlay[#[[2]]]&@*)
 (*EchoFunction["time: ",#[[1]]&]@*)
-(*Timing[integrate[#MusicClips,#Effects]&[parse[QYS`Tokenize[localPath<>"Songs\\PVZ\\Celebrawl.qys"],{4,5}]]];*)
+(*Timing[integrate[#MusicClips,#Effects]&[parse[QYS`Tokenize[localPath<>"Songs\\Touhou\\TH11-Chireiden\\Good_Cheer.qys"],1]]];*)
 
 
 (* ::Input:: *)
-(*EmitSound@Sound@SoundNote[0,1,"Applause"]*)
+(*EmitSound@Sound@SoundNote[0,1,"FrenchHorn"]*)
 
 
 (* ::Input:: *)
-(*EmitSound@Sound@SoundNote[0,1,"SynthBass"]*)
+(*EmitSound@Sound@SoundNote[0,1,"SynthBrass"]*)
 
 
 (* ::Input:: *)
@@ -433,6 +433,7 @@ integrate[tracks_,effects_]:=Module[
 				AppendTo[final[[j,"SoundData"]],{None,trackData[["Beginning"]]-final[[j,"Duration"]],"Piano"}];
 				final[[j,"SoundData"]]=Join[final[[j,"SoundData"]],Append[#,settings[["Instr",i]]]&/@trackData[["SoundData"]]];
 				final[[j,"Duration"]]=trackData[["End"]];
+				final[[j,"FadeOut"]]=settings[["FadeOut"]];
 			],
 		{i,instrCount}],
 	{trackData,tracks}];

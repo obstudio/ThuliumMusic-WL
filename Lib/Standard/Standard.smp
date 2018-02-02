@@ -1,0 +1,19 @@
+# SMML Standard Package
+# Updated: 2018.2.2.
+
+# Chord
+> Include: Chord.smp
+
+# Functions
+> Include: Function.js
+
+# Meta
+> Bottom: Powered by SMML
+
+# Typesetting
+> StaffDisplay: Paged
+> ForcedSpace: True
+> RecursionLimit: 8
+> DefaultMeasures: 4
+
+> End

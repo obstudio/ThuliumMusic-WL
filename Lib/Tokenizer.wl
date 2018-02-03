@@ -121,8 +121,8 @@ trackTok[str_]:=StringCases[str,{
 		"PitchOperators"->pit,
 		"DurationOperators"->dur,
 		"VolumeOperators"->vol,
-		"Staccato"->StringContainsQ[pre,"$"],
-		"Arpeggio"->StringCount[pst,"`"]
+		"Staccato"->StringCount[pst,"`"],
+		"Arpeggio"->StringContainsQ[pre,"$"]
 	},
 	
 	(* other notations *)

@@ -62,10 +62,7 @@ pitchTok[str_]:=StringCases[str,
 ];
 
 (* object *)
-objectPatt=Alternatives[
-	"{"~~""|(unsigned~~"*")~~subtrack~~"}",
-	preOperator~~""|"["~~pitch..~~"]"|""~~pitOperator~~volOperator~~durOperator~~postOperator
-];
+objectPatt=("{"~~""|(unsigned~~"*")~~subtrack~~"}")|note;
 objectTok[str_]:=StringCases[str,{
 	"{"~~n:unsigned~~"*"~~sub:subtrack~~"}":>
 		{"Type"->"Subtrack","Contents"->trackTok[sub],"Repeat"->-ToExpression@n},
@@ -116,6 +113,8 @@ functionPatt=Alternatives[
 	objPaddedLeft~~"~"~~objPaddedRight,
 	objPaddedLeft~~"("~~unsigned~~"=)"~~objPaddedRight,
 	"("~~unsigned~~"-)"~~objPaddedRight,
+	"("~~note..~~"^)"~~objPaddedRight,
+	objPaddedLeft~~"(^"~~note..~~")",
 	"("~~unsigned~~"~)"~~objPaddedRight
 ];
 functionTok[str_]:=StringCases[str,{
@@ -181,6 +180,24 @@ functionTok[str_]:=StringCases[str,{
 		"Argument"->{
 			{"Type"->"Expression","Content"->arg},
 			{"Type"->"Subtrack","Content"->trackTok[objR],"Repeat"->-1}
+		}
+	},
+	"("~~nl:note..~~"^)"~~objR:objPaddedRight:>{
+		"Type"->"FUNCTION",
+		"Name"->"GraceNote",
+		"Simplified"->True,
+		"Argument"->{
+			{"Type"->"Subtrack","Content"->trackTok[nl],"Repeat"->-1},
+			{"Type"->"Subtrack","Content"->trackTok[objR],"Repeat"->-1}
+		}
+	},
+	objL:objPaddedLeft~~"(^"~~nl:note..~~")":>{
+		"Type"->"FUNCTION",
+		"Name"->"Appoggiatura",
+		"Simplified"->True,
+		"Argument"->{
+			{"Type"->"Subtrack","Content"->trackTok[objL],"Repeat"->-1},
+			{"Type"->"Subtrack","Content"->trackTok[nl],"Repeat"->-1}
 		}
 	},
 	"("~~arg:unsigned~~"~)"~~"{"~~trkR:subtrack~~"}":>{
@@ -251,8 +268,7 @@ EndPackage[];
 
 
 (* ::Input:: *)
-(*trackTok["(1=F) (2/4) (90)5 5_ ^ 6_ | 2- | 1 1_ ^ 6,_ | 2- |\n5 5 | 6_ ^ 1'_ 6_ 5_ | 1 1_ ^ 6,_ | 2- |\n5 2 | 1 7,_ ^ 6,_ | 5, 5 | 2 3_ 2_ | 1 1_ ^ 6,_ |\n2_ 3_ 2_ 1_ | 2_ ^ 1_ 7,_ ^ 6,_ | 5,- ^ | 5, 0 ||*)
-(*"]*)
+(*trackTok["3(^12)3"]*)
 
 
 (* ::Input:: *)

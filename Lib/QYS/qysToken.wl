@@ -70,6 +70,8 @@ getTrack[score_]:=StringCases[score,{
 	"("~~n:expr~~"=)":>
 		{"Type"->"Tremolo2","StrokesCount"->ToExpression[n]},
 	"("~~pitches:pitch..~~"^)":>
+		{"Type"->"GraceNote","Pitches"->getPitch[pitches]},
+	"(^"~~pitches:pitch..~~")":>
 		{"Type"->"Appoggiatura","Pitches"->getPitch[pitches]},
 	
 	(* others *)

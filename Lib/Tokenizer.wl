@@ -12,7 +12,7 @@ keyDict=<|
 key=Alternatives@@Keys@keyDict;
 word=WordCharacter..;
 jsCodePatt=Nest[(("{"~~#~~"}")|Except["{"|"}"])...&,Except["{"|"}"]...,8];
-function=Alternatives@@Flatten[StringCases[StringExpression[
+funcName=Alternatives@@Flatten[StringCases[StringExpression[
 	name:word,
 	Shortest["("~~__~~")"],
 	Whitespace,
@@ -26,11 +26,11 @@ function=Alternatives@@Flatten[StringCases[StringExpression[
 rep[pat_]:=rep[pat,","];
 rep[pat_,sep_]:=pat~~(sep~~pat)...;
 unsigned=DigitCharacter..;
-integer=""|"-"|"+"~~DigitCharacter..;
+integer=""|"-"|"+"~~unsigned;
 number=(integer~~""|("/"|"."~~unsigned))|("log2("~~unsigned~~")");
 subtrack=Nest[(("{"~~#~~"}")|Except["{"|"}"])...&,Except["{"|"}"]...,8];
 argument=rep[number|("{"~~subtrack~~"}")];
-orderList=""|rep[integer~~""|("~"~~integer)];
+orderList=""|rep[unsigned~~""|("~"~~unsigned)];
 orderTok[ord_]:=Union@@StringCases[ord,{
 	n:integer~~"~"~~m:integer:>Range[ToExpression@n,ToExpression@m],
 	n:integer:>{ToExpression@n}
@@ -61,53 +61,18 @@ pitchTok[str_]:=StringCases[str,
 	}
 ];
 
-trackTok[str_]:=StringCases[str,{
-	
-	(* functions *)
-	"("~~var:function~~":"~~arg:rep[number]~~")":>{
-		"Type"->"FUNCTION",
-		"Name"->var,
-		"Simplified"->True,
-		"Argument"->({"Type"->"Expression","Content"->#}&)/@StringSplit[arg,","]
-	},
-	"("~~vol:number~~"%)":>{
-		"Type"->"FUNCTION",
-		"Name"->"Vol",
-		"Simplified"->True,
-		"Argument"->{{"Type"->"Expression","Content"->vol}}
-	},
-	"("~~bar:unsigned~~"/"~~beat:unsigned~~")":>{
-		"Type"->"FUNCTION",
-		"Name"->"BarBeat",
-		"Simplified"->True,
-		"Argument"->{{"Type"->"Expression","Content"->bar},{"Type"->"Expression","Content"->beat}}
-	},
-	"("~~spd:NumberString~~")":>{
-		"Type"->"FUNCTION",
-		"Name"->"Spd",
-		"Simplified"->True,
-		"Argument"->{{"Type"->"Expression","Content"->spd}}
-	},
-	"(1="~~key:key~~oct:("'"|",")...~~")":>{
-		"Type"->"FUNCTION",
-		"Name"->"KeyOct",
-		"Simplified"->True,
-		"Argument"->{{"Type"->"String","Content"->key},{"Type"->"String","Content"->oct}}
-	},
-	
-	(* subtracks and barlines *)
-	"{"~~n:integer~~"*"~~sub:subtrack~~"}":>
-		{"Type"->"Track","Contents"->trackTok[sub],"Repeat"->-ToExpression@n},
+(* object *)
+objectPatt=Alternatives[
+	"{"~~""|(unsigned~~"*")~~subtrack~~"}",
+	preOperator~~""|"["~~pitch..~~"]"|""~~pitOperator~~volOperator~~durOperator~~postOperator
+];
+objectTok[str_]:=StringCases[str,{
+	"{"~~n:unsigned~~"*"~~sub:subtrack~~"}":>
+		{"Type"->"Subtrack","Contents"->trackTok[sub],"Repeat"->-ToExpression@n},
 	"{"~~sub:subtrack~~"}":>
-		{"Type"->"Track","Contents"->trackTok[sub],"Repeat"->Max[-1,
+		{"Type"->"Subtrack","Contents"->trackTok[sub],"Repeat"->Max[-1,
 			StringCases[sub,"/"~~i:orderList~~":":>orderTok[i]]
 		]},
-	bl:"/"~~i:orderList~~":":>
-		{"Type"->"BarLine","Newline"->(bl=="\\"),"Skip"->False,"Order"->orderTok[i]},
-	bl:"|"|"/":>
-		{"Type"->"BarLine","Newline"->(bl=="\\"),"Skip"->(bl=="/"),"Order"->{0}},
-	
-	(* notes *)
 	StringExpression[
 		pre:preOperator,
 		""|"["~~pts:pitch..~~"]"|"",
@@ -123,11 +88,117 @@ trackTok[str_]:=StringCases[str,{
 		"VolumeOperators"->vol,
 		"Staccato"->StringCount[pst,"`"],
 		"Arpeggio"->StringContainsQ[pre,"$"]
+	}
+}][[1]];
+
+(* notation *)
+notationPatt=("/"~~orderList~~":")|"|"|"/"|"^"|"&"|"*"|Whitespace;
+notationTok[str_]:=StringCases[str,{
+	bl:"/"~~ol:orderList~~":":>
+		{"Type"->"BarLine","Newline"->(bl=="\\"),"Skip"->False,"Order"->orderTok[ol]},
+	bl:"|"|"/":>
+		{"Type"->"BarLine","Newline"->(bl=="\\"),"Skip"->(bl=="/"),"Order"->{0}},
+	"^":>{"Type"->"Tie"},
+	"&":>{"Type"->"PedalPress"},
+	"*":>{"Type"->"PedalRelease"},
+	space:Whitespace:>{"Type"->"Whitespace","Content"->space}
+}][[1]];
+
+(* function *)
+objPaddedLeft=objectPatt~~notationPatt...;
+objPaddedRight=notationPatt...~~objectPatt;
+functionPatt=Alternatives[
+	"("~~funcName~~":"~~rep[number]~~")",
+	"("~~number~~"%)",
+	"("~~unsigned~~"/"~~unsigned~~")",
+	"("~~NumberString~~")",
+	"(1="~~key~~("'"|",")...~~")",
+	objPaddedLeft~~"~"~~objPaddedRight,
+	objPaddedLeft~~"("~~unsigned~~"=)"~~objPaddedRight,
+	"("~~unsigned~~"-)"~~objPaddedRight,
+	"("~~unsigned~~"~)"~~objPaddedRight
+];
+functionTok[str_]:=StringCases[str,{
+	"("~~var:funcName~~":"~~arg:rep[number]~~")":>{
+		"Type"->"FUNCTION",
+		"Name"->var,
+		"Simplified"->True,
+		"Argument"->({"Type"->"Expression","Content"->#}&)/@StringSplit[arg,","]
 	},
-	
-	(* other notations *)
-	space:Whitespace:>{"Type"->"Whitespace","Content"->space},
-	undef_:>{"Type"->"Undefined","Content"->undef}
+	"("~~vol:number~~"%)":>{
+		"Type"->"FUNCTION",
+		"Name"->"Vol",
+		"Simplified"->True,
+		"Argument"->{{"Type"->"Expression","Content"->vol}}
+	},
+	"("~~bar:unsigned~~"/"~~beat:unsigned~~")":>{
+		"Type"->"FUNCTION",
+		"Name"->"BarBeat",
+		"Simplified"->True,
+		"Argument"->{
+			{"Type"->"Expression","Content"->bar},
+			{"Type"->"Expression","Content"->beat}
+		}
+	},
+	"("~~spd:NumberString~~")":>{
+		"Type"->"FUNCTION",
+		"Name"->"Spd",
+		"Simplified"->True,
+		"Argument"->{{"Type"->"Expression","Content"->spd}}
+	},
+	"(1="~~key:key~~oct:("'"|",")...~~")":>{
+		"Type"->"FUNCTION",
+		"Name"->"KeyOct",
+		"Simplified"->True,
+		"Argument"->{
+			{"Type"->"String","Content"->key},
+			{"Type"->"Expression","Content"->ToString[StringCount[oct,"'"]-StringCount[oct,","]]}
+		}
+	},
+	objL:objPaddedLeft~~"~"~~objR:objPaddedRight:>{
+		"Type"->"FUNCTION",
+		"Name"->"Portamento",
+		"Simplified"->True,
+		"Argument"->{
+			{"Type"->"Subtrack","Content"->trackTok[objL],"Repeat"->-1},
+			{"Type"->"Subtrack","Content"->trackTok[objR],"Repeat"->-1}
+		}
+	},
+	objL:objPaddedLeft~~"("~~arg:unsigned~~"=)"~~objR:objPaddedRight:>{
+		"Type"->"FUNCTION",
+		"Name"->"Tremolo2",
+		"Simplified"->True,
+		"Argument"->{
+			{"Type"->"Expression","Content"->arg},
+			{"Type"->"Subtrack","Content"->trackTok[objL],"Repeat"->-1},
+			{"Type"->"Subtrack","Content"->trackTok[objR],"Repeat"->-1}
+		}
+	},
+	"("~~arg:unsigned~~"-)"~~objR:objPaddedRight:>{
+		"Type"->"FUNCTION",
+		"Name"->"Tremolo1",
+		"Simplified"->True,
+		"Argument"->{
+			{"Type"->"Expression","Content"->arg},
+			{"Type"->"Subtrack","Content"->trackTok[objR],"Repeat"->-1}
+		}
+	},
+	"("~~arg:unsigned~~"~)"~~"{"~~trkR:subtrack~~"}":>{
+		"Type"->"FUNCTION",
+		"Name"->"Tuplet",
+		"Simplified"->True,
+		"Argument"->{
+			{"Type"->"Expression","Content"->arg},
+			{"Type"->"Subtrack","Content"->trackTok[trkR],"Repeat"->-1}
+		}
+	}
+}][[1]];
+
+trackTok[str_]:=StringCases[str,{
+	func:functionPatt:>functionTok[func],
+	objt:objectPatt:>objectTok[objt],
+	nota:notationPatt:>notationTok[nota],
+	und_:>{"Type"->"Undefined","Content"->und}
 }];
 
 include[SMLPath_]:=Module[
@@ -180,7 +251,8 @@ EndPackage[];
 
 
 (* ::Input:: *)
-(*trackTok["(1=bD')(3/4){[13],.`/3,5:$5#}"]*)
+(*trackTok["(1=F) (2/4) (90)5 5_ ^ 6_ | 2- | 1 1_ ^ 6,_ | 2- |\n5 5 | 6_ ^ 1'_ 6_ 5_ | 1 1_ ^ 6,_ | 2- |\n5 2 | 1 7,_ ^ 6,_ | 5, 5 | 2 3_ 2_ | 1 1_ ^ 6,_ |\n2_ 3_ 2_ 1_ | 2_ ^ 1_ 7,_ ^ 6,_ | 5,- ^ | 5, 0 ||*)
+(*"]*)
 
 
 (* ::Input:: *)
@@ -188,4 +260,4 @@ EndPackage[];
 
 
 (* ::Input:: *)
-(*Export[NotebookDirectory[]<>"test.json",trackTok["(1=bD')(3/4){[13],.`/3,5:$5#}"]];*)
+(*Export[NotebookDirectory[]<>"test.json",%];*)

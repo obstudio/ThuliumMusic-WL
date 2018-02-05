@@ -348,23 +348,27 @@ parse[tokenizer_,sections_]:=Module[
 
 
 (* ::Input:: *)
-(*debug[#Messages]&@parse[QYS`Tokenize[localPath<>"Songs\\Touhou\\test.qys"],All]*)
+(*debug[#Messages]&@parse[QYS`Tokenize[localPath<>"Songs\\Secret.qys"],All]*)
+
+
+(* ::Input:: *)
+(*debug[#Messages]&@parse[QYS`Tokenize[localPath<>"Songs\\Touhou\\Deep_Mountain.qys"],All]*)
 
 
 (* ::Input:: *)
 (*AudioStop[];AudioPlay[#[[2]]]&@*)
 (*EchoFunction["time: ",#[[1]]&]@*)
-(*Timing[integrate[#MusicClips,#Effects]&[parse[QYS`Tokenize[localPath<>"Songs\\temp.qys"],All]]];*)
+(*Timing[integrate[#MusicClips,#Effects]&[parse[QYS`Tokenize[localPath<>"Songs\\Secret.qys"],All]]];*)
 
 
 (* ::Input:: *)
 (*AudioStop[];AudioPlay[#[[2]]]&@*)
 (*EchoFunction["time: ",#[[1]]&]@*)
-(*Timing[integrate[#MusicClips,#Effects]&[parse[QYS`Tokenize[localPath<>"Songs\\Touhou\\test.qys"],1]]];*)
+(*Timing[integrate[#MusicClips,#Effects]&[parse[QYS`Tokenize[localPath<>"Songs\\Touhou\\Deep_Mountain.qys"],2]]];*)
 
 
 (* ::Input:: *)
-(*EmitSound@Sound@SoundNote[10,1,"Whistle"]*)
+(*EmitSound@Sound@SoundNote[10,1,"SlapBass"]*)
 
 
 (* ::Input:: *)

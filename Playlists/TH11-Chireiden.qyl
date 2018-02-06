@@ -7,8 +7,10 @@
 		{"Index": "二面道中曲", "Song": "Taeta_Hashi"},
 		{"Index": "二面BOSS曲", "Song": "Ryokugann_No_Jealousy"},
 		{"Index": "五面BOSS曲", "Song": "Good_Cheer"},
+		{"Index": "六面道中曲", "Song": "Gouka_Mantle"},
 		{"Index": "六面BOSS曲", "Song": "Nuclear_Fusion"},
-		{"Index": "EX面BOSS曲", "Song": "Hartmann_No_Youkai_Otome"}
+		{"Index": "EX面BOSS曲", "Song": "Hartmann_No_Youkai_Otome"},
+		{"Index": "改编曲", "Song": "Hana_ni_Kaze"}
 	],
 	"IndexWidth": 160
 }

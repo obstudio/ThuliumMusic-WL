@@ -67,7 +67,7 @@ trackParse[tokenizer_,global_]:=Module[
 		functionData,pitches,
 		beatCount,duration=0,
 		barBeat=0,prevBeat,
-		appoggiatura={},
+		graceNote={},appoggiatura,
 		tuplet=0,tupletRatio,
 		tremolo1=0,tremolo2=0,
 		tie=False,staccato,
@@ -106,8 +106,15 @@ trackParse[tokenizer_,global_]:=Module[
 			"Tremolo2",
 				tremolo2=token[["StrokesCount"]];
 				durCount-=duration,
+			"GraceNote",
+				graceNote=pitchCalc[token,settings,previous],
 			"Appoggiatura",
-				appoggiatura=pitchCalc[token,settings,previous],
+				appoggiatura=pitchCalc[token,settings,previous];
+				soundData[[-1,2]]-=240*settings[["Appo"]]/settings[["Speed"]]/settings[["Beat"]]*Min[4,Length@appoggiatura]/4;
+				duration=240*settings[["Appo"]]/settings[["Speed"]]/settings[["Beat"]]/Max[4,Length@appoggiatura];
+				Do[
+					AppendTo[soundData,{pitch,duration}],
+				{pitch,appoggiatura}],
 			"Tie",
 				tie=True,
 			"Portamento",
@@ -124,7 +131,7 @@ trackParse[tokenizer_,global_]:=Module[
 				durCount+=duration;
 				staccato=token[["Staccato"]];
 				If[token[["Arpeggio"]],
-					appoggiatura=Flatten/@Array[Take[pitches,#]&,Length@pitches-1]
+					graceNote=Flatten/@Array[Take[pitches,#]&,Length@pitches-1]
 				];
 				Which[
 					MemberQ[instrData[["Percussion"]],settings[["Instr",1]]],
@@ -160,13 +167,13 @@ trackParse[tokenizer_,global_]:=Module[
 						{k,previous[[2,1]],pitches[[1]],portRate}];
 						portamento=False,
 					True,
-						If[appoggiatura!={},
-							beatCount-=settings[["Appo"]]*Min[4,Length@appoggiatura]/4;
-							duration=240*settings[["Appo"]]/settings[["Speed"]]/settings[["Beat"]]/Max[4,Length@appoggiatura];
+						If[graceNote!={},
+							beatCount-=settings[["Appo"]]*Min[4,Length@graceNote]/4;
+							duration=240*settings[["Appo"]]/settings[["Speed"]]/settings[["Beat"]]/Max[4,Length@graceNote];
 							Do[
 								AppendTo[soundData,{pitch,duration}],
-							{pitch,appoggiatura}];
-							appoggiatura={};
+							{pitch,graceNote}];
+							graceNote={};
 						];
 						duration=240/settings[["Speed"]]/settings[["Beat"]]*beatCount;
 						prevBeat=beatCount;
@@ -344,27 +351,31 @@ parse[tokenizer_,sections_]:=Module[
 
 
 (* ::Input:: *)
-(*debug[#Messages]&@parse[QYS`Tokenize[localPath<>"Songs\\Touhou\\TH11-Chireiden\\Good_Cheer.qys"],All]*)
+(*debug[#Messages]&@parse[QYS`Tokenize[localPath<>"Songs\\Secret.qys"],All]*)
+
+
+(* ::Input:: *)
+(*debug[#Messages]&@parse[QYS`Tokenize[localPath<>"Songs\\Touhou\\Deep_Mountain.qys"],All]*)
 
 
 (* ::Input:: *)
 (*AudioStop[];AudioPlay[#[[2]]]&@*)
 (*EchoFunction["time: ",#[[1]]&]@*)
-(*Timing[integrate[#MusicClips,#Effects]&[parse[QYS`Tokenize[localPath<>"Songs\\temp.qys"],All]]];*)
+(*Timing[integrate[#MusicClips,#Effects]&[parse[QYS`Tokenize[localPath<>"Songs\\Secret.qys"],All]]];*)
 
 
 (* ::Input:: *)
 (*AudioStop[];AudioPlay[#[[2]]]&@*)
 (*EchoFunction["time: ",#[[1]]&]@*)
-(*Timing[integrate[#MusicClips,#Effects]&[parse[QYS`Tokenize[localPath<>"Songs\\Touhou\\TH11-Chireiden\\Good_Cheer.qys"],1]]];*)
+(*Timing[integrate[#MusicClips,#Effects]&[parse[QYS`Tokenize[localPath<>"Songs\\Touhou\\Deep_Mountain.qys"],2]]];*)
 
 
 (* ::Input:: *)
-(*EmitSound@Sound@SoundNote[0,1,"FrenchHorn"]*)
+(*EmitSound@Sound@SoundNote[10,1,"SlapBass"]*)
 
 
 (* ::Input:: *)
-(*EmitSound@Sound@SoundNote[0,1,"SynthBrass"]*)
+(*EmitSound@Sound@SoundNote[-20,1,"SynthBrass"]*)
 
 
 (* ::Input:: *)

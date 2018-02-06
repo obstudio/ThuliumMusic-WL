@@ -1,16 +1,16 @@
 {
 	"Default": {
-		"Pitch": "#007F7F",
-		"PitOp": "#007FBF",
-		"DurOp": "#00BF7F",
-		"Chord": "#00BFBF",
-		"Function": "#7F7F7F",
-		"FuncName": "#000000",
-		"FuncArg": "#7F007F",
-		"Modifier": "#7F7F7F",
-		"ModifOp": "#000000",
-		"ModifArg": "#7F007F",
-		"BarLine": "#000000",
-		"Background": "#FFFFFF"
+		"Pitch": {"Color": "#007F7F", "Weight": "Plain", "Slant": "Plain"},
+		"PitOp": {"Color": "#007FBF", "Weight": "Plain", "Slant": "Plain"},
+		"DurOp": {"Color": "#00BF7F", "Weight": "Plain", "Slant": "Plain"},
+		"Chord": {"Color": "#00BFBF", "Weight": "Plain", "Slant": "Plain"},
+		"Function": {"Color": "#7F7F7F", "Weight": "Plain", "Slant": "Plain"},
+		"FuncName": {"Color": "#000000", "Weight": "Plain", "Slant": "Plain"},
+		"FuncArg": {"Color": "#7F007F", "Weight": "Plain", "Slant": "Plain"},
+		"Modifier": {"Color": "#7F7F7F", "Weight": "Plain", "Slant": "Plain"},
+		"ModifOp": {"Color": "#000000", "Weight": "Plain", "Slant": "Plain"},
+		"ModifArg": {"Color": "#7F007F", "Weight": "Plain", "Slant": "Plain"},
+		"BarLine": {"Color": "#000000", "Weight": "Plain", "Slant": "Plain"},
+		"Background": {"Color": "#FFFFFF", "Weight": "Plain", "Slant": "Plain"}
 	}
 }

@@ -70,6 +70,8 @@ getTrack[score_]:=StringCases[score,{
 	"("~~n:expr~~"=)":>
 		{"Type"->"Tremolo2","StrokesCount"->ToExpression[n]},
 	"("~~pitches:pitch..~~"^)":>
+		{"Type"->"GraceNote","Pitches"->getPitch[pitches]},
+	"(^"~~pitches:pitch..~~")":>
 		{"Type"->"Appoggiatura","Pitches"->getPitch[pitches]},
 	
 	(* others *)
@@ -152,78 +154,5 @@ End[];
 (*QYS`Tokenize[localPath<>"Songs\\test.qys"]*)
 
 
-keyDictR=<|-2->"bB",-1->"B",0->"C",1->"#C",2->"D",3->"bE",4->"E",5->"F",6->"#F",7->"G",8->"#G",9->"A"|>;
-schemes=RGBColor/@Association@#&/@Association@Import[localPath<>"Lib\\QYS\\Color.json"];
-
-
-detoken[tokenizer_,scheme_]:=Module[
-	{
-		token=Association@tokenizer,
-		argument,
-		detok={}
-	},
-	Switch[token[["Type"]],
-		"FunctionToken",
-			AppendTo[detok,Style["<",scheme[["Function"]]]];
-			argument=Association@token[["Argument"]];
-			If[token[["Simplified"]]==True,
-				Switch[Keys@argument,
-					{"Key","Oct"},
-						AppendTo[detok,Style["1=",scheme[["FuncName"]]]];
-						AppendTo[detok,Style[Key[argument[["Key"]]][keyDictR],scheme[["FuncArg"]]]];
-						AppendTo[detok,Style[Switch[argument[["Oct"]],
-							_?Positive,StringRepeat["'",argument[["Oct"]]],
-							_?Negative,StringRepeat[",",-argument[["Oct"]]],
-							0,""
-						],scheme[["FuncArg"]]]],
-					{"Bar","Beat"},
-						AppendTo[detok,Style[argument[["Bar"]],scheme[["FuncArg"]]]];
-						AppendTo[detok,Style["/",scheme[["FuncName"]]]];
-						AppendTo[detok,Style[argument[["Beat"]],scheme[["FuncArg"]]]],
-					{"Instr","Volume"},
-						detok=detok~Join~Flatten@Riffle[Table[{
-							Style[argument[["Instr",i]],scheme[["FuncArg"]]],
-							If[argument[["Volume",i]]!=1,{
-								Style["(",scheme[["FuncName"]]],
-								Style[argument[["Volume",i]],scheme[["FuncArg"]]],
-								Style[")",scheme[["FuncName"]]]
-							},{Nothing}]},{i,Length@argument[["Instr"]]}],
-						Style[",",scheme[["Function"]]]],
-					{"Volume"},
-						detok=detok~Join~Riffle[Style[
-							If[StringPart[#,-1]==".",#<>"0",#]&@ToString[#],scheme[["FuncArg"]]
-						]&/@argument[["Volume"]],
-						Style[",",scheme[["Function"]]]],
-					{"Instr"},
-						detok=detok~Join~Riffle[
-							Style[#,scheme[["FuncArg"]]]&/@argument[["Instr"]],
-						Style[",",scheme[["Function"]]]],
-					{"Speed"},
-						AppendTo[detok,Style[argument[["Speed"]],scheme[["FuncArg"]]]];
-				],
-				Do[
-					AppendTo[detok,Style[function,scheme[["FuncName"]]]];
-					AppendTo[detok,Style[":",scheme[["Function"]]]];
-					Switch[function,
-						"Chord"|"Instr",
-							detok=detok~Join~Riffle[
-								Style[#,scheme[["FuncArg"]]]&/@argument[[function]],
-							Style[",",scheme[["Function"]]]],
-						"Volume",
-							detok=detok~Join~Riffle[Style[
-								If[StringPart[#,-1]==".",#<>"0",#]&@ToString[#],scheme[["FuncArg"]]
-							]&/@argument[["Volume"]],
-							Style[",",scheme[["Function"]]]],
-						_,
-							AppendTo[detok,Style[argument[[function]],scheme[["FuncArg"]]]];
-					],
-				{function,Keys@argument}];
-			];
-			AppendTo[detok,Style[">",scheme[["Function"]]]];
-	];
-	Return[Row[detok,Background->scheme[["Background"]]]];
-];
-
-
 (* ::Input:: *)
-(*Row[detoken[#,schemes[["Default"]]]&/@QYS`getTrack["<1=bD'><Chord:0,12><1.0>"]]*)
+(*QYMP;*)

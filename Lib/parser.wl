@@ -7,11 +7,15 @@ QYSParse[filename_]:=integrate[#MusicClips,#Effects]&@parse[QYS`Tokenize[filenam
 
 pitchDict=<|1->0,2->2,3->4,4->5,5->7,6->9,7->11,10->10|>;
 chordDict=<|
-	"M"->{0,4,7},"m"->{0,3,7},"a"->{0,4,8},
-	"d"->{0,3,6},"p"->{0,7,12},"o"->{0,12},"u"->{-12,0},
+	"M"->{0,4,7},"m"->{0,3,7},"a"->{0,4,8},"d"->{0,3,6},
 	"t"->{0,3},"T"->{0,4},"q"->{0,5},"Q"->{0,6},
-	"c"->{0,7},"C"->{0,8},"h"->{0,8},"H"->{0,9},
-	"v"->{0,5,12},"V"->{0,6,12},"f"->{0,8,12},"F"->{0,9,12}
+	"c"->{0,7},"C"->{0,8},"h"->{0,8},"H"->{0,9}
+|>;
+chordOpDict=<|
+	"o"->(Join[#,#[[{1}]]+12]&),"u"->(Join[#[[{-1}]]-12,#]&),
+	"i"->(Join[#[[;;1]]+12,#[[2;;]]]&),
+	"j"->(Join[#[[;;2]]+12,#[[3;;]]]&),
+	"k"->(Join[#[[;;3]]+12,#[[4;;]]]&)
 |>;
 defaultSettings=<|
 	"Volume"->{1},"Speed"->90,"Key"->0,"Beat"->4,"Bar"->4,"Instr"->{"Piano"},
@@ -34,7 +38,7 @@ beatCalc[operators_]:=Module[{beats=1,i=1},
 	{operator,StringCases[operators,{"-","_","=","."..}]}];
 	Return[beats];
 ];
-pitchCalc[token_,settings_,previous_]:=Module[{pitches,chordSymbol},
+pitchCalc[token_,settings_,previous_]:=Module[{pitches,chord,chordOp},
 	If[KeyExistsQ[token,"Pitches"],
 		pitches=Flatten[pitchCalc[#,settings,previous]&/@Association/@token[["Pitches"]]],
 		pitches=Switch[token[["ScaleDegree"]],
@@ -46,10 +50,14 @@ pitchCalc[token_,settings_,previous_]:=Module[{pitches,chordSymbol},
 	If[KeyExistsQ[token,"SemitonesCount"],pitches+=token[["SemitonesCount"]]];
 	If[KeyExistsQ[token,"OctavesCount"],pitches+=12*token[["OctavesCount"]]];
 	If[KeyExistsQ[token,"ChordSymbol"],
-		chordSymbol=token[["ChordSymbol"]];
-		Switch[chordSymbol,
-			"$",pitches+=settings[["Chord"]],
-			Except[""],pitches+=chordDict[[chordSymbol]]
+		chord=Switch[token[["ChordSymbol"]],
+			"$",settings[["Chord"]],
+			"",{0},
+			_,chordDict[[token[["ChordSymbol"]]]]
+		];
+		pitches+=If[token[["ChordOperator"]]=="",
+			If[chord=={0},0,chord],
+			chordOpDict[token[["ChordOperator"]]]@chord
 		];
 	];
 	Return[pitches];

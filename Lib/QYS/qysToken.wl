@@ -89,7 +89,7 @@ getTrack[score_]:=StringCases[score,{
 		"DurationOperators"->StringDelete[durOp,"`"]
 	},
 	space:Whitespace:>{"Type"->"Whitespace","Content"->space},
-	undef__:>{"Type"->"Undefined","Content"->undef}
+	undef_:>{"Type"->"Undefined","Content"->undef}
 }];
 
 (* tokenizer *)
@@ -111,7 +111,7 @@ Tokenize[filename_]:=Module[
 			StringLength@line>2&&StringTake[line,2]=="//",
 				AppendTo[comments,StringDrop[line,2]],
 			True,
-				score=score<>line;
+				score=score<>line<>"\n";
 				If[StringPart[line,-1]=="\\",Continue[]];
 				trackToken=getTrack[score];
 				If[ContainsOnly[Association[#][["Type"]]&/@trackToken,{"FunctionToken"}],

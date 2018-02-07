@@ -47,7 +47,7 @@ getTrack[score_]:=StringCases[score,{
 	"<"~~func:name~~":"~~arg:Except[">"]..~~">":>
 		{"Type"->"FunctionToken","Simplified"->False,"Argument"->{func->getArgument[arg,func]}},
 	"<"~~vol:rep[real]~~">":>
-		{"Type"->"FunctionToken","Simplified"->True,"Argument"->{"Volume"->ToExpression/@StringSplit[vol,","]}},
+		{"Type"->"FunctionToken","Simplified"->True,"Argument"->{"Volume"->ToExpression@vol}},
 	"<"~~speed:int~~">":>
 		{"Type"->"FunctionToken","Simplified"->True,"Argument"->{"Speed"->ToExpression@speed}},
 	"<"~~bar:int~~"/"~~beat:int~~">":>
@@ -58,7 +58,7 @@ getTrack[score_]:=StringCases[score,{
 		{"Type"->"FunctionToken","Simplified"->True,"Argument"->Module[{ivList=StringSplit[cont,","]},{
 			"Instr"->StringDelete["("~~__~~")"]/@ivList,
 			If[Or@@StringContainsQ["("]/@ivList,
-				"Volume"->(If[StringContainsQ[#,"("],
+				"InstProp"->(If[StringContainsQ[#,"("],
 					StringCases[#,"("~~volume__~~")":>ToExpression@volume][[1]],
 				1.0]&)/@ivList,
 			Nothing]
@@ -138,10 +138,6 @@ Tokenize[filename_]:=Module[
 ];
 End[];
 (* Here is the end of context QYS` *)
-
-
-(* ::Input:: *)
-(*QYS`getTrack["[1mi]"]*)
 
 
 (* ::Input:: *)

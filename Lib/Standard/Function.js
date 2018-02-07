@@ -1,6 +1,22 @@
 module.exports = {
+    Tremolo1 () {
+
+    },
+
+    Tremolo2 (expr, subtrack) {
+
+    },
+
+    Portamento (subtrack1, subtrack2) {
+
+    },
+
+    Appoggiatura (subtrack) {
+
+    },
+
     Vol(volume) {
-        AssignSetting(this, 'Vol', volume, Criteria.Vol)
+        AssignSetting(this, 'Volume', volume / 100, Criteria.Vol)
     },
     Spd(speed) {
         AssignSetting(this, 'Speed', speed, Criteria.Spd)
@@ -12,7 +28,7 @@ module.exports = {
         AssignSetting(this, 'Octave', oct, Criteria.Oct)
     },
     KeyOct(key, oct) {
-        AssignSetting(this, 'Key', key, Criteria.Key)
+        AssignSetting(this, 'Key', Tonality[key], Criteria.Key)
         AssignSetting(this, 'Octave', oct, Criteria.Oct)
     },
     Beat(beat) {
@@ -21,18 +37,12 @@ module.exports = {
     Bar(bar) {
         AssignSetting(this, 'Bar', bar, Criteria.Bar)
     },
-    BeatBar(beat, bar) {
-        AssignSetting(this, 'Beat', beat, Criteria.Beat)
+    BarBeat(bar, beat) {
         AssignSetting(this, 'Bar', bar, Criteria.Bar)
+        AssignSetting(this, 'Beat', beat, Criteria.Beat)
     },
     Dur(scale) {
         AssignSetting(this, 'Duration', scale, Criteria.Dur)
-    },
-    Stac1(restProportion) {
-        AssignSetting(this, 'Stac1', restProportion, Criteria.Stac1)
-    },
-    Stac2(restProportion) {
-        AssignSetting(this, 'Stac2', restProportion, Criteria.Stac2)
     },
     Acct(scale) {
         AssignSetting(this, 'Accent', scale, Criteria.Acct)
@@ -58,29 +68,63 @@ module.exports = {
     Rev(r) {
         AssignSetting(this, 'Rev', r, Criteria.Rev)
     },
-    Var(index, obj) {
-        this.Var[index] = obj
-    }
+    setVar(key, value) {
+        this.Var[key] = value
+    },
+    getVar(key, defaultValue = null) {
+        return this.Var[key] ? this.Var[key] : defaultValue
+    },
+    Stac(restProportion, index = 1) {
+        if (typeof restProportion !== 'number') throw new TypeError('Non-numeric value passed in as Stac')
+        if (!Criteria.Stac(restProportion)) throw new RangeError('Stac out of range')
+        if (![0, 1, 2].indexOf(index)) throw new RangeError('Stac index out of range')
+        this.Stac[index] = restProportion
+    },
 }
 
 const Criteria = {
     Vol:     (volume) => volume <= 1 && volume >= 0,
-    Spd:     (speed) => speed > 0 && Number.isInteger(speed),
+    Spd:     (speed) => speed > 0,
     Key:     (key) => Number.isInteger(key),
     Oct:     (octave) => Number.isInteger(octave),
-    Beat:    (beat) => beat > 0 && Number.isInteger(beat),
-    Bar:     (bar) => bar > 0 && Number.isInteger(Math.log2(bar)),
+    Beat:    (beat) => beat > 0 && Number.isInteger(Math.log2(beat)),
+    Bar:     (bar) => bar > 0 && Number.isInteger(bar),
     Dur:     (scale) => scale > 0,
-    Stac1:   (restProportion) => restProportion >= 0 && restProportion <= 0,
-    Stac2:   (restProportion) => restProportion >= 0 && restProportion <= 0,
+    Stac:    (restProportion) => restProportion >= 0 && restProportion <= 1,
     Acct:    (scale) => scale > 1,
     Light:   (scale) => scale < 1 && scale > 0,
     Appo:    (r) => r > 0,
     Port:    (r) => r > 0,
-    Trace:   (count) => count > 0 && Number.isInteger(count),
+    Trace:   (count) => count > 0 && count <= 4 && Number.isInteger(count),
     FadeIn:  (time) => time > 0,
     FadeOut: (time) => time > 0,
     Rev:     () => true,
+}
+const Tonality = {
+    'C':    0,
+    'G':    7,
+    'D':    2,
+    'A':    9,
+    'E':    4,
+    'B':    -1,
+    '#F':   6,
+    '#C':   1,
+    'F':    5,
+    'bB':   -2,
+    'bE':   3,
+    'bA':   8,
+    'bD':   1,
+    'bG':   6,
+    'bC':   -1,
+
+    'F#':   6,
+    'C#':   1,
+    'Bb':   -2,
+    'Eb':   3,
+    'Ab':   8,
+    'Db':   1,
+    'Gb':   6,
+    'Cb':   -1,
 }
 
 /**

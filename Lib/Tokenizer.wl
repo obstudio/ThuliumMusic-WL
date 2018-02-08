@@ -1,76 +1,153 @@
 (* ::Package:: *)
 
-BeginPackage["SMML`Tokenizer`"];
+Hold[a,b]
 
-rep[pat_]:=rep[pat,","];
+
+BeginPackage["SMML`Tokenizer`"];
+Get[NotebookDirectory[]<>"TrackTok.wl"];
+
+rep[pat_]:=rep[pat,","~~" "...];
 rep[pat_,sep_]:=pat~~(sep~~pat)...;
 unsigned=DigitCharacter..;
 integer=""|"-"|"+"~~unsigned;
+intPsb=""|integer;
+chordOpCode=rep["["~~intPsb|(intPsb~~";"~~intPsb)~~"]"~~intPsb];
+chordOpCodeTok[code_]:=StringCases[code,{
+	"["~~pos:intPsb~~"]"~~sft:intPsb:>{
+		If[pos=="",1,ToExpression[pos]],
+		If[pos=="",-1,ToExpression[pos]],
+		If[sft=="",0,ToExpression[sft]]
+	},
+	"["~~pos1:intPsb~~";"~~pos2:intPsb~~"]"~~sft:intPsb:>{
+		If[pos1=="",1,ToExpression[pos1]],
+		If[pos2=="",-1,ToExpression[pos2]],
+		If[sft=="",0,ToExpression[sft]]
+	}
+}];
 
-Get[NotebookDirectory[]<>"TrackTok.wl"];
+rif[list_]:=rif[list,WhitespaceCharacter...];
+rif[list_,sep_]:=StringExpression@@Riffle[list,sep,{1,-1,2}];
+word=LetterCharacter~~WordCharacter...;
+jsPlain=Except["{"|"}"]...;
+jsCode=Nest[(("{"~~#~~"}")|jsPlain)...&,jsPlain,8];
+functionCode=rif[{word,"("~~jsPlain~~")","{"~~jsCode~~"}"}];
+functionCodeTok[code_]:=StringCases[code,StringExpression[
+	name:word,
+	WhitespaceCharacter...,
+	"("~~jsPlain~~")",
+	WhitespaceCharacter...,
+	"{"~~js:jsCode~~"}"
+]:>{
+	"Name"->name,
+	"Code"->code,
+	"Syntax"->StringCases[js,"/** "~~stx:Shortest[__]~~" **/":>stx]
+}][[1]];
 
-contextList={"Default","ChordNotation","ChordOperator","FunctionPackage"};
-contextAbbr=AssociationMap[#&,contextList]~Join~<|
-	"End"->"Default",
-	"Chord"->"ChordNotation",
-	"ChordOp"->"ChordOperator",
-	"Function"->"FunctionPackage"
-|>;
-
+contextList={"End","ChordNotation","ChordOperator","Declaration"};
 syntaxTemplate=<|
 	"ChordNotation"-><||>,
 	"ChordOperator"-><||>,
 	"FunctionList"->{},
+	"FunctionSimp"-><||>,
 	"RecursionLimit"->8
 |>;
 
-Tokenizer[filepath_]:=Module[
+Tokenizer[filepath_]:=Block[
 	{
-		data={},lineCount=0,
-		messages={},tokenizer={},
-		context="Default",
+		rawData={},line,i=1,
+		messages={},tokenizer,
+		context="End",
+		contextData={},
 		command,argument,
 		library={},
 		syntax=syntaxTemplate
 	},
 	
+	
 	If[FileExistsQ[filepath],
-		data=Import[filepath,"List"],
+		rawData=Import[filepath,"List"],
 		AppendTo[messages,<|"Type"->"FileNotFound","Arguments"->filepath|>]
 	];
 	
-	Do[
-		lineCount++;
+	While[i<=Length[rawData],
+		line=rawData[[i]];
 		Switch[line,
 			_?(StringStartsQ["#"]),
 				{command,argument}=StringCases[cmd:WordCharacter..~~arg___:>Sequence[cmd,arg]][line];
+				If[contextData!={},
+					AppendTo[library,<|
+						"Type"->context,
+						"Storage"->"Internal",
+						"Data"->contextData
+					|>];
+					contextData={};
+				];
 				Switch[command,
-					_?(MemberQ[Keys@contextAbbr,#]&),context=contextAbbr[[command]]
+					_?(MemberQ[contextList,#]&),context=command
 				],
 			_?(StringStartsQ["//"]),
 				Null,
 			_?(!StringMatchQ[#,WhitespaceCharacter...]&),
 				Switch[context,
 					"ChordNotation",
-						StringCases[line,
+						AppendTo[contextData,StringCases[line,
 							StringExpression[
 								ntt:LetterCharacter~~"\t"..,
 								cmt:Shortest[__]~~"\t"..,
-								pts:rep[integer,","~~" "...]
+								pts:rep[integer]
 							]:>Sequence[
 								"Notation"->ntt,
 								"Comment"->cmt,
 								"Pitches"->StringSplit[pts,","~~" "...]
 							]
-						]//Print
+						]],
+					"ChordOperator",
+						AppendTo[contextData,StringCases[line,
+							StringExpression[
+								ntt:LetterCharacter~~"\t"..,
+								cmt:Shortest[__]~~"\t"..,
+								pts:chordOpCode
+							]:>Sequence[
+								"Notation"->ntt,
+								"Comment"->cmt,
+								"Pitches"->chordOpCodeTok[pts]
+							]
+						]],
+					"Declaration",
+						While[!StringMatchQ[line,functionCode]&&i<=Length@rawData,
+							i++;line=line<>"\n"<>rawData[[i]];
+						];
+						AppendTo[contextData,StringCases[line,
+							StringExpression[
+								name:word,
+								WhitespaceCharacter...,
+								"("~~jsPlain~~")",
+								WhitespaceCharacter...,
+								"{"~~js:jsCode~~"}"
+							]:>Sequence[
+								"Name"->name,
+								"Code"->line,
+								"Syntax"->StringCases[js,"/** "~~stx:Shortest[__]~~" **/":>stx]
+							]
+						]]
 				]
-		],
-	{line,data}];
+		];
+		i++;
+	];
+	
+	tokenizer=<|
+		"Comments"->{},
+		"Library"->library,
+		"Settings"->{},
+		"Sections"->{},
+		"Undefined"->{}
+	|>;
 	
 	Return[<|
 		"Messages"->messages,
 		"Tokenizer"->tokenizer
 	|>];
+	
 ];
 
 EndPackage[];

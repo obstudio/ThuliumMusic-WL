@@ -14,18 +14,6 @@ TrackTokenizer[syntax_]:=Block[{},
 		"Eb"->3,"Ab"->8,"Db"->1,"Cb"->-1
 	|>;
 	key=Alternatives@@Keys@keyDict;
-	word=WordCharacter..;
-	jsCodePatt=Nest[(("{"~~#~~"}")|Except["{"|"}"])...&,Except["{"|"}"]...,8];
-	funcName=Alternatives@@Flatten[StringCases[StringExpression[
-		name:word,
-		Shortest["("~~__~~")"],
-		Whitespace,
-		Shortest["{"~~jsCodePatt~~"}"]
-	]:>name]/@StringCases[
-		"module.exports = {"~~cont:Shortest[jsCodePatt]~~"}":>cont
-	]@Import[
-		NotebookDirectory[]<>"Standard\\Function.js","String"
-	]];
 	
 	number=(integer~~""|("/"|"."~~unsigned))|("log2("~~unsigned~~")");
 	subtrack=Nest[(("{"~~#~~"}")|Except["{"|"}"])...&,Except["{"|"}"]...,8];

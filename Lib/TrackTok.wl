@@ -53,9 +53,9 @@ TrackTokenizer[syntax_]:=Block[{},
 	objectPatt=("{"~~""|(unsigned~~"*")~~subtrack~~"}")|note;
 	objectTok[str_]:=StringCases[str,{
 		"{"~~n:unsigned~~"*"~~sub:subtrack~~"}":>
-			{"Type"->"Subtrack","Contents"->trackTok[sub],"Repeat"->-ToExpression@n},
+			{"Type"->"Subtrack","Content"->trackTok[sub],"Repeat"->-ToExpression@n},
 		"{"~~sub:subtrack~~"}":>
-			{"Type"->"Subtrack","Contents"->trackTok[sub],"Repeat"->Max[-1,
+			{"Type"->"Subtrack","Content"->trackTok[sub],"Repeat"->Max[-1,
 				StringCases[sub,"/"~~i:orderList~~":":>orderTok[i]]
 			]},
 		StringExpression[

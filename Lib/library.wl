@@ -61,7 +61,7 @@ caption[string_String,style_String,argument_List]:=Style[completeText[Which[
 ],argument],styleDict[[style]]];
 getArgument[string_,function_]:=Switch[function,
 	"Instr",{string},
-	"Volume"|"Chord",ToExpression/@StringSplit[string,","],
+	"Chord",ToExpression/@StringSplit[string,","],
 	_,ToExpression[string]
 ];
 

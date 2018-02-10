@@ -8,9 +8,10 @@
 Begin["QYS`"];
 
 subtrack=Nest[(("{"~~#~~"}")|Except["}"])...&,Except["}"]...,8];
-pitOp=Alternatives[Characters@"abdMmoputTqQcChHvVfF#$,'"]...;
+pitOp=Alternatives@@Characters@"abdMmptTqQpPhH#$,'"...;
+crdOp=Alternatives@@Characters@"ouijk"...;
 durOp=Alternatives[Characters@"-_.=`"]...;
-pitch="%"|"x"|DigitCharacter~~pitOp;
+pitch="%"|"x"|DigitCharacter~~pitOp~~crdOp;
 order=""|rep[int~~""|(".."~~int)];
 expr=Except["("|")"|"<"|">"]..;
 
@@ -19,12 +20,13 @@ getOrder[ord_]:=Union@@StringCases[ord,{
 	n:int:>{ToExpression@n}
 }];
 getPitch[pitches_]:=StringCases[pitches,
-	pitSd:("%"|"x"|DigitCharacter)~~pitOp:pitOp:>
+	pitSd:("%"|"x"|DigitCharacter)~~pitOp:pitOp~~crdOp:crdOp:>
 	{
 		"ScaleDegree"->Switch[pitSd,"%",-1,"x",10,_,ToExpression@pitSd],
 		"SemitonesCount"->StringCount[pitOp,"#"]-StringCount[pitOp,"b"],
 		"OctavesCount"->StringCount[pitOp,"'"]-StringCount[pitOp,","],
-		"ChordSymbol"->StringDelete[pitOp,"#"|"b"|"'"|","]
+		"ChordSymbol"->StringDelete[pitOp,"#"|"b"|"'"|","],
+		"ChordOperator"->crdOp
 	}
 ];
 
@@ -45,7 +47,7 @@ getTrack[score_]:=StringCases[score,{
 	"<"~~func:name~~":"~~arg:Except[">"]..~~">":>
 		{"Type"->"FunctionToken","Simplified"->False,"Argument"->{func->getArgument[arg,func]}},
 	"<"~~vol:rep[real]~~">":>
-		{"Type"->"FunctionToken","Simplified"->True,"Argument"->{"Volume"->ToExpression/@StringSplit[vol,","]}},
+		{"Type"->"FunctionToken","Simplified"->True,"Argument"->{"Volume"->ToExpression@vol}},
 	"<"~~speed:int~~">":>
 		{"Type"->"FunctionToken","Simplified"->True,"Argument"->{"Speed"->ToExpression@speed}},
 	"<"~~bar:int~~"/"~~beat:int~~">":>
@@ -56,7 +58,7 @@ getTrack[score_]:=StringCases[score,{
 		{"Type"->"FunctionToken","Simplified"->True,"Argument"->Module[{ivList=StringSplit[cont,","]},{
 			"Instr"->StringDelete["("~~__~~")"]/@ivList,
 			If[Or@@StringContainsQ["("]/@ivList,
-				"Volume"->(If[StringContainsQ[#,"("],
+				"InstProp"->(If[StringContainsQ[#,"("],
 					StringCases[#,"("~~volume__~~")":>ToExpression@volume][[1]],
 				1.0]&)/@ivList,
 			Nothing]
@@ -87,7 +89,7 @@ getTrack[score_]:=StringCases[score,{
 		"DurationOperators"->StringDelete[durOp,"`"]
 	},
 	space:Whitespace:>{"Type"->"Whitespace","Content"->space},
-	undef__:>{"Type"->"Undefined","Content"->undef}
+	undef_:>{"Type"->"Undefined","Content"->undef}
 }];
 
 (* tokenizer *)
@@ -109,7 +111,7 @@ Tokenize[filename_]:=Module[
 			StringLength@line>2&&StringTake[line,2]=="//",
 				AppendTo[comments,StringDrop[line,2]],
 			True,
-				score=score<>line;
+				score=score<>line<>"\n";
 				If[StringPart[line,-1]=="\\",Continue[]];
 				trackToken=getTrack[score];
 				If[ContainsOnly[Association[#][["Type"]]&/@trackToken,{"FunctionToken"}],
@@ -136,10 +138,6 @@ Tokenize[filename_]:=Module[
 ];
 End[];
 (* Here is the end of context QYS` *)
-
-
-(* ::Input:: *)
-(*QYS`getTrack["<1=bB,,>\t"]*)
 
 
 (* ::Input:: *)

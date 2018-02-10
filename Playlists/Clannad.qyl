@@ -2,7 +2,7 @@
 	"Title": "Clannad",
 	"Comment": "",
 	"Abstract": "",
-	"Path": "",
+	"Path": "Clannad\\",
 	"SongList": [
 		{"Song": "Nagisa"},
 		{"Song": "Shionari"},

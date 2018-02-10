@@ -1,5 +1,5 @@
 {
-	"Default": {
+	"FontStyle": {
 		"Pitch": {"Color": "#007F7F", "Weight": "Plain", "Slant": "Plain"},
 		"PitOp": {"Color": "#007FBF", "Weight": "Plain", "Slant": "Plain"},
 		"DurOp": {"Color": "#00BF7F", "Weight": "Plain", "Slant": "Plain"},
@@ -10,7 +10,14 @@
 		"Modifier": {"Color": "#7F7F7F", "Weight": "Plain", "Slant": "Plain"},
 		"ModifOp": {"Color": "#000000", "Weight": "Plain", "Slant": "Plain"},
 		"ModifArg": {"Color": "#7F007F", "Weight": "Plain", "Slant": "Plain"},
+		"TransOp": {"Color": "#7F003F", "Weight": "Plain", "Slant": "Plain"},
 		"BarLine": {"Color": "#000000", "Weight": "Plain", "Slant": "Plain"},
-		"Background": {"Color": "#FFFFFF", "Weight": "Plain", "Slant": "Plain"}
+		"Order": {"Color": "#7F3F3F", "Weight": "Plain", "Slant": "Plain"},
+		"Undef": {"Color": "#FF0077", "Weight": "Plain", "Slant": "Plain"}
+	},
+	"Background": {
+		"Default": "#FFFFFF",
+		"Emphasized": "#FFFF77",
+		"Error": "#FF7777"
 	}
 }

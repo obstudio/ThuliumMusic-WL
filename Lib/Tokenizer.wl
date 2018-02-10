@@ -12,12 +12,12 @@ chordCodeTok[str_]:=StringCases[str,
 		ntt:LetterCharacter~~"\t"..,
 		cmt:Shortest[__]~~"\t"..,
 		pts:rep[integer]
-	]:>Sequence[
+	]:><|
 		"Notation"->ntt,
 		"Comment"->cmt,
 		"Pitches"->StringSplit[pts,","~~" "...]
-	]
-];
+	|>
+][[1]];
 
 intPsb=""|integer;
 chordOpCode=rep["["~~intPsb|(intPsb~~";"~~intPsb)~~"]"~~intPsb];
@@ -26,7 +26,7 @@ chordOpCodeTok[str_]:=StringCases[line,
 		ntt:LetterCharacter~~"\t"..,
 		cmt:Shortest[__]~~"\t"..,
 		pts:chordOpCode
-	]:>Sequence[
+	]:><|
 		"Notation"->ntt,
 		"Comment"->cmt,
 		"Pitches"->StringCases[pts,{
@@ -41,50 +41,57 @@ chordOpCodeTok[str_]:=StringCases[line,
 				If[sft=="",0,ToExpression[sft]]
 			}
 		}]
-	]
-];
+	|>
+][[1]];
 
 rif[list_]:=rif[list,WhitespaceCharacter...];
 rif[list_,sep_]:=StringExpression@@Riffle[list,sep,{1,-1,2}];
 word=LetterCharacter~~WordCharacter...;
-jsPlain=Except["{"|"}"]...;
-jsCode=Nest[(("{"~~#~~"}")|jsPlain)...&,jsPlain,8];
-functionCode=rif[{word,"("~~jsPlain~~")","{"~~jsCode~~"}"}];
+jsCode=Nest[(("{"~~#~~"}")|Except["{"|"}"])...&,Except["{"|"}"]...,8];
+functionCode=rif[{word,"("~~Except["{"|"}"]...~~")","{"~~jsCode~~"}"}];
 functionCodeTok[str_]:=StringCases[str,
 	StringExpression[
 		name:word,
 		WhitespaceCharacter...,
-		"("~~jsPlain~~")",
+		"("~~Except["{"|"}"]...~~")",
 		WhitespaceCharacter...,
 		"{"~~js:jsCode~~"}"
-	]:>Sequence[
+	]:><|
 		"Name"->name,
 		"Code"->str,
-		"Syntax"->StringCases[js,"/** "~~stx:Shortest[__]~~" **/":>stx]
-	]
-];
+		"Syntax"->StringCases[js,"/**** "~~stx:Shortest[__]~~" ****/":>stx]
+	|>
+][[1]];
 
-contextList={"End","ChordNotation","ChordOperator","Declaration"};
+contextList={"End","ChordNotation","ChordOperator","Function"};
 settingList={"RecursionLimit","StaffDisplay","ForcedSpace"};
 syntaxTemplate=<|
-	"ChordNotation"-><||>,
-	"ChordOperator"-><||>,
+	"ChordNotation"->{},
+	"ChordOperator"->{},
 	"FunctionList"->{},
 	"FunctionSimp"-><||>,
 	"Typesetting"-><||>
 |>;
+syntaxList=Keys@syntaxTemplate;
 
 Tokenizer[filepath_]:=Block[
 	{
-		rawData={},line,i=1,
-		messages={},tokenizer,
+		rawData={},line,
+		lineCount=1,blankCount=2,
+		
+		tokenizer,
+		library={},undefined={},
+		settings={},sections={},
+		
+		messages={},
+		syntax=syntaxTemplate,
+		
+		source,
+		comments={},
+		sectionData={},trackData,
 		context="End",
 		contextData={},
-		scoreData={},
-		command,argument,
-		library={},
-		settings={},
-		syntax=syntaxTemplate
+		command,value
 	},
 	
 	If[FileExistsQ[filepath],
@@ -92,69 +99,104 @@ Tokenizer[filepath_]:=Block[
 		AppendTo[messages,<|"Type"->"FileNotFound","Arguments"->filepath|>]
 	];
 	
-	While[i<=Length[rawData],
-		line=rawData[[i]];
-		Switch[line,
-			_?(StringStartsQ["#"]),
-				{command,argument}=StringCases[cmd:WordCharacter..~~WhitespaceCharacter...~~arg___:>Sequence[cmd,arg]][line];
+	While[StringStartsQ[rawData[[lineCount]],"//"],
+		AppendTo[comments,rawData[[lineCount]]];
+		lineCount++;
+	];
+	tokenizer=<|"Comments"->comments|>;
+	comments={};
+	
+	While[lineCount<=Length[rawData],
+		line=rawData[[lineCount]];
+		If[StringStartsQ[line,"//"]||StringMatchQ[line,WhitespaceCharacter...],
+		
+			(* comment line or blank line *)
+			If[StringStartsQ[line,"//"],AppendTo[comments,line]];
+			If[blankCount<2,blankCount++],
+			
+			(* meaningful line *)
+			If[StringStartsQ[line,"#"],
+			
+				(* command *)
+				{command,value}=StringCases[cmd:WordCharacter..~~WhitespaceCharacter...~~arg___:>Sequence[cmd,arg]][line];
 				If[contextData!={},
-					AppendTo[library,<|
-						"Type"->context,
-						"Storage"->"Internal",
-						"Data"->contextData
-					|>];
+					Switch[context,
+						"ChordNotation",
+							syntax[["ChordNotation"]]=Union[syntax[["ChordNotation"]],contextData[[All,"Notation"]]],
+						"ChordOperator",
+							syntax[["ChordOperator"]]=Union[syntax[["ChordOperator"]],contextData[[All,"Notation"]]],
+						"Function",
+							syntax[["FunctionList"]]=Union[syntax[["FunctionList"]],contextData[[All,"Name"]]];
+							syntax[["FunctionSimp"]]=Union[syntax[["FunctionSimp"]],
+								Association[If[#Syntax=={},Nothing,#Name->#Syntax[[1]]]&/@contextData]
+							]
+					];
+					AppendTo[library,<|"Type"->context,"Storage"->"Internal","Data"->contextData|>];
 					contextData={};
 				];
 				Switch[command,
 					_?(MemberQ[contextList,#]&),
 						context=command,
 					_?(MemberQ[settingList,#]&),
-						If[KeyExistsQ[settings,command],
-							AppendTo[messages,<|"Type"->"RepDecl","Arguments"->command|>]
-						];
 						AppendTo[settings,command->Switch[command,
 							"StaffDisplay",Identity,
 							_,ToExpression
-						][argument]],
+						][value]],
+					"Include",
+						source=Tokenizer[If[StringStartsQ[value,"\"./"],
+							DirectoryName[filepath]<>StringTake[value,{4,-2}],
+							StringTake[value,{2,-2}]
+						]];
+						Do[
+							syntax[[item]]=Union[syntax[[item]],source[["Syntax",item]]],
+						{item,syntaxList}];
+						AppendTo[library,<|"Type"->"Package","Storage"->"External","Content"->source[["Tokenizer","Library"]]|>],
 					_,
-						AppendTo[messages,<|"Type"->"FalseCmd","Arguments"->command|>]
+						AppendTo[undefined,<|"Type"->"FalseCmd","Arguments"->command|>]
 				],
-			_?(StringStartsQ[#,"//"]||StringMatchQ[#,WhitespaceCharacter...]&),
-				Null,
-			_,
+				
+				(* code *)
 				Switch[context,
 					"ChordNotation",
 						AppendTo[contextData,chordCodeTok[line]],
 					"ChordOperator",
 						AppendTo[contextData,chordOpCodeTok[line]],
-					"Declaration",
-						i++;
-						While[i<=Length@rawData&&!StringMatchQ[line,functionCode],
-							line=line<>"\n"<>rawData[[i]];i++;
+					"Function",
+						lineCount++;
+						While[lineCount<=Length@rawData&&!StringMatchQ[line,functionCode],
+							line=line<>"\n"<>rawData[[lineCount]];lineCount++;
 						];
 						AppendTo[contextData,functionCodeTok[line]],
 					"End",
-						i++;
-						While[i<=Length@rawData&&!StringMatchQ[rawData[[i]],WhitespaceCharacter...],
-							line=line<>"\n"<>rawData[[i]];i++;
+						lineCount++;
+						While[lineCount<=Length@rawData&&!StringMatchQ[rawData[[lineCount]],WhitespaceCharacter...],
+							line=line<>"\n"<>rawData[[lineCount]];lineCount++;
 						];
-						AppendTo[scoreData,line]
+						If[sectionData!={}&&blankCount==2,
+							AppendTo[sections,sectionData];
+							sectionData={};
+						];
+						trackData=TrackTokenize[syntax][line];
+						AppendTo[sectionData,trackData];
 				]
+			];
+			blankCount=0;
 		];
-		i++;
+		lineCount++;
 	];
+	AppendTo[sections,sectionData];
 	
-	tokenizer=<|
-		"Comments"->{},
+	AppendTo[tokenizer,{
 		"Library"->library,
 		"Settings"->settings,
-		"Sections"->{},
-		"Undefined"->{}
-	|>;
+		"Sections"->sections,
+		"Undefined"->undefined
+	}];
 	
 	Return[<|
-		"Messages"->messages,
-		"Tokenizer"->tokenizer
+		"Syntax"->syntax,
+		"Tokenizer"->tokenizer,
+		"Messages"->messages
 	|>];
 	
 ];
@@ -171,15 +213,4 @@ EndPackage[];
 
 
 (* ::Input:: *)
-(*Tokenizer[NotebookDirectory[]<>"test.sml"]*)
-
-
-(* ::Input:: *)
-(*SMML`Tokenizer`Track`TrackTokenizer[1]["(100%)"]*)
-
-
-(* ::Input:: *)
-(*StringMatchQ["Tremolo1 (expr, subtrack) { /** (%1-)#2 **/\nTremolo1 (expr, subtrack) { /** (%1-)#2 **/\n}",WhitespaceCharacter...~~LetterCharacter~~WordCharacter...~~WhitespaceCharacter...~~"("~~Except["{"|"}"]...~~")"~~WhitespaceCharacter...~~"{"~~(("{"~~(("{"~~(("{"~~(("{"~~(("{"~~(("{"~~(("{"~~(("{"~~Except["{"|"}"]...~~"}")|(Except["{"|"}"]...))...~~"}")|(Except["{"|"}"]...))...~~"}")|(Except["{"|"}"]...))...~~"}")|(Except["{"|"}"]...))...~~"}")|(Except["{"|"}"]...))...~~"}")|(Except["{"|"}"]...))...~~"}")|(Except["{"|"}"]...))...~~"}")|(Except["{"|"}"]...))...~~"}"~~WhitespaceCharacter...]*)
-
-
-
+(*Tokenizer[NotebookDirectory[]<>"test.sml"][["Tokenizer","Sections"]]*)

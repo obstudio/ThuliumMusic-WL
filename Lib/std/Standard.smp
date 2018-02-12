@@ -1,6 +1,7 @@
 //SMML Standard Package
 //Updated: 2018.2.9.
 
+# Include "./Global.smp"
 # Include "./Function.smp"
 
 # ChordNotation

@@ -1,0 +1,113 @@
+//SMML Standard Package - Function
+//Updated: 2018.2.10.
+
+# Function
+
+ConOct(octave, volumeScale = 1) {
+    AssignSetting(this.Settings, 'ConOct', octave, (octave) => Number.isInteger(octave))
+    AssignSetting(this.Settings, 'ConOctVolume', volumeScale, (volume) => volume >= 0)
+}
+
+Vol(volume) {
+    /**** (!1\%) ****/
+    AssignSetting(this.Settings, 'Volume', volume / 100, (volume) => volume <= 1 && volume >= 0)
+}
+
+Spd(speed) {
+    /**** (!1) ****/
+    AssignSetting(this.Settings, 'Speed', speed, (speed) => speed > 0)
+}
+
+Key(key) {
+    AssignSetting(this.Settings, 'Key', key, (key) => Number.isInteger(key))
+}
+
+Oct(oct) {
+    /**** (Oct:!1) ****/
+    AssignSetting(this.Settings, 'Octave', oct, (octave) => Number.isInteger(octave))
+}
+
+KeyOct(key, oct) {
+    /**** (1=$1) ****/
+    const Tonality = {
+        'C': 0, 'G': 7, 'D': 2, 'A': 9, 'E': 4, 'B': -1, 'F': 5,
+        '#F': 6, '#C': 1, 'bB': -2, 'bE': 3, 'bA': 8, 'bD': 1, 'bG': 6, 'bC': -1,
+        'F#': 6, 'C#': 1, 'Bb': -2, 'Eb': 3, 'Ab': 8, 'Db': 1, 'Gb': 6, 'Cb': -1
+    }
+    AssignSetting(this.Settings, 'Key', Tonality[key], (key) => Number.isInteger(key))
+    AssignSetting(this.Settings, 'Octave', oct, (octave) => Number.isInteger(octave))
+}
+
+Beat(beat) {
+    AssignSetting(this.Settings, 'Beat', beat, (beat) => beat > 0 && Number.isInteger(Math.log2(beat)))
+}
+
+Bar(bar) {
+    AssignSetting(this.Settings, 'Bar', bar, (bar) => bar > 0 && Number.isInteger(bar))
+}
+
+BarBeat(bar, beat) {
+    /**** (!1/!2) ****/
+    AssignSetting(this.Settings, 'Bar', bar, (bar) => bar > 0 && Number.isInteger(bar))
+    AssignSetting(this.Settings, 'Beat', beat, (beat) => beat > 0 && Number.isInteger(Math.log2(beat)))
+}
+
+Dur(scale) {
+    /**** (Dur:%1) ****/
+    AssignSetting(this.Settings, 'Duration', scale, (scale) => scale > 0)
+}
+
+Acct(scale) {
+    AssignSetting(this.Settings, 'Accent', scale, (scale) => scale > 1)
+}
+
+Light(scale) {
+    AssignSetting(this.Settings, 'Light', scale, (scale) => scale < 1 && scale > 0)
+}
+
+Appo(r) {
+    /**** (Appo:!1) ****/
+    AssignSetting(this.Settings, 'Appo', r, (r) => r > 0)
+}
+
+Port(r) {
+    /**** (Port:!1) ****/
+    AssignSetting(this.Settings, 'Port', r, (r) => r > 0)
+}
+
+Trace(count) {
+    /**** (Trace:!1) ****/
+    AssignSetting(this.Settings, 'Trace', count, count > 0 && count <= 4 && Number.isInteger(count))
+}
+
+FadeIn(time) {
+    /**** (FadeIn:!1) ****/
+    AssignSetting(this.Settings, 'FadeIn', time, (time) => time >= 0)
+}
+
+FadeOut(time) {
+    /**** (FadeOut:!1) ****/
+    AssignSetting(this.Settings, 'FadeOut', time, (time) => time >= 0)
+}
+
+Rev(r) {
+    /**** (Rev:!1) ****/
+    AssignSetting(this.Settings, 'Rev', r, () => true)
+}
+
+setVar(key, value) {
+    this.Settings.Var[key] = value
+}
+
+getVar(key, defaultValue = null) {
+    return this.Settings.Var[key] ? this.Var[key] : defaultValue
+}
+
+Stac(restProportion, index = 1) {
+    if (typeof restProportion !== 'number') throw new TypeError('Non-numeric value passed in as Stac')
+    if (!((restProportion) => restProportion >= 0 && restProportion <= 1)(restProportion)) throw new RangeError('Stac out of range')
+    if (![0, 1, 2].indexOf(index)) throw new RangeError('Stac index out of range')
+    this.Settings.Stac[index] = restProportion
+}
+
+# End

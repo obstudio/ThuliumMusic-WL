@@ -63,6 +63,37 @@ functionCodeTok[str_]:=StringCases[str,
 	|>
 ][[1]];
 
+preOperator="$"|"";
+postOperator="``"|"`"|"";
+volOperator=(">"|":")...;
+pitOperator=("#"|"b"|"'"|",")...;
+durOperator=("."|"-"|"_"|"=")...;
+scaleDegree="0"|"1"|"2"|"3"|"4"|"5"|"6"|"7"|"%"|"x";
+
+number=integer~~""|("."~~unsigned);
+expression=(integer~~""|("/"|"."~~unsigned))|("log2("~~unsigned~~")");
+string=Except[WhitespaceCharacter|"("|")"|"{"|"}"|"["|"]"|"<"|">"]..;
+subtrack=Nest[(("{"~~#~~"}")|Except["{"|"}"])...&,Except["{"|"}"]...,8];
+argument=rep[expression|number|string|("{"~~subtrack~~"}")];
+
+(* notation *)
+orderList=""|rep[unsigned~~""|("~"~~unsigned)];
+orderTok=Union@@StringCases[#,{
+	n:integer~~"~"~~m:integer:>Range[ToExpression@n,ToExpression@m],
+	n:integer:>{ToExpression@n}
+}]&;
+notationPatt=("/"~~orderList~~":")|"|"|"/"|"^"|"&"|"*"|Whitespace;
+notationTok=StringCases[{
+	bl:"/"~~ol:orderList~~":":>
+		{"Type"->"BarLine","Newline"->(bl=="\\"),"Skip"->False,"Order"->orderTok[ol]},
+	bl:"|"|"/":>
+		{"Type"->"BarLine","Newline"->(bl=="\\"),"Skip"->(bl=="/"),"Order"->{0}},
+	"^":>{"Type"->"Tie"},
+	"&":>{"Type"->"PedalPress"},
+	"*":>{"Type"->"PedalRelease"},
+	space:Whitespace:>{"Type"->"Whitespace","Content"->space}
+}];
+
 contextList={"End","ChordNotation","ChordOperator","Function"};
 settingList={"RecursionLimit","StaffDisplay","ForcedSpace"};
 syntaxTemplate=<|
@@ -73,11 +104,15 @@ syntaxTemplate=<|
 	"Typesetting"-><||>
 |>;
 syntaxList=Keys@syntaxTemplate;
+blankLineQ[str_]:=Or[
+	StringMatchQ[str,WhitespaceCharacter...],
+	StringStartsQ[str,"//"]
+];
 
 Tokenizer[filepath_]:=Block[
 	{
 		rawData={},line,
-		lineCount=1,blankCount=2,
+		lineCount=1,blankCount=1,
 		
 		tokenizer,
 		library={},undefined={},
@@ -85,10 +120,11 @@ Tokenizer[filepath_]:=Block[
 		
 		messages={},
 		syntax=syntaxTemplate,
+		sectionData={},(*trackData,*)
 		
 		source,
 		comments={},
-		sectionData={},trackData,
+		
 		context="End",
 		contextData={},
 		command,value
@@ -104,17 +140,10 @@ Tokenizer[filepath_]:=Block[
 		lineCount++;
 	];
 	tokenizer=<|"Comments"->comments|>;
-	comments={};
 	
 	While[lineCount<=Length[rawData],
 		line=rawData[[lineCount]];
-		If[StringStartsQ[line,"//"]||StringMatchQ[line,WhitespaceCharacter...],
-		
-			(* comment line or blank line *)
-			If[StringStartsQ[line,"//"],AppendTo[comments,line]];
-			If[blankCount<2,blankCount++],
-			
-			(* meaningful line *)
+		If[!StringMatchQ[line,WhitespaceCharacter...],
 			If[StringStartsQ[line,"#"],
 			
 				(* command *)
@@ -168,23 +197,45 @@ Tokenizer[filepath_]:=Block[
 						];
 						AppendTo[contextData,functionCodeTok[line]],
 					"End",
-						lineCount++;
-						While[lineCount<=Length@rawData&&!StringMatchQ[rawData[[lineCount]],WhitespaceCharacter...],
-							line=line<>"\n"<>rawData[[lineCount]];lineCount++;
-						];
-						If[sectionData!={}&&blankCount==2,
-							AppendTo[sections,sectionData];
-							sectionData={};
-						];
-						trackData=TrackTokenize[syntax][line];
-						AppendTo[sectionData,trackData];
+						Break[];
 				]
 			];
-			blankCount=0;
 		];
 		lineCount++;
 	];
-	AppendTo[sections,sectionData];
+	tracktok=TrackTokenize[syntax];
+	
+	comments={};
+	While[lineCount<=Length[rawData],
+		line=rawData[[lineCount]];
+		If[blankLineQ[line],
+		
+			(* new section *)
+			If[sectionData!={},
+				AppendTo[sections,<|
+					"Comments"->comments,
+					"Tracks"->sectionData
+				|>];
+				comments={};
+				sectionData={};
+			];
+			If[StringStartsQ[line,"//"],AppendTo[comments,line]];
+			blankCount++,
+			
+			(* music score *)
+			lineCount++;
+			blankCount=0;
+			While[lineCount<=Length@rawData&&!blankLineQ[rawData[[lineCount]]],
+				line=line<>"\n"<>rawData[[lineCount]];lineCount++;
+			];
+			AppendTo[sectionData,tracktok@line];
+		];
+		lineCount++;
+	];
+	If[sectionData!={},AppendTo[sections,<|
+		"Comments"->comments,
+		"Tracks"->sectionData
+	|>]];
 	
 	AppendTo[tokenizer,{
 		"Library"->library,

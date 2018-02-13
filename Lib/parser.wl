@@ -316,7 +316,7 @@ parse[tokenizer_,sections_]:=Module[
 		sectionToken=Association@tokenData[[i]];
 		sectionDuration=0;
 		Do[
-			If[token[["Type"]]!="Function",Continue[]];
+			If[token[["Type"]]!="FunctionToken",Continue[]];
 			functionData=Association@token[["Argument"]];
 			Do[
 				settings[[function]]=functionData[[function]],

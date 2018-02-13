@@ -114,7 +114,7 @@ Tokenize[filename_]:=Module[
 				score=score<>line<>"\n";
 				If[StringPart[line,-1]=="\\",Continue[]];
 				trackToken=getTrack[score];
-				If[ContainsOnly[Association[#][["Type"]]&/@trackToken,{"FunctionToken"}],
+				If[ContainsNone[Association[#][["Type"]]&/@trackToken,{"Note","Track"}],
 					If[sectionMeta!={},                                             (* empty track *)
 						AppendTo[sections,Append[sectionMeta,"Tracks"->tracks]];
 						tracks={};

@@ -316,6 +316,7 @@ parse[tokenizer_,sections_]:=Module[
 		sectionToken=Association@tokenData[[i]];
 		sectionDuration=0;
 		Do[
+			If[token[["Type"]]!="Function",Continue[]];
 			functionData=Association@token[["Argument"]];
 			Do[
 				settings[[function]]=functionData[[function]],
@@ -369,7 +370,7 @@ parse[tokenizer_,sections_]:=Module[
 (* ::Input:: *)
 (*AudioStop[];AudioPlay[#[[2]]]&@*)
 (*EchoFunction["time: ",#[[1]]&]@*)
-(*Timing[integrate[#MusicClips,#Effects]&[parse[QYS`Tokenize[localPath<>"Songs\\test.qys"],All]]];*)
+(*Timing[integrate[#MusicClips,#Effects]&[parse[QYS`Tokenize[localPath<>"Songs\\Touhou\\TH11-Chireiden\\Kyuujigoku_Kaidou.qys"],All]]];*)
 
 
 (* ::Input:: *)

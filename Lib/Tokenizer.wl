@@ -70,8 +70,8 @@ durOperator=("."|"-"|"_"|"=")...;
 scaleDegree="0"|"1"|"2"|"3"|"4"|"5"|"6"|"7"|"%"|"x";
 
 number=integer~~""|("."~~unsigned);
-expression=(integer~~""|("/"|"."~~unsigned))|("log2("~~unsigned~~")");
-string=Except[WhitespaceCharacter|"\""|"("|")"|"{"|"}"|"["|"]"|"<"|">"]..;
+expression=(integer~~""|("/"|"."~~unsigned))|("Log2("~~unsigned~~")");
+string=Except["\""|"("|")"|"{"|"}"|"["|"]"|"<"|">"]..;
 subtrack=Nest[(("{"~~#~~"}")|Except["{"|"}"])...&,Except["{"|"}"]...,4];
 argument=expression|("\""~~string~~"\"")|("{"~~subtrack~~"}");
 
@@ -88,10 +88,7 @@ notationPatt=Alternatives[
 	"|"|"/"|("/"~~orderListC~~":")|"^"|"&"|"*"|Whitespace
 ];
 notationTok=StringCases[{
-	"+"|"ToCoda"|"Coda":><|"Type"->"Coda"|>,
-	"s"|"Segno":><|"Type"->"Segno"|>,
-	"DC"|"DaCapo":><|"Type"->"DaCapo"|>,
-	"DS"|"DaSegno":><|"Type"->"DaSegno"|>,
+	space:Whitespace:><|"Type"->"Whitespace","Content"->space|>,
 	"||:":><|"Type"->"RepeatBegin"|>,
 	":||":><|"Type"->"RepeatEnd"|>,
 	"["~~ol:orderListP~~".]":><|"Type"->"Volta","Order"->orderTok[ol]|>,
@@ -102,7 +99,10 @@ notationTok=StringCases[{
 	"^":><|"Type"->"Tie"|>,
 	"&":><|"Type"->"PedalPress"|>,
 	"*":><|"Type"->"PedalRelease"|>,
-	space:Whitespace:><|"Type"->"Whitespace","Content"->space|>
+	"+"|"ToCoda"|"Coda":><|"Type"->"Coda"|>,
+	"s"|"Segno":><|"Type"->"Segno"|>,
+	"DC"|"DaCapo":><|"Type"->"DaCapo"|>,
+	"DS"|"DaSegno":><|"Type"->"DaSegno"|>
 }];
 
 typeHead="$"|"%"|"&"|"!"|"@";
@@ -352,6 +352,7 @@ Tokenizer[filepath_]:=Block[
 		und_:><|"Type"->"Undefined","Content"->und|>
 	}];
 	
+	(* music tokenize *)
 	comments={};
 	While[lineCount<=Length[rawData],
 		line=rawData[[lineCount]];
@@ -387,7 +388,7 @@ Tokenizer[filepath_]:=Block[
 				StringCases[trackMeta,id__~~":":>id][[1]],
 			Null]];
 			AppendTo[trackData,"Instruments"->(<|
-				"Instrument"->StringCases[#,LetterCharacter~~WordCharacter..][[1]],
+				"Instrument"->StringCases[#,inst:(LetterCharacter~~WordCharacter..):>Sequence[inst]],
 				"Proportion"->If[#=={},Null,ToExpression@#[[1]]/100]&@StringCases[#,ns:NumberString~~"%":>ns]
 			|>&)/@StringCases[StringDelete[trackMeta,__~~":"],
 				WordCharacter..~~""|("("~~NumberString~~"%"~~")")
@@ -425,11 +426,8 @@ EndPackage[];
 
 
 (* ::Input:: *)
-(*Tokenizer[NotebookDirectory[]<>"test.sml"][["Tokenizer","Sections"]]//Timing*)
+(*Tokenizer[NotebookDirectory[]<>"test.sml"][["Tokenizer","Sections"]]*)
 
 
 (* ::Input:: *)
-(*Export[NotebookDirectory[]<>"test.json",Tokenizer[NotebookDirectory[]<>"test.sml"][["Tokenizer"]]];*)
-
-
-
+(*Export[NotebookDirectory[]<>"test4.json",Tokenizer[NotebookDirectory[]<>"test4.sml"][["Tokenizer"]]];//Timing*)

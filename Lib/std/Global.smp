@@ -66,12 +66,12 @@ Light(scale) {
 }
 
 Appo(r) {
-    /**** (Appo:!1) ****/
+    /**** (Appo:%1) ****/
     AssignSetting(this.Settings, 'Appo', r, (r) => r > 0)
 }
 
 Port(r) {
-    /**** (Port:!1) ****/
+    /**** (Port:%1) ****/
     AssignSetting(this.Settings, 'Port', r, (r) => r > 0)
 }
 
@@ -104,6 +104,7 @@ getVar(key, defaultValue = null) {
 }
 
 Stac(restProportion, index = 1) {
+    /**** (Stac:%1) ****/
     if (typeof restProportion !== 'number') throw new TypeError('Non-numeric value passed in as Stac')
     if (!((restProportion) => restProportion >= 0 && restProportion <= 1)(restProportion)) throw new RangeError('Stac out of range')
     if (![0, 1, 2].indexOf(index)) throw new RangeError('Stac index out of range')

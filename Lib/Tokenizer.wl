@@ -72,18 +72,30 @@ scaleDegree="0"|"1"|"2"|"3"|"4"|"5"|"6"|"7"|"%"|"x";
 number=integer~~""|("."~~unsigned);
 expression=(integer~~""|("/"|"."~~unsigned))|("log2("~~unsigned~~")");
 string=Except[WhitespaceCharacter|"\""|"("|")"|"{"|"}"|"["|"]"|"<"|">"]..;
-subtrack=Nest[(("{"~~#~~"}")|Except["{"|"}"])...&,Except["{"|"}"]...,8];
+subtrack=Nest[(("{"~~#~~"}")|Except["{"|"}"])...&,Except["{"|"}"]...,4];
 argument=expression|("\""~~string~~"\"")|("{"~~subtrack~~"}");
 
 (* notation *)
-orderList=""|rep[unsigned~~""|("~"~~unsigned)];
+orderListC=""|rep[unsigned~~""|("~"~~unsigned),","];
+orderListP=""|rep[unsigned~~""|("~"~~unsigned),"."];
 orderTok=Union@@StringCases[#,{
 	n:integer~~"~"~~m:integer:>Range[ToExpression@n,ToExpression@m],
 	n:integer:>{ToExpression@n}
 }]&;
-notationPatt=("/"~~orderList~~":")|"|"|"/"|"^"|"&"|"*"|Whitespace;
+notationPatt=Alternatives[
+	"+"|"ToCoda"|"Coda"|"s"|"Segno"|"DC"|"DaCapo"|"DS"|"DaSegno",
+	"||:"|":||"|("["~~orderListP~~".]"),
+	"|"|"/"|("/"~~orderListC~~":")|"^"|"&"|"*"|Whitespace
+];
 notationTok=StringCases[{
-	bl:"/"~~ol:orderList~~":":>
+	"+"|"ToCoda"|"Coda":><|"Type"->"Coda"|>,
+	"s"|"Segno":><|"Type"->"Segno"|>,
+	"DC"|"DaCapo":><|"Type"->"DaCapo"|>,
+	"DS"|"DaSegno":><|"Type"->"DaSegno"|>,
+	"||:":><|"Type"->"RepeatBegin"|>,
+	":||":><|"Type"->"RepeatEnd"|>,
+	"["~~ol:orderListP~~".]":><|"Type"->"Volta","Order"->orderTok[ol]|>,
+	bl:"/"~~ol:orderListC~~":":>
 		<|"Type"->"BarLine","Newline"->(bl=="\\"),"Skip"->False,"Order"->orderTok[ol]|>,
 	bl:"|"|"/":>
 		<|"Type"->"BarLine","Newline"->(bl=="\\"),"Skip"->(bl=="/"),"Order"->{0}|>,
@@ -93,8 +105,8 @@ notationTok=StringCases[{
 	space:Whitespace:><|"Type"->"Whitespace","Content"->space|>
 }];
 
-typeHead="$"|"%"|"&"|"!";
-typeName=<|"$"->"String","%"->"Expression","&"->"Subtrack","!"->"Number"|>;
+typeHead="$"|"%"|"&"|"!"|"@";
+typeName=<|"$"->"String","%"->"Expression","@"->"Subtrack","&"->"Object","!"->"Number"|>;
 contextList={"End","ChordNotation","ChordOperator","Function"};
 settingList={"RecursionLimit","StaffDisplay","ForcedSpace"};
 syntaxTemplate=<|"ChordNotation"->{},"ChordOperator"->{},"Function"->{}|>;
@@ -112,10 +124,14 @@ Tokenizer[filepath_]:=Block[
 	{
 		rawData={},line,
 		lineCount=1,blankCount=1,
-		
-		tokenizer,
+		tokenizer,return,
 		library={},undefined={},
 		settings={},sections={},
+		sectionData={},comments={},
+		trackData,trackMeta,
+		blankTrack={},messages={},
+		context="End",contextData={},
+		source,command,value,
 		
 		syntax=syntaxTemplate,
 		chordNotation,chordOperator,
@@ -125,18 +141,8 @@ Tokenizer[filepath_]:=Block[
 		functionTok,functionTokList,
 		argRule,argType,argData,
 		typePatt,typeTok,
-		
 		funcName,argumentTok,
-		trackPadded,trackTok,
-		
-		sectionData={},comments={},
-		trackData,trackMeta,
-		blankTrack={},
-		messages={},
-		
-		context="End",
-		contextData={},
-		source,command,value
+		object,trackTok
 	},
 	
 	If[FileExistsQ[filepath],
@@ -183,6 +189,7 @@ Tokenizer[filepath_]:=Block[
 						AppendTo[library,<|
 							"Type"->"Package",
 							"Storage"->"External",
+							"Path"->StringTake[value,{2,-2}],
 							"Content"->source[["Tokenizer","Library"]]
 						|>],
 					_,
@@ -214,6 +221,12 @@ Tokenizer[filepath_]:=Block[
 		"Settings"->settings,
 		"Undefined"->undefined
 	}];
+	return=<|
+		"Syntax"->syntax,
+		"Messages"->messages,
+		"Tokenizer"->tokenizer
+	|>;
+	If[StringTake[filepath,-4]==".smp",Return[return]];
 	
 	(* pitch *)
 	chordNotation=""|Alternatives@@syntax[["ChordNotation"]];
@@ -236,13 +249,13 @@ Tokenizer[filepath_]:=Block[
 	];
 	
 	(* object *)
-	objectPatt=("{"~~""|(unsigned~~"*")~~subtrack~~"}")|note;
+	objectPatt=("{"~~subtrack~~"}")|note;
 	objectTok=StringCases[{
 		"{"~~n:unsigned~~"*"~~sub:subtrack~~"}":>
 			<|"Type"->"Subtrack","Content"->trackTok[sub],"Repeat"->-ToExpression@n|>,
 		"{"~~sub:subtrack~~"}":>
 			<|"Type"->"Subtrack","Content"->trackTok[sub],"Repeat"->Max[-1,
-				StringCases[sub,"/"~~i:orderList~~":":>orderTok[i]]
+				StringCases[sub,"/"~~i:orderListC~~":":>orderTok[i]]
 			]|>,
 		StringExpression[
 			pre:preOperator,
@@ -270,7 +283,7 @@ Tokenizer[filepath_]:=Block[
 			<|"Type"->"Subtrack","Content"->trackTok[arg],"Repeat"->-ToExpression@n|>,
 		"{"~~arg:subtrack~~"}":>
 			<|"Type"->"Subtrack","Content"->trackTok[arg],"Repeat"->Max[-1,
-				StringCases[arg,"/"~~i:orderList~~":":>orderTok[i]]
+				StringCases[arg,"/"~~i:orderListC~~":":>orderTok[i]]
 			]|>
 	}];
 	funcName=Alternatives@@syntax[["Function",All,"Name"]];
@@ -285,13 +298,14 @@ Tokenizer[filepath_]:=Block[
 	}][[1]]&};
 	
 	(* function simplified *)
-	trackPadded=("{"~~""|(unsigned~~"*")~~subtrack~~"}")|(notationPatt...~~note~~notationPatt...);
-	typePatt=<|"$"->string,"%"->expression,"&"->trackPadded,"!"->number|>;
+	object=("{"~~subtrack~~"}")|(notationPatt...~~note~~notationPatt...);
+	typePatt=<|"$"->string,"%"->expression,"&"->object,"!"->number,"@"->subtrack|>;
 	typeTok[type_,str_]:=Switch[type,
 		"String",<|"Type"->"String","Content"->str|>,
 		"Expression",<|"Type"->"Expression","Content"->str|>,
 		"Number",<|"Type"->"Expression","Content"->str|>,
-		"Subtrack",<|"Type"->"Subtrack","Content"->trackTok[str],"Repeat"->-1|>
+		"Subtrack",<|"Type"->"Subtrack","Content"->trackTok[str],"Repeat"->-1|>,
+		"Object",<|"Type"->"Subtrack","Content"->trackTok[str],"Repeat"->-1|>
 	];
 	Do[
 		argData=syntax[["Function",funcCount]];
@@ -331,6 +345,7 @@ Tokenizer[filepath_]:=Block[
 	];
 	
 	trackTok=StringCases[{
+		spc:Whitespace:><|"Type"->"Whitespace","Content"->spc|>,
 		func:functionPatt:>functionTok[func],
 		objt:objectPatt:>objectTok[objt][[1]],
 		nota:notationPatt:>notationTok[nota][[1]],
@@ -362,7 +377,8 @@ Tokenizer[filepath_]:=Block[
 			While[lineCount<=Length@rawData&&!blankLineQ[rawData[[lineCount]]],
 				line=line<>"\n"<>rawData[[lineCount]];lineCount++;
 			];
-			trackData=<||>;trackMeta="";
+			trackData=<||>;
+			trackMeta="";
 			If[StringStartsQ[line,"<"~~__~~">"],
 				trackMeta=StringCases[line,"<"~~mt:Shortest[__]~~">":>mt][[1]];
 				line=StringDelete[line,StartOfString~~"<"~~Shortest[__]~~">"];
@@ -370,10 +386,10 @@ Tokenizer[filepath_]:=Block[
 			AppendTo[trackData,"Id"->If[StringContainsQ[trackMeta,":"],
 				StringCases[trackMeta,id__~~":":>id][[1]],
 			Null]];
-			AppendTo[trackData,"Instruments"-><|
+			AppendTo[trackData,"Instruments"->(<|
 				"Instrument"->StringCases[#,LetterCharacter~~WordCharacter..][[1]],
 				"Proportion"->If[#=={},Null,ToExpression@#[[1]]/100]&@StringCases[#,ns:NumberString~~"%":>ns]
-			|>&/@StringCases[StringDelete[trackMeta,__~~":"],
+			|>&)/@StringCases[StringDelete[trackMeta,__~~":"],
 				WordCharacter..~~""|("("~~NumberString~~"%"~~")")
 			]];
 			AppendTo[trackData,"Content"->trackTok@line];
@@ -392,11 +408,8 @@ Tokenizer[filepath_]:=Block[
 	|>]];
 	
 	AppendTo[tokenizer,"Sections"->sections];
-	Return[<|
-		"Syntax"->syntax,
-		"Messages"->messages,
-		"Tokenizer"->tokenizer
-	|>];
+	return[["Tokenizer"]]=tokenizer;
+	Return[return];
 	
 ];
 
@@ -412,8 +425,11 @@ EndPackage[];
 
 
 (* ::Input:: *)
-(*Tokenizer[NotebookDirectory[]<>"test.sml"];//Timing*)
+(*Tokenizer[NotebookDirectory[]<>"test.sml"][["Tokenizer","Sections"]]//Timing*)
 
 
 (* ::Input:: *)
 (*Export[NotebookDirectory[]<>"test.json",Tokenizer[NotebookDirectory[]<>"test.sml"][["Tokenizer"]]];*)
+
+
+

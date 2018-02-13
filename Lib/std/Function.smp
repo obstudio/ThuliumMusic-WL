@@ -23,7 +23,7 @@ Tremolo1(expr, subtrack) {
 }
 
 Tremolo2(expr, subtrack1, subtrack2) {
-    /**** &2(%1-)&3 ****/
+    /**** &2(%1=)&3 ****/
     const ts = [new SubtrackParser(subtrack1, this.Settings, this.Libraries).parseTrack(), new SubtrackParser(subtrack2, this.Settings, this.Libraries).parseTrack()]
     const pow = Math.pow(2, -expr)
     const num = ts[1].Meta.Duration / pow
@@ -98,7 +98,7 @@ Portamento(subtrack1, subtrack2) {
 }
 
 GraceNote(subtrack1, subtrack2) {
-    /**** &1(^&2) ****/
+    /**** (@1^)&2 ****/
     const t1 = new SubtrackParser(subtrack1, this.Settings, this.Libraries).parseTrack()
     const t2 = new SubtrackParser(subtrack2, this.Settings, this.Libraries).parseTrack()
     const num = subtrack1.Contents.length
@@ -124,7 +124,7 @@ GraceNote(subtrack1, subtrack2) {
 }
 
 Appoggiatura(subtrack1, subtrack2) {
-    /**** (&1^)&2 ****/
+    /**** &1(^@2) ****/
     const t1 = new SubtrackParser(subtrack1, this.Settings, this.Libraries).parseTrack()
     const t2 = new SubtrackParser(subtrack2, this.Settings, this.Libraries).parseTrack()
     const num = subtrack2.Contents.length

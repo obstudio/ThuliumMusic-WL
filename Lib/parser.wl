@@ -1,22 +1,28 @@
 (* ::Package:: *)
 
 (* temporary function *)
-QYMParse[filename_]:=integrate[#MusicClips,#Effects]&@parse[QYM`tokenizer[filename]];
 QYSParse[filename_]:=integrate[#MusicClips,#Effects]&@parse[QYS`Tokenize[filename]];
 
 
 pitchDict=<|1->0,2->2,3->4,4->5,5->7,6->9,7->11,10->10|>;
 chordDict=<|
-	"M"->{0,4,7},"m"->{0,3,7},"a"->{0,4,8},
-	"d"->{0,3,6},"p"->{0,7,12},"o"->{0,12}
+	"M"->{0,4,7},"m"->{0,3,7},"a"->{0,4,8},"d"->{0,3,6},
+	"t"->{0,3},"T"->{0,4},"q"->{0,5},"Q"->{0,6},
+	"p"->{0,7},"P"->{0,8},"h"->{0,8},"H"->{0,9}
+|>;
+chordOpDict=<|
+	"o"->(Join[#,#[[{1}]]+12]&),"u"->(Join[#[[{-1}]]-12,#]&),
+	"i"->(Join[#[[;;1]]+12,#[[2;;]]]&),
+	"j"->(Join[#[[;;2]]+12,#[[3;;]]]&),
+	"k"->(Join[#[[;;3]]+12,#[[4;;]]]&)
 |>;
 defaultSettings=<|
-	"Volume"->{1},"Speed"->90,"Key"->0,"Beat"->4,"Bar"->4,"Instr"->{"Piano"},
+	"Volume"->1,"Speed"->90,"Key"->0,"Beat"->4,"Bar"->4,"Instr"->{"Piano"},
 	"Dur"->0,"FadeIn"->0,"FadeOut"->0,"Stac"->1/2,"Appo"->1/4,"Oct"->0,
-	"Port"->6,"Spac"->0,"Chord"->{0,12},"Trace"->1
+	"Port"->6,"Spac"->0,"Chord"->{0,12},"Trace"->1,"InstProp"->{1}
 |>;
 functionList=Keys@defaultSettings;
-metaSettingTag={"Instr","Volume","FadeIn","FadeOut"};
+metaSettingTag={"Instr","InstProp","FadeIn","FadeOut"};
 effectSettingTag={"FadeIn","FadeOut"};
 
 
@@ -25,12 +31,13 @@ beatCalc[operators_]:=Module[{beats=1,i=1},
 		Switch[operator,
 			"-",beats+=1,
 			"_",beats/=2,
+			"=",beats/=4,
 			_,beats*=2-2^(-StringLength@operator)
 		],
-	{operator,StringCases[operators,{"-","_","."..}]}];
+	{operator,StringCases[operators,{"-","_","=","."..}]}];
 	Return[beats];
 ];
-pitchCalc[token_,settings_,previous_]:=Module[{pitches,chordSymbol},
+pitchCalc[token_,settings_,previous_]:=Module[{pitches,chord,chordOp},
 	If[KeyExistsQ[token,"Pitches"],
 		pitches=Flatten[pitchCalc[#,settings,previous]&/@Association/@token[["Pitches"]]],
 		pitches=Switch[token[["ScaleDegree"]],
@@ -42,10 +49,14 @@ pitchCalc[token_,settings_,previous_]:=Module[{pitches,chordSymbol},
 	If[KeyExistsQ[token,"SemitonesCount"],pitches+=token[["SemitonesCount"]]];
 	If[KeyExistsQ[token,"OctavesCount"],pitches+=12*token[["OctavesCount"]]];
 	If[KeyExistsQ[token,"ChordSymbol"],
-		chordSymbol=token[["ChordSymbol"]];
-		Switch[chordSymbol,
-			"$",pitches+=settings[["Chord"]],
-			Except[""],pitches+=chordDict[[chordSymbol]]
+		chord=Switch[token[["ChordSymbol"]],
+			"$",settings[["Chord"]],
+			"",{0},
+			_,chordDict[[token[["ChordSymbol"]]]]
+		];
+		pitches+=If[token[["ChordOperator"]]=="",
+			If[chord=={0},0,chord],
+			chordOpDict[token[["ChordOperator"]]]@chord
 		];
 	];
 	Return[pitches];
@@ -63,7 +74,7 @@ trackParse[tokenizer_,global_]:=Module[
 		functionData,pitches,
 		beatCount,duration=0,
 		barBeat=0,prevBeat,
-		appoggiatura={},
+		graceNote={},appoggiatura,
 		tuplet=0,tupletRatio,
 		tremolo1=0,tremolo2=0,
 		tie=False,staccato,
@@ -102,8 +113,15 @@ trackParse[tokenizer_,global_]:=Module[
 			"Tremolo2",
 				tremolo2=token[["StrokesCount"]];
 				durCount-=duration,
+			"GraceNote",
+				graceNote=pitchCalc[token,settings,previous],
 			"Appoggiatura",
-				appoggiatura=pitchCalc[token,settings,previous],
+				appoggiatura=pitchCalc[token,settings,previous];
+				soundData[[-1,2]]-=240*settings[["Appo"]]/settings[["Speed"]]/settings[["Beat"]]*Min[4,Length@appoggiatura]/4;
+				duration=240*settings[["Appo"]]/settings[["Speed"]]/settings[["Beat"]]/Max[4,Length@appoggiatura];
+				Do[
+					AppendTo[soundData,{pitch,duration,settings[["Volume"]]}],
+				{pitch,appoggiatura}],
 			"Tie",
 				tie=True,
 			"Portamento",
@@ -120,13 +138,13 @@ trackParse[tokenizer_,global_]:=Module[
 				durCount+=duration;
 				staccato=token[["Staccato"]];
 				If[token[["Arpeggio"]],
-					appoggiatura=Flatten/@Array[Take[pitches,#]&,Length@pitches-1]
+					graceNote=Flatten/@Array[Take[pitches,#]&,Length@pitches-1]
 				];
 				Which[
 					MemberQ[instrData[["Percussion"]],settings[["Instr",1]]],
 						If[pitches==={None},
-							AppendTo[soundData,{None,duration}],
-							AppendTo[soundData,{True,duration}]
+							AppendTo[soundData,{None,duration,settings[["Volume"]]}],
+							AppendTo[soundData,{True,duration,settings[["Volume"]]}]
 						],
 					tie&&pitches==previous[[2]],
 						soundData[[-1,2]]+=duration;
@@ -134,7 +152,7 @@ trackParse[tokenizer_,global_]:=Module[
 					tremolo1!=0,
 						duration/=(beatCount*2^tremolo1);
 						Do[
-							AppendTo[soundData,{pitches,duration}],
+							AppendTo[soundData,{pitches,duration,settings[["Volume"]]}],
 						{k,beatCount*2^tremolo1}];
 						tremolo1=0,
 					tremolo2!=0,
@@ -142,8 +160,8 @@ trackParse[tokenizer_,global_]:=Module[
 						barBeat-=prevBeat;
 						soundData=Drop[soundData,-1];
 						Do[
-							AppendTo[soundData,{previous[[2]],duration}];
-							AppendTo[soundData,{pitches,duration}],
+							AppendTo[soundData,{previous[[2]],duration,settings[["Volume"]]}];
+							AppendTo[soundData,{pitches,duration,settings[["Volume"]]}],
 						{k,beatCount*2^(tremolo2-1)}];
 						tremolo2=0,
 					portamento,
@@ -152,25 +170,25 @@ trackParse[tokenizer_,global_]:=Module[
 						barBeat=barBeat-prevBeat;
 						soundData=Drop[soundData,-1];
 						Do[
-							AppendTo[soundData,{Floor[k],duration}],
+							AppendTo[soundData,{Floor[k],duration,settings[["Volume"]]}],
 						{k,previous[[2,1]],pitches[[1]],portRate}];
 						portamento=False,
 					True,
-						If[appoggiatura!={},
-							beatCount-=settings[["Appo"]]*Min[4,Length@appoggiatura]/4;
-							duration=240*settings[["Appo"]]/settings[["Speed"]]/settings[["Beat"]]/Max[4,Length@appoggiatura];
+						If[graceNote!={},
+							beatCount-=settings[["Appo"]]*Min[4,Length@graceNote]/4;
+							duration=240*settings[["Appo"]]/settings[["Speed"]]/settings[["Beat"]]/Max[4,Length@graceNote];
 							Do[
-								AppendTo[soundData,{pitch,duration}],
-							{pitch,appoggiatura}];
-							appoggiatura={};
+								AppendTo[soundData,{pitch,duration,settings[["Volume"]]}],
+							{pitch,graceNote}];
+							graceNote={};
 						];
 						duration=240/settings[["Speed"]]/settings[["Beat"]]*beatCount;
 						prevBeat=beatCount;
 						If[staccato,
-							AppendTo[soundData,{pitches,duration*(1-settings[["Stac"]])}];
-							AppendTo[soundData,{None,duration*settings[["Stac"]]}];
+							AppendTo[soundData,{pitches,duration*(1-settings[["Stac"]]),settings[["Volume"]]}];
+							AppendTo[soundData,{None,duration*settings[["Stac"]],settings[["Volume"]]}];
 							staccato=False,
-							AppendTo[soundData,{pitches,duration}];
+							AppendTo[soundData,{pitches,duration,settings[["Volume"]]}];
 						];
 				];
 				tie=False,
@@ -200,7 +218,7 @@ trackParse[tokenizer_,global_]:=Module[
 				Do[
 					If[musicClip[["MetaSettings"]]==settings[[metaSettingTag]],
 						soundData=Join[soundData,musicClip[["SoundData"]]],
-						soundData=AppendTo[soundData,{None,trackData[["Duration"]]}];
+						soundData=AppendTo[soundData,{None,trackData[["Duration"]],settings[["Volume"]]}];
 						AppendTo[MusicClips[["Subtracks"]],<|
 							"SoundData"->musicClip[["SoundData"]],
 							"Beginning"->musicClip[["Beginning"]]+durCount,
@@ -297,6 +315,7 @@ parse[tokenizer_,sections_]:=Module[
 		sectionToken=Association@tokenData[[i]];
 		sectionDuration=0;
 		Do[
+			If[token[["Type"]]!="FunctionToken",Continue[]];
 			functionData=Association@token[["Argument"]];
 			Do[
 				settings[[function]]=functionData[[function]],
@@ -340,27 +359,31 @@ parse[tokenizer_,sections_]:=Module[
 
 
 (* ::Input:: *)
-(*debug[#Messages]&@parse[QYS`Tokenize[localPath<>"Songs\\PVZ\\Brainiac_Maniac.qys"],All]*)
+(*debug[#Messages]&@parse[QYS`Tokenize[localPath<>"Songs\\test.qys"],All]*)
+
+
+(* ::Input:: *)
+(*debug[#Messages]&@parse[QYS`Tokenize[localPath<>"Songs\\Touhou\\Deep_Mountain.qys"],All]*)
 
 
 (* ::Input:: *)
 (*AudioStop[];AudioPlay[#[[2]]]&@*)
 (*EchoFunction["time: ",#[[1]]&]@*)
-(*Timing[integrate[#MusicClips,#Effects]&[parse[QYS`Tokenize[localPath<>"Songs\\temp.qys"],All]]];*)
+(*Timing[integrate[#MusicClips,#Effects]&[parse[QYS`Tokenize[localPath<>"Songs\\Touhou\\TH11-Chireiden\\Kyuujigoku_Kaidou.qys"],All]]];*)
 
 
 (* ::Input:: *)
 (*AudioStop[];AudioPlay[#[[2]]]&@*)
 (*EchoFunction["time: ",#[[1]]&]@*)
-(*Timing[integrate[#MusicClips,#Effects]&[parse[QYS`Tokenize[localPath<>"Songs\\PVZ\\Brainiac_Maniac.qys"],All]]];*)
+(*Timing[integrate[#MusicClips,#Effects]&[parse[QYS`Tokenize[localPath<>"Songs\\Touhou\\Deep_Mountain.qys"],2]]];*)
 
 
 (* ::Input:: *)
-(*EmitSound@Sound@SoundNote[0,1,"PercussiveOrgan"]*)
+(*EmitSound@Sound@SoundNote[10,1,"SlapBass"]*)
 
 
 (* ::Input:: *)
-(*EmitSound@Sound@SoundNote[0,1,"Organ"]*)
+(*EmitSound@Sound@SoundNote[-20,1,"SynthBrass"]*)
 
 
 (* ::Input:: *)
@@ -396,9 +419,9 @@ debug[messages_]:=Module[{output={},sectionOutput},
 ];
 
 
-generate=If[MemberQ[instrData[["Style"]],#[[3]]],
-	SoundNote[#[[1]],#[[2]],#[[3]]],
-	SoundNote[If[TrueQ@#[[1]],#[[3]],None],#[[2]]]
+generate=If[MemberQ[instrData[["Style"]],#[[4]]],
+	SoundNote[#[[1]],#[[2]],#[[4]],SoundVolume->#[[3]]],
+	SoundNote[If[TrueQ@#[[1]],#[[4]],None],#[[2]],SoundVolume->#[[3]]]
 ]&;
 integrate[tracks_]:=integrate[tracks,defaultSettings[[effectSettingTag]]];
 integrate[tracks_,effects_]:=Module[
@@ -411,34 +434,36 @@ integrate[tracks_,effects_]:=Module[
 	Do[
 		settings=trackData[["MetaSettings"]];
 		instrCount=Length@settings[["Instr"]];
-		If[Length@settings[["Volume"]]<instrCount,
-			settings[["Volume"]]=Array[settings[["Volume",1]]&,instrCount];
+		If[Length@settings[["InstProp"]]<instrCount,
+			settings[["InstProp"]]=Array[settings[["InstProp",1]]&,instrCount];
 		];
 		Do[
 			j=LengthWhile[final,Or[
-				#Volume!=settings[["Volume",i]],
 				#Duration>trackData[["Beginning"]],
 				#FadeOut!=0,
 				settings[["FadeIn"]]!=0
 			]&]+1;
 			If[j>Length@final,
 				AppendTo[final,<|
-					"SoundData"->(Append[#,settings[["Instr",i]]]&)/@Prepend[trackData[["SoundData"]],{None,trackData[["Beginning"]]}],
+					"SoundData"->(Append[#,settings[["Instr",i]]]&)/@Prepend[trackData[["SoundData"]],{None,trackData[["Beginning"]],1}],
 					"Duration"->trackData[["End"]],
-					"Volume"->settings[["Volume",i]],
 					"FadeIn"->settings[["FadeIn"]],
 					"FadeOut"->settings[["FadeOut"]]
 				|>],
-				AppendTo[final[[j,"SoundData"]],{None,trackData[["Beginning"]]-final[[j,"Duration"]],"Piano"}];
+				AppendTo[final[[j,"SoundData"]],{None,trackData[["Beginning"]]-final[[j,"Duration"]],1,"Piano"}];
 				final[[j,"SoundData"]]=Join[final[[j,"SoundData"]],Append[#,settings[["Instr",i]]]&/@trackData[["SoundData"]]];
 				final[[j,"Duration"]]=trackData[["End"]];
-			],
+				final[[j,"FadeOut"]]=settings[["FadeOut"]];
+			];
+			Do[
+				final[[j,"SoundData",k,3]]*=settings[["InstProp",i]],
+			{k,Length@final[[j,"SoundData"]]}],
 		{i,instrCount}],
 	{trackData,tracks}];
 	
 	(* integrate *)
 	Do[
-		audio+=data[["Volume"]]*AudioFade[
+		audio+=AudioFade[
 			Sound[generate/@data[["SoundData"]]],
 		{data[["FadeIn"]],data[["FadeOut"]]}],
 	{data,final}];

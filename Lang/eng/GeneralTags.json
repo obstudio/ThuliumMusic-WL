@@ -19,5 +19,8 @@
 	"Source": "Source",
 	"Version": "Version",
 	"Producer": "Producer",
-	"Website": "Website"
+	"Website": "Website",
+	"Tag": "Tag",
+	"Playlist": "Playlist",
+	"Class": "Class"
 }

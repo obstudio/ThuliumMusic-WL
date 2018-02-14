@@ -61,9 +61,20 @@ caption[string_String,style_String,argument_List]:=Style[completeText[Which[
 ],argument],styleDict[[style]]];
 getArgument[string_,function_]:=Switch[function,
 	"Instr",{string},
-	"Volume"|"Chord",ToExpression/@StringSplit[string,","],
+	"Chord",ToExpression/@StringSplit[string,","],
 	_,ToExpression[string]
 ];
+
+
+playlistTemplate=<|
+	"Type"->"Playlist",
+	"Path"->"",
+	"Title"->"",
+	"Abstract"->"",
+	"Comment"->"",
+	"SongList"->"",
+	"IndexWidth"->0
+|>;
 
 
 (* ::Text:: *)
@@ -79,7 +90,7 @@ refreshLanguage:=Module[{langDataPath},
 ];
 
 
-refresh:=Module[
+refresh:=Block[
 	{
 		metaTree,songsClassified,
 		playlistInfo,songList
@@ -98,34 +109,40 @@ refresh:=Module[
 	Do[
 		If[!DirectoryQ[dataPath<>"image\\"<>dir],CreateDirectory[dataPath<>"image\\"<>dir]],
 	{dir,imageDirList}];
-	playlists=Import[localPath<>"playlist.json"];
+	playlists=Association/@Import[localPath<>"playlist.json"];
 	playlistData=<||>;
 	songsClassified={};
 	Do[
-		playlistInfo=Association@Import[localPath<>"Playlists\\"<>playlist<>".qyl","JSON"];
+		playlistInfo=Append[Association@Import[localPath<>"Playlists\\"<>playlist,"JSON"],<|"Type"->"Playlist"|>];
 		songList=#Song&/@Association/@playlistInfo[["SongList"]];
 		AppendTo[playlistData,<|playlist->playlistInfo|>];
-		songsClassified=Union[songsClassified,playlistInfo[["Path"]]<>#&/@songList],
-	{playlist,playlists}];
-	playlists=Join[{"All","Unclassified"},playlists];
-	playlistData=Join[<|
-		"All"-><|
-			"Path"->"",
-			"Title"->text[["AllSongs"]],
-			"Abstract"->"",
-			"Comment"->"",
-			"SongList"->({"Song"->#}&/@songs),
-			"IndexWidth"->0
-		|>,
-		"Unclassified"-><|
-			"Path"->"",
-			"Title"->text[["Unclassified"]],
-			"Abstract"->"",
-			"Comment"->"",
-			"SongList"->({"Song"->#}&/@Complement[songs,songsClassified]),
-			"IndexWidth"->0
-		|>
-	|>,playlistData];
+		AppendTo[songsClassified,playlistInfo[["Path"]]<>#&/@songList],
+	{playlist,Select[playlists,#Type=="Playlist"&][[All,"Name"]]}];
+	Do[
+		songList=Keys@Select[Normal@index,MemberQ[Values[#][["Tags"]],tag]&];
+		playlistInfo=ReplacePart[playlistTemplate,{
+			"Type"->"Tag",
+			"Title"->If[KeyExistsQ[tagDict,tag],
+				If[KeyExistsQ[tagDict[[tag]],userInfo[["Language"]]],
+					tagDict[[tag,userInfo[["Language"]]]],
+					tagDict[[tag,tagDict[[tag,"Origin"]]]]
+				],
+			tag],
+			"SongList"->({"Song"->#}&)/@songList
+		}];
+		AppendTo[playlistData,<|tag->playlistInfo|>];
+		AppendTo[songsClassified,playlistInfo[["Path"]]<>#&/@songList],
+	{tag,Select[playlists,#Type=="Tag"&][[All,"Name"]]}];
+	playlists=Join[{"All","Unclassified"},playlists[[All,"Name"]]];
+	PrependTo[playlistData,{
+		"All"->ReplacePart[playlistTemplate,{
+			"Type"->"Class","Title"->text[["AllSongs"]],"SongList"->({"Song"->#}&/@songs)
+		}],
+		"Unclassified"->ReplacePart[playlistTemplate,{
+			"Type"->"Class","Title"->text[["Unclassified"]],
+			"SongList"->({"Song"->#}&/@Complement[songs,Flatten@songsClassified])
+		}]
+	}];
 	pageData=AssociationMap[1&,Prepend[playlists,"Main"]];
 ];
 
@@ -134,7 +151,7 @@ refresh:=Module[
 (*refresh;*)
 
 
-updateImage:=Module[{updates={},image,filename,meta},
+updateImage:=Block[{updates={},image,filename,meta},
 	Do[
 		If[KeyExistsQ[index[[song]],"Image"]&&!FileExistsQ[dataPath<>"Images\\"<>index[[song,"Image"]]],
 			AppendTo[updates,index[[song,"Image"]]]
@@ -166,7 +183,7 @@ updateImage:=Module[{updates={},image,filename,meta},
 ];
 
 
-updateBuffer:=Module[{updates={},song,filename,hash,audio,messages,bufferList},
+updateBuffer:=Block[{updates={},song,filename,hash,audio,messages,bufferList},
 	SetDirectory[dataPath];
 	bufferList=StringTake[FileNames["*.buffer","buffer",Infinity],{8,-8}];
 	DeleteFile[dataPath<>"Buffer\\"<>#<>".buffer"]&/@Complement[bufferList,songs];

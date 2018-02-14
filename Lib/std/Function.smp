@@ -1,0 +1,152 @@
+//SMML Standard Package - Function
+//Updated: 2018.2.10.
+
+# Function
+
+Tremolo1(expr, subtrack) {
+    /**** (%1-)&2 ****/
+    const t = new SubtrackParser(subtrack, this.Settings, this.Libraries).parseTrack()
+    const pow = Math.pow(2, -expr)
+    const num = t.Meta.Duration / pow
+    const result = []
+    const length = t.Contents.length
+    for (let i = 0; i < num; i++) {
+        const startTime = i * pow
+        for (let j = 0; j < length; j++) {
+            result.push({ ...(t.Contents[j]), StartTime: startTime, Duration: pow })
+        }
+    }
+    return {
+        Contents: result,
+        Meta: t.Meta
+    }
+}
+
+Tremolo2(expr, subtrack1, subtrack2) {
+    /**** &2(%1=)&3 ****/
+    const ts = [new SubtrackParser(subtrack1, this.Settings, this.Libraries).parseTrack(), new SubtrackParser(subtrack2, this.Settings, this.Libraries).parseTrack()]
+    const pow = Math.pow(2, -expr)
+    const num = ts[1].Meta.Duration / pow
+    const lengths = ts.map((t) => t.Contents.length)
+    const result = []
+    for (let i = 0; i < num; i++) {
+        const startTime = i * pow
+        const index = i % 2
+        for (let j = 0; j < lengths[index]; j++) {
+            result.push({ ...(ts[index].Contents[j]), StartTime: startTime, Duration: pow })
+        }
+    }
+    return {
+        Contents: result,
+        Meta: {
+            Duration: ts[1].Meta.Duration,
+            Incomplete: ts[1].Meta.Incomplete,
+            Single: true,
+            Warnings: [],
+            PitchQueue: [...ts[0].Meta.PitchQueue, ...ts[1].Meta.PitchQueue],
+            NotesBeforeTie: ts[(num - 1) % 2].Meta.NotesBeforeTie
+        }
+    }
+}
+
+Tuplet(expr, subtrack) {
+    /**** (!1~)&2 ****/
+    const scale = Math.pow(2, Math.floor(Math.log2(expr))) / expr
+    const t = new SubtrackParser(subtrack, this.Settings, this.Libraries).parseTrack()
+    t.Contents.forEach((note) => {
+        note.Duration *= scale
+        note.StartTime *= scale
+    })
+    t.Meta.Duration *= scale
+    return t
+}
+
+Portamento(subtrack1, subtrack2) {
+    /**** &1~&2 ****/
+    const t1 = new SubtrackParser(subtrack1, this.Settings, this.Libraries).parseTrack()
+    const t2 = new SubtrackParser(subtrack2, this.Settings, this.Libraries).parseTrack()
+    const pitch1 = t1.Contents[0].Pitch
+    const pitch2 = t2.Contents[0].Pitch
+    const duration = t1.Meta.Duration
+    const port = this.Settings.Port
+    const num = duration * port
+    const step = (pitch2 - pitch1) / (num - 1)
+    const pitches = []
+    for (let i = 0; i < port; i++) {
+        pitches.push(Math.round(pitch1 + step * i))
+    }
+    const result = pitches.map((pitch, index) => {
+        return {
+            Type: 'Note',
+            Pitch: pitch,
+            Volume: t2.Contents[0].Volume,
+            Duration: 1 / port,
+            StartTime: index / port
+        }
+    })
+    return {
+        Contents: result,
+        Meta: {
+            Duration: duration,
+            Incomplete: [duration],
+            Single: true,
+            Warnings: [],
+            PitchQueue: [...t1.Meta.PitchQueue, ...t2.Meta.PitchQueue],
+            NotesBeforeTie: [result[result.length - 1]]
+        }
+    }
+}
+
+GraceNote(subtrack1, subtrack2) {
+    /**** (@1^)&2 ****/
+    const t1 = new SubtrackParser(subtrack1, this.Settings, this.Libraries).parseTrack()
+    const t2 = new SubtrackParser(subtrack2, this.Settings, this.Libraries).parseTrack()
+    const num = subtrack1.Contents.length
+    let dur
+    if (num <= 4) {
+        dur = this.Settings.Appo / 4
+    } else {
+        dur = this.Settings.Appo / num
+    }
+    t1.Contents.forEach((note) => {
+        note.Duration = dur
+        note.StartTime *= dur
+    })
+    const total = dur * num
+    t2.Contents.forEach((note) => {
+        note.StartTime += total
+        note.Duration -= total
+    })
+    return {
+        Contents: [...t1.Contents, ...t2.Contents],
+        Meta: t2.Meta
+    }
+}
+
+Appoggiatura(subtrack1, subtrack2) {
+    /**** &1(^@2) ****/
+    const t1 = new SubtrackParser(subtrack1, this.Settings, this.Libraries).parseTrack()
+    const t2 = new SubtrackParser(subtrack2, this.Settings, this.Libraries).parseTrack()
+    const num = subtrack2.Contents.length
+    let dur
+    if (num <= 4) {
+        dur = this.Settings.Appo / 4
+    } else {
+        dur = this.Settings.Appo / num
+    }
+    const total = dur * num
+    t1.Contents.forEach((note) => {
+        note.Duration -= total
+    })
+    t2.Contents.forEach((note) => {
+        note.Duration = dur
+        note.StartTime *= dur
+        note.StartTime += t1.Contents[0].Duration
+    })
+    return {
+        Contents: [...t1.Contents, ...t2.Contents],
+        Meta: t1.Meta
+    }
+}
+
+# End

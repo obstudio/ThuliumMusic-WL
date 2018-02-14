@@ -1,11 +1,12 @@
 {
 	"None": {},
-	"Text": {"FontSize": 20},
-	"Title": {"FontSize": 32, "FontWeight": "Bold", "FontFamily": "微软雅黑"},
-	"TitleComment": {"FontSize": 28, "FontWeight": "Bold", "FontFamily": "微软雅黑", "FontColor": "Comment"},
-	"Subtitle": {"FontSize": 24, "FontWeight": "Bold", "FontFamily": "微软雅黑"},
-	"BigTitle": {"FontSize": 40, "FontWeight": "Bold", "FontFamily": "微软雅黑"},
-	"SongName": {"FontSize": 24, "FontFamily": "微软雅黑"},
-	"SongIndex": {"FontSize": 22, "FontFamily": "微软雅黑", "FontColor": "Index"},
-	"SongComment": {"FontSize": 22, "FontFamily": "微软雅黑", "FontColor": "Comment"}
+	"Text": {"Size": 20},
+	"Title": {"Size": 32, "Weight": "Bold", "Family": "微软雅黑"},
+	"TitleCmt": {"Size": 28, "Weight": "Bold", "Family": "微软雅黑", "Color": "Comment"},
+	"Subtitle": {"Size": 24, "Weight": "Bold", "Family": "微软雅黑"},
+	"BigTitle": {"Size": 40, "Weight": "Bold", "Family": "微软雅黑"},
+	"BigTitleCmt": {"Size": 40, "Weight": "Bold", "Family": "微软雅黑", "Color": "Comment"},
+	"SongName": {"Size": 24, "Family": "微软雅黑"},
+	"SongIndex": {"Size": 22, "Family": "微软雅黑", "Color": "Index"},
+	"SongComment": {"Size": 22, "Family": "微软雅黑", "Color": "Comment"}
 }

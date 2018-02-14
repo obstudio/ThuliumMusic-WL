@@ -2,7 +2,7 @@
 	"None": {},
 	"Text": {"Size": 20},
 	"Title": {"Size": 32, "Weight": "Bold", "Family": "微软雅黑"},
-	"TitleComment": {"Size": 28, "Weight": "Bold", "Family": "微软雅黑", "Color": "Comment"},
+	"TitleCmt": {"Size": 28, "Weight": "Bold", "Family": "微软雅黑", "Color": "Comment"},
 	"Subtitle": {"Size": 24, "Weight": "Bold", "Family": "微软雅黑"},
 	"BigTitle": {"Size": 40, "Weight": "Bold", "Family": "微软雅黑"},
 	"BigTitleCmt": {"Size": 40, "Weight": "Bold", "Family": "微软雅黑", "Color": "Comment"},

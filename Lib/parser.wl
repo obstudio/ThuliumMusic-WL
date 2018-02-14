@@ -1,7 +1,6 @@
 (* ::Package:: *)
 
 (* temporary function *)
-QYMParse[filename_]:=integrate[#MusicClips,#Effects]&@parse[QYM`tokenizer[filename]];
 QYSParse[filename_]:=integrate[#MusicClips,#Effects]&@parse[QYS`Tokenize[filename]];
 
 

@@ -183,7 +183,7 @@ QYMP:=DynamicModule[{playlist},
 				
 				Row[{
 					caption[tagName[[playlistData[[#,"Type"]]]],"SongComment"]
-				},Alignment->{Center,Top},ImageSize->{80,40}],
+				},Alignment->{Center,Top},ImageSize->{80,38}],
 				caption[playlistData[[#,"Title"]],"SongName"],
 				Spacer[24],
 				caption[playlistData[[#,"Comment"]],"SongComment"]				

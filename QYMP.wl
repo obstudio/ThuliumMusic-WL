@@ -10,8 +10,7 @@ localPath=NotebookDirectory[];
 <<(localPath<>"Assets\\uiUser.wl")         (* UI for common users *)
 <<(localPath<>"Assets\\uiDeveloper.wl")    (* UI for developers *)
 <<(localPath<>"Lib\\library.wl")           (* library *)
-<<(localPath<>"Lib\\QYM\\qymToken.wl")     (* QYM tokenizer *)
-<<(localPath<>"Lib\\QYS\\qysToken.wl")     (* QYS tokenizer *)
+<<(localPath<>"Lib\\qysToken.wl")          (* QYS tokenizer *)
 <<(localPath<>"Lib\\parser.wl")            (* parser *)
 
 

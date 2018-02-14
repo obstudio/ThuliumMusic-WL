@@ -1,14 +1,81 @@
 {
-	"ACG": ["ACG","二次元","にじげん"],
-	"Choir": ["合唱曲"],
-	"Clannad": ["Clannad","クラナド"],
-	"Deemo": ["Deemo","古树旋律"],
-	"Piano": ["Piano","钢琴曲"],
-	"SteinsGate": ["Steins;Gate","命运石之门","石头门","シュタインズ・ゲート"],
-	"Touhou": ["东方","东方Project","東方","東方Project","東方プロジェクト","Houhou","Touhou Project"],
-	"Touhou11": ["地灵殿","东方地灵殿","地霊殿","東方地霊殿","Chireiden","Touhou Chireiden"],
-	"Touhou15": ["绀珠传","东方绀珠传","紺珠伝","東方紺珠伝","Kanjuden","Touhou Kanjuden"],
-	"Umaru": ["干物妹！うまるちゃん","干物妹！小埋","Himouto!Umaru"],
-	"Vocaloid": ["Vocaloid","V家","ボーカロイド"],
-	"YosugaNoSora": ["YosugaNoSora","缘之空","ヨスガノソラ"]
+	"ACG": {
+        "Alias": ["ACG","二次元","にじげん"],
+        "Origin": "eng",
+        "chs": "二次元",
+        "eng": "ACG",
+        "jpn": "にじげん"
+    },
+	"Chorus": {
+        "Alias": ["Chorus","合唱曲"],
+        "Origin": "eng",
+        "chs": "合唱曲",
+        "eng": "Chorus"
+    },
+	"Clannad": {
+        "Alias": ["Clannad","クラナド"],
+        "Origin": "eng",
+        "jpn": "クラナド",
+        "eng": "Clannad"
+    },
+	"Deemo": {
+        "Alias": ["Deemo","古树旋律"],
+        "Origin": "chs",
+        "chs": "古树旋律",
+        "eng": "Deemo"
+    },
+	"Piano": {
+        "Alias": ["Piano","钢琴曲"],
+        "Origin": "eng",
+        "chs": "钢琴曲",
+        "eng": "Piano"
+    },
+	"SteinsGate": {
+        "Alias": ["Steins;Gate","命运石之门","石头门","シュタインズ・ゲート"],
+        "Origin": "eng",
+        "chs": "命运石之门",
+        "eng": "Steins;Gate",
+        "jpn": "シュタインズ・ゲート"
+    },
+    "Touhou": {
+        "Alias": ["东方","东方Project","東方","東方Project","東方プロジェクト","Houhou","Touhou Project"],
+        "Origin": "jpn",
+        "chs": "东方Project",
+        "eng": "Touhou Project",
+        "jpn": "東方プロジェクト"
+    },
+	"Touhou11": {
+        "Alias": ["地灵殿","东方地灵殿","地霊殿","東方地霊殿","Chireiden","Touhou Chireiden"],
+        "Origin": "jpn",
+        "chs": "东方地灵殿",
+        "eng": "Touhou Chireiden",
+        "jpn": "東方地霊殿"
+    },
+	"Touhou15": {
+        "Alias": ["绀珠传","东方绀珠传","紺珠伝","東方紺珠伝","Kanjuden","Touhou Kanjuden"],
+        "Origin": "jpn",
+        "chs": "东方绀珠传",
+        "eng": "Touhou Kanjuden",
+        "jpn": "東方紺珠伝"
+    },
+	"Umaru": {
+        "Alias": ["干物妹！うまるちゃん","干物妹！小埋","Himouto!Umaru"],
+        "Origin": "jpn",
+        "chs": "干物妹！小埋",
+        "eng": "Himouto!Umaru",
+        "jpn": "干物妹！うまるちゃん"
+    },
+	"Vocaloid": {
+        "Alias": ["Vocaloid","V家","ボーカロイド"],
+        "Origin": "eng",
+        "chs": "V家",
+        "eng": "Vocaloid",
+        "jpn": "ボーカロイド"
+    },
+	"YosugaNoSora": {
+        "Alias": ["YosugaNoSora","缘之空","ヨスガノソラ"],
+        "Origin": "jpn",
+        "chs": "缘之空",
+        "jpn": "ヨスガノソラ"
+    }
 }

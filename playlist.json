@@ -1,8 +1,8 @@
 [
-	"Chorus",
-	"Piano",
-	"Clannad",
-	"Touhou",
-	"TH11-Chireiden",
-	"TH15-Kanjuden"
+	{"Type": "Playlist", "Name": "Clannad.qyl"},
+	{"Type": "Playlist", "Name": "Touhou.qyl"},
+	{"Type": "Playlist", "Name": "TH11-Chireiden.qyl"},
+	{"Type": "Playlist", "Name": "TH15-Kanjuden.qyl"},
+	{"Type": "Tag", "Name": "Chorus"},
+	{"Type": "Tag", "Name": "Piano"}
 ]

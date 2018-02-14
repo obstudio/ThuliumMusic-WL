@@ -253,7 +253,7 @@ uiPlaylist[playlist_]:=DynamicModule[{song},
 		uiPageSelector,
 		Spacer[{40,40}]
 	},Center,ItemSize->Full],
-	WindowTitle->text[["Playlist"]]<>" - "<>playlistInfo[["Title"]],Background->styleColor[["Background"]]]
+	WindowTitle->tagName[[playlistInfo[["Type"]]]]<>" - "<>playlistInfo[["Title"]],Background->styleColor[["Background"]]]
 ];
 
 
@@ -262,7 +262,7 @@ uiPlaylist[playlist_]:=DynamicModule[{song},
 
 
 (* ::Input:: *)
-(*uiPlaylist["TH15-Kanjuden"];*)
+(*uiPlaylist["TH15-Kanjuden.qyl"];*)
 
 
 (* ::Input:: *)

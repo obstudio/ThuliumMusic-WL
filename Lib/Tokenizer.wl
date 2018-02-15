@@ -1,40 +1,38 @@
 (* ::Package:: *)
 
+(* ::Input:: *)
+(*StringMatchQ["&",RegularExpression["[^\\{\\}]*"]]*)
+
+
 BeginPackage["SMML`Tokenizer`"];
 
+RE=RegularExpression;
 rep[pat_]:=rep[pat,","~~" "...];
 rep[pat_,sep_]:=pat~~(sep~~pat)...;
-unsigned=DigitCharacter..;
-integer=""|"-"|"+"~~unsigned;
+repRegex[pat_]:=repRegex[pat,", *"];
+repRegex[pat_,sep_]:=RE[pat<>"("<>sep<>pat<>")*"];
+sel[pat_]:=RE["("<>pat[[1]]<>")?"];
+or[pat__]:=RE["("<>StringRiffle[#[[1]]&/@{pat},"|"]<>")"];
+unsigned=RE["\\d+"];
+signed=RE["[\\+\\-]\\d+"];
+integer=RE["[\\+\\-]?\\d+"];
+
 chordCodeTok[str_]:=StringCases[str,
 	StringExpression[
 		ntt:LetterCharacter~~"\t"..,
 		cmt:Shortest[__]~~"\t"..,
-		pts:rep[integer]
-	]:><|
-		"Notation"->ntt,
-		"Comment"->cmt,
-		"Pitches"->StringSplit[pts,","~~" "...]
-	|>
-][[1]];
-
-intPsb=""|integer;
-chordOpCode=rep["["~~intPsb|(intPsb~~";"~~intPsb)~~"]"~~intPsb];
-chordOpCodeTok[str_]:=StringCases[line,
-	StringExpression[
-		ntt:LetterCharacter~~"\t"..,
-		cmt:Shortest[__]~~"\t"..,
-		pts:chordOpCode
+		pts:repRegex["(([\\+\\-]?\\d+)|(\\[([\\+\\-]?\\d+)?(;([\\+\\-]?\\d+)?)?\\]([\\-\\+]\\d+)?))"]
 	]:><|
 		"Notation"->ntt,
 		"Comment"->cmt,
 		"Pitches"->StringCases[pts,{
-			"["~~pos:intPsb~~"]"~~sft:intPsb:>{
+			pit:integer:>{1,1,ToExpression[pit]},
+			"["~~pos:sel[integer]~~"]"~~sft:sel[signed]:>{
 				If[pos=="",1,ToExpression[pos]],
 				If[pos=="",-1,ToExpression[pos]],
 				If[sft=="",0,ToExpression[sft]]
 			},
-			"["~~pos1:intPsb~~";"~~pos2:intPsb~~"]"~~sft:intPsb:>{
+			"["~~pos1:sel[integer]~~";"~~pos2:sel[integer]~~"]"~~sft:sel[signed]:>{
 				If[pos1=="",1,ToExpression[pos1]],
 				If[pos2=="",-1,ToExpression[pos2]],
 				If[sft=="",0,ToExpression[sft]]
@@ -67,7 +65,7 @@ postOperator="``"|"`"|"";
 volOperator=(">"|":")...;
 pitOperator=("#"|"b"|"'"|",")...;
 durOperator=("."|"-"|"_"|"=")...;
-scaleDegree="0"|"1"|"2"|"3"|"4"|"5"|"6"|"7"|"%"|"x";
+scaleDegree=RE["[0-7%x]"];
 
 number=integer~~""|("."~~unsigned);
 expression=(integer~~""|("/"|"."~~unsigned))|("Log2("~~unsigned~~")");
@@ -82,6 +80,7 @@ orderTok=Union@@StringCases[#,{
 	n:integer~~"~"~~m:integer:>Range[ToExpression@n,ToExpression@m],
 	n:integer:>{ToExpression@n}
 }]&;
+notationPadded=RE["[&\\|\\s\\^\\*]*"];
 notationPatt=Alternatives[
 	"+"|"ToCoda"|"Coda"|"s"|"Segno"|"DC"|"DaCapo"|"DS"|"DaSegno",
 	"||:"|":||"|("["~~orderListP~~".]"),
@@ -107,12 +106,11 @@ notationTok=StringCases[{
 
 typeHead="$"|"%"|"&"|"!"|"@";
 typeName=<|"$"->"String","%"->"Expression","@"->"Subtrack","&"->"Object","!"->"Number"|>;
-contextList={"End","ChordNotation","ChordOperator","Function"};
+contextList={"End","Chord","Function"};
 settingList={"RecursionLimit","StaffDisplay","ForcedSpace"};
-syntaxTemplate=<|"ChordNotation"->{},"ChordOperator"->{},"Function"->{}|>;
+syntaxTemplate=<|"Chord"->{},"Function"->{}|>;
 syntaxTags=<|
-	"ChordNotation"->"Notation",
-	"ChordOperator"->"Notation",
+	"Chord"->"Notation",
 	"Function"->{"Name","Syntax"}
 |>;
 blankLineQ[str_]:=Or[
@@ -134,7 +132,7 @@ Tokenizer[filepath_]:=Block[
 		source,command,value,
 		
 		syntax=syntaxTemplate,
-		chordNotation,chordOperator,
+		chordPatt,
 		pitch,pitches,note,pitchTok,
 		objectPatt,objectTok,
 		functionPatt,functionPattList,
@@ -167,7 +165,7 @@ Tokenizer[filepath_]:=Block[
 				][line];
 				If[contextData!={},
 					syntax[[context]]=Union[syntax[[context]],contextData[[All,syntaxTags[[context]]]]];
-					AppendTo[library,<|"Type"->context,"Storage"->"Internal","Data"->contextData|>];
+					AppendTo[library,<|"Type"->context,"Data"->contextData|>];
 					contextData={};
 				];
 				Switch[command,
@@ -185,10 +183,9 @@ Tokenizer[filepath_]:=Block[
 						]];
 						Do[
 							syntax[[item]]=Union[syntax[[item]],source[["Syntax",item]]],
-						{item,{"ChordNotation","ChordOperator","Function"}}];
+						{item,{"Chord","Function"}}];
 						AppendTo[library,<|
 							"Type"->"Package",
-							"Storage"->"External",
 							"Path"->StringTake[value,{2,-2}],
 							"Content"->source[["Tokenizer","Library"]]
 						|>],
@@ -198,10 +195,8 @@ Tokenizer[filepath_]:=Block[
 				
 				(* code *)
 				Switch[context,
-					"ChordNotation",
+					"Chord",
 						AppendTo[contextData,chordCodeTok[line]],
-					"ChordOperator",
-						AppendTo[contextData,chordOpCodeTok[line]],
 					"Function",
 						lineCount++;
 						While[lineCount<=Length@rawData&&!StringMatchQ[line,functionCode],
@@ -229,22 +224,19 @@ Tokenizer[filepath_]:=Block[
 	If[StringTake[filepath,-4]==".smp",Return[return]];
 	
 	(* pitch *)
-	chordNotation=""|Alternatives@@syntax[["ChordNotation"]];
-	chordOperator=Alternatives@@syntax[["ChordOperator"]]...;
-	pitch=scaleDegree~~pitOperator~~chordNotation~~chordOperator...;
-	pitches="["~~pitch..~~"]"~~pitOperator;
-	note=preOperator~~pitch|pitches~~volOperator~~durOperator~~postOperator;
+	chordPatt=RE["["<>syntax[["Chord"]]<>"]*"];
+	pitch=scaleDegree~~pitOperator~~chordPatt;
+	pitches=pitch|("["~~pitch..~~"]");
+	note=preOperator~~pitches~~pitOperator~~volOperator~~durOperator~~postOperator;
 	pitchTok=StringCases[
 		StringExpression[
 			sd:scaleDegree,
 			po:pitOperator,
-			cn:chordNotation,
-			co:chordOperator
+			ch:chordPatt
 		]:><|
 			"ScaleDegree"->sd,
 			"PitchOperators"->po,
-			"ChordNotations"->cn,
-			"ChordOperators"->co
+			"Chord"->ch
 		|>
 	];
 	
@@ -298,8 +290,8 @@ Tokenizer[filepath_]:=Block[
 	}][[1]]&};
 	
 	(* function simplified *)
-	object=("{"~~subtrack~~"}")|(notationPatt...~~note~~notationPatt...);
-	typePatt=<|"$"->string,"%"->expression,"&"->object,"!"->number,"@"->subtrack|>;
+	object=("{"~~subtrack~~"}")|(notationPadded~~note~~notationPadded);
+	typePatt=<|"$"->string,"%"->expression,"&"->object,"!"->number,"@"->Shortest[subtrack]|>;
 	typeTok[type_,str_]:=Switch[type,
 		"String",<|"Type"->"String","Content"->str|>,
 		"Expression",<|"Type"->"Expression","Content"->str|>,
@@ -418,16 +410,8 @@ EndPackage[];
 
 
 (* ::Input:: *)
-(*Contexts["SMML`*"]*)
+(*Tokenizer[NotebookDirectory[]<>"test.sml"][["Tokenizer","Sections",1,"Tracks",1,"Content"(*,All,"Type"*)]]*)
 
 
 (* ::Input:: *)
-(*Export[NotebookDirectory[]<>"test.json",%];*)
-
-
-(* ::Input:: *)
-(*Tokenizer[NotebookDirectory[]<>"test.sml"][["Tokenizer","Sections"]]*)
-
-
-(* ::Input:: *)
-(*Export[NotebookDirectory[]<>"test4.json",Tokenizer[NotebookDirectory[]<>"test4.sml"][["Tokenizer"]]];//Timing*)
+(*Export[NotebookDirectory[]<>"test5.json",Tokenizer[NotebookDirectory[]<>"test5.sml"][["Tokenizer"]]];//Timing*)

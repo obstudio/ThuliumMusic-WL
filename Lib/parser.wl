@@ -375,7 +375,7 @@ parse[tokenizer_,sections_]:=Module[
 (* ::Input:: *)
 (*AudioStop[];AudioPlay[#[[2]]]&@*)
 (*EchoFunction["time: ",#[[1]]&]@*)
-(*Timing[integrate[#MusicClips,#Effects]&[parse[QYS`Tokenize[localPath<>"Songs\\Touhou\\Deep_Mountain.qys"],2]]];*)
+(*Timing[integrate[#MusicClips,#Effects]&[parse[QYS`Tokenize[localPath<>"Songs\\Touhou\\Deep_Mountain.qys"],3]]];*)
 
 
 (* ::Input:: *)

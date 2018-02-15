@@ -1,7 +1,7 @@
 (* ::Package:: *)
 
 (* ::Input:: *)
-(*StringMatchQ[",",RegularExpression["\\,"]]*)
+(*StringMatchQ["&",RegularExpression["[^\\{\\}]*"]]*)
 
 
 BeginPackage["SMML`Tokenizer`"];
@@ -11,13 +11,12 @@ rep[pat_]:=rep[pat,","~~" "...];
 rep[pat_,sep_]:=pat~~(sep~~pat)...;
 repRegex[pat_]:=repRegex[pat,", *"];
 repRegex[pat_,sep_]:=RE[pat<>"("<>sep<>pat<>")*"];
-sel[pat_RegularExpression]:=RE["("<>pat[[1]]<>")?"];
+sel[pat_]:=RE["("<>pat[[1]]<>")?"];
+or[pat__]:=RE["("<>StringRiffle[#[[1]]&/@{pat},"|"]<>")"];
 unsigned=RE["\\d+"];
 signed=RE["[\\+\\-]\\d+"];
 integer=RE["[\\+\\-]?\\d+"];
 
-chordCodePos=RE["([\\+\\-]?\\d+)?"];
-chordCodeSft=RE["([\\+\\-]\\d+)?"];
 chordCodeTok[str_]:=StringCases[str,
 	StringExpression[
 		ntt:LetterCharacter~~"\t"..,
@@ -66,7 +65,7 @@ postOperator="``"|"`"|"";
 volOperator=(">"|":")...;
 pitOperator=("#"|"b"|"'"|",")...;
 durOperator=("."|"-"|"_"|"=")...;
-scaleDegree="0"|"1"|"2"|"3"|"4"|"5"|"6"|"7"|"%"|"x";
+scaleDegree=RE["[0-7%x]"];
 
 number=integer~~""|("."~~unsigned);
 expression=(integer~~""|("/"|"."~~unsigned))|("Log2("~~unsigned~~")");
@@ -81,7 +80,7 @@ orderTok=Union@@StringCases[#,{
 	n:integer~~"~"~~m:integer:>Range[ToExpression@n,ToExpression@m],
 	n:integer:>{ToExpression@n}
 }]&;
-notationPadded=Whitespace|"|"|"/"|"^"|"&"|"*";
+notationPadded=RE["[&\\|\\s\\^\\*]*"];
 notationPatt=Alternatives[
 	"+"|"ToCoda"|"Coda"|"s"|"Segno"|"DC"|"DaCapo"|"DS"|"DaSegno",
 	"||:"|":||"|("["~~orderListP~~".]"),
@@ -166,7 +165,7 @@ Tokenizer[filepath_]:=Block[
 				][line];
 				If[contextData!={},
 					syntax[[context]]=Union[syntax[[context]],contextData[[All,syntaxTags[[context]]]]];
-					AppendTo[library,<|"Type"->context,"Storage"->"Internal","Data"->contextData|>];
+					AppendTo[library,<|"Type"->context,"Data"->contextData|>];
 					contextData={};
 				];
 				Switch[command,
@@ -187,7 +186,6 @@ Tokenizer[filepath_]:=Block[
 						{item,{"Chord","Function"}}];
 						AppendTo[library,<|
 							"Type"->"Package",
-							"Storage"->"External",
 							"Path"->StringTake[value,{2,-2}],
 							"Content"->source[["Tokenizer","Library"]]
 						|>],
@@ -292,8 +290,8 @@ Tokenizer[filepath_]:=Block[
 	}][[1]]&};
 	
 	(* function simplified *)
-	object=("{"~~subtrack~~"}")|(notationPadded...~~note~~notationPadded...);
-	typePatt=<|"$"->string,"%"->expression,"&"->object,"!"->number,"@"->subtrack|>;
+	object=("{"~~subtrack~~"}")|(notationPadded~~note~~notationPadded);
+	typePatt=<|"$"->string,"%"->expression,"&"->object,"!"->number,"@"->Shortest[subtrack]|>;
 	typeTok[type_,str_]:=Switch[type,
 		"String",<|"Type"->"String","Content"->str|>,
 		"Expression",<|"Type"->"Expression","Content"->str|>,
@@ -409,14 +407,6 @@ Tokenizer[filepath_]:=Block[
 ];
 
 EndPackage[];
-
-
-(* ::Input:: *)
-(*Contexts["SMML`*"]*)
-
-
-(* ::Input:: *)
-(*Export[NotebookDirectory[]<>"test.json",%];*)
 
 
 (* ::Input:: *)

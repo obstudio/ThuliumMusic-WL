@@ -10,8 +10,7 @@ localPath=NotebookDirectory[];
 <<(localPath<>"Assets\\uiUser.wl")         (* UI for common users *)
 <<(localPath<>"Assets\\uiDeveloper.wl")    (* UI for developers *)
 <<(localPath<>"Lib\\library.wl")           (* library *)
-<<(localPath<>"Lib\\QYM\\qymToken.wl")     (* QYM tokenizer *)
-<<(localPath<>"Lib\\QYS\\qysToken.wl")     (* QYS tokenizer *)
+<<(localPath<>"Lib\\qysToken.wl")          (* QYS tokenizer *)
 <<(localPath<>"Lib\\parser.wl")            (* parser *)
 
 
@@ -23,12 +22,13 @@ buttonColor=RGBColor/@#&/@Association/@Association@colorData[["ButtonColor"]];
 pageSelectorColor=RGBColor/@#&/@Association/@Association@colorData[["PageSelectorColor"]];
 styleData=Association/@Association@Import[localPath<>"style.json"];                  (* styles *)
 styleDict=Normal@Module[{outcome={}},
-	If[KeyExistsQ[#,"FontSize"],AppendTo[outcome,FontSize->#[["FontSize"]]]];
-	If[KeyExistsQ[#,"FontFamily"],AppendTo[outcome,FontFamily->#[["FontFamily"]]]];
-	If[KeyExistsQ[#,"FontWeight"],AppendTo[outcome,FontWeight->ToExpression@#[["FontWeight"]]]];
-	If[KeyExistsQ[#,"FontColor"],AppendTo[outcome,FontColor->styleColor[[#[["FontColor"]]]]]];
+	If[KeyExistsQ[#,"Size"],AppendTo[outcome,FontSize->#[["Size"]]]];
+	If[KeyExistsQ[#,"Family"],AppendTo[outcome,FontFamily->#[["Family"]]]];
+	If[KeyExistsQ[#,"Weight"],AppendTo[outcome,FontWeight->ToExpression@#[["Weight"]]]];
+	If[KeyExistsQ[#,"Color"],AppendTo[outcome,FontColor->styleColor[[#[["Color"]]]]]];
 outcome]&/@styleData;
 langDict=Association@Import[localPath<>"Lang\\Languages.json"];                      (* languages *)
+tagDict=Association/@Association@Import[localPath<>"Tags.json"];
 
 
 (* user data *)

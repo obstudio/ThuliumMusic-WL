@@ -19,5 +19,8 @@
 	"Source": "来源",
 	"Version": "版本",
 	"Producer": "制作",
-	"Website": "网址"
+	"Website": "网址",
+	"Tag": "标签",
+	"Playlist": "歌单",
+	"Class": "分类"
 }

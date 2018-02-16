@@ -16,6 +16,7 @@ Tremolo1(expr, subtrack) {
             result.push(Object.assign({}, t.Content[j]), { StartTime: startTime, Duration: pow })
         }
     }
+
     return {
         Content: result,
         Meta: t.Meta
@@ -63,16 +64,17 @@ Tuplet(expr, subtrack) {
 
 Ferm(ferm) {
     /**** (Ferm:%1) ****/
-    AssignSetting(this.Settings, 'Ferm', ferm, (ferm) => ferm > 1)
+    this.Settings.assignSetting('Ferm', ferm, (ferm) => ferm > 1)
 }
 
 Fermata(subtrack) {
     const t = new SubtrackParser(subtrack, this.Settings, this.Libraries).parseTrack()
+    const ferm = this.Settings.getOrSetDefault('Ferm', 2)
     t.Content.forEach((note) => {
-        note.Duration *= this.Settings.Ferm
-        note.StartTime *= this.Settings.Ferm
+        note.Duration *= ferm
+        note.StartTime *= ferm
     })
-    t.Meta.Duration *= this.Settings.Ferm
+    t.Meta.Duration *= ferm
     return t
 }
 

@@ -1,0 +1,47 @@
+//SMML Standard Package - Portamento
+//Updated: 2018.2.10.
+
+# Function
+
+Port(r) {
+    /**** (Port:%1) ****/
+    AssignSetting(this.Settings, 'Port', r, (r) => r > 0)
+}
+
+Portamento(subtrack1, subtrack2) {
+    /**** &1~&2 ****/
+    const t1 = new SubtrackParser(subtrack1, this.Settings, this.Libraries).parseTrack()
+    const t2 = new SubtrackParser(subtrack2, this.Settings, this.Libraries).parseTrack()
+    const pitch1 = t1.Content[0].Pitch
+    const pitch2 = t2.Content[0].Pitch
+    const duration = t1.Meta.Duration
+    const port = this.Settings.Port
+    const num = duration * port
+    const step = (pitch2 - pitch1) / (num - 1)
+    const pitches = []
+    for (let i = 0; i < port; i++) {
+        pitches.push(Math.round(pitch1 + step * i))
+    }
+    const result = pitches.map((pitch, index) => {
+        return {
+            Type: 'Note',
+            Pitch: pitch,
+            Volume: t2.Content[0].Volume,
+            Duration: 1 / port,
+            StartTime: index / port
+        }
+    })
+    return {
+        Content: result,
+        Meta: {
+            Duration: duration,
+            Incomplete: [duration],
+            Single: true,
+            Warnings: [],
+            PitchQueue: [...t1.Meta.PitchQueue, ...t2.Meta.PitchQueue],
+            NotesBeforeTie: [result[result.length - 1]]
+        }
+    }
+}
+
+# End

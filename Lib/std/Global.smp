@@ -1,4 +1,4 @@
-//SMML Standard Package - Function
+//SMML Standard Package - GlobalSettings
 //Updated: 2018.2.10.
 
 # Function
@@ -10,7 +10,7 @@ ConOct(octave, volumeScale = 1) {
 
 Vol(volume) {
     /**** (!1\%) ****/
-    AssignSetting(this.Settings, 'Volume', volume / 100, (volume) => volume <= 1 && volume >= 0)
+    AssignSetting(this.Settings, 'Volume', volume / 100, (volume) => volume >= 0)
 }
 
 Spd(speed) {
@@ -29,6 +29,19 @@ Oct(oct) {
 
 KeyOct(key, oct) {
     /**** (1=$1) ****/
+    let key, oct, splitIndex
+    if (keyOct.endsWith('\'')) {
+        splitIndex = keyOct.indexOf('\'')
+        key = keyOct.slice(0, splitIndex)
+        oct = keyOct.length - splitIndex + 1
+    } else if (keyOct.endsWith(',')) {
+        splitIndex = keyOct.indexOf('\'')
+        key = keyOct.slice(0, splitIndex)
+        oct = keyOct.length - splitIndex + 1
+    } else {
+        key = keyOct
+        oct = 0
+    }
     const Tonality = {
         'C': 0, 'G': 7, 'D': 2, 'A': 9, 'E': 4, 'B': -1, 'F': 5,
         '#F': 6, '#C': 1, 'bB': -2, 'bE': 3, 'bA': 8, 'bD': 1, 'bG': 6, 'bC': -1,
@@ -63,16 +76,6 @@ Acct(scale) {
 
 Light(scale) {
     AssignSetting(this.Settings, 'Light', scale, (scale) => scale < 1 && scale > 0)
-}
-
-Appo(r) {
-    /**** (Appo:%1) ****/
-    AssignSetting(this.Settings, 'Appo', r, (r) => r > 0)
-}
-
-Port(r) {
-    /**** (Port:%1) ****/
-    AssignSetting(this.Settings, 'Port', r, (r) => r > 0)
 }
 
 Trace(count) {

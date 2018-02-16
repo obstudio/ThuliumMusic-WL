@@ -12,7 +12,6 @@ rep[pat_,sep_]:=pat~~(sep~~pat)...;
 repRegex[pat_]:=repRegex[pat,", *"];
 repRegex[pat_,sep_]:=RE[pat<>"("<>sep<>pat<>")*"];
 sel[pat_]:=RE["("<>pat[[1]]<>")?"];
-or[pat__]:=RE["("<>StringRiffle[#[[1]]&/@{pat},"|"]<>")"];
 unsigned=RE["\\d+"];
 signed=RE["[\\+\\-]\\d+"];
 integer=RE["[\\+\\-]?\\d+"];
@@ -60,7 +59,6 @@ functionCodeTok[str_]:=StringCases[str,
 	|>
 ][[1]];
 
-preOperator="$"|"";
 postOperator="``"|"`"|"";
 volOperator=(">"|":")...;
 pitOperator=("#"|"b"|"'"|",")...;
@@ -129,7 +127,7 @@ Tokenizer[filepath_]:=Block[
 		trackData,trackMeta,
 		blankTrack={},messages={},
 		context="End",contextData={},
-		source,command,value,
+		source,depth,command,value,
 		
 		syntax=syntaxTemplate,
 		chordPatt,
@@ -177,9 +175,10 @@ Tokenizer[filepath_]:=Block[
 							_,ToExpression
 						][value]],
 					"Include",
-						source=Tokenizer[If[StringStartsQ[value,"\"./"],
-							DirectoryName[filepath]<>StringTake[value,{4,-2}],
-							StringTake[value,{2,-2}]
+						source=Tokenizer[If[StringContainsQ[value,":"],
+							StringTake[value,{2,-2}],
+							depth=StringCount[value,"../"];
+							FileNameDrop[DirectoryName[filepath],-depth]<>"/"<>StringTake[value,{2+3*depth,-2}]
 						]];
 						Do[
 							syntax[[item]]=Union[syntax[[item]],source[["Syntax",item]]],
@@ -227,7 +226,7 @@ Tokenizer[filepath_]:=Block[
 	chordPatt=RE["["<>syntax[["Chord"]]<>"]*"];
 	pitch=scaleDegree~~pitOperator~~chordPatt;
 	pitches=pitch|("["~~pitch..~~"]");
-	note=preOperator~~pitches~~pitOperator~~volOperator~~durOperator~~postOperator;
+	note=pitches~~pitOperator~~volOperator~~durOperator~~postOperator;
 	pitchTok=StringCases[
 		StringExpression[
 			sd:scaleDegree,
@@ -250,7 +249,6 @@ Tokenizer[filepath_]:=Block[
 				StringCases[sub,"/"~~i:orderListC~~":":>orderTok[i]]
 			]|>,
 		StringExpression[
-			pre:preOperator,
 			""|"["~~pts:pitch..~~"]"|"",
 			pit:pitOperator,
 			vol:volOperator,
@@ -262,8 +260,7 @@ Tokenizer[filepath_]:=Block[
 			"PitchOperators"->pit,
 			"DurationOperators"->dur,
 			"VolumeOperators"->vol,
-			"Staccato"->StringCount[pst,"`"],
-			"Arpeggio"->StringContainsQ[pre,"$"]
+			"Staccato"->StringCount[pst,"`"]
 		|>
 	}];
 	
@@ -414,4 +411,11 @@ EndPackage[];
 
 
 (* ::Input:: *)
-(*Export[NotebookDirectory[]<>"test5.json",Tokenizer[NotebookDirectory[]<>"test5.sml"][["Tokenizer"]]];//Timing*)
+(*Export[NotebookDirectory[]<>"test6.json",Tokenizer[NotebookDirectory[]<>"test6.sml"][["Tokenizer"]]];//Timing*)
+
+
+(* ::Input:: *)
+(*Export[NotebookDirectory[]<>"test/test2.compact.json",*)
+(*StringDelete[*)
+(*ExportString[Tokenizer[NotebookDirectory[]<>"test/test2.sml"][["Tokenizer"]],"JSON"],*)
+(*Whitespace],"String"];//Timing*)

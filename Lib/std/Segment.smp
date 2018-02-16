@@ -14,10 +14,11 @@ GraceNote(subtrack1, subtrack2) {
     const t2 = new SubtrackParser(subtrack2, this.Settings, this.Libraries).parseTrack()
     const num = subtrack1.Content.length
     let dur
+    const appo = this.Settings.getOrSetDefault('Appo', 1 / 4)
     if (num <= 4) {
-        dur = this.Settings.Seg / 4
+        dur = appo / 4
     } else {
-        dur = this.Settings.Seg / num
+        dur = appo / num
     }
     t1.Content.forEach((note) => {
         note.Duration = dur
@@ -40,10 +41,11 @@ Appoggiatura(subtrack1, subtrack2) {
     const t2 = new SubtrackParser(subtrack2, this.Settings, this.Libraries).parseTrack()
     const num = subtrack2.Content.length
     let dur
+    const appo = this.Settings.getOrSetDefault('Appo', 1 / 4)
     if (num <= 4) {
-        dur = this.Settings.Seg / 4
+        dur = appo / 4
     } else {
-        dur = this.Settings.Seg / num
+        dur = appo / num
     }
     const total = dur * num
     t1.Content.forEach((note) => {
@@ -65,15 +67,16 @@ Arpeggio(subtrack) {
     const t = new SubtrackParser(subtrack, this.Settings, this.Libraries).parseTrack()
     const num = t.Content.length - 1
     let dur
+    const appo = this.Settings.getOrSetDefault('Appo', 1 / 4)
     if (num <= 4) {
-        dur = this.Settings.Seg / 4
+        dur = appo / 4
     } else {
-        dur = this.Settings.Seg / num
+        dur = appo / num
     }
     dur = dur * 60 / this.Settings.Speed
     const result = []
     t.Content.reduce((sum, cur, index) => {
-        if (index <= num) {
+        if (index < num) {
             sum.push(cur)
             cur.Duration = dur
             for (const note of sum) {
@@ -86,6 +89,7 @@ Arpeggio(subtrack) {
             })
             result.push(...t.Content)
         }
+        return sum
     }, [])
     return Object.assign(t, {Content: result})
 }

@@ -1,7 +1,7 @@
 (* ::Package:: *)
 
 (* ::Input:: *)
-(*StringMatchQ["&",RegularExpression["[^\\{\\}]*"]]*)
+(*StringMatchQ["-_=..-",RE["[\\-._=]*"]]*)
 
 
 BeginPackage["SMML`Tokenizer`"];
@@ -11,6 +11,7 @@ rep[pat_]:=rep[pat,","~~" "...];
 rep[pat_,sep_]:=pat~~(sep~~pat)...;
 repRegex[pat_]:=repRegex[pat,", *"];
 repRegex[pat_,sep_]:=RE[pat<>"("<>sep<>pat<>")*"];
+join[pat__]:=RE[StringJoin[#[[1]]&/@{pat}]];
 sel[pat_]:=RE["("<>pat[[1]]<>")?"];
 unsigned=RE["\\d+"];
 signed=RE["[\\+\\-]\\d+"];
@@ -59,10 +60,10 @@ functionCodeTok[str_]:=StringCases[str,
 	|>
 ][[1]];
 
-postOperator="``"|"`"|"";
-volOperator=(">"|":")...;
-pitOperator=("#"|"b"|"'"|",")...;
-durOperator=("."|"-"|"_"|"=")...;
+postOp=RE["`{0,2}"];
+volOp=RE["[:>]*"];
+pitOp=RE["[#b',]*"];
+durOp=RE["[\\-._=]*"];
 scaleDegree=RE["[0-7%x]"];
 
 number=integer~~""|("."~~unsigned);
@@ -104,9 +105,12 @@ notationTok=StringCases[{
 
 typeHead="$"|"%"|"&"|"!"|"@";
 typeName=<|"$"->"String","%"->"Expression","@"->"Subtrack","&"->"Object","!"->"Number"|>;
-contextList={"End","Chord","Function"};
-settingList={"RecursionLimit","StaffDisplay","ForcedSpace"};
-syntaxTemplate=<|"Chord"->{},"Function"->{}|>;
+contextList={"End","Chord","Function","Track"};
+settingList={
+	"MaxRecursion","StaffDisplay","ForcedSpace",
+	"FullName","InlineBars","ColorScheme"
+};
+syntaxTemplate=<|"Chord"->{},"Function"->{},"Macro"->{}|>;
 syntaxTags=<|
 	"Chord"->"Notation",
 	"Function"->{"Name","Syntax"}
@@ -128,9 +132,10 @@ Tokenizer[filepath_]:=Block[
 		blankTrack={},messages={},
 		context="End",contextData={},
 		source,depth,command,value,
+		macroData={},
 		
 		syntax=syntaxTemplate,
-		chordPatt,
+		chordPatt,macroPatt,
 		pitch,pitches,note,pitchTok,
 		objectPatt,objectTok,
 		functionPatt,functionPattList,
@@ -196,6 +201,17 @@ Tokenizer[filepath_]:=Block[
 				Switch[context,
 					"Chord",
 						AppendTo[contextData,chordCodeTok[line]],
+					"Track",
+						lineCount++;
+						While[lineCount<=Length@rawData&&!blankLineQ[rawData[[lineCount]]],
+							line=line<>"\n"<>rawData[[lineCount]];lineCount++;
+						];
+						trackData=StringCases[line,"<*"~~name:word~~"*>"~~score__:>Sequence[name,score]];
+						If[trackData=={},
+							AppendTo[messages,<|"Type"->"InvalidDef","Arguments"->line|>],
+							AppendTo[syntax[["Macro"]],trackData[[1]]];
+							AppendTo[macroData,trackData[[2]]];
+						],
 					"Function",
 						lineCount++;
 						While[lineCount<=Length@rawData&&!StringMatchQ[line,functionCode],
@@ -220,27 +236,20 @@ Tokenizer[filepath_]:=Block[
 		"Messages"->messages,
 		"Tokenizer"->tokenizer
 	|>;
-	If[StringTake[filepath,-4]==".smp",Return[return]];
+	If[StringTake[filepath,-4]==".smp"&&macroData=={},Return[return]];
 	
 	(* pitch *)
 	chordPatt=RE["["<>syntax[["Chord"]]<>"]*"];
-	pitch=scaleDegree~~pitOperator~~chordPatt;
+	pitch=join[scaleDegree,pitOp,chordPatt];
 	pitches=pitch|("["~~pitch..~~"]");
-	note=pitches~~pitOperator~~volOperator~~durOperator~~postOperator;
-	pitchTok=StringCases[
-		StringExpression[
-			sd:scaleDegree,
-			po:pitOperator,
-			ch:chordPatt
-		]:><|
-			"ScaleDegree"->sd,
-			"PitchOperators"->po,
-			"Chord"->ch
-		|>
+	note=pitches~~pitOp~~volOp~~durOp~~postOp;
+	pitchTok=StringCases[sd:scaleDegree~~po:pitOp~~ch:chordPatt:>
+		<|"ScaleDegree"->sd,"PitchOperators"->po,"Chord"->ch|>
 	];
 	
 	(* object *)
-	objectPatt=("{"~~subtrack~~"}")|note;
+	macroPatt="@"~~Alternatives@@syntax[["Macro"]];
+	objectPatt=("{"~~subtrack~~"}")|note|macroPatt;
 	objectTok=StringCases[{
 		"{"~~n:unsigned~~"*"~~sub:subtrack~~"}":>
 			<|"Type"->"Subtrack","Content"->trackTok[sub],"Repeat"->-ToExpression@n|>,
@@ -248,20 +257,16 @@ Tokenizer[filepath_]:=Block[
 			<|"Type"->"Subtrack","Content"->trackTok[sub],"Repeat"->Max[-1,
 				StringCases[sub,"/"~~i:orderListC~~":":>orderTok[i]]
 			]|>,
-		StringExpression[
-			""|"["~~pts:pitch..~~"]"|"",
-			pit:pitOperator,
-			vol:volOperator,
-			dur:durOperator,
-			pst:postOperator
-		]:><|
-			"Type"->"Note",
-			"Pitches"->pitchTok[pts],
-			"PitchOperators"->pit,
-			"DurationOperators"->dur,
-			"VolumeOperators"->vol,
-			"Staccato"->StringCount[pst,"`"]
-		|>
+		""|"["~~pts:pitch..~~"]"|""~~pit:pitOp~~vol:volOp~~dur:durOp~~pst:postOp:>
+			<|
+				"Type"->"Note",
+				"Pitches"->pitchTok[pts],
+				"PitchOperators"->pit,
+				"DurationOperators"->dur,
+				"VolumeOperators"->vol,
+				"Staccato"->StringCount[pst,"`"]
+			|>,
+		"@"~~mcr:Alternatives@@syntax[["Macro"]]:><|"Type"->"Macrotrack","Name"->mcr|>
 	}];
 	
 	(* function unsimplified *)
@@ -287,7 +292,7 @@ Tokenizer[filepath_]:=Block[
 	}][[1]]&};
 	
 	(* function simplified *)
-	object=("{"~~subtrack~~"}")|(notationPadded~~note~~notationPadded);
+	object=("{"~~subtrack~~"}")|(notationPadded~~note|macroPatt~~notationPadded);
 	typePatt=<|"$"->string,"%"->expression,"&"->object,"!"->number,"@"->Shortest[subtrack]|>;
 	typeTok[type_,str_]:=Switch[type,
 		"String",<|"Type"->"String","Content"->str|>,
@@ -334,12 +339,19 @@ Tokenizer[filepath_]:=Block[
 	];
 	
 	trackTok=StringCases[{
-		spc:Whitespace:><|"Type"->"Whitespace","Content"->spc|>,
 		func:functionPatt:>functionTok[func],
 		objt:objectPatt:>objectTok[objt][[1]],
 		nota:notationPatt:>notationTok[nota][[1]],
 		und_:><|"Type"->"Undefined","Content"->und|>
 	}];
+	
+	(* macro tracks *)
+	If[macroData!={},AppendTo[tokenizer[["Library"]],<|
+		"Type"->"Track","Data"->(<|
+			"Name"->syntax[["Macro",#]],
+			"Content"->trackTok[macroData[[#]]]
+		|>&/@Range[Length@macroData])
+	|>]];
 	
 	(* music tokenize *)
 	comments={};
@@ -377,13 +389,13 @@ Tokenizer[filepath_]:=Block[
 				StringCases[trackMeta,id__~~":":>id][[1]],
 			Null]];
 			AppendTo[trackData,"Instruments"->(<|
-				"Instrument"->StringCases[#,inst:(LetterCharacter~~WordCharacter..):>Sequence[inst]],
+				"Instrument"->StringCases[#,inst:(LetterCharacter~~WordCharacter..):>inst][[1]],
 				"Proportion"->If[#=={},Null,ToExpression@#[[1]]/100]&@StringCases[#,ns:NumberString~~"%":>ns]
 			|>&)/@StringCases[StringDelete[trackMeta,__~~":"],
 				WordCharacter..~~""|("("~~NumberString~~"%"~~")")
 			]];
-			AppendTo[trackData,"Content"->trackTok@line];
-			If[ContainsNone[#Type&/@trackData[["Content"]],{"Note","Subtrack"}],
+			AppendTo[trackData,"Content"->trackTok[line]];
+			If[ContainsNone[#Type&/@trackData[["Content"]],{"Note","Subtrack","Macrotrack"}],
 				blankTrack=trackData[["Content"]],
 				AppendTo[sectionData,trackData];	
 			];
@@ -407,15 +419,15 @@ EndPackage[];
 
 
 (* ::Input:: *)
-(*Tokenizer[NotebookDirectory[]<>"test.sml"][["Tokenizer","Sections",1,"Tracks",1,"Content"(*,All,"Type"*)]]*)
+(*Tokenizer[NotebookDirectory[]<>"test.sml"][["Tokenizer","Sections",1,"Tracks",1]]*)
 
 
 (* ::Input:: *)
-(*Export[NotebookDirectory[]<>"test6.json",Tokenizer[NotebookDirectory[]<>"test6.sml"][["Tokenizer"]]];//Timing*)
+(*Export[NotebookDirectory[]<>"test/test3.json",Tokenizer[NotebookDirectory[]<>"test/test3.sml"][["Tokenizer"]]];//Timing*)
 
 
 (* ::Input:: *)
-(*Export[NotebookDirectory[]<>"test/test2.compact.json",*)
+(*Export[NotebookDirectory[]<>"test/test3.compact.json",*)
 (*StringDelete[*)
-(*ExportString[Tokenizer[NotebookDirectory[]<>"test/test2.sml"][["Tokenizer"]],"JSON"],*)
+(*ExportString[Tokenizer[NotebookDirectory[]<>"test/test3.sml"][["Tokenizer"]],"JSON"],*)
 (*Whitespace],"String"];//Timing*)

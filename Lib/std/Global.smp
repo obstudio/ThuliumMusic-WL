@@ -1,30 +1,30 @@
 //SMML Standard Package - GlobalSettings
-//Updated: 2018.2.10.
+//Updated: 2018.2.16.
 
 # Function
 
 ConOct(octave, volumeScale = 1) {
-    AssignSetting(this.Settings, 'ConOct', octave, (octave) => Number.isInteger(octave))
-    AssignSetting(this.Settings, 'ConOctVolume', volumeScale, (volume) => volume >= 0)
+    this.Settings.assignSetting('ConOct', octave, (octave) => Number.isInteger(octave))
+    this.Settings.assignSetting('ConOctVolume', volumeScale, (volume) => volume >= 0)
 }
 
 Vol(volume) {
     /**** (!1\%) ****/
-    AssignSetting(this.Settings, 'Volume', volume / 100, (volume) => volume >= 0)
+    this.Settings.assignSetting('Volume', volume / 100, (volume) => volume >= 0)
 }
 
 Spd(speed) {
     /**** (!1) ****/
-    AssignSetting(this.Settings, 'Speed', speed, (speed) => speed > 0)
+    this.Settings.assignSetting('Speed', speed, (speed) => speed > 0)
 }
 
 Key(key) {
-    AssignSetting(this.Settings, 'Key', key, (key) => Number.isInteger(key))
+    this.Settings.assignSetting('Key', key, (key) => Number.isInteger(key))
 }
 
 Oct(oct) {
     /**** (Oct:!1) ****/
-    AssignSetting(this.Settings, 'Octave', oct, (octave) => Number.isInteger(octave))
+    this.Settings.assignSetting('Octave', oct, (octave) => Number.isInteger(octave))
 }
 
 KeyOct(key, oct) {
@@ -47,55 +47,55 @@ KeyOct(key, oct) {
         '#F': 6, '#C': 1, 'bB': -2, 'bE': 3, 'bA': 8, 'bD': 1, 'bG': 6, 'bC': -1,
         'F#': 6, 'C#': 1, 'Bb': -2, 'Eb': 3, 'Ab': 8, 'Db': 1, 'Gb': 6, 'Cb': -1
     }
-    AssignSetting(this.Settings, 'Key', Tonality[key], (key) => Number.isInteger(key))
-    AssignSetting(this.Settings, 'Octave', oct, (octave) => Number.isInteger(octave))
+    this.Settings.assignSetting('Key', Tonality[key], (key) => Number.isInteger(key))
+    this.Settings.assignSetting('Octave', oct, (octave) => Number.isInteger(octave))
 }
 
 Beat(beat) {
-    AssignSetting(this.Settings, 'Beat', beat, (beat) => beat > 0 && Number.isInteger(Math.log2(beat)))
+    this.Settings.assignSetting('Beat', beat, (beat) => beat > 0 && Number.isInteger(Math.log2(beat)))
 }
 
 Bar(bar) {
-    AssignSetting(this.Settings, 'Bar', bar, (bar) => bar > 0 && Number.isInteger(bar))
+    this.Settings.assignSetting('Bar', bar, (bar) => bar > 0 && Number.isInteger(bar))
 }
 
 BarBeat(bar, beat) {
     /**** (!1/!2) ****/
-    AssignSetting(this.Settings, 'Bar', bar, (bar) => bar > 0 && Number.isInteger(bar))
-    AssignSetting(this.Settings, 'Beat', beat, (beat) => beat > 0 && Number.isInteger(Math.log2(beat)))
+    this.Settings.assignSetting('Bar', bar, (bar) => bar > 0 && Number.isInteger(bar))
+    this.Settings.assignSetting('Beat', beat, (beat) => beat > 0 && Number.isInteger(Math.log2(beat)))
 }
 
 Dur(scale) {
     /**** (Dur:%1) ****/
-    AssignSetting(this.Settings, 'Duration', scale, (scale) => scale > 0)
+    this.Settings.assignSetting('Duration', scale, () => true)
 }
 
 Acct(scale) {
-    AssignSetting(this.Settings, 'Accent', scale, (scale) => scale > 1)
+    this.Settings.assignSetting('Accent', scale, (scale) => scale > 1)
 }
 
 Light(scale) {
-    AssignSetting(this.Settings, 'Light', scale, (scale) => scale < 1 && scale > 0)
+    this.Settings.assignSetting('Light', scale, (scale) => scale < 1 && scale > 0)
 }
 
 Trace(count) {
     /**** (Trace:!1) ****/
-    AssignSetting(this.Settings, 'Trace', count, count > 0 && count <= 4 && Number.isInteger(count))
+    this.Settings.assignSetting('Trace', count, count > 0 && count <= 4 && Number.isInteger(count))
 }
 
 FadeIn(time) {
     /**** (FadeIn:!1) ****/
-    AssignSetting(this.Settings, 'FadeIn', time, (time) => time >= 0)
+    this.Settings.assignSetting('FadeIn', time, (time) => time >= 0)
 }
 
 FadeOut(time) {
     /**** (FadeOut:!1) ****/
-    AssignSetting(this.Settings, 'FadeOut', time, (time) => time >= 0)
+    this.Settings.assignSetting('FadeOut', time, (time) => time >= 0)
 }
 
 Rev(r) {
     /**** (Rev:!1) ****/
-    AssignSetting(this.Settings, 'Rev', r, () => true)
+    this.Settings.assignSetting('Rev', r, () => true)
 }
 
 setVar(key, value) {

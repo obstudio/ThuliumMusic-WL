@@ -5,23 +5,25 @@
 
 Port(r) {
     /**** (Port:%1) ****/
-    AssignSetting(this.Settings, 'Port', r, (r) => r > 0)
+    this.Settings.assignSetting('Port', r, (r) => r > 0)
 }
 
 Portamento(subtrack1, subtrack2) {
     /**** &1~&2 ****/
     const t1 = new SubtrackParser(subtrack1, this.Settings, this.Libraries).parseTrack()
     const t2 = new SubtrackParser(subtrack2, this.Settings, this.Libraries).parseTrack()
+
     const pitch1 = t1.Content[0].Pitch
     const pitch2 = t2.Content[0].Pitch
     const duration = t1.Meta.Duration
-    const port = this.Settings.Port
+    const port = this.Settings.getOrSetDefault('Port', 6)
     const num = duration * port
     const step = (pitch2 - pitch1) / (num - 1)
     const pitches = []
     for (let i = 0; i < port; i++) {
         pitches.push(Math.round(pitch1 + step * i))
     }
+
     const result = pitches.map((pitch, index) => {
         return {
             Type: 'Note',
@@ -31,6 +33,7 @@ Portamento(subtrack1, subtrack2) {
             StartTime: index / port
         }
     })
+
     return {
         Content: result,
         Meta: {

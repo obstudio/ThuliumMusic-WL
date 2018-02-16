@@ -1,5 +1,5 @@
 //SMML Standard Package - Duration
-//Updated: 2018.2.10.
+//Updated: 2018.2.16.
 
 # Function
 
@@ -68,6 +68,7 @@ Ferm(ferm) {
 }
 
 Fermata(subtrack) {
+    /**** (.)&1 ****/
     const t = new SubtrackParser(subtrack, this.Settings, this.Libraries).parseTrack()
     const ferm = this.Settings.getOrSetDefault('Ferm', 2)
     t.Content.forEach((note) => {

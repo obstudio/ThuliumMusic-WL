@@ -9,8 +9,8 @@ class Parser {
      * @param {SMML.Adapter} adapter 可选的Adapter
      * @example
      * new Parser(tokenizedData)
-     * new Parser(tokenizedData, MIDIAdapter)
-     * new Parser(tokenizedData, MMAAdapter)
+     * new Parser(tokenizedData, new MIDIAdapter())
+     * new Parser(tokenizedData, new MMAAdapter())
      */
     constructor(tokenizedData, adapter = undefined) {
         this.tokenizedData = tokenizedData
@@ -35,7 +35,7 @@ class Parser {
         if (this.adapter === undefined) {
             return result
         } else {
-            return new this.adapter(result).adapt()
+            return this.adapter.adapt(result)
         }
     }
 

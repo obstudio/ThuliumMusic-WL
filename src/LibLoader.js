@@ -7,15 +7,7 @@ class LibLoader {
      * @param {SMML.Library[]} libs
      */
     constructor(libs = [], withDefault = true) {
-        this.internalLib = []
-        this.externalLib = []
-        for (const lib of libs) {
-            if (lib.Storage === 'Internal') {
-                this.internalLib.push(lib)
-            } else {
-                this.externalLib.push(lib)
-            }
-        }
+        this.libs = libs
 
         this.result = {
             Chord: {},
@@ -24,6 +16,7 @@ class LibLoader {
                 Custom: {}
             },
             MIDIEventList: {},
+            Track: {}
         }
         if (withDefault) {
             Object.assign(this.result, LibLoader.Default)
@@ -31,11 +24,8 @@ class LibLoader {
     }
 
     load() {
-        for (const lib of this.internalLib) {
-            this.loadInternalLibrary(lib)
-        }
-        for (const lib of this.externalLib) {
-            this.loadExternalLibrary(lib)
+        for (const lib of this.libs) {
+            this.loadLibrary(lib)
         }
         return this.result
     }
@@ -44,47 +34,33 @@ class LibLoader {
      * load internal lib
      * @param {SMML.InternalLibrary} lib 
      */
-    loadInternalLibrary(lib) {
-        let code
+    loadLibrary(lib) {
         switch (lib.Type) {
         case LibLoader.libType.Chord:
             lib.Data.forEach((operator) => {
                 this.result.Chord[operator.Notation] = operator.Pitches
             })
             break
-        case LibLoader.libType.MetaInformation:
-            break
-        case LibLoader.libType.FunctionPackage:
-            code = 'this.result.FunctionPackage.Custom = {' + lib.Data.map((func) => func.Code).join(',') + '}'
-            eval(code)
-            break
-        case LibLoader.libType.MIDIEventList:
-            break
-        case LibLoader.libType.Library:
-        // Object.assign(this.result, new LibLoader(lib.Data, false).load())
-        }
-    }
-
-    /**
-     * load external lib
-     * @param {SMML.ExternalLibrary} lib
-     */
-    loadExternalLibrary(lib) {
-        switch (lib.Type) {
-        case LibLoader.libType.Chord:
-            // JSON.parse(content).forEach((operator) => {
-            //     this.result.ChordOperator[operator.Notation] = operator.Pitches
-            // })
+        case LibLoader.libType.Track:
+            for (const track of lib.Data) {
+                this.result.Track[track.Name] = track.Content
+            }
             break
         case LibLoader.libType.MetaInformation:
             break
         case LibLoader.libType.FunctionPackage:
+            this.loadCode(lib.Data)
             break
         case LibLoader.libType.MIDIEventList:
             break
         case LibLoader.libType.Library:
             this.loadSubPackage(lib.Content)
         }
+    }
+
+    loadCode(data) {
+        const code = 'this.result.FunctionPackage.Custom = {' + data.map((func) => func.Code).join(',') + '}'
+        eval(code)
     }
 
     /**
@@ -97,6 +73,7 @@ class LibLoader {
         Object.assign(this.result.FunctionPackage.Custom, sub.FunctionPackage.Custom)
         Object.assign(this.result.MetaInformation, sub.MetaInformation)
         Object.assign(this.result.MIDIEventList, sub.MIDIEventList)
+        Object.assign(this.result.Track, sub.Track)
     }
 }
 
@@ -105,7 +82,8 @@ LibLoader.libType = {
     MetaInformation: 'MetaInformation',
     FunctionPackage: 'Function',
     MIDIEventList: 'MIDIEventList',
-    Library: 'Package'
+    Library: 'Package',
+    Track: 'Track'
 }
 
 LibLoader.Default = {
@@ -143,7 +121,7 @@ LibLoader.Default = {
         }
     },
     MIDIEventList: {},
-    Library: {}
+    Track: {}
 }
 
 module.exports = LibLoader

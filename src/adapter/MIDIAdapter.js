@@ -5,16 +5,14 @@
 class MIDIAdapter {
     /**
      * 
-     * @param {SMML.ParsedSection[]} parsedSection 
      */
-    constructor(parsedSection) {
-        this.parsedSection = parsedSection
+    constructor() {
     }
 
-    adapt() {
+    adapt(parsedSection) {
         let prevTime = 0
         const trackMap = {}
-        for (const section of this.parsedSection) {
+        for (const section of parsedSection) {
             const durs = []
             for (const track of section.Tracks) {
                 durs.push(track.Meta.Duration)

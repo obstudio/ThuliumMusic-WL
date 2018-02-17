@@ -22,7 +22,12 @@ const output = input.split('.').slice(0, -1).concat([typeStr, 'json']).join('.')
 
 fs.readFile(path.join(path.resolve('./'), input), 'utf8', (err, data) => {
     const jsonData = JSON.parse(data)
-    const parser = new Parser(jsonData, type)
+    let parser
+    if (type) {
+        parser = new Parser(jsonData, new type())
+    } else {
+        parser = new Parser(jsonData)
+    }
     const json = JSON.stringify(parser.parse())
     fs.writeFile(path.join(path.resolve('./'), output), json, 'utf8', () => {})
 })

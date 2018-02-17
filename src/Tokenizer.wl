@@ -1,9 +1,5 @@
 (* ::Package:: *)
 
-(* ::Input:: *)
-(*StringMatchQ["-_=..-",RE["[\\-._=]*"]]*)
-
-
 BeginPackage["SMML`"];
 
 RE=RegularExpression;
@@ -82,8 +78,8 @@ orderTok=Union@@StringCases[#,{
 notationPadded=RE["[&\\|\\s\\^\\*]*"];
 notationPatt=Alternatives[
 	"+"|"ToCoda"|"Coda"|"s"|"Segno"|"DC"|"DaCapo"|"DS"|"DaSegno",
-	"||:"|":||"|("["~~orderListP~~".]"),
-	"|"|"/"|("/"~~orderListC~~":")|"^"|"&"|"*"|Whitespace
+	"||:"|":||"|("["~~orderListP~~".]")|Whitespace,
+	("/"~~orderListC~~":")|"|"|"/"|"^"|"&"|"*"
 ];
 notationTok=StringCases[{
 	space:Whitespace:><|"Type"->"Whitespace","Content"->space|>,

@@ -4,7 +4,7 @@
 (*StringMatchQ["-_=..-",RE["[\\-._=]*"]]*)
 
 
-BeginPackage["SMML`Tokenizer`"];
+BeginPackage["SMML`"];
 
 RE=RegularExpression;
 rep[pat_]:=rep[pat,","~~" "...];
@@ -120,7 +120,7 @@ blankLineQ[str_]:=Or[
 	StringStartsQ[str,"//"]
 ];
 
-Tokenizer[filepath_]:=Block[
+tokenize[filepath_]:=Block[
 	{
 		rawData={},line,
 		lineCount=1,blankCount=1,
@@ -180,7 +180,7 @@ Tokenizer[filepath_]:=Block[
 							_,ToExpression
 						][value]],
 					"Include",
-						source=Tokenizer[If[StringContainsQ[value,":"],
+						source=tokenize[If[StringContainsQ[value,":"],
 							StringTake[value,{2,-2}],
 							depth=StringCount[value,"../"];
 							FileNameDrop[DirectoryName[filepath],-depth]<>"/"<>StringTake[value,{2+3*depth,-2}]
@@ -419,15 +419,15 @@ EndPackage[];
 
 
 (* ::Input:: *)
-(*Tokenizer[NotebookDirectory[]<>"test.sml"][["Tokenizer","Sections",1,"Tracks",1]]*)
+(*tokenize[NotebookDirectory[]<>"test.sml"][["Tokenizer","Sections",1,"Tracks",1]]*)
 
 
 (* ::Input:: *)
-(*Export[NotebookDirectory[]<>"test/test3.json",Tokenizer[NotebookDirectory[]<>"test/test3.sml"][["Tokenizer"]]];//Timing*)
+(*Export[NotebookDirectory[]<>"test/test3.json",tokenize[NotebookDirectory[]<>"test/test3.sml"][["Tokenizer"]]];//Timing*)
 
 
 (* ::Input:: *)
 (*Export[NotebookDirectory[]<>"test/test3.compact.json",*)
 (*StringDelete[*)
-(*ExportString[Tokenizer[NotebookDirectory[]<>"test/test3.sml"][["Tokenizer"]],"JSON"],*)
+(*ExportString[tokenize[NotebookDirectory[]<>"test/test3.sml"][["Tokenizer"]],"JSON"],*)
 (*Whitespace],"String"];//Timing*)

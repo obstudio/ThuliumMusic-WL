@@ -1,5 +1,5 @@
 //SMML Standard Package - Portamento
-//Updated: 2018.2.16.
+//Updated: 2018.2.17.
 
 # Function
 
@@ -10,8 +10,8 @@ Port(r) {
 
 Portamento(subtrack1, subtrack2) {
     /**** &1~&2 ****/
-    const t1 = new SubtrackParser(subtrack1, this.Settings, this.Libraries).parseTrack()
-    const t2 = new SubtrackParser(subtrack2, this.Settings, this.Libraries).parseTrack()
+    const t1 = new SubtrackParser(subtrack1, this.Settings, this.Libraries, this.pitchQueue).parseTrack()
+    const t2 = new SubtrackParser(subtrack2, this.Settings, this.Libraries, this.pitchQueue).parseTrack()
 
     const pitch1 = t1.Content[0].Pitch
     const pitch2 = t2.Content[0].Pitch

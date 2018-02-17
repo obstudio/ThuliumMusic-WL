@@ -7,6 +7,7 @@
 kernelPath=StringReplace[NotebookDirectory[],"\\"->"/"];
 temp[]:=kernelPath<>"tmp$"<>ToString[Floor@SessionTime[]]<>".json";
 Get[kernelPath<>"Tokenizer.wl"];
+MIDIStop=Sound`StopMIDI;
 JS=StartExternalSession["NodeJS"];
 ExternalEvaluate[JS,File[kernelPath<>"SMML.js"]]
 ExternalEvaluate[JS,"const fs = require('fs')"]
@@ -28,6 +29,7 @@ Valid part specification include:
 4. nonzero number {m,n}: parse from mth section to nth section.
 The default value of partspec is {1,-1}.";
 
+parse::fail = "A failure occured in the process.";
 parse::invspec = "Part specification `1` is invalid.";
 parse::nosect = "No section was found through part specification `1`.";
 
@@ -37,12 +39,15 @@ parse[filepath_,partspec_]:=Block[
 		tempFile=temp[],
 		rawData,sectCount,
 		startSect,endSect,
-		duration=0,groups,
-		musicClips={},targetClip,
-		compactData
+		abspec
 	},
+	
 	Export[tempFile,tokenize[filepath][["Tokenizer"]]];
 	rawData=ExternalEvaluate[JS,"parse('"<>tempFile<>"')"];
+	If[FailureQ[rawData],
+		Message[parse::failure];
+		Return[];
+	];
 	DeleteFile[tempFile];
 	sectCount=Length@rawData;
 	abspec=If[#<0,sectCount+1+#,#]&;
@@ -60,12 +65,43 @@ parse[filepath_,partspec_]:=Block[
             Message[parse::invspec,partspec]
     ];
     If[startSect>endSect,
-        Message[parse::nosect,partspec];
-        Return[];
+		Message[parse::nosect,partspec];Return[],
+		Return[rawData[[startSect;;endSect]]];
     ];
+	
+];
+
+midiAdapt[rawData_]:=Block[
+    {
+		duration=0,
+		musicClip={}
+    },
     
 	Do[
-		groups=GatherBy[sectionData,#Meta[[{"FadeIn","FadeOut"}]]&];
+		AppendTo[musicClip,Table[
+			SoundNote[
+				#Pitch,
+				duration+#StartTime+{0,#Duration},
+				trackData[["Instrument"]],
+				SoundVolume->#Volume
+			]&/@trackData[["Content"]],
+		{trackData,sectionData[["Tracks"]]}]];
+		duration+=Max[sectionData[["Tracks",All,"Meta","Duration"]]],
+	{sectionData,rawData}];
+	
+	Return[Sound@Flatten@musicClip];
+	
+];
+
+audioAdapt[rawData_]:=Block[
+    {
+		duration=0,groups,
+		musicClips={},targetClip,
+		compactData
+    },
+    
+	Do[
+		groups=GatherBy[sectionData[["Tracks"]],#Meta[[{"FadeIn","FadeOut"}]]&];
 		Do[
 			compactData=Flatten@Table[
 				SoundNote[
@@ -89,8 +125,8 @@ parse[filepath_,partspec_]:=Block[
 				AppendTo[musicClips[[targetClip,"Events"]],compactData];
 			],
 		{group,groups}];
-		duration+=Max[sectionData[[All,"Meta","Duration"]]],
-	{sectionData,rawData[[startSect;;endSect,"Tracks"]]}];
+		duration+=Max[sectionData[["Tracks",All,"Meta","Duration"]]],
+	{sectionData,rawData}];
 	
 	Return[Total[Table[
 		AudioFade[
@@ -103,5 +139,29 @@ parse[filepath_,partspec_]:=Block[
 End[];
 
 
+(* ::Subsubsection:: *)
+(*MIDI*)
+
+
 (* ::Input:: *)
-(*parse[kernelPath<>"test/test2.sml",{1,5}]//Timing*)
+(*MIDIStop[];*)
+
+
+(* ::Input:: *)
+(*MIDIStop[];EmitSound[#[[2]]]&@*)
+(*EchoFunction["time: ",#[[1]]&]@*)
+(*Timing[midiAdapt[parse[kernelPath<>"test/test2.sml"]]];*)
+
+
+(* ::Subsubsection:: *)
+(*Audio*)
+
+
+(* ::Input:: *)
+(*AudioStop[];*)
+
+
+(* ::Input:: *)
+(*AudioStop[];AudioPlay[#[[2]]]&@*)
+(*EchoFunction["time: ",#[[1]]&]@*)
+(*Timing[audioAdapt[parse[kernelPath<>"test/test2.sml"]]];*)

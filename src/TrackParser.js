@@ -75,7 +75,7 @@ class TrackParser {
         }
     }
 
-    preprocess() {
+    mergeMacro() {
         let length = this.Content.length
         let pointer = 0
         while (pointer < length) {
@@ -89,6 +89,11 @@ class TrackParser {
                 pointer += 1
             }
         }
+    }
+
+    preprocess() {
+        this.mergeMacro()
+        if (this.Content.length === 1) return
         const last = this.Content.pop()
         const last2 = this.Content.pop()
         if (last.Type === 'BarLine' && last2.Type === 'BarLine') {
@@ -122,7 +127,7 @@ class TrackParser {
                 result.push(...localContext.subtrackTemp.Content)
                 break
             case 'Subtrack':
-                this.handleSubtrack(new SubtrackParser(token, this.Settings.extend(), this.Libraries).parseTrack(), localContext)
+                this.handleSubtrack(new SubtrackParser(token, this.Settings.extend(), this.Libraries, this.Context.pitchQueue).parseTrack(), localContext)
                 result.push(...localContext.subtrackTemp.Content)
                 break
             case 'Note':
@@ -142,6 +147,10 @@ class TrackParser {
                     Type: token.Type,
                     StartTime: this.Context.startTime
                 })
+                break
+            case '__se':
+                this.Settings = this.initialSettings.extend()
+                this.Context.pitchQueue = this.initialPitchQueue.slice()
                 break
             case 'Clef':
             case 'Whitespace':
@@ -196,7 +205,7 @@ class TrackParser {
                 tok.StartTime += this.Context.startTime
             }
         })
-        this.Context.pitchQueue.push(...subtrack.Meta.PitchQueue)
+        // this.Context.pitchQueue.push(...subtrack.Meta.PitchQueue)
         this.Context.startTime += subtrack.Meta.Duration
         this.Context.notesBeforeTie = subtrack.Meta.NotesBeforeTie
         if (localContext.subtrackTemp.Meta.Single) {
@@ -273,7 +282,10 @@ class TrackParser {
             pitches.push(...pitches.map((pitch) => pitch + 12 * this.Settings.ConOct))
             volumes.push(...volumes.map((volume) => volume * this.Settings.ConOctVolume))
         }
-        this.Context.pitchQueue.push(pitches.slice(0))
+        
+        if (pitches.length > 0) {
+            this.Context.pitchQueue.push(pitches.slice(0))
+        }
 
         // merge pitches with previous ones if tie exists
         if (this.Context.afterTie) {
@@ -382,9 +394,12 @@ TrackParser.pitchDict = { 1: 0, 2: 2, 3: 4, 4: 5, 5: 7, 6: 9, 7: 11 }
 TrackParser.pitchOperatorDict = { '#': 1, 'b': -1, '\'': 12, ',': -12 }
 
 class SubtrackParser extends TrackParser {
-    constructor(track, sectionSettings, libraries) {
+    constructor(track, sectionSettings, libraries, pitchQueue) {
         super(track, sectionSettings, libraries, true)
+        this.initialSettings = sectionSettings.extend()
         this.Repeat = track.Repeat
+        this.Context.pitchQueue = pitchQueue.slice()
+        this.initialPitchQueue = pitchQueue.slice()
     }
 
     parseTrack() {
@@ -394,8 +409,17 @@ class SubtrackParser extends TrackParser {
     }
 
     preprocess() {
+        this.mergeMacro()
         if (this.Repeat > 0) {
             const temp = []
+            const repeatArray = this.Content.filter((token) => token.Type === 'BarLine' && token.Order[0] !== 0)
+            const defaultOrder = repeatArray.find((token) => token.Order.length === 0)
+            if (defaultOrder !== undefined) {
+                const order = [].concat(...repeatArray.map((token)=> token.Order))
+                for (let i = 1; i < this.Repeat; i++) {
+                    if (order.indexOf(i) === -1) defaultOrder.Order.push(i)
+                }
+            }
             for (let i = 1; i <= this.Repeat; i++) {
                 let skip = false
                 for (const token of this.Content) {
@@ -416,9 +440,13 @@ class SubtrackParser extends TrackParser {
             const skip = this.Content.findIndex((tok) => tok.Skip === true)
             let temp
             if (skip === -1) {
-                temp = new Array(-this.Repeat).fill(this.Content)
+                temp = new Array(-this.Repeat).fill(this.Content.concat({
+                    Type: '__se'
+                }))
             } else {
-                temp = new Array(-this.Repeat - 1).fill(this.Content)
+                temp = new Array(-this.Repeat - 1).fill(this.Content.concat({
+                    Type: '__se'
+                }))
                 temp.push(this.Content.slice(0, skip))
             }
             this.Content = [].concat(...temp)

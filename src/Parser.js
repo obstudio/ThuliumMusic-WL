@@ -113,7 +113,7 @@ class Parser {
      */
     parseSection(section) {
         section.Settings.filter((token) => token.Type === 'FUNCTION')
-            .forEach((token) => this.libraries.FunctionPackage.applyFunction({ Settings: this.sectionContext.Settings }, token))
+            .forEach((token) => this.libraries.FunctionPackage.applyFunction({ Settings: this.sectionContext.Settings, Context: {} }, token))
         const instrStatistic = {}
         return {
             ID: section.ID,

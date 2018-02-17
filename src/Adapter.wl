@@ -29,29 +29,43 @@ Valid part specification include:
 4. nonzero number {m,n}: parse from mth section to nth section.
 The default value of partspec is {1,-1}.";
 
-parse::fail = "A failure occured in the process.";
+parse::nfound = "Cannot find file `1`.";
+parse::suffix = "Cannot parse file with suffix `1`.";
+parse::nsuffix = "Cannot parse file with no suffix.";
+parse::failure = "A failure occured in the process.";
 parse::invspec = "Part specification `1` is invalid.";
 parse::nosect = "No section was found through part specification `1`.";
 
 parse[filepath_]:=parse[filepath,{1,-1}];
 parse[filepath_,partspec_]:=Block[
 	{
-		tempFile=temp[],
-		rawData,sectCount,
-		startSect,endSect,
-		abspec
+		tempFile,rawData,
+		sectCount,abspec,
+		startSect,endSect
 	},
-	
-	Export[tempFile,tokenize[filepath][["Tokenizer"]]];
-	rawData=ExternalEvaluate[JS,"parse('"<>tempFile<>"')"];
+	Switch[filepath,
+		_?(!FileExistsQ@#&),                               (* file not found *)
+			Message[parse::nfound,filepath];Return[],
+		_?(StringEndsQ[".json"]),                           (* json *)
+			rawData=ExternalEvaluate[JS,"parse('"<>filepath<>"')"],
+		_?(StringEndsQ[".sml"]),                            (* sml *)
+			tempFile=temp[];
+			Export[tempFile,tokenize[filepath][["Tokenizer"]]];
+			rawData=ExternalEvaluate[JS,"parse('"<>tempFile<>"')"];
+			DeleteFile[tempFile],
+		_?(StringEndsQ["."~~WordCharacter..]),              (* other files *)
+			Message[parse::suffix,
+				StringCases[filepath,"."~~sfx:WordCharacter..:>sfx][[-1]]
+			];Return[],
+		_,
+			Message[parse::nsuffix];Return[];
+	];
 	If[FailureQ[rawData],
 		Message[parse::failure];
 		Return[];
 	];
-	DeleteFile[tempFile];
 	sectCount=Length@rawData;
 	abspec=If[#<0,sectCount+1+#,#]&;
-	
     Switch[partspec,
         {_Integer,_Integer},
             {startSect,endSect}=abspec/@partspec,
@@ -76,7 +90,7 @@ midiAdapt[rawData_]:=Block[
 		duration=0,
 		musicClip={}
     },
-    
+	If[!ListQ[rawData],Return[]];
 	Do[
 		AppendTo[musicClip,Table[
 			SoundNote[
@@ -88,19 +102,18 @@ midiAdapt[rawData_]:=Block[
 		{trackData,sectionData[["Tracks"]]}]];
 		duration+=Max[sectionData[["Tracks",All,"Meta","Duration"]]],
 	{sectionData,rawData}];
-	
 	Return[Sound@Flatten@musicClip];
-	
 ];
 
 audioAdapt[rawData_]:=Block[
     {
 		duration=0,groups,
 		musicClips={},targetClip,
-		compactData
+		compactData,clipUsed
     },
-    
+	If[!ListQ[rawData],Return[]];
 	Do[
+		clipUsed={};
 		groups=GatherBy[sectionData[["Tracks"]],#Meta[[{"FadeIn","FadeOut"}]]&];
 		Do[
 			compactData=Flatten@Table[
@@ -112,9 +125,13 @@ audioAdapt[rawData_]:=Block[
 				]&/@trackData[["Content"]],
 			{trackData,group}];
 			targetClip=If[group[[1,"Meta","FadeIn"]]==0,
-				LengthWhile[musicClips,#FadeOut>0&]+1,
-				Length@musicClips+1;
+				LengthWhile[Range@Length@musicClips,Or[
+					musicClips[[#,"FadeOut"]]>0,
+					MemberQ[clipUsed,#]
+				]&]+1,
+				Length@musicClips+1
 			];
+			AppendTo[clipUsed,targetClip];
 			If[targetClip>Length@musicClips,
 				AppendTo[musicClips,<|
 					"FadeIn"->group[[1,"Meta","FadeIn"]],
@@ -127,16 +144,22 @@ audioAdapt[rawData_]:=Block[
 		{group,groups}];
 		duration+=Max[sectionData[["Tracks",All,"Meta","Duration"]]],
 	{sectionData,rawData}];
-	
 	Return[Total[Table[
 		AudioFade[
 			Sound@Flatten@musicClip[["Events"]],
 		{musicClip[["FadeIn"]],musicClip[["FadeOut"]]}],
 	{musicClip,musicClips}]]];
-	
 ];
 
 End[];
+
+
+(* ::Input:: *)
+(*data=parse[kernelPath<>"test/test6.sml"];*)
+
+
+(* ::Input:: *)
+(*audioAdapt[data]*)
 
 
 (* ::Subsubsection:: *)
@@ -150,7 +173,7 @@ End[];
 (* ::Input:: *)
 (*MIDIStop[];EmitSound[#[[2]]]&@*)
 (*EchoFunction["time: ",#[[1]]&]@*)
-(*Timing[midiAdapt[parse[kernelPath<>"test/test2.sml"]]];*)
+(*Timing[midiAdapt[parse[kernelPath<>"test/test3.sml"]]];*)
 
 
 (* ::Subsubsection:: *)
@@ -164,4 +187,17 @@ End[];
 (* ::Input:: *)
 (*AudioStop[];AudioPlay[#[[2]]]&@*)
 (*EchoFunction["time: ",#[[1]]&]@*)
-(*Timing[audioAdapt[parse[kernelPath<>"test/test2.sml"]]];*)
+(*Timing[audioAdapt[parse[kernelPath<>"test/test6.sml"]]];*)
+
+
+(* ::Subsubsection:: *)
+(*Test output*)
+
+
+(* ::Input:: *)
+(*testfile=kernelPath<>"test/test6.";*)
+(*testjson=tokenize[testfile<>"sml"][["Tokenizer"]];*)
+(*(*Export[testfile<>"tokenizer.json",testjson];*)*)
+(*testdata=parse[testfile<>"json"];*)
+(*Export[testfile<>"output.mid",midiAdapt[testdata]];*)
+(*(*Export[testfile<>"output.mp3",audioAdapt[testdata]];*)*)

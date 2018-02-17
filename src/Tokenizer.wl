@@ -2,6 +2,8 @@
 
 BeginPackage["SMML`"];
 
+tokenize::nfound = "Cannot find file `1`.";
+
 RE=RegularExpression;
 rep[pat_]:=rep[pat,","~~" "...];
 rep[pat_,sep_]:=pat~~(sep~~pat)...;
@@ -144,7 +146,7 @@ tokenize[filepath_]:=Block[
 	
 	If[FileExistsQ[filepath],
 		rawData=Import[filepath,"List"],
-		AppendTo[messages,<|"Type"->"FileNotFound","Arguments"->filepath|>]
+		Message[tokenize::nfound,filepath];
 	];
 	
 	While[StringStartsQ[rawData[[lineCount]],"//"],
@@ -289,7 +291,7 @@ tokenize[filepath_]:=Block[
 	
 	(* function simplified *)
 	object=("{"~~subtrack~~"}")|(notationPadded~~note|macroPatt~~notationPadded);
-	typePatt=<|"$"->string,"%"->expression,"&"->object,"!"->number,"@"->Shortest[subtrack]|>;
+	typePatt=<|"$"->string,"%"->expression,"&"->object,"!"->number,"@"->note..|>;
 	typeTok[type_,str_]:=Switch[type,
 		"String",<|"Type"->"String","Content"->str|>,
 		"Expression",<|"Type"->"Expression","Content"->str|>,
@@ -415,15 +417,8 @@ EndPackage[];
 
 
 (* ::Input:: *)
-(*tokenize[NotebookDirectory[]<>"test.sml"][["Tokenizer","Sections",1,"Tracks",1]]*)
+(*tokenize[NotebookDirectory[]<>"test.sml"][["Tokenizer","Sections",1,"Tracks"]]*)
 
 
 (* ::Input:: *)
-(*Export[NotebookDirectory[]<>"test/test3.json",tokenize[NotebookDirectory[]<>"test/test3.sml"][["Tokenizer"]]];//Timing*)
-
-
-(* ::Input:: *)
-(*Export[NotebookDirectory[]<>"test/test3.compact.json",*)
-(*StringDelete[*)
-(*ExportString[tokenize[NotebookDirectory[]<>"test/test3.sml"][["Tokenizer"]],"JSON"],*)
-(*Whitespace],"String"];//Timing*)
+(*Export[NotebookDirectory[]<>"test/test6.json",tokenize[NotebookDirectory[]<>"test/test6.sml"][["Tokenizer"]]];//Timing*)

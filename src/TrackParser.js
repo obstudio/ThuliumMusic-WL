@@ -133,7 +133,7 @@ class TrackParser {
             case 'Note':
                 this.Context.notesBeforeTie = this.parseNote(token)
                 this.handleNote(token, localContext)
-                result.push(...this.Context.notesBeforeTie)
+                result.push(...this.Context.notesBeforeTie.filter((note) => result.indexOf(note) === -1))   // potentially inefficient
                 break
             case 'Tie':
                 this.Context.afterTie = true
@@ -147,10 +147,6 @@ class TrackParser {
                     Type: token.Type,
                     StartTime: this.Context.startTime
                 })
-                break
-            case '__se':
-                this.Settings = this.initialSettings.extend()
-                this.Context.pitchQueue = this.initialPitchQueue.slice()
                 break
             case 'Clef':
             case 'Whitespace':
@@ -287,19 +283,20 @@ class TrackParser {
             this.Context.pitchQueue.push(pitches.slice(0))
         }
 
+        const result = []
         // merge pitches with previous ones if tie exists
         if (this.Context.afterTie) {
             this.Context.afterTie = false
             this.Context.notesBeforeTie.forEach((prevNote) => {
                 const index = pitches.indexOf(prevNote.Pitch)
                 if (index === -1 || prevNote.Volume !== volumes[index]) return
+                result.push(prevNote)
                 prevNote.Duration += actualDuration
                 pitches.splice(index, 1)
                 volumes.splice(index, 1)
             })
         }
 
-        const result = []
         for (var index = 0, length = pitches.length; index < length; index++) {
             result.push({
                 Type: 'Note',
@@ -396,10 +393,8 @@ TrackParser.pitchOperatorDict = { '#': 1, 'b': -1, '\'': 12, ',': -12 }
 class SubtrackParser extends TrackParser {
     constructor(track, sectionSettings, libraries, pitchQueue) {
         super(track, sectionSettings, libraries, true)
-        this.initialSettings = sectionSettings.extend()
         this.Repeat = track.Repeat
         this.Context.pitchQueue = pitchQueue.slice()
-        this.initialPitchQueue = pitchQueue.slice()
     }
 
     parseTrack() {
@@ -440,13 +435,9 @@ class SubtrackParser extends TrackParser {
             const skip = this.Content.findIndex((tok) => tok.Skip === true)
             let temp
             if (skip === -1) {
-                temp = new Array(-this.Repeat).fill(this.Content.concat({
-                    Type: '__se'
-                }))
+                temp = new Array(-this.Repeat).fill(this.Content)
             } else {
-                temp = new Array(-this.Repeat - 1).fill(this.Content.concat({
-                    Type: '__se'
-                }))
+                temp = new Array(-this.Repeat - 1).fill(this.Content)
                 temp.push(this.Content.slice(0, skip))
             }
             this.Content = [].concat(...temp)

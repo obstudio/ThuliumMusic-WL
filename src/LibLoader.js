@@ -100,7 +100,8 @@ LibLoader.Default = {
         applyFunction(parser, token) {
             return this.locateFunction(token.Name).apply({
                 Settings: parser.Settings,
-                Libraries: parser.Libraries
+                Libraries: parser.Libraries,
+                pitchQueue: parser.Context.pitchQueue
             }, token.Argument.map((arg) => {
                 switch (arg.Type) {
                 case 'Read':

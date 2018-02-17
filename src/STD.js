@@ -2,7 +2,7 @@ const { SubtrackParser } = require('./TrackParser')
 
 module.exports = {
     Tremolo1(expr, subtrack) {
-        const t = new SubtrackParser(subtrack, this.Settings, this.Libraries).parseTrack()
+        const t = new SubtrackParser(subtrack, this.Settings, this.Libraries, this.pitchQueue).parseTrack()
         const pow = Math.pow(2, -expr)
         const num = Math.round(t.Meta.Duration / pow)
         const result = []
@@ -21,7 +21,7 @@ module.exports = {
     },
 
     Tremolo2(expr, subtrack1, subtrack2) {
-        const ts = [new SubtrackParser(subtrack1, this.Settings, this.Libraries).parseTrack(), new SubtrackParser(subtrack2, this.Settings, this.Libraries).parseTrack()]
+        const ts = [new SubtrackParser(subtrack1, this.Settings, this.Libraries, this.pitchQueue).parseTrack(), new SubtrackParser(subtrack2, this.Settings, this.Libraries, this.pitchQueue).parseTrack()]
         const pow = Math.pow(2, -expr)
         const num = Math.round(ts[1].Meta.Duration / pow)
         const lengths = ts.map((t) => t.Content.length)
@@ -48,7 +48,7 @@ module.exports = {
 
     Tuplet(expr, subtrack) {
         const scale = Math.pow(2, Math.floor(Math.log2(expr))) / expr
-        const t = new SubtrackParser(subtrack, this.Settings, this.Libraries).parseTrack()
+        const t = new SubtrackParser(subtrack, this.Settings, this.Libraries, this.pitchQueue).parseTrack()
         t.Content.forEach((note) => {
             note.Duration *= scale
             note.StartTime *= scale
@@ -58,8 +58,8 @@ module.exports = {
     },
 
     Portamento(subtrack1, subtrack2) {
-        const t1 = new SubtrackParser(subtrack1, this.Settings, this.Libraries).parseTrack()
-        const t2 = new SubtrackParser(subtrack2, this.Settings, this.Libraries).parseTrack()
+        const t1 = new SubtrackParser(subtrack1, this.Settings, this.Libraries, this.pitchQueue).parseTrack()
+        const t2 = new SubtrackParser(subtrack2, this.Settings, this.Libraries, this.pitchQueue).parseTrack()
 
         const pitch1 = t1.Content[0].Pitch
         const pitch2 = t2.Content[0].Pitch
@@ -96,8 +96,8 @@ module.exports = {
     },
 
     GraceNote(subtrack1, subtrack2) {
-        const t1 = new SubtrackParser(subtrack1, this.Settings, this.Libraries).parseTrack()
-        const t2 = new SubtrackParser(subtrack2, this.Settings, this.Libraries).parseTrack()
+        const t1 = new SubtrackParser(subtrack1, this.Settings, this.Libraries, this.pitchQueue).parseTrack()
+        const t2 = new SubtrackParser(subtrack2, this.Settings, this.Libraries, this.pitchQueue).parseTrack()
         const num = subtrack1.Content.length
         let dur
         const appo = this.Settings.getOrSetDefault('Seg', 1 / 4)
@@ -106,11 +106,12 @@ module.exports = {
         } else {
             dur = appo / num
         }
+        const actualDur = dur * Math.pow(2, -this.Settings.Duration) * 60 / this.Settings.Speed
         t1.Content.forEach((note) => {
-            note.Duration = dur
+            note.Duration = actualDur 
             note.StartTime *= dur
         })
-        const total = dur * num
+        const total = actualDur * num
         t2.Content.forEach((note) => {
             note.StartTime += total
             note.Duration -= total
@@ -122,8 +123,8 @@ module.exports = {
     },
 
     Appoggiatura(subtrack1, subtrack2) {
-        const t1 = new SubtrackParser(subtrack1, this.Settings, this.Libraries).parseTrack()
-        const t2 = new SubtrackParser(subtrack2, this.Settings, this.Libraries).parseTrack()
+        const t1 = new SubtrackParser(subtrack1, this.Settings, this.Libraries, this.pitchQueue).parseTrack()
+        const t2 = new SubtrackParser(subtrack2, this.Settings, this.Libraries, this.pitchQueue).parseTrack()
         const num = subtrack2.Content.length
         let dur
         const appo = this.Settings.getOrSetDefault('Seg', 1 / 4)
@@ -132,12 +133,13 @@ module.exports = {
         } else {
             dur = appo / num
         }
-        const total = dur * num
+        const actualDur = dur * Math.pow(2, -this.Settings.Duration) * 60 / this.Settings.Speed
+        const total = actualDur * num
         t1.Content.forEach((note) => {
             note.Duration -= total
         })
         t2.Content.forEach((note) => {
-            note.Duration = dur
+            note.Duration = actualDur
             note.StartTime *= dur
             note.StartTime += t1.Content[0].Duration
         })
@@ -149,7 +151,7 @@ module.exports = {
     },
 
     Fermata(subtrack) {
-        const t = new SubtrackParser(subtrack, this.Settings, this.Libraries).parseTrack()
+        const t = new SubtrackParser(subtrack, this.Settings, this.Libraries, this.pitchQueue).parseTrack()
         const ferm = this.Settings.getOrSetDefault('Ferm', 2)
         t.Content.forEach((note) => {
             note.Duration *= ferm
@@ -160,7 +162,7 @@ module.exports = {
     },
 
     Arpeggio(subtrack) {
-        const t = new SubtrackParser(subtrack, this.Settings, this.Libraries).parseTrack()
+        const t = new SubtrackParser(subtrack, this.Settings, this.Libraries, this.pitchQueue).parseTrack()
         const num = t.Content.length - 1
         let dur
         const appo = this.Settings.getOrSetDefault('Seg', 1 / 4)
@@ -169,19 +171,19 @@ module.exports = {
         } else {
             dur = appo / num
         }
-        dur = dur * 60 / this.Settings.Speed
+        const actualDur = dur * Math.pow(2, -this.Settings.Duration) * 60 / this.Settings.Speed
         const result = []
         t.Content.reduce((sum, cur, index) => {
             if (index < num) {
                 sum.push(cur)
-                cur.Duration = dur
+                cur.Duration = actualDur
                 for (const note of sum) {
-                    result.push(Object.assign({}, note, { StartTime: dur * index }))
+                    result.push(Object.assign({}, note, { StartTime: actualDur * index }))
                 }
             } else {
                 t.Content.forEach((note) => {
-                    note.StartTime += dur * index
-                    note.Duration -= dur * index
+                    note.StartTime += actualDur * index
+                    note.Duration -= actualDur * index
                 })
                 result.push(...t.Content)
             }

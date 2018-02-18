@@ -1,68 +1,9 @@
 (* ::Package:: *)
 
-BeginPackage["SMML`"];
+<<(NotebookDirectory[]<>"Syntax.wl");
+<<(NotebookDirectory[]<>"Standard.wl");
 
 tokenize::nfound = "Cannot find file `1`.";
-
-RE=RegularExpression;
-rep[pat_]:=rep[pat,","~~" "...];
-rep[pat_,sep_]:=pat~~(sep~~pat)...;
-repRegex[pat_]:=repRegex[pat,", *"];
-repRegex[pat_,sep_]:=RE[pat<>"("<>sep<>pat<>")*"];
-join[pat__]:=RE[StringJoin[#[[1]]&/@{pat}]];
-sel[pat_]:=RE["("<>pat[[1]]<>")?"];
-unsigned=RE["\\d+"];
-signed=RE["[\\+\\-]\\d+"];
-integer=RE["[\\+\\-]?\\d+"];
-
-chordCodeTok[str_]:=StringCases[str,
-	StringExpression[
-		ntt:LetterCharacter~~"\t"..,
-		cmt:Shortest[__]~~"\t"..,
-		pts:repRegex["(([\\+\\-]?\\d+)|(\\[([\\+\\-]?\\d+)?(;([\\+\\-]?\\d+)?)?\\]([\\-\\+]\\d+)?))"]
-	]:><|
-		"Notation"->ntt,
-		"Comment"->cmt,
-		"Pitches"->StringCases[pts,{
-			pit:integer:>{1,1,ToExpression[pit]},
-			"["~~pos:sel[integer]~~"]"~~sft:sel[signed]:>{
-				If[pos=="",1,ToExpression[pos]],
-				If[pos=="",-1,ToExpression[pos]],
-				If[sft=="",0,ToExpression[sft]]
-			},
-			"["~~pos1:sel[integer]~~";"~~pos2:sel[integer]~~"]"~~sft:sel[signed]:>{
-				If[pos1=="",1,ToExpression[pos1]],
-				If[pos2=="",-1,ToExpression[pos2]],
-				If[sft=="",0,ToExpression[sft]]
-			}
-		}]
-	|>
-][[1]];
-
-rif[lst_]:=rif[lst,WhitespaceCharacter...];
-rif[lst_,sep_]:=StringExpression@@Riffle[lst,sep,{1,-1,2}];
-word=LetterCharacter~~WordCharacter...;
-jsCode=Nest[(("{"~~#~~"}")|Except["{"|"}"])...&,Except["{"|"}"]...,8];
-functionCode=rif[{word,"("~~Except["{"|"}"]...~~")","{"~~jsCode~~"}"}];
-functionCodeTok[str_]:=StringCases[str,
-	StringExpression[
-		name:word,
-		WhitespaceCharacter...,
-		"("~~Except["{"|"}"]...~~")",
-		WhitespaceCharacter...,
-		"{"~~js:jsCode~~"}"
-	]:><|
-		"Name"->name,
-		"Code"->str,
-		"Syntax"->StringCases[js,"/****"~~" "..~~stx:Shortest[__]~~" "..~~"****/":>stx]
-	|>
-][[1]];
-
-postOp=RE["`{0,2}"];
-volOp=RE["[:>]*"];
-pitOp=RE["[#b',]*"];
-durOp=RE["[\\-._=]*"];
-scaleDegree=RE["[0-7%x]"];
 
 number=integer~~""|("."~~unsigned);
 expression=(integer~~""|("/"|"."~~unsigned))|("Log2("~~unsigned~~")");
@@ -238,11 +179,11 @@ tokenize[filepath_]:=Block[
 	
 	(* pitch *)
 	chordPatt=RE["["<>syntax[["Chord"]]<>"]*"];
-	pitch=join[scaleDegree,pitOp,chordPatt];
+	pitch=join[degree,pitOp,chordPatt];
 	pitches=pitch|("["~~pitch..~~"]");
 	note=pitches~~pitOp~~volOp~~durOp~~postOp;
-	pitchTok=StringCases[sd:scaleDegree~~po:pitOp~~ch:chordPatt:>
-		<|"ScaleDegree"->sd,"PitchOperators"->po,"Chord"->ch|>
+	pitchTok=StringCases[sd:degree~~po:pitOp~~ch:chordPatt:>
+		<|"Degree"->sd,"PitOp"->po,"Chord"->ch|>
 	];
 	
 	(* object *)
@@ -259,9 +200,9 @@ tokenize[filepath_]:=Block[
 			<|
 				"Type"->"Note",
 				"Pitches"->pitchTok[pts],
-				"PitchOperators"->pit,
-				"DurationOperators"->dur,
-				"VolumeOperators"->vol,
+				"PitOp"->pit,
+				"DurOp"->dur,
+				"VolOp"->vol,
 				"Staccato"->StringCount[pst,"`"]
 			|>,
 		"@"~~mcr:Alternatives@@syntax[["Macro"]]:><|"Type"->"Macrotrack","Name"->mcr|>
@@ -413,12 +354,10 @@ tokenize[filepath_]:=Block[
 	
 ];
 
-EndPackage[];
-
 
 (* ::Input:: *)
 (*tokenize[NotebookDirectory[]<>"test.sml"][["Tokenizer","Sections",1,"Tracks"]]*)
 
 
 (* ::Input:: *)
-(*Export[NotebookDirectory[]<>"test/test6.json",tokenize[NotebookDirectory[]<>"test/test6.sml"][["Tokenizer"]]];//Timing*)
+(*Export[NotebookDirectory[]<>"test/test7.json",tokenize[NotebookDirectory[]<>"test/test7.sml"][["Tokenizer"]]];//Timing*)

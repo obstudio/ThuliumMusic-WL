@@ -21,7 +21,16 @@ ExternalEvaluate[JS,"
 
 Begin["SMML`"];
 
-parse::usage = "parse [filepath, partspec]\n
+parse::usage = "\!\(\*RowBox[{\"parse\",\"[\",RowBox[{
+StyleBox[\"filepath\",\"TI\"],\",\",StyleBox[\"partspec\",\"TI\"]
+}],\"]\"}]\)\n\!\(\*RowBox[{\"parse\",\"[\",RowBox[{
+StyleBox[\"tokenizer\",\"TI\"],\",\",StyleBox[\"partspec\",\"TI\"]
+}],\"]\"}]\)
+
+Valid file format include:
+1. SML file: tokenize and parse the SML file.
+2. JSON file: parse the tokenized SML file.
+
 Valid part specification include: 
 1. positive number n: parse the first n sections.
 2. negative number -n: parse the last n sections.
@@ -154,12 +163,18 @@ audioAdapt[rawData_]:=Block[
 End[];
 
 
-(* ::Input:: *)
-(*data=parse[kernelPath<>"test/test6.sml"];*)
 
 
 (* ::Input:: *)
-(*audioAdapt[data]*)
+(*data=parse[kernelPath<>"test/test7.sml"];*)
+
+
+(* ::Input:: *)
+(*data*)
+
+
+(* ::Input:: *)
+(*midiAdapt[data]*)
 
 
 (* ::Subsubsection:: *)
@@ -173,7 +188,7 @@ End[];
 (* ::Input:: *)
 (*MIDIStop[];EmitSound[#[[2]]]&@*)
 (*EchoFunction["time: ",#[[1]]&]@*)
-(*Timing[midiAdapt[parse[kernelPath<>"test/test3.sml"]]];*)
+(*Timing[midiAdapt[parse[kernelPath<>"test/test7.sml"]]];*)
 
 
 (* ::Subsubsection:: *)
@@ -195,7 +210,7 @@ End[];
 
 
 (* ::Input:: *)
-(*testfile=kernelPath<>"test/test6.";*)
+(*testfile=kernelPath<>"test/test7.";*)
 (*testjson=tokenize[testfile<>"sml"][["Tokenizer"]];*)
 (*(*Export[testfile<>"tokenizer.json",testjson];*)*)
 (*testdata=parse[testfile<>"json"];*)

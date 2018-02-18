@@ -5,45 +5,7 @@
 
 tokenize::nfound = "Cannot find file `1`.";
 
-number=integer~~""|("."~~unsigned);
-expression=(integer~~""|("/"|"."~~unsigned))|("Log2("~~unsigned~~")");
-string=Except["\""|"("|")"|"{"|"}"|"["|"]"|"<"|">"]..;
-subtrack=Nest[(("{"~~#~~"}")|Except["{"|"}"])...&,Except["{"|"}"]...,4];
-argument=expression|("\""~~string~~"\"")|("{"~~subtrack~~"}");
-
-(* notation *)
-orderListC=""|rep[unsigned~~""|("~"~~unsigned),","];
-orderListP=""|rep[unsigned~~""|("~"~~unsigned),"."];
-orderTok=Union@@StringCases[#,{
-	n:integer~~"~"~~m:integer:>Range[ToExpression@n,ToExpression@m],
-	n:integer:>{ToExpression@n}
-}]&;
-notationPadded=RE["[&\\|\\s\\^\\*]*"];
-notationPatt=Alternatives[
-	"+"|"ToCoda"|"Coda"|"s"|"Segno"|"DC"|"DaCapo"|"DS"|"DaSegno",
-	"||:"|":||"|("["~~orderListP~~".]")|Whitespace,
-	("/"~~orderListC~~":")|"|"|"/"|"^"|"&"|"*"
-];
-notationTok=StringCases[{
-	space:Whitespace:><|"Type"->"Whitespace","Content"->space|>,
-	"||:":><|"Type"->"RepeatBegin"|>,
-	":||":><|"Type"->"RepeatEnd"|>,
-	"["~~ol:orderListP~~".]":><|"Type"->"Volta","Order"->orderTok[ol]|>,
-	bl:"/"~~ol:orderListC~~":":>
-		<|"Type"->"BarLine","Newline"->(bl=="\\"),"Skip"->False,"Order"->orderTok[ol]|>,
-	bl:"|"|"/":>
-		<|"Type"->"BarLine","Newline"->(bl=="\\"),"Skip"->(bl=="/"),"Order"->{0}|>,
-	"^":><|"Type"->"Tie"|>,
-	"&":><|"Type"->"PedalPress"|>,
-	"*":><|"Type"->"PedalRelease"|>,
-	"+"|"ToCoda"|"Coda":><|"Type"->"Coda"|>,
-	"s"|"Segno":><|"Type"->"Segno"|>,
-	"DC"|"DaCapo":><|"Type"->"DaCapo"|>,
-	"DS"|"DaSegno":><|"Type"->"DaSegno"|>
-}];
-
 typeHead="$"|"%"|"&"|"!"|"@";
-typeName=<|"$"->"String","%"->"Expression","@"->"Subtrack","&"->"Object","!"->"Number"|>;
 contextList={"End","Chord","Function","Track"};
 settingList={
 	"MaxRecursion","StaffDisplay","ForcedSpace",
@@ -75,8 +37,7 @@ tokenize[filepath_]:=Block[
 		
 		syntax=syntaxTemplate,
 		chordPatt,macroPatt,
-		pitch,pitches,note,pitchTok,
-		objectPatt,objectTok,
+		pitch,note,pitchTok,
 		functionPatt,functionPattList,
 		functionTok,functionTokList,
 		argRule,argType,argData,
@@ -129,7 +90,7 @@ tokenize[filepath_]:=Block[
 						{item,{"Chord","Function"}}];
 						AppendTo[library,<|
 							"Type"->"Package",
-							"Path"->StringTake[value,{2,-2}],
+							"Path"->value,
 							"Content"->source[["Tokenizer","Library"]]
 						|>],
 					_,
@@ -177,36 +138,15 @@ tokenize[filepath_]:=Block[
 	|>;
 	If[StringTake[filepath,-4]==".smp"&&macroData=={},Return[return]];
 	
-	(* pitch *)
-	chordPatt=RE["["<>syntax[["Chord"]]<>"]*"];
-	pitch=join[degree,pitOp,chordPatt];
-	pitches=pitch|("["~~pitch..~~"]");
-	note=pitches~~pitOp~~volOp~~durOp~~postOp;
-	pitchTok=StringCases[sd:degree~~po:pitOp~~ch:chordPatt:>
-		<|"Degree"->sd,"PitOp"->po,"Chord"->ch|>
+	(* note *)
+	If[syntax[["Chord"]]!={},
+		chordPatt=RE["["<>syntax[["Chord"]]<>"]*"];
+		pitch=degree~~pitOp~~chordPatt;
+		note=pitch|("["~~pitch..~~"]")~~pitOp~~volOp~~durOp~~postOp;
+		pitchTok=StringCases[sd:degree~~po:pitOp~~ch:chordPatt:>
+			<|"Degree"->sd,"PitOp"->po,"Chord"->ch|>
+		];
 	];
-	
-	(* object *)
-	macroPatt="@"~~Alternatives@@syntax[["Macro"]];
-	objectPatt=("{"~~subtrack~~"}")|note|macroPatt;
-	objectTok=StringCases[{
-		"{"~~n:unsigned~~"*"~~sub:subtrack~~"}":>
-			<|"Type"->"Subtrack","Content"->trackTok[sub],"Repeat"->-ToExpression@n|>,
-		"{"~~sub:subtrack~~"}":>
-			<|"Type"->"Subtrack","Content"->trackTok[sub],"Repeat"->Max[-1,
-				StringCases[sub,"/"~~i:orderListC~~":":>orderTok[i]]
-			]|>,
-		""|"["~~pts:pitch..~~"]"|""~~pit:pitOp~~vol:volOp~~dur:durOp~~pst:postOp:>
-			<|
-				"Type"->"Note",
-				"Pitches"->pitchTok[pts],
-				"PitOp"->pit,
-				"DurOp"->dur,
-				"VolOp"->vol,
-				"Staccato"->StringCount[pst,"`"]
-			|>,
-		"@"~~mcr:Alternatives@@syntax[["Macro"]]:><|"Type"->"Macrotrack","Name"->mcr|>
-	}];
 	
 	(* function unsimplified *)
 	argumentTok=StringCases[{
@@ -231,14 +171,21 @@ tokenize[filepath_]:=Block[
 	}][[1]]&};
 	
 	(* function simplified *)
+	macroPatt="@"~~Alternatives@@syntax[["Macro"]];
 	object=("{"~~subtrack~~"}")|(notationPadded~~note|macroPatt~~notationPadded);
 	typePatt=<|"$"->string,"%"->expression,"&"->object,"!"->number,"@"->note..|>;
 	typeTok[type_,str_]:=Switch[type,
-		"String",<|"Type"->"String","Content"->str|>,
-		"Expression",<|"Type"->"Expression","Content"->str|>,
-		"Number",<|"Type"->"Expression","Content"->str|>,
-		"Subtrack",<|"Type"->"Subtrack","Content"->trackTok[str],"Repeat"->-1|>,
-		"Object",<|"Type"->"Subtrack","Content"->trackTok[str],"Repeat"->-1|>
+		"$",<|"Type"->"String","Content"->str|>,
+		"%",<|"Type"->"Expression","Content"->str|>,
+		"!",<|"Type"->"Real","Content"->str|>,
+		"&",<|"Type"->"Subtrack","Content"->trackTok[str],"Repeat"->-1|>,
+		"@",<|"Type"->"Subtrack","Content"->StringCases[str,
+			pts:pitch|("["~~pitch..~~"]")~~pit:pitOp~~vol:volOp~~dur:durOp~~pst:postOp:><|
+				"Type"->"Note","Pitches"->pitchTok[pts],
+				"PitOp"->pit,"DurOp"->dur,"VolOp"->vol,
+				"Staccato"->StringCount[pst,"`"]
+			|>
+		],"Repeat"->-1|>
 	];
 	Do[
 		argData=syntax[["Function",funcCount]];
@@ -249,7 +196,7 @@ tokenize[filepath_]:=Block[
 				char_:>char
 			}]];
 			argType=#[[1]]&/@SortBy[
-				StringCases[abbr,hd:typeHead~~id:DigitCharacter:>{typeName[[hd]],id}],
+				StringCases[abbr,hd:typeHead~~id:DigitCharacter:>{hd,id}],
 			#[[2]]&];
 			argRule=StringExpression@@StringCases[abbr,{
 				"\\"~~char_:>char,
@@ -279,7 +226,18 @@ tokenize[filepath_]:=Block[
 	
 	trackTok=StringCases[{
 		func:functionPatt:>functionTok[func],
-		objt:objectPatt:>objectTok[objt][[1]],
+		"{"~~n:unsigned~~"*"~~sub:subtrack~~"}":>
+			<|"Type"->"Subtrack","Content"->trackTok[sub],"Repeat"->-ToExpression@n|>,
+		"{"~~sub:subtrack~~"}":>
+			<|"Type"->"Subtrack","Content"->trackTok[sub],"Repeat"->Max[-1,
+				StringCases[sub,"/"~~i:orderListC~~":":>orderTok[i]]
+			]|>,
+		pts:pitch|("["~~pitch..~~"]")~~pit:pitOp~~vol:volOp~~dur:durOp~~pst:postOp:><|
+			"Type"->"Note","Pitches"->pitchTok[pts],
+			"PitOp"->pit,"DurOp"->dur,"VolOp"->vol,
+			"Staccato"->StringCount[pst,"`"]
+		|>,
+		"@"~~mcr:Alternatives@@syntax[["Macro"]]:><|"Type"->"Macrotrack","Name"->mcr|>,
 		nota:notationPatt:>notationTok[nota][[1]],
 		und_:><|"Type"->"Undefined","Content"->und|>
 	}];

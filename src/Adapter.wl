@@ -19,8 +19,6 @@ ExternalEvaluate[JS,"
 "]
 
 
-Begin["SMML`"];
-
 parse::usage = "\!\(\*RowBox[{\"parse\",\"[\",RowBox[{
 StyleBox[\"filepath\",\"TI\"],\",\",StyleBox[\"partspec\",\"TI\"]
 }],\"]\"}]\)\n\!\(\*RowBox[{\"parse\",\"[\",RowBox[{
@@ -159,9 +157,6 @@ audioAdapt[rawData_]:=Block[
 		{musicClip[["FadeIn"]],musicClip[["FadeOut"]]}],
 	{musicClip,musicClips}]]];
 ];
-
-End[];
-
 
 
 

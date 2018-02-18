@@ -156,7 +156,7 @@ class TrackParser {
         }
 
         if (!this.isSubtrack && !((localContext.leftIncomplete === this.Settings.Bar && localContext.rightIncomplete === this.Settings.Bar) || (localContext.leftIncomplete + localContext.rightIncomplete === this.Settings.Bar))) {
-            this.Context.warnings.push(new Error('Not enough'))
+            this.Context.warnings.push(new Error('Not enough as head or tail'))
         }
         const returnObj = {
             Content: result,
@@ -204,21 +204,35 @@ class TrackParser {
         // this.Context.pitchQueue.push(...subtrack.Meta.PitchQueue)
         this.Context.startTime += subtrack.Meta.Duration
         this.Context.notesBeforeTie = subtrack.Meta.NotesBeforeTie
+        this.Context.warnings.push(...subtrack.Meta.Warnings)
         if (localContext.subtrackTemp.Meta.Single) {
             if (localContext.leftFirst) {
                 localContext.leftIncomplete += localContext.subtrackTemp.Meta.Incomplete[0]
+                if (this.isLegalBar(localContext.leftIncomplete)) {
+                    localContext.leftFirst = false
+                    localContext.rightIncomplete = 0
+                }
             } else {
                 localContext.rightIncomplete += localContext.subtrackTemp.Meta.Incomplete[0]
+                if (this.isLegalBar(localContext.rightIncomplete)) {
+                    localContext.rightIncomplete = 0
+                }
             }
         } else {
             if (localContext.leftFirst) {
                 localContext.leftIncomplete += localContext.subtrackTemp.Meta.Incomplete[0]
                 localContext.leftFirst = false
                 localContext.rightIncomplete = localContext.subtrackTemp.Meta.Incomplete[1]
+                if (this.isLegalBar(localContext.rightIncomplete)) {
+                    localContext.rightIncomplete = 0
+                }
             } else {
                 localContext.rightIncomplete += localContext.subtrackTemp.Meta.Incomplete[0]
-                if (!this.isLegalBar(localContext.rightIncomplete)) this.Context.warnings.push(new Error('Not enough'))
+                if (!this.isLegalBar(localContext.rightIncomplete)) this.Context.warnings.push(new Error('Not enough subtrack ret'))
                 localContext.rightIncomplete = localContext.subtrackTemp.Meta.Incomplete[1]
+                if (this.isLegalBar(localContext.rightIncomplete)) {
+                    localContext.rightIncomplete = 0
+                }
             }
         }
     }
@@ -236,7 +250,7 @@ class TrackParser {
         localContext.leftFirst = false
         if (barLine.Terminal !== true) {
             if (!this.isLegalBar(localContext.rightIncomplete)) {
-                this.Context.warnings.push(new Error('Not enough'))
+                this.Context.warnings.push(new Error('Not enough middle bar'))
             }
             localContext.rightIncomplete = 0
         }
@@ -252,17 +266,17 @@ class TrackParser {
         const beat = this.parseBeat(note)
         const duration = beat * 60 / this.Settings.Speed
         const actualDuration = duration * (1 - this.Settings.Stac[note.Staccato])
-        const volumeScale = note.VolumeOperators.split('').reduce((sum, cur) => sum * cur === '>' ? this.Settings.Accent : cur === ':' ? this.Settings.Light : 1, 1)
+        const volumeScale = note.VolOp.split('').reduce((sum, cur) => sum * cur === '>' ? this.Settings.Accent : cur === ':' ? this.Settings.Light : 1, 1)
         const volume = this.Settings.Volume * volumeScale
 
         // calculate pitch array and record it for further trace
-        const pitchDelta = this.parseDeltaPitch(note.PitchOperators)
-        if (note.Pitches.length === 1 && note.Pitches[0].ScaleDegree === '%') {
+        const pitchDelta = this.parseDeltaPitch(note.PitOp)
+        if (note.Pitches.length === 1 && note.Pitches[0].Degree === '%') {
             pitches.push(...this.Context.pitchQueue[this.Context.pitchQueue.length - this.Settings.Trace])
         } else {
             for (const pitch of note.Pitches) {
-                if (pitch.ScaleDegree === '0') continue
-                if (pitch.ScaleDegree === 'x') {
+                if (pitch.Degree === '0') continue
+                if (pitch.Degree === 'x') {
                     pitches.push(null)
                 } else if (pitch.Chord === '') {
                     pitches.push(this.parsePitch(pitch) + pitchDelta)
@@ -341,7 +355,7 @@ class TrackParser {
      * @returns {number}
      */
     parsePitch(pitch) {
-        return this.Settings.Key + this.Settings.Octave * 12 + TrackParser.pitchDict[pitch.ScaleDegree] + this.parseDeltaPitch(pitch.PitchOperators)
+        return this.Settings.Key + this.Settings.Octave * 12 + TrackParser.pitchDict[pitch.Degree] + this.parseDeltaPitch(pitch.PitOp)
     }
 
     parseDeltaPitch(pitchOperators) {
@@ -357,9 +371,9 @@ class TrackParser {
         let duration = 1
         let pointer = 0
         let dotCount = 0
-        const length = note.DurationOperators.length
+        const length = note.DurOp.length
         while (pointer < length) {
-            const char = note.DurationOperators.charAt(pointer)
+            const char = note.DurOp.charAt(pointer)
             switch (char) {
             case '=':
                 duration /= 4
@@ -376,7 +390,7 @@ class TrackParser {
             case '.':
                 dotCount = 1
                 pointer += 1
-                while (note.DurationOperators.charAt(pointer) === '.') {
+                while (note.DurOp.charAt(pointer) === '.') {
                     dotCount += 1
                     pointer += 1
                 }
@@ -405,6 +419,16 @@ class SubtrackParser extends TrackParser {
 
     preprocess() {
         this.mergeMacro()
+        if (this.Repeat !== -1 && this.Content.length >= 1) {
+            const last = this.Content[this.Content.length - 1]
+            if (last.Type !== 'BarLine') {
+                this.Content.push({
+                    Type: 'BarLine',
+                    Skip: false,
+                    Order: [0]
+                })
+            }
+        }
         if (this.Repeat > 0) {
             const temp = []
             const repeatArray = this.Content.filter((token) => token.Type === 'BarLine' && token.Order[0] !== 0)

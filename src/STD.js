@@ -213,11 +213,11 @@ module.exports = {
         if (keyOct.endsWith('\'')) {
             splitIndex = keyOct.indexOf('\'')
             key = keyOct.slice(0, splitIndex)
-            oct = keyOct.length - splitIndex + 1
+            oct = keyOct.length - splitIndex
         } else if (keyOct.endsWith(',')) {
-            splitIndex = keyOct.indexOf('\'')
+            splitIndex = keyOct.indexOf(',')
             key = keyOct.slice(0, splitIndex)
-            oct = keyOct.length - splitIndex + 1
+            oct = splitIndex - keyOct.length
         } else {
             key = keyOct
             oct = 0

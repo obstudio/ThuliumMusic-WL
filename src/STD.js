@@ -10,7 +10,7 @@ module.exports = {
         for (let i = 0; i < num; i++) {
             const startTime = i * pow
             for (let j = 0; j < length; j++) {
-                result.push(Object.assign({}, t.Content[j]), { StartTime: startTime, Duration: pow })
+                result.push(Object.assign({}, t.Content[j], { StartTime: startTime, Duration: pow }))
             }
         }
 

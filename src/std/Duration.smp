@@ -1,5 +1,5 @@
 //SMML Standard Package - Duration
-//Updated: 2018.2.17.
+//Updated: 2018.2.18.
 
 # Function
 
@@ -13,7 +13,7 @@ Tremolo1(expr, subtrack) {
     for (let i = 0; i < num; i++) {
         const startTime = i * pow
         for (let j = 0; j < length; j++) {
-            result.push(Object.assign({}, t.Content[j]), { StartTime: startTime, Duration: pow })
+            result.push(Object.assign({}, t.Content[j], { StartTime: startTime, Duration: pow }))
         }
     }
 

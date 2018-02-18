@@ -27,7 +27,7 @@ Oct(oct) {
     this.Settings.assignSetting('Octave', oct, (octave) => Number.isInteger(octave))
 }
 
-KeyOct(key, oct) {
+KeyOct(keyOct) {
     /**** (1=$1) ****/
     let key, oct, splitIndex
     if (keyOct.endsWith('\'')) {

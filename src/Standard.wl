@@ -1,56 +1,187 @@
 (* ::Package:: *)
 
-number=integer~~""|("."~~unsigned);
-expression=(integer~~""|("/"|"."~~unsigned))|("Log2("~~unsigned~~")");
-string=Except["\""|"("|")"|"{"|"}"|"["|"]"|"<"|">"]..;
-subtrack=Nest[(("{"~~#~~"}")|Except["{"|"}"])...&,Except["{"|"}"]...,4];
-argument=expression|("\""~~string~~"\"")|("{"~~subtrack~~"}");
+(* chord *)
+chordPack["Standard"]="adhHijkmMpoPqQstTu";
 
-(* notation *)
-orderListC="(\\d+(~\\d+)?(,\\d+(~\\d+)?)*)?";
-orderListP="(\\d+(~\\d+)?\\.)*";
-orderTok=Union@@StringCases[#,{
-	n:integer~~"~"~~m:integer:>Range[ToExpression@n,ToExpression@m],
-	n:integer:>{ToExpression@n}
-}]&;
-notationPadded=RE["[&\\|\\s\\^\\*]*"];
-notationPatt=Alternatives[
-	"+"|"ToCoda"|"Coda"|"s"|"Segno"|"DC"|"DaCapo"|"DS"|"DaSegno",
-	"||:"|":||"|("["~~orderListP~~".]")|Whitespace,
-	("/"~~orderListC~~":")|"|"|"/"|"^"|"&"|"*"
-];
-notationTok=StringCases[{
-	space:Whitespace:><|"Type"->"Whitespace","Content"->space|>,
-	"||:":><|"Type"->"RepeatBegin"|>,
-	":||":><|"Type"->"RepeatEnd"|>,
-	"["~~ol:orderListP~~".]":><|"Type"->"Volta","Order"->orderTok[ol]|>,
-	bl:"/"~~ol:orderListC~~":":>
-		<|"Type"->"BarLine","Newline"->(bl=="\\"),"Skip"->False,"Order"->orderTok[ol]|>,
-	bl:"|"|"/":>
-		<|"Type"->"BarLine","Newline"->(bl=="\\"),"Skip"->(bl=="/"),"Order"->{0}|>,
-	"^":><|"Type"->"Tie"|>,
-	"&":><|"Type"->"PedalPress"|>,
-	"*":><|"Type"->"PedalRelease"|>,
-	"+"|"ToCoda"|"Coda":><|"Type"->"Coda"|>,
-	"s"|"Segno":><|"Type"->"Segno"|>,
-	"DC"|"DaCapo":><|"Type"->"DaCapo"|>,
-	"DS"|"DaSegno":><|"Type"->"DaSegno"|>
-}];
-
-(* pitch *)
-postOp=RE["`{0,2}"];
-volOp=RE["[:>]*"];
-pitOp=RE["[#b',]*"];
-durOp=RE["[\\-._=]*"];
-degree=RE["[0-7%x]"];
-chordPatt=RE["[adhHijkmMpoPqQstTu]*"];
-pitch=degree~~pitOp~~chordPatt;
-note=pitch|("["~~pitch..~~"]")~~pitOp~~volOp~~durOp~~postOp;
-pitchTok=StringCases[sd:degree~~po:pitOp~~ch:chordPatt:>
-	<|"Degree"->sd,"PitOp"->po,"Chord"->ch|>
-];
+(* function list *)
+funcNamePack["Standard"]=Alternatives[
 	
+	(* operator functions *)
+	"Tremolo1","Tremolo2",
+	"Portamento","Fermata","Tuplet",
+	"GraceNote","Appoggiatura","Arpeggio",
+	
+	(* assignment functions *)
+	"Key","Oct","KeyOct","ConOct","Vol",
+	"Spd","Bar","Beat","BarBeat","Dur",
+	"Acct","Light","Trace","Stac",
+	"FadeIn","FadeOut","Rev",
+	"Ferm","Port","Seg"
+	
+];
 
-
-
+(* function simplified *)
+funcSimpPack["Standard"]:=Sequence[
+	
+	arg2:objectPatt~~"("~~arg1:expression~~"=)"~~arg3:objectPatt:><|
+		"Type"->"FUNCTION",
+		"Name"->"Tremolo1",
+		"Simplified"->True,
+		"Argument"->{
+			<|"Type"->"Expression","Content"->arg1|>,
+			<|"Type"->"Subtrack","Content"->objectTok[arg2],"Repeat"->-1|>,
+			<|"Type"->"Subtrack","Content"->objectTok[arg3],"Repeat"->-1|>
+		}
+	|>,
+	arg1:objectPatt~~"~"~~arg2:objectPatt:><|
+		"Type"->"FUNCTION",
+		"Name"->"Portamento",
+		"Simplified"->True,
+		"Argument"->{
+			<|"Type"->"Subtrack","Content"->objectTok[arg1],"Repeat"->-1|>,
+			<|"Type"->"Subtrack","Content"->objectTok[arg2],"Repeat"->-1|>
+		}
+	|>,
+	arg1:objectPatt~~"(^"~~arg2:notePatt..~~")":><|
+		"Type"->"FUNCTION",
+		"Name"->"Appoggiatura",
+		"Simplified"->True,
+		"Argument"->{
+			<|"Type"->"Subtrack","Content"->objectTok[arg1],"Repeat"->-1|>,
+			<|"Type"->"Subtrack","Content"->StringCases[arg2,noteRule],"Repeat"->-1|>
+		}
+	|>,
+	"("~~arg1:number~~"~)"~~arg2:objectPatt:><|
+		"Type"->"FUNCTION",
+		"Name"->"Tuplet",
+		"Simplified"->True,
+		"Argument"->{
+			<|"Type"->"Number","Content"->ToExpression[arg1]|>,
+			<|"Type"->"Subtrack","Content"->objectTok[arg2],"Repeat"->-1|>
+		}
+	|>,
+	"("~~arg1:notePatt..~~"^)"~~arg2:objectPatt:><|
+		"Type"->"FUNCTION",
+		"Name"->"GraceNote",
+		"Simplified"->True,
+		"Argument"->{
+			<|"Type"->"Subtrack","Content"->StringCases[arg1,noteRule],"Repeat"->-1|>,
+			<|"Type"->"Subtrack","Content"->objectTok[arg2],"Repeat"->-1|>
+		}
+	|>,
+	"("~~arg1:expression~~"-)"~~arg2:objectPatt:><|
+		"Type"->"FUNCTION",
+		"Name"->"Tremolo1",
+		"Simplified"->True,
+		"Argument"->{
+			<|"Type"->"Expression","Content"->arg1|>,
+			<|"Type"->"Subtrack","Content"->objectTok[arg2],"Repeat"->-1|>
+		}
+	|>,
+	"$"~~arg1:objectPatt:><|
+		"Type"->"FUNCTION",
+		"Name"->"Arpeggio",
+		"Simplified"->True,
+		"Argument"->{
+			<|"Type"->"Subtrack","Content"->objectTok[arg1],"Repeat"->-1|>
+		}
+	|>,
+	"(.)"~~arg1:objectPatt:><|
+		"Type"->"FUNCTION",
+		"Name"->"Fermata",
+		"Simplified"->True,
+		"Argument"->{
+			<|"Type"->"Subtrack","Content"->objectTok[arg1],"Repeat"->-1|>
+		}
+	|>,
+	"(Seg:"~~arg1:expression~~")":><|
+		"Type"->"FUNCTION",
+		"Name"->"Seg",
+		"Simplified"->True,
+		"Argument"->{
+			<|"Type"->"Expression","Content"->arg1|>
+		}
+	|>,
+	"(Port:"~~arg1:expression~~")":><|
+		"Type"->"FUNCTION",
+		"Name"->"Port",
+		"Simplified"->True,
+		"Argument"->{
+			<|"Type"->"Expression","Content"->arg1|>
+		}
+	|>,
+	"(Ferm:"~~arg1:expression~~")":><|
+		"Type"->"FUNCTION",
+		"Name"->"Ferm",
+		"Simplified"->True,
+		"Argument"->{
+			<|"Type"->"Expression","Content"->arg1|>
+		}
+	|>,
+	"(Stac:"~~arg1:expression~~")":><|
+		"Type"->"FUNCTION",
+		"Name"->"Stac",
+		"Simplified"->True,
+		"Argument"->{
+			<|"Type"->"Expression","Content"->arg1|>
+		}
+	|>,
+	"(Trace:"~~arg1:number~~")":><|
+		"Type"->"FUNCTION",
+		"Name"->"Trace",
+		"Simplified"->True,
+		"Argument"->{
+			<|"Type"->"Number","Content"->ToExpression[arg1]|>
+		}
+	|>,
+	"(Dur:"~~arg1:expression~~")":><|
+		"Type"->"FUNCTION",
+		"Name"->"Dur",
+		"Simplified"->True,
+		"Argument"->{
+			<|"Type"->"Expression","Content"->arg1|>
+		}
+	|>,
+	"(Oct:"~~arg1:number~~")":><|
+		"Type"->"FUNCTION",
+		"Name"->"Oct",
+		"Simplified"->True,
+		"Argument"->{
+			<|"Type"->"Number","Content"->ToExpression[arg1]|>
+		}
+	|>,
+	"("~~arg1:number~~"/"~~arg2:number~~")":><|
+		"Type"->"FUNCTION",
+		"Name"->"BarBeat",
+		"Simplified"->True,
+		"Argument"->{
+			<|"Type"->"Number","Content"->ToExpression[arg1]|>,
+			<|"Type"->"Number","Content"->ToExpression[arg2]|>
+		}
+	|>,
+	"(1="~~arg1:string~~")":><|
+		"Type"->"FUNCTION",
+		"Name"->"KeyOct",
+		"Simplified"->True,
+		"Argument"->{
+			<|"Type"->"String","Content"->arg1|>
+		}
+	|>,
+	"("~~arg1:number~~"%)":><|
+		"Type"->"FUNCTION",
+		"Name"->"Vol",
+		"Simplified"->True,
+		"Argument"->{
+			<|"Type"->"Number","Content"->ToExpression[arg1]|>
+		}
+	|>,
+	"("~~arg1:number~~")":><|
+		"Type"->"FUNCTION",
+		"Name"->"Spd",
+		"Simplified"->True,
+		"Argument"->{
+			<|"Type"->"Number","Content"->ToExpression[arg1]|>
+		}
+	|>
+];
 

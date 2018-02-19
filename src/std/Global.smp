@@ -84,26 +84,15 @@ Trace(count) {
 }
 
 FadeIn(time) {
-    /**** (FadeIn:!1) ****/
     this.Settings.assignSetting('FadeIn', time, (time) => time >= 0)
 }
 
 FadeOut(time) {
-    /**** (FadeOut:!1) ****/
     this.Settings.assignSetting('FadeOut', time, (time) => time >= 0)
 }
 
 Rev(r) {
-    /**** (Rev:!1) ****/
     this.Settings.assignSetting('Rev', r, () => true)
-}
-
-setVar(key, value) {
-    this.Settings.Var[key] = value
-}
-
-getVar(key, defaultValue = null) {
-    return this.Settings.Var[key] ? this.Var[key] : defaultValue
 }
 
 Stac(restProportion, index = 1) {

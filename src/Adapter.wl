@@ -7,6 +7,8 @@
 kernelPath=StringReplace[NotebookDirectory[],"\\"->"/"];
 temp[]:=kernelPath<>"tmp$"<>ToString[Floor@SessionTime[]]<>".json";
 Get[kernelPath<>"Tokenizer.wl"];
+<<(kernelPath<>"Syntax.wl");
+<<(kernelPath<>"Standard.wl");
 MIDIStop=Sound`StopMIDI;
 JS=StartExternalSession["NodeJS"];
 ExternalEvaluate[JS,File[kernelPath<>"SMML.js"]]
@@ -68,6 +70,7 @@ parse[filepath_,partspec_]:=Block[
 			Message[parse::nsuffix];Return[];
 	];
 	If[FailureQ[rawData],
+		Echo[rawData];
 		Message[parse::failure];
 		Return[];
 	];
@@ -165,10 +168,6 @@ audioAdapt[rawData_]:=Block[
 
 
 (* ::Input:: *)
-(*data*)
-
-
-(* ::Input:: *)
 (*midiAdapt[data]*)
 
 
@@ -183,7 +182,7 @@ audioAdapt[rawData_]:=Block[
 (* ::Input:: *)
 (*MIDIStop[];EmitSound[#[[2]]]&@*)
 (*EchoFunction["time: ",#[[1]]&]@*)
-(*Timing[midiAdapt[parse[kernelPath<>"test/test7.sml"]]];*)
+(*Timing[midiAdapt[parse[kernelPath<>"test/test6.sml"]]];*)
 
 
 (* ::Subsubsection:: *)

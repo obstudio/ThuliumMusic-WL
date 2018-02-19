@@ -1,8 +1,5 @@
 (* ::Package:: *)
 
-<<(NotebookDirectory[]<>"Syntax.wl");
-<<(NotebookDirectory[]<>"Standard.wl");
-
 tokenize::nfound = "Cannot find file `1`.";
 
 typeHead="$"|"%"|"&"|"!"|"@";
@@ -21,6 +18,12 @@ blankLineQ[str_]:=Or[
 	StringStartsQ[str,"//"]
 ];
 
+postOp=RE["`{0,2}"];
+volOp=RE["[:>]*"];
+pitOp=RE["[#b',]*"];
+durOp=RE["[\\-._=]*"];
+degree=RE["[0-7%x]"];
+
 tokenize[filepath_]:=Block[
 	{
 		rawData={},line,
@@ -37,13 +40,16 @@ tokenize[filepath_]:=Block[
 		
 		syntax=syntaxTemplate,
 		chordPatt,macroPatt,
-		pitch,note,pitchTok,
-		functionPatt,functionPattList,
-		functionTok,functionTokList,
+		pitch,notePatt,pitchTok,
+		functionPatt,functionPattList={},
+		functionTok,functionTokList={},
 		argRule,argType,argData,
 		typePatt,typeTok,
-		funcName,argumentTok,
-		object,trackTok
+		funcName,noteRule,
+		objectPatt,trackTok,
+		bracketRule,objectTok,
+		
+		StartingTime=SessionTime[]
 	},
 	
 	If[FileExistsQ[filepath],
@@ -139,53 +145,34 @@ tokenize[filepath_]:=Block[
 	If[StringTake[filepath,-4]==".smp"&&macroData=={},Return[return]];
 	
 	(* note *)
-	If[syntax[["Chord"]]!={},
-		chordPatt=RE["["<>syntax[["Chord"]]<>"]*"];
-		pitch=degree~~pitOp~~chordPatt;
-		note=pitch|("["~~pitch..~~"]")~~pitOp~~volOp~~durOp~~postOp;
-		pitchTok=StringCases[sd:degree~~po:pitOp~~ch:chordPatt:>
-			<|"Degree"->sd,"PitOp"->po,"Chord"->ch|>
-		];
+	chordPatt=RE["["<>chordPack["Standard"]<>syntax[["Chord"]]<>"]*"];
+	pitch=degree~~pitOp~~chordPatt;
+	notePatt=pitch|("["~~pitch..~~"]")~~pitOp~~volOp~~durOp~~postOp;
+	pitchTok=StringCases[sd:degree~~po:pitOp~~ch:chordPatt:>
+		<|"Degree"->sd,"PitOp"->po,"Chord"->ch|>
 	];
-	
-	(* function unsimplified *)
-	argumentTok=StringCases[{
-		arg:expression:><|"Type"->"Expression","Content"->arg|>,
-		"\""~~arg:string~~"\"":><|"Type"->"String","Content"->arg|>,
-		"{"~~n:unsigned~~"*"~~arg:subtrack~~"}":>
-			<|"Type"->"Subtrack","Content"->trackTok[arg],"Repeat"->-ToExpression@n|>,
-		"{"~~arg:subtrack~~"}":>
-			<|"Type"->"Subtrack","Content"->trackTok[arg],"Repeat"->Max[-1,
-				StringCases[arg,"/"~~i:orderListC~~":":>orderTok[i]]
-			]|>
-	}];
-	funcName=Alternatives@@syntax[["Function",All,"Name"]];
-	functionPattList={funcName~~"("~~rep[argument]~~")"};
-	functionTokList={StringCases[#,{
-		name:funcName~~"("~~arglist:rep[argument]~~")":><|
-			"Type"->"FUNCTION",
-			"Name"->name,
-			"Simplified"->False,
-			"Argument"->argumentTok[arglist]
-		|>
-	}][[1]]&};
+	noteRule=pts:pitch|("["~~pitch..~~"]")~~pit:pitOp~~vol:volOp~~dur:durOp~~pst:postOp:><|
+		"Type"->"Note","Pitches"->pitchTok[pts],
+		"PitOp"->pit,"DurOp"->dur,"VolOp"->vol,
+		"Staccato"->StringCount[pst,"`"]
+	|>;
 	
 	(* function simplified *)
 	macroPatt="@"~~Alternatives@@syntax[["Macro"]];
-	object=("{"~~subtrack~~"}")|(notationPadded~~note|macroPatt~~notationPadded);
-	typePatt=<|"$"->string,"%"->expression,"&"->object,"!"->number,"@"->note..|>;
+	objectPatt=("{"~~subtrack~~"}")|(notationPadded~~notePatt|macroPatt~~notationPadded);
+	objectTok=StringCases[{
+		bracketRule,
+		noteRule,
+		"@"~~mcr:Alternatives@@syntax[["Macro"]]:><|"Type"->"Macrotrack","Name"->mcr|>,
+		nota:notationPatt:>notationTok[nota][[1]]
+	}];
+	typePatt=<|"$"->string,"%"->expression,"&"->objectPatt,"!"->number,"@"->notePatt..|>;
 	typeTok[type_,str_]:=Switch[type,
 		"$",<|"Type"->"String","Content"->str|>,
 		"%",<|"Type"->"Expression","Content"->str|>,
-		"!",<|"Type"->"Real","Content"->str|>,
-		"&",<|"Type"->"Subtrack","Content"->trackTok[str],"Repeat"->-1|>,
-		"@",<|"Type"->"Subtrack","Content"->StringCases[str,
-			pts:pitch|("["~~pitch..~~"]")~~pit:pitOp~~vol:volOp~~dur:durOp~~pst:postOp:><|
-				"Type"->"Note","Pitches"->pitchTok[pts],
-				"PitOp"->pit,"DurOp"->dur,"VolOp"->vol,
-				"Staccato"->StringCount[pst,"`"]
-			|>
-		],"Repeat"->-1|>
+		"!",<|"Type"->"Number","Content"->ToExpression[str]|>,
+		"&",<|"Type"->"Subtrack","Content"->objectTok[str],"Repeat"->-1|>,
+		"@",<|"Type"->"Subtrack","Content"->StringCases[str,noteRule],"Repeat"->-1|>
 	];
 	Do[
 		argData=syntax[["Function",funcCount]];
@@ -218,27 +205,39 @@ tokenize[filepath_]:=Block[
 		{abbr,argData[["Syntax"]]}],
 	{funcCount,Length@syntax[["Function"]]}];
 	
+	funcName=funcNamePack["Standard"]|Alternatives@@syntax[["Function",All,"Name"]];
 	functionPatt=Alternatives@@functionPattList;
 	functionTok[str_]:=Block[{pattID},
 		pattID=LengthWhile[functionPattList,!StringMatchQ[str,#]&]+1;
 		Return[functionTokList[[pattID]][str]];
 	];
 	
-	trackTok=StringCases[{
-		func:functionPatt:>functionTok[func],
+	bracketRule=Sequence[
 		"{"~~n:unsigned~~"*"~~sub:subtrack~~"}":>
 			<|"Type"->"Subtrack","Content"->trackTok[sub],"Repeat"->-ToExpression@n|>,
 		"{"~~sub:subtrack~~"}":>
 			<|"Type"->"Subtrack","Content"->trackTok[sub],"Repeat"->Max[-1,
 				StringCases[sub,"/"~~i:orderListC~~":":>orderTok[i]]
-			]|>,
-		pts:pitch|("["~~pitch..~~"]")~~pit:pitOp~~vol:volOp~~dur:durOp~~pst:postOp:><|
-			"Type"->"Note","Pitches"->pitchTok[pts],
-			"PitOp"->pit,"DurOp"->dur,"VolOp"->vol,
-			"Staccato"->StringCount[pst,"`"]
-		|>,
+			]|>
+	];
+	
+	trackTok=StringCases[{
+		func:functionPatt:>functionTok[func],
+		funcSimpPack["Standard"],
+		noteRule,
+		bracketRule,
 		"@"~~mcr:Alternatives@@syntax[["Macro"]]:><|"Type"->"Macrotrack","Name"->mcr|>,
 		nota:notationPatt:>notationTok[nota][[1]],
+		name:funcName~~"("~~arglist:rep[argument]~~")":><|
+			"Type"->"FUNCTION",
+			"Name"->name,
+			"Simplified"->False,
+			"Argument"->StringCases[arglist,{
+				arg:expression:><|"Type"->"Expression","Content"->arg|>,
+				"\""~~arg:string~~"\"":><|"Type"->"String","Content"->arg|>,
+				bracketRule
+			}]
+		|>,
 		und_:><|"Type"->"Undefined","Content"->und|>
 	}];
 	
@@ -318,4 +317,4 @@ tokenize[filepath_]:=Block[
 
 
 (* ::Input:: *)
-(*Export[NotebookDirectory[]<>"test/test7.json",tokenize[NotebookDirectory[]<>"test/test7.sml"][["Tokenizer"]]];//Timing*)
+(*Export[NotebookDirectory[]<>"test/test6.json",tokenize[NotebookDirectory[]<>"test/test6.sml"][["Tokenizer"]]];//Timing*)

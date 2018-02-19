@@ -4,26 +4,26 @@
 (*DeleteObject[JS];*)
 
 
-kernelPath=StringReplace[NotebookDirectory[],"\\"->"/"];
-temp[]:=kernelPath<>"tmp$"<>ToString[Floor@SessionTime[]]<>".json";
-Get[kernelPath<>"Tokenizer.wl"];
-<<(kernelPath<>"Syntax.wl");
-<<(kernelPath<>"Standard.wl");
+localPath=StringReplace[ParentDirectory[NotebookDirectory[]],"\\"->"/"];
+temp[]:=localPath<>"/src/tmp$"<>ToString[Floor@SessionTime[]]<>".json";
+<<(localPath<>"/src/Tokenizer.wl");
+<<(localPath<>"/src/Syntax.wl");
+<<(localPath<>"/package/Standard/.init.wl")
 MIDIStop=Sound`StopMIDI;
 JS=StartExternalSession["NodeJS"];
-ExternalEvaluate[JS,File[kernelPath<>"SMML.js"]]
+ExternalEvaluate[JS,File[localPath<>"/src/SMML.js"]]
 ExternalEvaluate[JS,"const fs = require('fs')"]
 ExternalEvaluate[JS,"
-	function parse(filePath) {
+	function Parse(filePath) {
 	    const data = JSON.parse(fs.readFileSync(filePath, 'utf8'))
 	    return new SMML.Parser(data).parse()
 	}
 "]
 
 
-parse::usage = "\!\(\*RowBox[{\"parse\",\"[\",RowBox[{
+Parse::usage = "\!\(\*RowBox[{\"Parse\",\"[\",RowBox[{
 StyleBox[\"filepath\",\"TI\"],\",\",StyleBox[\"partspec\",\"TI\"]
-}],\"]\"}]\)\n\!\(\*RowBox[{\"parse\",\"[\",RowBox[{
+}],\"]\"}]\)\n\!\(\*RowBox[{\"Parse\",\"[\",RowBox[{
 StyleBox[\"tokenizer\",\"TI\"],\",\",StyleBox[\"partspec\",\"TI\"]
 }],\"]\"}]\)
 
@@ -38,15 +38,15 @@ Valid part specification include:
 4. nonzero number {m,n}: parse from mth section to nth section.
 The default value of partspec is {1,-1}.";
 
-parse::nfound = "Cannot find file `1`.";
-parse::suffix = "Cannot parse file with suffix `1`.";
-parse::nsuffix = "Cannot parse file with no suffix.";
-parse::failure = "A failure occured in the process.";
-parse::invspec = "Part specification `1` is invalid.";
-parse::nosect = "No section was found through part specification `1`.";
+Parse::nfound = "Cannot find file `1`.";
+Parse::suffix = "Cannot Parse file with suffix `1`.";
+Parse::nsuffix = "Cannot Parse file with no suffix.";
+Parse::failure = "A failure occured in the process.";
+Parse::invspec = "Part specification `1` is invalid.";
+Parse::nosect = "No section was found through part specification `1`.";
 
-parse[filepath_]:=parse[filepath,{1,-1}];
-parse[filepath_,partspec_]:=Block[
+Parse[filepath_]:=Parse[filepath,{1,-1}];
+Parse[filepath_,partspec_]:=Block[
 	{
 		tempFile,rawData,
 		sectCount,abspec,
@@ -54,24 +54,24 @@ parse[filepath_,partspec_]:=Block[
 	},
 	Switch[filepath,
 		_?(!FileExistsQ@#&),                               (* file not found *)
-			Message[parse::nfound,filepath];Return[],
+			Message[Parse::nfound,filepath];Return[],
 		_?(StringEndsQ[".json"]),                           (* json *)
-			rawData=ExternalEvaluate[JS,"parse('"<>filepath<>"')"],
+			rawData=ExternalEvaluate[JS,"Parse('"<>filepath<>"')"],
 		_?(StringEndsQ[".sml"]),                            (* sml *)
 			tempFile=temp[];
-			Export[tempFile,tokenize[filepath][["Tokenizer"]]];
-			rawData=ExternalEvaluate[JS,"parse('"<>tempFile<>"')"];
+			Export[tempFile,Tokenize[filepath][["Tokenizer"]]];
+			rawData=ExternalEvaluate[JS,"Parse('"<>tempFile<>"')"];
 			DeleteFile[tempFile],
 		_?(StringEndsQ["."~~WordCharacter..]),              (* other files *)
-			Message[parse::suffix,
+			Message[Parse::suffix,
 				StringCases[filepath,"."~~sfx:WordCharacter..:>sfx][[-1]]
 			];Return[],
 		_,
-			Message[parse::nsuffix];Return[];
+			Message[Parse::nsuffix];Return[];
 	];
 	If[FailureQ[rawData],
 		Echo[rawData];
-		Message[parse::failure];
+		Message[Parse::failure];
 		Return[];
 	];
 	sectCount=Length@rawData;
@@ -86,16 +86,16 @@ parse[filepath_,partspec_]:=Block[
         _?(Negative[#]&&IntegerQ[#]&),
             startSect=sectCount+1+partspec;endSect=sectCount,
         _,
-            Message[parse::invspec,partspec]
+            Message[Parse::invspec,partspec]
     ];
     If[startSect>endSect,
-		Message[parse::nosect,partspec];Return[],
+		Message[Parse::nosect,partspec];Return[],
 		Return[rawData[[startSect;;endSect]]];
     ];
 	
 ];
 
-midiAdapt[rawData_]:=Block[
+MIDIAdapt[rawData_]:=Block[
     {
 		duration=0,
 		musicClip={}
@@ -115,7 +115,7 @@ midiAdapt[rawData_]:=Block[
 	Return[Sound@Flatten@musicClip];
 ];
 
-audioAdapt[rawData_]:=Block[
+AudioAdapt[rawData_]:=Block[
     {
 		duration=0,groups,
 		musicClips={},targetClip,
@@ -164,11 +164,11 @@ audioAdapt[rawData_]:=Block[
 
 
 (* ::Input:: *)
-(*data=parse[kernelPath<>"test/test7.sml"];*)
+(*data=Parse[localPath<>"/src/test/test7.sml"];*)
 
 
 (* ::Input:: *)
-(*midiAdapt[data]*)
+(*MIDIAdapt[data]*)
 
 
 (* ::Subsubsection:: *)
@@ -182,7 +182,7 @@ audioAdapt[rawData_]:=Block[
 (* ::Input:: *)
 (*MIDIStop[];EmitSound[#[[2]]]&@*)
 (*EchoFunction["time: ",#[[1]]&]@*)
-(*Timing[midiAdapt[parse[kernelPath<>"test/test6.sml"]]];*)
+(*Timing[MIDIAdapt[Parse[localPath<>"/src/test/test6.sml"]]];*)
 
 
 (* ::Subsubsection:: *)
@@ -196,7 +196,7 @@ audioAdapt[rawData_]:=Block[
 (* ::Input:: *)
 (*AudioStop[];AudioPlay[#[[2]]]&@*)
 (*EchoFunction["time: ",#[[1]]&]@*)
-(*Timing[audioAdapt[parse[kernelPath<>"test/test6.sml"]]];*)
+(*Timing[AudioAdapt[Parse[localPath<>"/src/test/test6.sml"]]];*)
 
 
 (* ::Subsubsection:: *)
@@ -204,9 +204,9 @@ audioAdapt[rawData_]:=Block[
 
 
 (* ::Input:: *)
-(*testfile=kernelPath<>"test/test7.";*)
+(*testfile=localPath<>"/src/test/test7.";*)
 (*testjson=tokenize[testfile<>"sml"][["Tokenizer"]];*)
 (*(*Export[testfile<>"tokenizer.json",testjson];*)*)
-(*testdata=parse[testfile<>"json"];*)
-(*Export[testfile<>"output.mid",midiAdapt[testdata]];*)
-(*(*Export[testfile<>"output.mp3",audioAdapt[testdata]];*)*)
+(*testdata=Parse[testfile<>"json"];*)
+(*Export[testfile<>"output.mid",MIDIAdapt[testdata]];*)
+(*(*Export[testfile<>"output.mp3",AudioAdapt[testdata]];*)*)

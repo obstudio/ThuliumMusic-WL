@@ -1,10 +1,150 @@
 //SMML Standard Package
 //Updated: 2018.2.9.
 
-# Include "Chord.smp"
-# Include "Global.smp"
-# Include "Duration.smp"
+# Include "Settings.smp"
 # Include "Segment.smp"
-# Include "Portamento.smp"
+
+# Chord
+
+M		Major			0, 4, 7
+m		Minor			0, 3, 7
+a		Augmented		0, 4, 8
+d		Diminished		0, 3, 6
+t		tres			[], 3
+T		tres+			[], 4
+q		quattuor		[], 5
+Q		quattuor+		[], 6
+p		quinque			[], 7
+P		quinque+		[], 8
+h		sex				[], 9
+H		sex+			[], 10
+s		septem			[], 11
+o		octo			[], 12
+u		octo (Under)	[-1]-12, []
+i		1st inversion	[1]+12, [2;]
+j		2nd inversion	[;2]+12, [3;]
+k		3rd inversion	[;3]+12, [4;]
+
+# Function
+
+Tremolo1(expr, subtrack) {
+    /**** (%1-)&2 ****/
+    const t = new SubtrackParser(subtrack, this.Settings, this.Libraries, this.pitchQueue).parseTrack()
+    const pow = Math.pow(2, -expr)
+    const num = Math.round(t.Meta.Duration / pow)
+    const result = []
+    const length = t.Content.length
+    for (let i = 0; i < num; i++) {
+        const startTime = i * pow
+        for (let j = 0; j < length; j++) {
+            result.push(Object.assign({}, t.Content[j], { StartTime: startTime, Duration: pow }))
+        }
+    }
+
+    return {
+        Content: result,
+        Meta: t.Meta
+    }
+}
+
+Tremolo2(expr, subtrack1, subtrack2) {
+    /**** &2(%1=)&3 ****/
+    const ts = [new SubtrackParser(subtrack1, this.Settings, this.Libraries, this.pitchQueue).parseTrack(), new SubtrackParser(subtrack2, this.Settings, this.Libraries, this.pitchQueue).parseTrack()]
+    const pow = Math.pow(2, -expr)
+    const num = Math.round(ts[1].Meta.Duration / pow)
+    const lengths = ts.map((t) => t.Content.length)
+    const result = []
+    for (let i = 0; i < num; i++) {
+        const startTime = i * pow
+        const index = i % 2
+        for (let j = 0; j < lengths[index]; j++) {
+            result.push(Object.assign({}, ts[index].Content[j], { StartTime: startTime, Duration: pow }))
+        }
+    }
+    return {
+        Content: result,
+        Meta: {
+            Duration: ts[1].Meta.Duration,
+            Incomplete: ts[1].Meta.Incomplete,
+            Single: true,
+            Warnings: [],
+            PitchQueue: [...ts[0].Meta.PitchQueue, ...ts[1].Meta.PitchQueue],
+            NotesBeforeTie: ts[(num - 1) % 2].Meta.NotesBeforeTie
+        }
+    }
+}
+
+Tuplet(expr, subtrack) {
+    /**** (!1~)&2 ****/
+    const scale = Math.pow(2, Math.floor(Math.log2(expr))) / expr
+    const t = new SubtrackParser(subtrack, this.Settings, this.Libraries, this.pitchQueue).parseTrack()
+    t.Content.forEach((note) => {
+        note.Duration *= scale
+        note.StartTime *= scale
+    })
+    t.Meta.Duration *= scale
+    return t
+}
+
+Ferm(ferm) {
+    /**** (Ferm:%1) ****/
+    this.Settings.assignSetting('Ferm', ferm, (ferm) => ferm > 1)
+}
+
+Fermata(subtrack) {
+    /**** (.)&1 ****/
+    const t = new SubtrackParser(subtrack, this.Settings, this.Libraries, this.pitchQueue).parseTrack()
+    const ferm = this.Settings.getOrSetDefault('Ferm', 2)
+    t.Content.forEach((note) => {
+        note.Duration *= ferm
+        note.StartTime *= ferm
+    })
+    t.Meta.Duration *= ferm
+    return t
+}
+
+Port(r) {
+    /**** (Port:%1) ****/
+    this.Settings.assignSetting('Port', r, (r) => r > 0)
+}
+
+Portamento(subtrack1, subtrack2) {
+    /**** &1~&2 ****/
+    const t1 = new SubtrackParser(subtrack1, this.Settings, this.Libraries, this.pitchQueue).parseTrack()
+    const t2 = new SubtrackParser(subtrack2, this.Settings, this.Libraries, this.pitchQueue).parseTrack()
+
+    const pitch1 = t1.Content[0].Pitch
+    const pitch2 = t2.Content[0].Pitch
+    const duration = t1.Meta.Duration
+    const port = this.Settings.getOrSetDefault('Port', 6)
+    const num = duration * port
+    const step = (pitch2 - pitch1) / (num - 1)
+    const pitches = []
+    for (let i = 0; i < port; i++) {
+        pitches.push(Math.round(pitch1 + step * i))
+    }
+
+    const result = pitches.map((pitch, index) => {
+        return {
+            Type: 'Note',
+            Pitch: pitch,
+            Volume: t2.Content[0].Volume,
+            Duration: 1 / port,
+            StartTime: index / port
+        }
+    })
+
+    return {
+        Content: result,
+        Meta: {
+            Duration: duration,
+            Incomplete: [duration],
+            Single: true,
+            Warnings: [],
+            PitchQueue: [...t1.Meta.PitchQueue, ...t2.Meta.PitchQueue],
+            NotesBeforeTie: [result[result.length - 1]]
+        }
+    }
+}
 
 # End

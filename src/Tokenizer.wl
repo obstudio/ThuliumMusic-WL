@@ -24,7 +24,7 @@ pitOp=RE["[#b',]*"];
 durOp=RE["[\\-._=]*"];
 degree=RE["[0-7%x]"];
 
-tokenize[filepath_]:=Block[
+Tokenize[filepath_]:=Block[
 	{
 		rawData={},line,
 		lineCount=1,blankCount=1,
@@ -86,7 +86,7 @@ tokenize[filepath_]:=Block[
 							_,ToExpression
 						][value]],
 					"Include",
-						source=tokenize[If[StringContainsQ[value,":"],
+						source=Tokenize[If[StringContainsQ[value,":"],
 							StringTake[value,{2,-2}],
 							depth=StringCount[value,"../"];
 							FileNameDrop[DirectoryName[filepath],-depth]<>"/"<>StringTake[value,{2+3*depth,-2}]
@@ -313,8 +313,8 @@ tokenize[filepath_]:=Block[
 
 
 (* ::Input:: *)
-(*tokenize[NotebookDirectory[]<>"test.sml"][["Tokenizer","Sections",1,"Tracks"]]*)
+(*Tokenize[NotebookDirectory[]<>"test.sml"][["Tokenizer","Sections",1,"Tracks"]]*)
 
 
 (* ::Input:: *)
-(*Export[NotebookDirectory[]<>"test/test6.json",tokenize[NotebookDirectory[]<>"test/test6.sml"][["Tokenizer"]]];//Timing*)
+(*Export[NotebookDirectory[]<>"test/test6.json",Tokenize[NotebookDirectory[]<>"test/test6.sml"][["Tokenizer"]]];//Timing*)

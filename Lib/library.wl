@@ -35,7 +35,7 @@ tonalityDict=<|
 rep[pat_]:=rep[pat,","];
 rep[pat_,sep_]:=pat~~(sep~~pat)...;
 int=DigitCharacter..;
-name=LetterCharacter~~WordCharacter...;
+word=LetterCharacter~~WordCharacter...;
 real=DigitCharacter...~~"."~~DigitCharacter...;
 key=Alternatives@Keys@tonalityDict;
 

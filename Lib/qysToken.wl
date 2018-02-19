@@ -44,7 +44,7 @@ getTrack[score_]:=StringCases[score,{
 		{"Type"->"BarLine","Newline"->(bl=="\\"),"Skip"->(bl=="/"),"Order"->{0}},
 	
 	(* functions *)
-	"<"~~func:name~~":"~~arg:Except[">"]..~~">":>
+	"<"~~func:word~~":"~~arg:Except[">"]..~~">":>
 		{"Type"->"FunctionToken","Simplified"->False,"Argument"->{func->getArgument[arg,func]}},
 	"<"~~vol:rep[real]~~">":>
 		{"Type"->"FunctionToken","Simplified"->True,"Argument"->{"Volume"->ToExpression@vol}},
@@ -54,7 +54,7 @@ getTrack[score_]:=StringCases[score,{
 		{"Type"->"FunctionToken","Simplified"->True,"Argument"->{"Bar"->ToExpression@bar,"Beat"->ToExpression@beat}},
 	"<1="~~k:key~~o:("'"|",")...~~">":>
 		{"Type"->"FunctionToken","Simplified"->True,"Argument"->{"Key"->tonalityDict[[k]],"Oct"->StringCount[o,"'"]-StringCount[o,","]}},
-	"<"~~cont:rep[name~~""|("("~~real~~")")]~~">":>
+	"<"~~cont:rep[word~~""|("("~~real~~")")]~~">":>
 		{"Type"->"FunctionToken","Simplified"->True,"Argument"->Module[{ivList=StringSplit[cont,","]},{
 			"Instr"->StringDelete["("~~__~~")"]/@ivList,
 			If[Or@@StringContainsQ["("]/@ivList,

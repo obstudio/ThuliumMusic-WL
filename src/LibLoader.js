@@ -109,7 +109,7 @@ LibLoader.Default = {
     },
     MetaInformation: {},
     FunctionPackage: {
-        STD: require('../package/Standard/STD'),
+        STD: require('../package/Standard/.init'),
         Custom: {},
         applyFunction(parser, token) {
             return this.locateFunction(token.Name).apply({

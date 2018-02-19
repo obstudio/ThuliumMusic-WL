@@ -175,8 +175,9 @@ module.exports = {
         const result = []
         t.Content.reduce((sum, cur, index) => {
             if (index < num) {
-                sum.push(cur)
-                cur.Duration = actualDur
+                const temp = Object.assign({}, cur)
+                sum.push(temp)
+                temp.Duration = actualDur
                 for (const note of sum) {
                     result.push(Object.assign({}, note, { StartTime: actualDur * index }))
                 }

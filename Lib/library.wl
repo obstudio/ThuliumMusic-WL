@@ -15,6 +15,13 @@ userTemplate=<|
 |>;
 
 
+(* instruments *)
+instrData=<|
+	"Style"->Keys@Import[localPath<>"midi\\instrument.json"],
+	"Percussion"->Keys@Import[localPath<>"midi\\percussion.json"]
+|>;
+
+
 (* tags *)
 metaInfoTags={"SectionCount","RealTrackCount","Duration","Instruments"};
 textInfoTags={"SongName","Lyricist","Composer","Adapter","Comment","Abstract","Origin"};

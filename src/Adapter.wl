@@ -1,7 +1,10 @@
 (* ::Package:: *)
 
-(* ::Input:: *)
-(*DeleteObject[JS];*)
+temp[]
+
+
+(* ::InheritFromParent:: *)
+(*"C:/Users/shigma/AppData/Local/obstudio/QYMP/tmp$272.json"//SystemOpen*)
 
 
 temp[]:=userPath<>"tmp$"<>ToString[Floor@SessionTime[]]<>".json";
@@ -88,17 +91,20 @@ MIDIAdapt[rawData_]:=Block[
     },
 	If[!ListQ[rawData],Return[]];
 	Do[
-		AppendTo[musicClip,Table[Switch
-			SoundNote@@If[#Pitch!=Null,{
-				#Pitch,
-				duration+#StartTime+{0,#Duration},
-				trackData[["Instrument"]],
-				SoundVolume->#Volume
-			},{
-				trackData[["Instrument"]],
-				duration+#StartTime+{0,#Duration},
-				SoundVolume->#Volume
-			}]&/@trackData[["Content"]],
+		AppendTo[musicClip,Table[
+			If[MemberQ[instrData[["Style"]],trackData[["Instrument"]]],
+				SoundNote[
+					#Pitch,
+					duration+#StartTime+{0,#Duration},
+					trackData[["Instrument"]],
+					SoundVolume->#Volume
+				],
+				SoundNote[
+					trackData[["Instrument"]],
+					duration+#StartTime+{0,#Duration},
+					SoundVolume->#Volume
+				]
+			]&/@trackData[["Content"]],
 		{trackData,sectionData[["Tracks"]]}]];
 		duration+=Max[sectionData[["Tracks",All,"Meta","Duration"]]],
 	{sectionData,rawData}];
@@ -158,7 +164,11 @@ AudioAdapt[rawData_]:=Block[
 
 
 (* ::Input:: *)
-(*data=Parse[localPath<>"src/test/test7.sml"];*)
+(*DeleteObject[JS];*)
+
+
+(* ::Input:: *)
+(*data=Parse[localPath<>"src/test/test10.sml"];*)
 
 
 (* ::Input:: *)
@@ -176,7 +186,7 @@ AudioAdapt[rawData_]:=Block[
 (* ::Input:: *)
 (*MIDIStop[];EmitSound[#[[2]]]&@*)
 (*EchoFunction["time: ",#[[1]]&]@*)
-(*Timing[MIDIAdapt[Parse[localPath<>"src/test/test10.sml"]]];*)
+(*Timing[MIDIAdapt[Parse[localPath<>"src/test/test6.sml"]]];*)
 
 
 (* ::Subsubsection:: *)

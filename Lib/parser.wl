@@ -1,7 +1,7 @@
 (* ::Package:: *)
 
 (* temporary function *)
-QYSParse[filename_]:=integrate[#MusicClips,#Effects]&@parse[QYS`Tokenize[filename]];
+QYSParse[filename_]:=integrate[#MusicClips,#Effects]&@parse[QYS`tokenize[filename]];
 
 
 pitchDict=<|1->0,2->2,3->4,4->5,5->7,6->9,7->11,10->10|>;
@@ -279,13 +279,13 @@ trackParse[tokenizer_,global_]:=Module[
 
 
 (* ::Input:: *)
-(*debug[#Messages]&@parse[QYS`Tokenize[localPath<>"Songs\\test.qys"],All]*)
+(*debug[#Messages]&@parse[QYS`tokenize[localPath<>"Songs\\test.qys"],All]*)
 
 
 (* ::Input:: *)
 (*AudioStop[];AudioPlay[#[[2]]]&@*)
 (*EchoFunction["time: ",#[[1]]&]@*)
-(*Timing[integrate[#MusicClips,#Effects]&[parse[QYS`Tokenize[localPath<>"Songs\\test.qys"],All]]];*)
+(*Timing[integrate[#MusicClips,#Effects]&[parse[QYS`tokenize[localPath<>"Songs\\test.qys"],All]]];*)
 
 
 parse[tokenizer_]:=parse[tokenizer,All];
@@ -359,23 +359,23 @@ parse[tokenizer_,sections_]:=Module[
 
 
 (* ::Input:: *)
-(*debug[#Messages]&@parse[QYS`Tokenize[localPath<>"Songs\\test.qys"],All]*)
+(*debug[#Messages]&@parse[QYS`tokenize[localPath<>"Songs\\test.qys"],All]*)
 
 
 (* ::Input:: *)
-(*debug[#Messages]&@parse[QYS`Tokenize[localPath<>"Songs\\Touhou\\Deep_Mountain.qys"],All]*)
-
-
-(* ::Input:: *)
-(*AudioStop[];AudioPlay[#[[2]]]&@*)
-(*EchoFunction["time: ",#[[1]]&]@*)
-(*Timing[integrate[#MusicClips,#Effects]&[parse[QYS`Tokenize[localPath<>"Songs\\Touhou\\TH11-Chireiden\\Kyuujigoku_Kaidou.qys"],All]]];*)
+(*debug[#Messages]&@parse[QYS`tokenize[localPath<>"Songs\\Touhou\\Deep_Mountain.qys"],All]*)
 
 
 (* ::Input:: *)
 (*AudioStop[];AudioPlay[#[[2]]]&@*)
 (*EchoFunction["time: ",#[[1]]&]@*)
-(*Timing[integrate[#MusicClips,#Effects]&[parse[QYS`Tokenize[localPath<>"Songs\\Touhou\\Deep_Mountain.qys"],3]]];*)
+(*Timing[integrate[#MusicClips,#Effects]&[parse[QYS`tokenize[localPath<>"Songs\\Touhou\\TH11-Chireiden\\Kyuujigoku_Kaidou.qys"],All]]];*)
+
+
+(* ::Input:: *)
+(*AudioStop[];AudioPlay[#[[2]]]&@*)
+(*EchoFunction["time: ",#[[1]]&]@*)
+(*Timing[integrate[#MusicClips,#Effects]&[parse[QYS`tokenize[localPath<>"Songs\\Touhou\\Deep_Mountain.qys"],3]]];*)
 
 
 (* ::Input:: *)

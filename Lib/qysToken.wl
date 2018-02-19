@@ -93,7 +93,7 @@ getTrack[score_]:=StringCases[score,{
 }];
 
 (* tokenizer *)
-Tokenize[filename_]:=Module[
+tokenize[filename_]:=Module[
 	{
 		i,data,score="",
 		songComments={},sections={},
@@ -141,15 +141,15 @@ End[];
 
 
 (* ::Input:: *)
-(*Export["E:\\test-Tokenizer.json",QYS`Tokenize[localPath<>"Songs\\test.qys"]];*)
+(*Export["E:\\test-Tokenizer.json",QYS`tokenize[localPath<>"Songs\\test.qys"]];*)
 
 
 (* ::Input:: *)
-(*ExportString[QYS`Tokenize[localPath<>"Songs\\test.qys"],"JSON"]*)
+(*ExportString[QYS`tokenize[localPath<>"Songs\\test.qys"],"JSON"]*)
 
 
 (* ::Input:: *)
-(*QYS`Tokenize[localPath<>"Songs\\test.qys"]*)
+(*QYS`tokenize[localPath<>"Songs\\test.qys"]*)
 
 
 (* ::Input:: *)

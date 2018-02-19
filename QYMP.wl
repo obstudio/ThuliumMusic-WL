@@ -10,8 +10,30 @@ localPath=NotebookDirectory[];
 <<(localPath<>"Assets\\uiUser.wl")         (* UI for common users *)
 <<(localPath<>"Assets\\uiDeveloper.wl")    (* UI for developers *)
 <<(localPath<>"Lib\\library.wl")           (* library *)
+
+<<(localPath<>"src\\Adapter.wl")
+<<(localPath<>"src\\Syntax.wl")
+<<(localPath<>"src\\Tokenizer.wl")         (* SMML tokenizer *)
+
 <<(localPath<>"Lib\\qysToken.wl")          (* QYS tokenizer *)
-<<(localPath<>"Lib\\parser.wl")            (* parser *)
+<<(localPath<>"Lib\\parser.wl")            (* QYS parser *)
+
+<<(localPath<>"package\\Standard\\.init.wl")
+
+
+JS=StartExternalSession["NodeJS"];
+ExternalEvaluate[JS,File[localPath<>"src/SMML.js"]]
+ExternalEvaluate[JS,"const fs = require('fs')"]
+ExternalEvaluate[JS,"
+	function Parse(filePath) {
+	    const data = JSON.parse(fs.readFileSync(filePath, 'utf8'))
+	    return new SMML.Parser(data).parse()
+	}
+"]
+
+
+(* ::Subsubsection:: *)
+(*Packages Initialization*)
 
 
 (* local data *)
@@ -63,12 +85,20 @@ If[!FileExistsQ[dataPath<>"Image.json"],Export[dataPath<>"Image.json",{}]];
 imageData=Association/@Association@Import[dataPath<>"image.json"];
 
 
+(* ::Subsubsection:: *)
+(*Engine Start*)
+
+
 (* ::Input::Initialization:: *)
 refresh;updateImage;updateBuffer;
 
 
 (* ::Input::Initialization:: *)
 QYMP;
+
+
+(* ::Subsubsection::Closed:: *)
+(*Test Code*)
 
 
 (* ::Input:: *)

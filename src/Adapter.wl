@@ -4,22 +4,8 @@
 (*DeleteObject[JS];*)
 
 
-localPath=StringReplace[ParentDirectory[NotebookDirectory[]],"\\"->"/"];
-temp[]:=localPath<>"/src/tmp$"<>ToString[Floor@SessionTime[]]<>".json";
-<<(localPath<>"/src/Tokenizer.wl");
-<<(localPath<>"/src/Syntax.wl");
-<<(localPath<>"/package/Standard/.init.wl")
+temp[]:=userPath<>"tmp$"<>ToString[Floor@SessionTime[]]<>".json";
 MIDIStop=Sound`StopMIDI;
-JS=StartExternalSession["NodeJS"];
-ExternalEvaluate[JS,File[localPath<>"/src/SMML.js"]]
-ExternalEvaluate[JS,"const fs = require('fs')"]
-ExternalEvaluate[JS,"
-	function Parse(filePath) {
-	    const data = JSON.parse(fs.readFileSync(filePath, 'utf8'))
-	    return new SMML.Parser(data).parse()
-	}
-"]
-
 
 Parse::usage = "\!\(\*RowBox[{\"Parse\",\"[\",RowBox[{
 StyleBox[\"filepath\",\"TI\"],\",\",StyleBox[\"partspec\",\"TI\"]
@@ -102,13 +88,17 @@ MIDIAdapt[rawData_]:=Block[
     },
 	If[!ListQ[rawData],Return[]];
 	Do[
-		AppendTo[musicClip,Table[
-			SoundNote[
+		AppendTo[musicClip,Table[Switch
+			SoundNote@@If[#Pitch!=Null,{
 				#Pitch,
 				duration+#StartTime+{0,#Duration},
 				trackData[["Instrument"]],
 				SoundVolume->#Volume
-			]&/@trackData[["Content"]],
+			},{
+				trackData[["Instrument"]],
+				duration+#StartTime+{0,#Duration},
+				SoundVolume->#Volume
+			}]&/@trackData[["Content"]],
 		{trackData,sectionData[["Tracks"]]}]];
 		duration+=Max[sectionData[["Tracks",All,"Meta","Duration"]]],
 	{sectionData,rawData}];
@@ -127,12 +117,16 @@ AudioAdapt[rawData_]:=Block[
 		groups=GatherBy[sectionData[["Tracks"]],#Meta[[{"FadeIn","FadeOut"}]]&];
 		Do[
 			compactData=Flatten@Table[
-				SoundNote[
+				If[#Pitch!=Null,SoundNote[
 					#Pitch,
 					duration+#StartTime+{0,#Duration},
 					trackData[["Instrument"]],
 					SoundVolume->#Volume
-				]&/@trackData[["Content"]],
+				],SoundNote[
+					trackData[["Instrument"]],
+					duration+#StartTime+{0,#Duration},
+					SoundVolume->#Volume
+				]]&/@trackData[["Content"]],
 			{trackData,group}];
 			targetClip=If[group[[1,"Meta","FadeIn"]]==0,
 				LengthWhile[Range@Length@musicClips,Or[
@@ -164,7 +158,7 @@ AudioAdapt[rawData_]:=Block[
 
 
 (* ::Input:: *)
-(*data=Parse[localPath<>"/src/test/test7.sml"];*)
+(*data=Parse[localPath<>"src/test/test7.sml"];*)
 
 
 (* ::Input:: *)
@@ -182,7 +176,7 @@ AudioAdapt[rawData_]:=Block[
 (* ::Input:: *)
 (*MIDIStop[];EmitSound[#[[2]]]&@*)
 (*EchoFunction["time: ",#[[1]]&]@*)
-(*Timing[MIDIAdapt[Parse[localPath<>"/src/test/test6.sml"]]];*)
+(*Timing[MIDIAdapt[Parse[localPath<>"src/test/test10.sml"]]];*)
 
 
 (* ::Subsubsection:: *)
@@ -196,7 +190,7 @@ AudioAdapt[rawData_]:=Block[
 (* ::Input:: *)
 (*AudioStop[];AudioPlay[#[[2]]]&@*)
 (*EchoFunction["time: ",#[[1]]&]@*)
-(*Timing[AudioAdapt[Parse[localPath<>"/src/test/test6.sml"]]];*)
+(*Timing[AudioAdapt[Parse[localPath<>"src/test/test10.sml"]]];*)
 
 
 (* ::Subsubsection:: *)
@@ -204,7 +198,7 @@ AudioAdapt[rawData_]:=Block[
 
 
 (* ::Input:: *)
-(*testfile=localPath<>"/src/test/test7.";*)
+(*testfile=localPath<>"src/test/test7.";*)
 (*testjson=tokenize[testfile<>"sml"][["Tokenizer"]];*)
 (*(*Export[testfile<>"tokenizer.json",testjson];*)*)
 (*testdata=Parse[testfile<>"json"];*)

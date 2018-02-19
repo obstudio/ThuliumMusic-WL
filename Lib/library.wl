@@ -3,8 +3,8 @@
 (* path and template *)
 version=281;
 cloudPath="http://qymp.ob-studio.cn/assets/";
-userPath=$HomeDirectory<>"\\AppData\\Local\\obstudio\\QYMP\\";
 dataPathTemplate="C:\\ProgramData\\obstudio\\QYMP\\";
+userPath=StringReplace[$HomeDirectory,"\\"->"/"]<>"/AppData/Local/obstudio/QYMP/";
 If[!DirectoryQ[dataPathTemplate],CreateDirectory[dataPathTemplate]];
 userTemplate=<|
 	"Version"->version,
@@ -206,7 +206,7 @@ updateBuffer:=Block[{updates={},song,filename,hash,audio,messages,bufferList},
 		bufferHash[[song]]=toBase32@FileHash[filename];
 		If[index[[song,"Format"]]=="qys",
 			audio=QYSParse[filename],
-			audio=QYMParse[filename]
+			audio=AudioAdapt[Parse[filename]]
 		];
 		messages=Values[Options[audio,MetaInformation]][[1]][["Messages"]];
 		Export[dataPath<>"Buffer\\"<>song<>".buffer",audio,"MP3"],

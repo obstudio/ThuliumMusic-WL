@@ -45,7 +45,7 @@ class GlobalSetting {
         }
     }
 
-    extend(settingObj = {}) {
+    extend(settingObj = {Stac: this.Stac.slice()}) {
         const newSetting = new GlobalSetting()
         Object.assign(newSetting, this, settingObj)
         return newSetting

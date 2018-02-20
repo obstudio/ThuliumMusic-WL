@@ -30,6 +30,7 @@ ExternalEvaluate[JS,"
 	    return new SMML.Parser(data).parse()
 	}
 "]
+DeleteObject[Drop[ExternalSessions[],-1]]
 
 
 (* ::Subsubsection::Closed:: *)

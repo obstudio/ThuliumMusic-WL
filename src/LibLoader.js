@@ -130,7 +130,7 @@ LibLoader.Default = {
         },
         locateFunction (name) {
             if (name in this.STD) return this.STD[name]
-            if (name in this.Custom) return this.Custom[name]   // can be changed to employ package mechanism
+            if (name in this.Custom) return this.Custom[name]
             return () => {}
         }
     },

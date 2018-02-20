@@ -11,18 +11,18 @@ localPath=NotebookDirectory[];
 <<(localPath<>"Assets\\uiDeveloper.wl")    (* UI for developers *)
 <<(localPath<>"Lib\\library.wl")           (* library *)
 
+<<(localPath<>"Lib\\qysToken.wl")          (* QYS tokenizer *)
+<<(localPath<>"Lib\\parser.wl")            (* QYS parser *)
+
 <<(localPath<>"src\\Adapter.wl")
 <<(localPath<>"src\\Syntax.wl")
 <<(localPath<>"src\\Tokenizer.wl")         (* SMML tokenizer *)
-
-<<(localPath<>"Lib\\qysToken.wl")          (* QYS tokenizer *)
-<<(localPath<>"Lib\\parser.wl")            (* QYS parser *)
 
 <<(localPath<>"package\\Standard\\.init.wl")
 
 
 JS=StartExternalSession["NodeJS"];
-ExternalEvaluate[JS,File[localPath<>"src/SMML.js"]]
+ExternalEvaluate[JS,File[localPath<>"src\\SMML.js"]]
 ExternalEvaluate[JS,"const fs = require('fs')"]
 ExternalEvaluate[JS,"
 	function Parse(filePath) {
@@ -32,12 +32,11 @@ ExternalEvaluate[JS,"
 "]
 
 
-(* ::Subsubsection:: *)
+(* ::Subsubsection::Closed:: *)
 (*Packages Initialization*)
 
 
 (* local data *)
-instrData=Association@Import[localPath<>"instr.json"];                               (* instruments *)
 colorData=Association@Import[localPath<>"color.json"];                               (* colors *)
 styleColor=RGBColor/@Association@colorData[["StyleColor"]];
 buttonColor=RGBColor/@#&/@Association/@Association@colorData[["ButtonColor"]];
@@ -97,7 +96,7 @@ refresh;updateImage;updateBuffer;
 QYMP;
 
 
-(* ::Subsubsection::Closed:: *)
+(* ::Subsubsection:: *)
 (*Test Code*)
 
 

@@ -1,12 +1,5 @@
 (* ::Package:: *)
 
-temp[]
-
-
-(* ::InheritFromParent:: *)
-(*"C:/Users/shigma/AppData/Local/obstudio/QYMP/tmp$272.json"//SystemOpen*)
-
-
 temp[]:=userPath<>"tmp$"<>ToString[Floor@SessionTime[]]<>".json";
 MIDIStop=Sound`StopMIDI;
 
@@ -168,6 +161,12 @@ AudioAdapt[rawData_]:=Block[
 
 
 (* ::Input:: *)
+(*With[{testfile=localPath<>"src/test/Nuclear_Fusion"},*)
+(*Export[testfile<>".json",Tokenize[testfile<>".sml"][["Tokenizer"]]]*)
+(*];*)
+
+
+(* ::Input:: *)
 (*data=Parse[localPath<>"src/test/test10.sml"];*)
 
 
@@ -186,7 +185,13 @@ AudioAdapt[rawData_]:=Block[
 (* ::Input:: *)
 (*MIDIStop[];EmitSound[#[[2]]]&@*)
 (*EchoFunction["time: ",#[[1]]&]@*)
-(*Timing[MIDIAdapt[Parse[localPath<>"src/test/test6.sml"]]];*)
+(*Timing[MIDIAdapt[Parse[localPath<>"src/test/Nuclear_Fusion.sml",{4}]]];*)
+
+
+(* ::Input:: *)
+(*MIDIStop[];EmitSound[#[[2]]]&@*)
+(*EchoFunction["time: ",#[[1]]&]@*)
+(*Timing[MIDIAdapt[Parse[localPath<>"src/test/test.sml"]]];*)
 
 
 (* ::Subsubsection:: *)
@@ -200,7 +205,7 @@ AudioAdapt[rawData_]:=Block[
 (* ::Input:: *)
 (*AudioStop[];AudioPlay[#[[2]]]&@*)
 (*EchoFunction["time: ",#[[1]]&]@*)
-(*Timing[AudioAdapt[Parse[localPath<>"src/test/test10.sml"]]];*)
+(*Timing[AudioAdapt[Parse[localPath<>"src/test/test.sml"]]];*)
 
 
 (* ::Subsubsection:: *)

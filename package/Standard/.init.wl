@@ -25,7 +25,7 @@ funcSimpPack["Standard"]:=Sequence[
 	
 	arg2:objectPatt~~"("~~arg1:expression~~"=)"~~arg3:objectPatt:><|
 		"Type"->"FUNCTION",
-		"Name"->"Tremolo1",
+		"Name"->"Tremolo2",
 		"Simplified"->True,
 		"Argument"->{
 			<|"Type"->"Expression","Content"->arg1|>,

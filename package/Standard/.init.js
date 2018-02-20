@@ -278,7 +278,7 @@ module.exports = {
         this.Settings.assignSetting('Port', r, (r) => r > 0)
     },
     Trace(count) {
-        this.Settings.assignSetting('Trace', count, count > 0 && count <= 4 && Number.isInteger(count))
+        this.Settings.assignSetting('Trace', count, (count) => count > 0 && count <= 4 && Number.isInteger(count))
     },
     FadeIn(time) {
         this.Settings.assignSetting('FadeIn', time, (time) => time >= 0)

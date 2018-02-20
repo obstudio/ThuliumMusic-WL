@@ -77,7 +77,7 @@ Light(scale) {
 }
 
 Trace(count) {
-    this.Settings.assignSetting('Trace', count, count > 0 && count <= 4 && Number.isInteger(count))
+    this.Settings.assignSetting('Trace', count, (count) => count > 0 && count <= 4 && Number.isInteger(count))
 }
 
 FadeIn(time) {

@@ -238,6 +238,16 @@ Tokenize[filepath_]:=Block[
 				bracketRule
 			}]
 		|>,
+		"("~~name:funcName~~":"~~arglist:rep[argument]~~")":><|
+			"Type"->"FUNCTION",
+			"Name"->name,
+			"Simplified"->False,
+			"Argument"->StringCases[arglist,{
+				arg:expression:><|"Type"->"Expression","Content"->arg|>,
+				"\""~~arg:string~~"\"":><|"Type"->"String","Content"->arg|>,
+				bracketRule
+			}]
+		|>,
 		und_:><|"Type"->"Undefined","Content"->und|>
 	}];
 	

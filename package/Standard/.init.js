@@ -3,7 +3,7 @@ const { SubtrackParser } = require('../../src/TrackParser')
 module.exports = {
     Tremolo1(expr, subtrack) {
         const t = new SubtrackParser(subtrack, this.Settings, this.Libraries, this.pitchQueue).parseTrack()
-        const pow = Math.pow(2, -expr)
+        const pow = Math.pow(2, -expr) * 60 / this.Settings.Speed
         const num = Math.round(t.Meta.Duration / pow)
         const result = []
         const length = t.Content.length
@@ -22,7 +22,7 @@ module.exports = {
 
     Tremolo2(expr, subtrack1, subtrack2) {
         const ts = [new SubtrackParser(subtrack1, this.Settings, this.Libraries, this.pitchQueue).parseTrack(), new SubtrackParser(subtrack2, this.Settings, this.Libraries, this.pitchQueue).parseTrack()]
-        const pow = Math.pow(2, -expr)
+        const pow = Math.pow(2, -expr) * 60 / this.Settings.Speed
         const num = Math.round(ts[1].Meta.Duration / pow)
         const lengths = ts.map((t) => t.Content.length)
         const result = []
@@ -108,7 +108,7 @@ module.exports = {
         }
         const actualDur = dur * Math.pow(2, -this.Settings.Duration) * 60 / this.Settings.Speed
         t1.Content.forEach((note) => {
-            note.Duration = actualDur 
+            note.Duration = actualDur
             note.StartTime *= dur
         })
         const total = actualDur * num
@@ -190,9 +190,9 @@ module.exports = {
             }
             return sum
         }, [])
-        return Object.assign(t, {Content: result})
+        return Object.assign(t, { Content: result })
     },
-    
+
     ConOct(octave = 0, volumeScale = 1) {
         this.Settings.assignSetting('ConOct', octave, (octave) => Number.isInteger(octave))
         this.Settings.assignSetting('ConOctVolume', volumeScale, (volume) => volume >= 0)

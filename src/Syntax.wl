@@ -61,8 +61,8 @@ subtrack=Nest[(("{"~~#~~"}")|Except["{"|"}"])...&,Except["{"|"}"]...,4];
 argument=expression|("\""~~string~~"\"")|("{"~~subtrack~~"}");
 
 (* notation *)
-orderListC="(\\d+(~\\d+)?(,\\d+(~\\d+)?)*)?";
-orderListP="(\\d+(~\\d+)?\\.)*";
+orderListC=RE["(\\d+(~\\d+)?(,\\d+(~\\d+)?)*)?"];
+orderListP=RE["(\\d+(~\\d+)?\\.)*"];
 orderTok=Union@@StringCases[#,{
 	n:integer~~"~"~~m:integer:>Range[ToExpression@n,ToExpression@m],
 	n:integer:>{ToExpression@n}

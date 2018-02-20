@@ -164,7 +164,7 @@ AudioAdapt[rawData_]:=Block[
 
 
 (* ::Input:: *)
-(*With[{testfile=localPath<>"src/test/Nuclear_Fusion"},*)
+(*With[{testfile=localPath<>"src/test/test"},*)
 (*Export[testfile<>".json",Tokenize[testfile<>".sml"][["Tokenizer"]]]*)
 (*];*)
 
@@ -208,7 +208,7 @@ AudioAdapt[rawData_]:=Block[
 (* ::Input:: *)
 (*AudioStop[];AudioPlay[#[[2]]]&@*)
 (*EchoFunction["time: ",#[[1]]&]@*)
-(*Timing[AudioAdapt[Parse[localPath<>"src/test/Nuclear_Fusion.sml"]]];*)
+(*Timing[AudioAdapt[Parse[localPath<>"src/test/test.sml"]]];*)
 
 
 (* ::Subsubsection:: *)

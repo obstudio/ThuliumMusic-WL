@@ -33,7 +33,7 @@ ExternalEvaluate[JS,"
 DeleteObject[Drop[ExternalSessions[],-1]]
 
 
-(* ::Subsubsection::Closed:: *)
+(* ::Subsubsection:: *)
 (*Packages Initialization*)
 
 

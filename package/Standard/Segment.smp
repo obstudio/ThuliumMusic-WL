@@ -4,7 +4,6 @@
 # Function
 
 Seg(r) {
-    /**** (Seg:%1) ****/
     AssignSetting(this.Settings, 'Seg', r, (r) => r > 0)
 }
 

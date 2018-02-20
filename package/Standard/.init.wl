@@ -94,62 +94,6 @@ funcSimpPack["Standard"]:=Sequence[
 			<|"Type"->"Subtrack","Content"->objectTok[arg1],"Repeat"->-1|>
 		}
 	|>,
-	"(Seg:"~~arg1:expression~~")":><|
-		"Type"->"FUNCTION",
-		"Name"->"Seg",
-		"Simplified"->True,
-		"Argument"->{
-			<|"Type"->"Expression","Content"->arg1|>
-		}
-	|>,
-	"(Port:"~~arg1:expression~~")":><|
-		"Type"->"FUNCTION",
-		"Name"->"Port",
-		"Simplified"->True,
-		"Argument"->{
-			<|"Type"->"Expression","Content"->arg1|>
-		}
-	|>,
-	"(Ferm:"~~arg1:expression~~")":><|
-		"Type"->"FUNCTION",
-		"Name"->"Ferm",
-		"Simplified"->True,
-		"Argument"->{
-			<|"Type"->"Expression","Content"->arg1|>
-		}
-	|>,
-	"(Stac:"~~arg1:expression~~")":><|
-		"Type"->"FUNCTION",
-		"Name"->"Stac",
-		"Simplified"->True,
-		"Argument"->{
-			<|"Type"->"Expression","Content"->arg1|>
-		}
-	|>,
-	"(Trace:"~~arg1:number~~")":><|
-		"Type"->"FUNCTION",
-		"Name"->"Trace",
-		"Simplified"->True,
-		"Argument"->{
-			<|"Type"->"Number","Content"->ToExpression[arg1]|>
-		}
-	|>,
-	"(Dur:"~~arg1:expression~~")":><|
-		"Type"->"FUNCTION",
-		"Name"->"Dur",
-		"Simplified"->True,
-		"Argument"->{
-			<|"Type"->"Expression","Content"->arg1|>
-		}
-	|>,
-	"(Oct:"~~arg1:number~~")":><|
-		"Type"->"FUNCTION",
-		"Name"->"Oct",
-		"Simplified"->True,
-		"Argument"->{
-			<|"Type"->"Number","Content"->ToExpression[arg1]|>
-		}
-	|>,
 	"("~~arg1:number~~"/"~~arg2:number~~")":><|
 		"Type"->"FUNCTION",
 		"Name"->"BarBeat",
@@ -184,4 +128,65 @@ funcSimpPack["Standard"]:=Sequence[
 		}
 	|>
 ];
+
+(*************************************************
+
+    "(Seg:"~~arg1:expression~~")":><|
+        "Type"->"FUNCTION",
+        "Name"->"Seg",
+        "Simplified"->True,
+        "Argument"->{
+            <|"Type"->"Expression","Content"->arg1|>
+        }
+    |>,
+    "(Port:"~~arg1:expression~~")":><|
+        "Type"->"FUNCTION",
+        "Name"->"Port",
+        "Simplified"->True,
+        "Argument"->{
+            <|"Type"->"Expression","Content"->arg1|>
+        }
+    |>,
+    "(Ferm:"~~arg1:expression~~")":><|
+        "Type"->"FUNCTION",
+        "Name"->"Ferm",
+        "Simplified"->True,
+        "Argument"->{
+            <|"Type"->"Expression","Content"->arg1|>
+        }
+    |>,
+    "(Stac:"~~arg1:expression~~")":><|
+        "Type"->"FUNCTION",
+        "Name"->"Stac",
+        "Simplified"->True,
+        "Argument"->{
+            <|"Type"->"Expression","Content"->arg1|>
+        }
+    |>,
+    "(Trace:"~~arg1:number~~")":><|
+        "Type"->"FUNCTION",
+        "Name"->"Trace",
+        "Simplified"->True,
+        "Argument"->{
+            <|"Type"->"Number","Content"->ToExpression[arg1]|>
+        }
+    |>,
+    "(Dur:"~~arg1:expression~~")":><|
+        "Type"->"FUNCTION",
+        "Name"->"Dur",
+        "Simplified"->True,
+        "Argument"->{
+            <|"Type"->"Expression","Content"->arg1|>
+        }
+    |>,
+    "(Oct:"~~arg1:number~~")":><|
+        "Type"->"FUNCTION",
+        "Name"->"Oct",
+        "Simplified"->True,
+        "Argument"->{
+            <|"Type"->"Number","Content"->ToExpression[arg1]|>
+        }
+    |>,
+
+**************************************************)
 

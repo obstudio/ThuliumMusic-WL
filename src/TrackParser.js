@@ -1,4 +1,4 @@
-const { BarLengthError } = require('./Error')
+const { BarLengthError, DupChordError, TraceError, VolumeError } = require('./Error')
 
 class TrackParser {
     /**
@@ -266,7 +266,11 @@ class TrackParser {
         // calculate pitch array and record it for further trace
         const pitchDelta = this.parseDeltaPitch(note.PitOp)
         if (note.Pitches.length === 1 && note.Pitches[0].Degree === '%') {
-            pitches.push(...this.Context.pitchQueue[this.Context.pitchQueue.length - this.Settings.Trace])
+            if (this.Context.pitchQueue.length >= this.Settings.Trace) {
+                pitches.push(...this.Context.pitchQueue[this.Context.pitchQueue.length - this.Settings.Trace])
+            } else {
+                this.Context.warnings.push(new TraceError(this.ID, [this.Content.indexOf(note)], this.Settings.Trace))
+            }
         } else {
             for (const pitch of note.Pitches) {
                 if (pitch.Degree === '0') continue
@@ -280,13 +284,18 @@ class TrackParser {
                 }
             }
         }
+        if (new Set(pitches).size !== pitches.length) {
+            this.Context.warnings.push(new DupChordError(this.ID, [this.Content.indexOf(note)], pitches))
+        }
 
         const volumes = new Array(pitches.length).fill(volume)
         if (this.Settings.ConOct !== 0) {
             pitches.push(...pitches.map((pitch) => pitch + 12 * this.Settings.ConOct))
             volumes.push(...volumes.map((volume) => volume * this.Settings.ConOctVolume))
         }
-
+        if (volumes.some((volume) => volume > 1 || volume < 0)) {
+            this.Context.warnings.push(new VolumeError(this.ID, [this.Content.indexOf(note)], volumes))
+        }
         if (pitches.length > 0) {
             this.Context.pitchQueue.push(pitches.slice(0))
         }

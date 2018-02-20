@@ -30,7 +30,7 @@ k		3rd inversion	[;3]+12, [4;]
 Tremolo1(expr, subtrack) {
     /**** (%1-)&2 ****/
     const t = new SubtrackParser(subtrack, this.Settings, this.Libraries, this.pitchQueue).parseTrack()
-    const pow = Math.pow(2, -expr)
+    const pow = Math.pow(2, -expr) * 60 / this.Settings.Speed
     const num = Math.round(t.Meta.Duration / pow)
     const result = []
     const length = t.Content.length
@@ -50,7 +50,7 @@ Tremolo1(expr, subtrack) {
 Tremolo2(expr, subtrack1, subtrack2) {
     /**** &2(%1=)&3 ****/
     const ts = [new SubtrackParser(subtrack1, this.Settings, this.Libraries, this.pitchQueue).parseTrack(), new SubtrackParser(subtrack2, this.Settings, this.Libraries, this.pitchQueue).parseTrack()]
-    const pow = Math.pow(2, -expr)
+    const pow = Math.pow(2, -expr) * 60 / this.Settings.Speed
     const num = Math.round(ts[1].Meta.Duration / pow)
     const lengths = ts.map((t) => t.Content.length)
     const result = []
@@ -87,7 +87,6 @@ Tuplet(expr, subtrack) {
 }
 
 Ferm(ferm) {
-    /**** (Ferm:%1) ****/
     this.Settings.assignSetting('Ferm', ferm, (ferm) => ferm > 1)
 }
 
@@ -104,7 +103,6 @@ Fermata(subtrack) {
 }
 
 Port(r) {
-    /**** (Port:%1) ****/
     this.Settings.assignSetting('Port', r, (r) => r > 0)
 }
 

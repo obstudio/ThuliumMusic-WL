@@ -16,10 +16,10 @@ userTemplate=<|
 
 
 (* instruments *)
-instrData=<|
-	"Style"->Keys@Import[localPath<>"midi\\instrument.json"],
-	"Percussion"->Keys@Import[localPath<>"midi\\percussion.json"]
-|>;
+instDict=Association@Import[localPath<>"src\\Instrument.json"];
+percDict=Association@Import[localPath<>"src\\Percussion.json"];
+instList=Keys@instDict;
+percList=Keys@percDict;
 
 
 (* tags *)

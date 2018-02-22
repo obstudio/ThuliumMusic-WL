@@ -69,8 +69,8 @@ Parse[origin_,partspec_]:=Block[
 	];
 	
 	If[FailureQ[rawData],
-		Echo[rawData];
 		Message[Parse::failure];
+		Echo[Level[Level[rawData,1][[2,"StackTrace"]],1][[1]]];
 		Return[];
 	];
 	
@@ -201,7 +201,7 @@ AudioAdapt[rawData_]:=Block[
 	{sectionData,rawData}];
 	Return[Total[Table[
 		AudioFade[
-			MIDIConstruct@Flatten@musicClip[["Events"]],
+			Sound@MIDIConstruct@Flatten@musicClip[["Events"]],
 		{musicClip[["FadeIn"]],musicClip[["FadeOut"]]}],
 	{musicClip,musicClips}]]];
 ];
@@ -222,7 +222,7 @@ AudioAdapt[rawData_]:=Block[
 
 
 (* ::Input:: *)
-(*data=Parse[localPath<>"src/test/test.sml",1];*)
+(*data=Parse[localPath<>"src/test/test.sml"]*)
 
 
 (* ::Input:: *)
@@ -246,9 +246,9 @@ AudioAdapt[rawData_]:=Block[
 
 
 (* ::Input:: *)
-(*MIDIStop[];EmitSound[#[[2]]]&@*)
+(*MIDIStop[];MIDIPlay[#[[2]]]&@*)
 (*EchoFunction["time: ",#[[1]]&]@*)
-(*Timing[MIDIAdapt[Parse[localPath<>"Songs/Touhou/Dream_Battle.sml"]]];*)
+(*Timing[MIDIAdapt[Parse[localPath<>"Songs/Touhou/Necro_Fantasia.sml"]]];*)
 
 
 (* ::Input:: *)

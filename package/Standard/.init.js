@@ -203,7 +203,7 @@ module.exports = {
         // this.Settings.assignSetting('ConOctVolume', volumeScale, (volume) => volume >= 0)
     },
     Vol(volume) {
-        const delta = volume / this.Settings.Volume[0]
+        const delta = (volume / 100) / this.Settings.Volume[0]
         for (var i = 0, length = this.Settings.Volume.length; i < length; i++) {
             this.Settings.Volume[i] *= delta
         }

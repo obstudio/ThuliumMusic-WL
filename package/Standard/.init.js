@@ -193,36 +193,42 @@ module.exports = {
         return Object.assign(t, { Content: result })
     },
 
-    ConOct(octave = 0, volumeScale = 1) {
-        this.Settings.assignSetting('ConOct', octave, (octave) => Number.isInteger(octave))
-        this.Settings.assignSetting('ConOctVolume', volumeScale, (volume) => volume >= 0)
+    ConOct(octave) {
+        if (octave === 0) {
+            this.Settings.Key = [this.Settings.Key[0]]
+        } else {
+            this.Settings.Key = [this.Settings.Key[0], this.Settings.Key[0] + octave * 12]
+        }
+        // this.Settings.assignSetting('ConOct', octave, (octave) => Number.isInteger(octave))
+        // this.Settings.assignSetting('ConOctVolume', volumeScale, (volume) => volume >= 0)
     },
     Vol(volume) {
-        this.Settings.assignSetting('Volume', volume / 100, (volume) => volume >= 0)
+        const delta = volume / this.Settings.Volume[0]
+        for (var i = 0, length = this.Settings.Volume.length; i < length; i++) {
+            this.Settings.Volume[i] *= delta
+        }
+        // this.Settings.assignSetting('Volume', volume / 100, (volume) => volume >= 0)
     },
     Spd(speed) {
         this.Settings.assignSetting('Speed', speed, (speed) => speed > 0)
     },
     Key(key) {
-        this.Settings.assignSetting('Key', key, (key) => Number.isInteger(key))
+        const delta = key - this.Settings.Key[0]
+        for (var i = 0, length = this.Settings.Key.length; i < length; i++) {
+            this.Settings.Key[i] += delta
+        }
+        // this.Settings.assignSetting('Key', key, (key) => Number.isInteger(key))
     },
     Oct(oct) {
-        this.Settings.assignSetting('Octave', oct, (octave) => Number.isInteger(octave))
+        const delta = (oct - Math.floor((this.Settings.Key[0] + 2) / 12)) * 12
+        for (var i = 0, length = this.Settings.Key.length; i < length; i++) {
+            this.Settings.Key[i] += delta
+        }
+        // this.Settings.assignSetting('Octave', oct, (octave) => Number.isInteger(octave))
     },
     KeyOct(keyOct) {
-        let key, oct, splitIndex
-        if (keyOct.endsWith('\'')) {
-            splitIndex = keyOct.indexOf('\'')
-            key = keyOct.slice(0, splitIndex)
-            oct = keyOct.length - splitIndex
-        } else if (keyOct.endsWith(',')) {
-            splitIndex = keyOct.indexOf(',')
-            key = keyOct.slice(0, splitIndex)
-            oct = splitIndex - keyOct.length
-        } else {
-            key = keyOct
-            oct = 0
-        }
+        const match = keyOct.match(/^((#|b)\2*)?([A-G])(('|,)\5*)?/)
+
         const Tonality = {
             'C': 0,
             'G': 7,
@@ -230,27 +236,15 @@ module.exports = {
             'A': 9,
             'E': 4,
             'B': -1,
-            '#F': 6,
-            '#C': 1,
-            'F': 5,
-            'bB': -2,
-            'bE': 3,
-            'bA': 8,
-            'bD': 1,
-            'bG': 6,
-            'bC': -1,
-
-            'F#': 6,
-            'C#': 1,
-            'Bb': -2,
-            'Eb': 3,
-            'Ab': 8,
-            'Db': 1,
-            'Gb': 6,
-            'Cb': -1,
+            'F': 5
         }
-        this.Settings.assignSetting('Key', Tonality[key], (key) => Number.isInteger(key))
-        this.Settings.assignSetting('Octave', oct, (octave) => Number.isInteger(octave))
+        let delta = Tonality[match[3]] + (match[2] === undefined ? 0 : (match[2] === '#' ? match[1].length : -match[1].length))
+            + (match[5] === undefined ? 0 : (match[5] === '\'' ? (12 * match[4].length) : (-12 * match[4].length))) - this.Settings.Key[0]
+        for (var i = 0, length = this.Settings.Key.length; i < length; i++) {
+            this.Settings.Key[i] += delta
+        }
+        // this.Settings.assignSetting('Key', Tonality[key], (key) => Number.isInteger(key))
+        // this.Settings.assignSetting('Octave', oct, (octave) => Number.isInteger(octave))
     },
     Beat(beat) {
         this.Settings.assignSetting('Beat', beat, (beat) => beat > 0 && Number.isInteger(Math.log2(beat)))

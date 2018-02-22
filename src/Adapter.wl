@@ -1,6 +1,6 @@
 (* ::Package:: *)
 
-temp[]:=userPath<>"tmp$"<>ToString[Floor@SessionTime[]]<>".json";
+TempPath[]:=userPath<>"tmp$"<>ToString[Floor@SessionTime[]]<>".json";
 MIDIStop=Sound`StopMIDI;
 
 Parse::usage = "\!\(\*RowBox[{\"Parse\",\"[\",RowBox[{
@@ -14,48 +14,54 @@ Valid file format include:
 2. JSON file: parse the tokenized SML file.
 
 Valid part specification include: 
-1. positive number n: parse the first n sections.
+1. positive number \!\(\*StyleBox[\"n\",\"TI\"]\): parse the first n sections.
 2. negative number -n: parse the last n sections.
 3. nonzero number {n}: parse the nth section.
 4. nonzero number {m,n}: parse from mth section to nth section.
 The default value of partspec is {1,-1}.";
 
 Parse::nfound = "Cannot find file `1`.";
-Parse::suffix = "Cannot Parse file with suffix `1`.";
-Parse::nsuffix = "Cannot Parse file with no suffix.";
+Parse::ext1 = "Cannot Parse file with extension `1`.";
+Parse::ext2 = "Cannot Parse file with no extension.";
 Parse::failure = "A failure occured in the process.";
 Parse::invspec = "Part specification `1` is invalid.";
 Parse::nosect = "No section was found through part specification `1`.";
 
-Parse[filepath_]:=Parse[filepath,{1,-1}];
-Parse[filepath_,partspec_]:=Block[
+Parse[filepath_String]:=Parse[filepath,{1,-1}];
+Parse[filepath_String,partspec_]:=Block[
 	{
 		tempFile,rawData,
 		sectCount,abspec,
 		startSect,endSect
 	},
-	Switch[filepath,
-		_?(!FileExistsQ@#&),                               (* file not found *)
-			Message[Parse::nfound,filepath];Return[],
-		_?(StringEndsQ[".json"]),                           (* json *)
+	
+	If[!FileExistsQ[filepath],
+		Message[Parse::nfound,filepath];
+		Return[];
+	];
+	
+	Switch[ToLowerCase@FileExtension[filepath],
+		"json",
 			rawData=ExternalEvaluate[JS,"Parse('"<>filepath<>"')"],
-		_?(StringEndsQ[".sml"]),                            (* sml *)
-			tempFile=temp[];
+		"sml",
+			tempFile=TempPath[];
 			Export[tempFile,Tokenize[filepath][["Tokenizer"]]];
 			rawData=ExternalEvaluate[JS,"Parse('"<>tempFile<>"')"];
 			DeleteFile[tempFile],
-		_?(StringEndsQ["."~~WordCharacter..]),              (* other files *)
-			Message[Parse::suffix,
-				StringCases[filepath,"."~~sfx:WordCharacter..:>sfx][[-1]]
-			];Return[],
+		"",
+			Message[Parse::ext2];
+			Return[],
 		_,
-			Message[Parse::nsuffix];Return[];
+			Message[Parse::ext1,FileExtension[filepath]];
+			Return[];
 	];
+	
 	If[FailureQ[rawData],
 		Echo[rawData];
 		Message[Parse::failure];
 		Return[];
 	];
+	
 	sectCount=Length@rawData;
 	abspec=If[#<0,sectCount+1+#,#]&;
     Switch[partspec,
@@ -70,6 +76,7 @@ Parse[filepath_,partspec_]:=Block[
         _,
             Message[Parse::invspec,partspec]
     ];
+    
     If[startSect>endSect,
 		Message[Parse::nosect,partspec];Return[],
 		Return[rawData[[startSect;;endSect]]];
@@ -77,31 +84,73 @@ Parse[filepath_,partspec_]:=Block[
 	
 ];
 
+
+EventConstruct[trackData_,startTime_]:=If[MemberQ[instList,trackData[["Instrument"]]],
+	<|
+		"Inst"->instDict[[trackData[["Instrument"]]]],
+		"Note"->#Pitch,
+		"Start"->startTime+#StartTime,
+		"End"->startTime+#StartTime+#Duration,
+		"Vol"->#Volume
+	|>&,
+	<|
+		"Inst"->128,
+		"Note"->percDict[[trackData[["Instrument"]]]],
+		"Start"->startTime+#StartTime,
+		"End"->startTime+#StartTime+#Duration,
+		"Vol"->#Volume
+	|>&
+]/@trackData[["Content"]];
+
+TrackConstruct[inst_,chan_,events_]:=Sound`MIDITrack[{
+	Sound`MIDIEvent[0,"SetTempo","Tempo"->1000000],
+	Sound`MIDIEvent[0,"ProgramCommand","Channel"->chan,"Value"->inst],
+	Sequence@@MapThread[Sound`MIDIEvent[##,"Channel"->chan]&][Transpose[
+		SortBy[events,{First,If[#[[2]]=="NoteOff",0,1]&}]
+	]]
+}];
+
+$Resolution = 48;
+$BaseLine = 60;
+MIDIConstruct::channel = "The amount of channels exceeds 16. Some channels may be lost when exporting to a MIDI file.";
+MIDIConstruct::instid = "The sound consists of instrument with ID exceeding 128, thus cannot be transferred to MIDI.";
+
+MIDIConstruct[musicClip_]:=Block[
+	{
+		channelData,channelMap=<||>
+	},
+	channelData=GroupBy[musicClip,#Inst&->({
+		{Floor[$Resolution*#Start],"NoteOn","Note"->#Note+$BaseLine,"Velocity"->Floor[127*#Vol]},
+		{Floor[$Resolution*#End],"NoteOff","Note"->#Note+$BaseLine,"Velocity"->0}
+	}&)];
+	Do[
+		If[instID==128,
+			AppendTo[channelMap,instID->9],
+			AppendTo[channelMap,instID->LengthWhile[
+				Range[0,Length@channelData],MemberQ[Values@channelMap,#]&
+			]];
+		],
+	{instID,Keys@channelData}];	
+	Return[Sound@Sound`MIDISequence[
+		KeyValueMap[TrackConstruct[#1,#2,Flatten[channelData[[Key[#1]]],1]]&,channelMap],
+		"DivisionType"->"PPQ",
+		"Resolution"->$Resolution
+	]];
+];
+
+
 MIDIAdapt[rawData_]:=Block[
     {
-		duration=0,
-		musicClip={}
+		duration=0,musicClip={}
     },
 	If[!ListQ[rawData],Return[]];
 	Do[
 		AppendTo[musicClip,Table[
-			If[MemberQ[instrData[["Style"]],trackData[["Instrument"]]],
-				SoundNote[
-					#Pitch,
-					duration+#StartTime+{0,#Duration},
-					trackData[["Instrument"]],
-					SoundVolume->#Volume
-				],
-				SoundNote[
-					trackData[["Instrument"]],
-					duration+#StartTime+{0,#Duration},
-					SoundVolume->#Volume
-				]
-			]&/@trackData[["Content"]],
+			EventConstruct[trackData,duration],
 		{trackData,sectionData[["Tracks"]]}]];
 		duration+=Max[sectionData[["Tracks",All,"Meta","Duration"]]],
 	{sectionData,rawData}];
-	Return[Sound@Flatten@musicClip];
+	Return[MIDIConstruct@Flatten@musicClip];
 ];
 
 AudioAdapt[rawData_]:=Block[
@@ -116,19 +165,7 @@ AudioAdapt[rawData_]:=Block[
 		groups=GatherBy[sectionData[["Tracks"]],#Meta[[{"FadeIn","FadeOut"}]]&];
 		Do[
 			compactData=Flatten@Table[
-				If[MemberQ[instrData[["Style"]],trackData[["Instrument"]]],
-					SoundNote[
-						#Pitch,
-						duration+#StartTime+{0,#Duration},
-						trackData[["Instrument"]],
-						SoundVolume->#Volume
-					],
-					SoundNote[
-						trackData[["Instrument"]],
-						duration+#StartTime+{0,#Duration},
-						SoundVolume->#Volume
-					]
-				]&/@trackData[["Content"]],
+				EventConstruct[trackData,duration],
 			{trackData,group}];
 			targetClip=If[group[[1,"Meta","FadeIn"]]==0,
 				LengthWhile[Range@Length@musicClips,Or[
@@ -152,11 +189,10 @@ AudioAdapt[rawData_]:=Block[
 	{sectionData,rawData}];
 	Return[Total[Table[
 		AudioFade[
-			Sound@Flatten@musicClip[["Events"]],
+			MIDIConstruct@Flatten@musicClip[["Events"]],
 		{musicClip[["FadeIn"]],musicClip[["FadeOut"]]}],
 	{musicClip,musicClips}]]];
 ];
-
 
 
 (* ::Input:: *)
@@ -170,11 +206,19 @@ AudioAdapt[rawData_]:=Block[
 
 
 (* ::Input:: *)
-(*data=Parse[localPath<>"src/test/test10.sml"];*)
+(*data=Parse[localPath<>"src/test/test.sml",1];*)
 
 
 (* ::Input:: *)
-(*MIDIAdapt[data]*)
+(*MIDIAdapt[Parse[localPath<>"src/test/test.sml"]]*)
+
+
+(* ::Input:: *)
+(*EmitSound@Sound@SoundNote[-25,1,"SlapBass"]*)
+
+
+(* ::Input:: *)
+(*EmitSound@Sound@SoundNote["RideBell",1]*)
 
 
 (* ::Subsubsection:: *)
@@ -188,7 +232,7 @@ AudioAdapt[rawData_]:=Block[
 (* ::Input:: *)
 (*MIDIStop[];EmitSound[#[[2]]]&@*)
 (*EchoFunction["time: ",#[[1]]&]@*)
-(*Timing[MIDIAdapt[Parse[localPath<>"src/test/Nuclear_Fusion.sml"]]];*)
+(*Timing[MIDIAdapt[Parse[localPath<>"Songs/Touhou/TH11-Chireiden/Heartfelt_Fancy.sml"]]];*)
 
 
 (* ::Input:: *)
@@ -216,9 +260,8 @@ AudioAdapt[rawData_]:=Block[
 
 
 (* ::Input:: *)
-(*testfile=localPath<>"src/test/test7.";*)
-(*testjson=tokenize[testfile<>"sml"][["Tokenizer"]];*)
-(*(*Export[testfile<>"tokenizer.json",testjson];*)*)
-(*testdata=Parse[testfile<>"json"];*)
-(*Export[testfile<>"output.mid",MIDIAdapt[testdata]];*)
-(*(*Export[testfile<>"output.mp3",AudioAdapt[testdata]];*)*)
+(*Export[localPath<>"src/test.mid",MIDIAdapt[Parse[localPath<>"Songs/Touhou/TH11-Chireiden/Heartfelt_Fancy.sml",2]]];*)
+
+
+(* ::Input:: *)
+(*Export[localPath<>"src/test.mid",Sound[SoundNote["BassDrum"]]];*)

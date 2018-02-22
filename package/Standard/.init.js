@@ -65,20 +65,19 @@ module.exports = {
         const pitch2 = t2.Content[0].Pitch
         const duration = t1.Meta.Duration
         const port = this.Settings.getOrSetDefault('Port', 6)
-        const num = duration * port
+        const num = duration * port * this.Settings.Speed / 60
         const step = (pitch2 - pitch1) / (num - 1)
         const pitches = []
-        for (let i = 0; i < port; i++) {
+        for (let i = 0; i < num; i++) {
             pitches.push(Math.round(pitch1 + step * i))
         }
-
         const result = pitches.map((pitch, index) => {
             return {
                 Type: 'Note',
                 Pitch: pitch,
                 Volume: t2.Content[0].Volume,
-                Duration: 1 / port,
-                StartTime: index / port
+                Duration: 1 / port * 60 / this.Settings.Speed,
+                StartTime: index / port * 60 / this.Settings.Speed
             }
         })
 

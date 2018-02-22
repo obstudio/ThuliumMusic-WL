@@ -257,17 +257,19 @@ class TrackParser {
      */
     parseNote(note) {
         const pitches = []
+        const pitchQueue = []
         const volumes = []
         const beat = this.parseBeat(note)
         const duration = beat * 60 / this.Settings.Speed
         const actualDuration = duration * (1 - this.Settings.Stac[note.Staccato])
-        const volumeScale = note.VolOp.split('').reduce((sum, cur) => sum * cur === '>' ? this.Settings.Accent : cur === ':' ? this.Settings.Light : 1, 1)
-        const volume = this.Settings.Volume * volumeScale
 
         // calculate pitch array and record it for further trace
         if (note.Pitches.length === 1 && note.Pitches[0].Degree === '%') {
             if (this.Context.pitchQueue.length >= this.Settings.Trace) {
-                pitches.push(...this.Context.pitchQueue[this.Context.pitchQueue.length - this.Settings.Trace])
+                const delta = this.parseDeltaPitch(note.PitOp)
+                const queue = this.Context.pitchQueue[this.Context.pitchQueue.length - this.Settings.Trace]
+                pitches.push(...[].concat(...queue.map((pitch) => this.Settings.Key.map((key) => key + pitch + delta))))
+                volumes.push(...[].concat(...new Array(queue.length).fill(this.getVolume(note))))
             } else {
                 this.Context.warnings.push(new TraceError(this.ID, [this.Content.indexOf(note)], this.Settings.Trace))
             }
@@ -276,14 +278,18 @@ class TrackParser {
                 if (pitch.Degree === '0') continue
                 if (pitch.Degree === 'x') {
                     pitches.push(null)
+                    volumes.push(this.Settings.Volume[0] * note.VolOp.split('').reduce((sum, cur) => sum * cur === '>' ? this.Settings.Accent : cur === ':' ? this.Settings.Light : 1, 1))
                 } else if (pitch.Chord === '') {
-                    pitches.push(...this.parsePitch(pitch, note.PitOp))
-                    volumes.push(...this.getVolume())
+                    const temp = this.parsePitch(pitch, note.PitOp)
+                    pitchQueue.push(temp[0])
+                    pitches.push(...temp)
+                    volumes.push(...this.getVolume(note))
                 } else {
                     const basePitch = this.parsePitch(pitch, note.PitOp)
                     const chords = this.parseChord(pitch)
+                    pitchQueue.push(...chords.map(subPitch => subPitch + basePitch[0]))
                     pitches.push(...[].concat(...chords.map((subPitch) => basePitch.map((delta) => subPitch + delta))))
-                    volumes.push(...[].concat(...new Array(chords.length).fill(this.getVolume())))
+                    volumes.push(...[].concat(...new Array(chords.length).fill(this.getVolume(note))))
                 }
             }
         }
@@ -293,8 +299,8 @@ class TrackParser {
         if (volumes.some((volume) => volume > 1 || volume < 0)) {
             this.Context.warnings.push(new VolumeError(this.ID, [this.Content.indexOf(note)], volumes))
         }
-        if (pitches.length > 0) {
-            this.Context.pitchQueue.push(pitches.slice(0))
+        if (pitchQueue.length > 0) {
+            this.Context.pitchQueue.push(pitchQueue.slice(0))
         }
 
         const result = []
@@ -324,10 +330,11 @@ class TrackParser {
         return result
     }
 
-    getVolume() {
+    getVolume(note) {
+        const scale = note.VolOp.split('').reduce((sum, cur) => sum * cur === '>' ? this.Settings.Accent : cur === ':' ? this.Settings.Light : 1, 1)
         const total = this.Settings.Key.length
         const vol = this.Settings.Volume.length
-        return [...this.Settings.Volume, ...new Array(total - vol).fill(this.Settings.Volume[vol - 1])]
+        return [...this.Settings.Volume, ...new Array(total - vol).fill(this.Settings.Volume[vol - 1])].map((v) => v * scale)
     }
     
     /**

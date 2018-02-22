@@ -257,6 +257,7 @@ class TrackParser {
      */
     parseNote(note) {
         const pitches = []
+        const volumes = []
         const beat = this.parseBeat(note)
         const duration = beat * 60 / this.Settings.Speed
         const actualDuration = duration * (1 - this.Settings.Stac[note.Staccato])
@@ -264,7 +265,6 @@ class TrackParser {
         const volume = this.Settings.Volume * volumeScale
 
         // calculate pitch array and record it for further trace
-        const pitchDelta = this.parseDeltaPitch(note.PitOp)
         if (note.Pitches.length === 1 && note.Pitches[0].Degree === '%') {
             if (this.Context.pitchQueue.length >= this.Settings.Trace) {
                 pitches.push(...this.Context.pitchQueue[this.Context.pitchQueue.length - this.Settings.Trace])
@@ -277,21 +277,18 @@ class TrackParser {
                 if (pitch.Degree === 'x') {
                     pitches.push(null)
                 } else if (pitch.Chord === '') {
-                    pitches.push(this.parsePitch(pitch) + pitchDelta)
+                    pitches.push(...this.parsePitch(pitch, note.PitOp))
+                    volumes.push(...this.getVolume())
                 } else {
-                    const basePitch = this.parsePitch(pitch) + pitchDelta
-                    pitches.push(...this.parseChord(pitch).map((subPitch) => subPitch + basePitch))
+                    const basePitch = this.parsePitch(pitch, note.PitOp)
+                    const chords = this.parseChord(pitch)
+                    pitches.push(...[].concat(...chords.map((subPitch) => basePitch.map((delta) => subPitch + delta))))
+                    volumes.push(...[].concat(...new Array(chords.length).fill(this.getVolume())))
                 }
             }
         }
         if (new Set(pitches).size !== pitches.length) {
             this.Context.warnings.push(new DupChordError(this.ID, [this.Content.indexOf(note)], pitches))
-        }
-
-        const volumes = new Array(pitches.length).fill(volume)
-        if (this.Settings.ConOct !== 0) {
-            pitches.push(...pitches.map((pitch) => pitch + 12 * this.Settings.ConOct))
-            volumes.push(...volumes.map((volume) => volume * this.Settings.ConOctVolume))
         }
         if (volumes.some((volume) => volume > 1 || volume < 0)) {
             this.Context.warnings.push(new VolumeError(this.ID, [this.Content.indexOf(note)], volumes))
@@ -327,6 +324,12 @@ class TrackParser {
         return result
     }
 
+    getVolume() {
+        const total = this.Settings.Key.length
+        const vol = this.Settings.Volume.length
+        return [...this.Settings.Volume, ...new Array(total - vol).fill(this.Settings.Volume[vol - 1])]
+    }
+    
     /**
     *
     * @param {SMML.Pitch} pitch
@@ -357,8 +360,9 @@ class TrackParser {
      * @param {SMML.Pitch} pitch
      * @returns {number}
      */
-    parsePitch(pitch) {
-        return this.Settings.Key + this.Settings.Octave * 12 + TrackParser.pitchDict[pitch.Degree] + this.parseDeltaPitch(pitch.PitOp)
+    parsePitch(pitch, base) {
+        const delta = this.parseDeltaPitch(base) + TrackParser.pitchDict[pitch.Degree] + this.parseDeltaPitch(pitch.PitOp)
+        return this.Settings.Key.map((key) => key + delta)
     }
 
     parseDeltaPitch(pitchOperators) {

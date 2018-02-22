@@ -2,6 +2,7 @@
 
 TempPath[]:=userPath<>"tmp$"<>ToString[Floor@SessionTime[]]<>".json";
 MIDIStop=Sound`StopMIDI;
+MIDIPlay=Sound`EmitMIDI;
 
 Parse::usage = "\!\(\*RowBox[{\"Parse\",\"[\",RowBox[{
 StyleBox[\"filepath\",\"TI\"],\",\",StyleBox[\"partspec\",\"TI\"]
@@ -14,12 +15,18 @@ Valid file format include:
 2. JSON file: parse the tokenized SML file.
 
 Valid part specification include: 
-1. positive number \!\(\*StyleBox[\"n\",\"TI\"]\): parse the first n sections.
-2. negative number -n: parse the last n sections.
-3. nonzero number {n}: parse the nth section.
-4. nonzero number {m,n}: parse from mth section to nth section.
-The default value of partspec is {1,-1}.";
+1. Positive number \!\(\*StyleBox[\"n\",\"TI\"]\): \
+parse the first \!\(\*StyleBox[\"n\",\"TI\"]\) sections.
+2. Negative number -\!\(\*StyleBox[\"n\",\"TI\"]\): \
+parse the last \!\(\*StyleBox[\"n\",\"TI\"]\) sections.
+3. Nonzero number \!\(\*RowBox[{\"{\",StyleBox[\"n\",\"TI\"],\"}\"}]\): \
+parse the \!\(\*StyleBox[\"n\",\"TI\"]\)\!\(\*SuperscriptBox[\"\[Null]\", \"th\"]\) section.
+4. Nonzero number \!\(\*RowBox[{\"{\",StyleBox[\"m\",\"TI\"],\",\",StyleBox[\"n\",\"TI\"],\"}\"}]\): \
+parse from \!\(\*StyleBox[\"m\",\"TI\"]\)\!\(\*SuperscriptBox[\"\[Null]\", \"th\"]\) section \
+to \!\(\*StyleBox[\"n\",\"TI\"]\)\!\(\*SuperscriptBox[\"\[Null]\", \"th\"]\) section.
+The default value of partspec is \!\(\*RowBox[{\"{\",\"1\",\",\",\"-1\",\"}\"}]\).";
 
+Parse::type = "The first argument should be a filename or a tokenizer.";
 Parse::nfound = "Cannot find file `1`.";
 Parse::ext1 = "Cannot Parse file with extension `1`.";
 Parse::ext2 = "Cannot Parse file with no extension.";
@@ -27,33 +34,38 @@ Parse::failure = "A failure occured in the process.";
 Parse::invspec = "Part specification `1` is invalid.";
 Parse::nosect = "No section was found through part specification `1`.";
 
-Parse[filepath_String]:=Parse[filepath,{1,-1}];
-Parse[filepath_String,partspec_]:=Block[
+Parse[origin_]:=Parse[origin,{1,-1}];
+Parse[origin_,partspec_]:=Block[
 	{
-		tempFile,rawData,
-		sectCount,abspec,
-		startSect,endSect
+		filepath,tempFile,rawData,
+		sectCount,abspec,startSect,endSect
 	},
 	
-	If[!FileExistsQ[filepath],
-		Message[Parse::nfound,filepath];
-		Return[];
-	];
-	
-	Switch[ToLowerCase@FileExtension[filepath],
-		"json",
-			rawData=ExternalEvaluate[JS,"Parse('"<>filepath<>"')"],
-		"sml",
+	Switch[origin,
+		_String,
+			If[!FileExistsQ[origin],
+				Message[Parse::nfound,origin];Return[];
+			];
+			Switch[ToLowerCase@FileExtension[origin],
+				"json",
+					rawData=ExternalEvaluate[JS,"Parse('"<>origin<>"')"],
+				"sml",
+					tempFile=TempPath[];
+					Export[tempFile,Tokenize[origin][["Tokenizer"]]];
+					rawData=ExternalEvaluate[JS,"Parse('"<>tempFile<>"')"];
+					DeleteFile[tempFile],
+				"",
+					Message[Parse::ext2];Return[],
+				_,
+					Message[Parse::ext1,FileExtension[origin]];Return[];
+			],
+		_Association,
 			tempFile=TempPath[];
-			Export[tempFile,Tokenize[filepath][["Tokenizer"]]];
+			Export[tempFile,origin];
 			rawData=ExternalEvaluate[JS,"Parse('"<>tempFile<>"')"];
 			DeleteFile[tempFile],
-		"",
-			Message[Parse::ext2];
-			Return[],
 		_,
-			Message[Parse::ext1,FileExtension[filepath]];
-			Return[];
+			Message[Parse::type];Return[];
 	];
 	
 	If[FailureQ[rawData],
@@ -131,7 +143,7 @@ MIDIConstruct[musicClip_]:=Block[
 			]];
 		],
 	{instID,Keys@channelData}];	
-	Return[Sound@Sound`MIDISequence[
+	Return[Sound`MIDISequence[
 		KeyValueMap[TrackConstruct[#1,#2,Flatten[channelData[[Key[#1]]],1]]&,channelMap],
 		"DivisionType"->"PPQ",
 		"Resolution"->$Resolution
@@ -200,6 +212,10 @@ AudioAdapt[rawData_]:=Block[
 
 
 (* ::Input:: *)
+(*Parse[Tokenize[localPath<>"src/test/test.sml"][["Tokenizer"]]]*)
+
+
+(* ::Input:: *)
 (*With[{testfile=localPath<>"src/test/test"},*)
 (*Export[testfile<>".json",Tokenize[testfile<>".sml"][["Tokenizer"]]]*)
 (*];*)
@@ -210,7 +226,7 @@ AudioAdapt[rawData_]:=Block[
 
 
 (* ::Input:: *)
-(*MIDIAdapt[Parse[localPath<>"src/test/test.sml"]]*)
+(*MIDIPlay@MIDIAdapt[Parse[localPath<>"src/test/test.sml"]]*)
 
 
 (* ::Input:: *)
@@ -232,11 +248,11 @@ AudioAdapt[rawData_]:=Block[
 (* ::Input:: *)
 (*MIDIStop[];EmitSound[#[[2]]]&@*)
 (*EchoFunction["time: ",#[[1]]&]@*)
-(*Timing[MIDIAdapt[Parse[localPath<>"Songs/Touhou/TH11-Chireiden/Heartfelt_Fancy.sml"]]];*)
+(*Timing[MIDIAdapt[Parse[localPath<>"Songs/Touhou/Dream_Battle.sml"]]];*)
 
 
 (* ::Input:: *)
-(*MIDIStop[];EmitSound[#[[2]]]&@*)
+(*MIDIStop[];MIDIPlay[#[[2]]]&@*)
 (*EchoFunction["time: ",#[[1]]&]@*)
 (*Timing[MIDIAdapt[Parse[localPath<>"src/test/test.sml"]]];*)
 

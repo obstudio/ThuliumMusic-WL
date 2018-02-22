@@ -70,14 +70,14 @@ orderTok=Union@@StringCases[#,{
 notationPadded=RE["[&\\|\\s\\^\\*]*"];
 notationPatt=Alternatives[
 	"+"|"ToCoda"|"Coda"|"s"|"Segno"|"DC"|"DaCapo"|"DS"|"DaSegno",
-	"||:"|":||"|("["~~orderListP~~".]")|Whitespace,
+	"||:"|":||"|("["~~orderListP~~"]")|Whitespace,
 	("/"~~orderListC~~":")|"|"|"/"|"^"|"&"|"*"
 ];
 notationTok=StringCases[{
 	space:Whitespace:><|"Type"->"Whitespace","Content"->space|>,
 	"||:":><|"Type"->"RepeatBegin"|>,
 	":||":><|"Type"->"RepeatEnd"|>,
-	"["~~ol:orderListP~~".]":><|"Type"->"Volta","Order"->orderTok[ol]|>,
+	"["~~ol:orderListP~~"]":><|"Type"->"Volta","Order"->orderTok[ol]|>,
 	bl:"/"~~ol:orderListC~~":":>
 		<|"Type"->"BarLine","Newline"->(bl=="\\"),"Skip"->False,"Order"->orderTok[ol]|>,
 	bl:"|"|"/":>

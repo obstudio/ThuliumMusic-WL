@@ -211,6 +211,10 @@ AudioAdapt[rawData_]:=Block[
 (*DeleteObject[JS];*)
 
 
+(* ::Subsubsection:: *)
+(*Debug*)
+
+
 (* ::Input:: *)
 (*Parse[Tokenize[localPath<>"src/test/test.sml"][["Tokenizer"]]]*)
 
@@ -222,7 +226,11 @@ AudioAdapt[rawData_]:=Block[
 
 
 (* ::Input:: *)
-(*data=Parse[localPath<>"src/test/test.sml"]*)
+(*data=Parse[localPath<>"src/test/test.sml"];*)
+
+
+(* ::Input:: *)
+(*Diagnose[data]*)
 
 
 (* ::Input:: *)
@@ -271,13 +279,4 @@ AudioAdapt[rawData_]:=Block[
 (*Timing[AudioAdapt[Parse[localPath<>"src/test/test.sml"]]];*)
 
 
-(* ::Subsubsection:: *)
-(*Test output*)
 
-
-(* ::Input:: *)
-(*Export[localPath<>"src/test.mid",MIDIAdapt[Parse[localPath<>"Songs/Touhou/TH11-Chireiden/Heartfelt_Fancy.sml",2]]];*)
-
-
-(* ::Input:: *)
-(*Export[localPath<>"src/test.mid",Sound[SoundNote["BassDrum"]]];*)

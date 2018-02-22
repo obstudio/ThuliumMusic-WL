@@ -268,7 +268,7 @@ class TrackParser {
             if (this.Context.pitchQueue.length >= this.Settings.Trace) {
                 const delta = this.parseDeltaPitch(note.PitOp)
                 const queue = this.Context.pitchQueue[this.Context.pitchQueue.length - this.Settings.Trace]
-                pitches.push(...[].concat(...queue.map((pitch) => this.Settings.Key.map((key) => key + pitch + delta))))
+                pitches.push(...[].concat(...queue.map((pitch) => this.Settings.Key.map((key) => key - this.Settings.Key[0] + pitch + delta))))
                 volumes.push(...[].concat(...new Array(queue.length).fill(this.getVolume(note))))
             } else {
                 this.Context.warnings.push(new TraceError(this.ID, [this.Content.indexOf(note)], this.Settings.Trace))

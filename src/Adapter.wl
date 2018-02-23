@@ -1,5 +1,9 @@
 (* ::Package:: *)
 
+(* ::Subsubsection:: *)
+(*Parser*)
+
+
 TempPath[]:=userPath<>"tmp$"<>ToString[Floor@SessionTime[]]<>".json";
 MIDIStop=Sound`StopMIDI;
 MIDIPlay=Sound`EmitMIDI;
@@ -95,6 +99,10 @@ Parse[origin_,partspec_]:=Block[
     ];
 	
 ];
+
+
+(* ::Subsubsection:: *)
+(*Adapter*)
 
 
 EventConstruct[trackData_,startTime_]:=If[MemberQ[instList,trackData[["Instrument"]]],
@@ -204,10 +212,6 @@ AudioAdapt[rawData_]:=Block[
 		{musicClip[["FadeIn"]],musicClip[["FadeOut"]]}],
 	{musicClip,musicClips}]]];
 ];
-
-
-(* ::Input:: *)
-(*DeleteObject[JS];*)
 
 
 (* ::Subsubsection:: *)

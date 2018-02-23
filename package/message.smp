@@ -1,0 +1,16 @@
+//SMML Global - Message - eng
+//Updated: 2018.2.23.
+
+# Package Global::Note
+
+Range = 'Chord operator $1 indicates invalid range [!1;!2].'
+Override = 'Chord operator $1 will override all previous chord operators.'
+Repeat = 'Pitch !1 is found repeatedly.'
+OutReg = 'Pitch !1 is out of register and cannot be played.'
+Instru = 'Note disaccords with current instrument $1.'
+
+# Package Global::Track
+
+BarLen = 'Number of beats is expected to be !1, but !2 was found.'
+
+# End

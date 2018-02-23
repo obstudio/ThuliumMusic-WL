@@ -1,0 +1,29 @@
+# GraceNote
+
+? GraceNote(subtrack, note)
+  prepend *subtrack* to *note* as gracenote.
+? (`subtrack`^)`note`
+  is the simplified form for %GraceNote%.
+
+## Details
+
++ A gracenote will be rendered in staff like this:
+  =[![1.svg];![2.svg]]
++ *subtrack* only allows a list of notes.
++ The gracenotes will have duration proportion corresponding to the duration in *subtrack*.
+
+## Examples
+
+### Basic Examples
+
+Generate a simple gracenote:
+> GraceNote({13}, {5-})
+
+### Scope
+
+### Relations
+
+## See Also
+
+## Toturials
+

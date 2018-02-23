@@ -100,7 +100,7 @@ Parse[origin_,partspec_]:=Block[
 EventConstruct[trackData_,startTime_]:=If[MemberQ[instList,trackData[["Instrument"]]],
 	<|
 		"Inst"->instDict[[trackData[["Instrument"]]]],
-		"Note"->#Pitch,
+		"Note"->#Pitch+60,
 		"Start"->startTime+#StartTime,
 		"End"->startTime+#StartTime+#Duration,
 		"Vol"->#Volume
@@ -123,7 +123,6 @@ TrackConstruct[inst_,chan_,events_]:=Sound`MIDITrack[{
 }];
 
 $Resolution = 48;
-$BaseLine = 60;
 MIDIConstruct::channel = "The amount of channels exceeds 16. Some channels may be lost when exporting to a MIDI file.";
 MIDIConstruct::instid = "The sound consists of instrument with ID exceeding 128, thus cannot be transferred to MIDI.";
 
@@ -132,8 +131,8 @@ MIDIConstruct[musicClip_]:=Block[
 		channelData,channelMap=<||>
 	},
 	channelData=GroupBy[musicClip,#Inst&->({
-		{Floor[$Resolution*#Start],"NoteOn","Note"->#Note+$BaseLine,"Velocity"->Floor[127*#Vol]},
-		{Floor[$Resolution*#End],"NoteOff","Note"->#Note+$BaseLine,"Velocity"->0}
+		{Floor[$Resolution*#Start],"NoteOn","Note"->#Note,"Velocity"->Floor[127*#Vol]},
+		{Floor[$Resolution*#End],"NoteOff","Note"->#Note,"Velocity"->0}
 	}&)];
 	Do[
 		If[instID==128,
@@ -220,7 +219,7 @@ AudioAdapt[rawData_]:=Block[
 
 
 (* ::Input:: *)
-(*With[{testfile=localPath<>"src/test/test"},*)
+(*With[{testfile=localPath<>"Songs/Noushyou_Sakuretsu_Garu"},*)
 (*Export[testfile<>".json",Tokenize[testfile<>".sml"][["Tokenizer"]]]*)
 (*];*)
 
@@ -256,7 +255,7 @@ AudioAdapt[rawData_]:=Block[
 (* ::Input:: *)
 (*MIDIStop[];MIDIPlay[#[[2]]]&@*)
 (*EchoFunction["time: ",#[[1]]&]@*)
-(*Timing[MIDIAdapt[Parse[localPath<>"Songs/Touhou/Necro_Fantasia.sml"]]];*)
+(*Timing[MIDIAdapt[Parse[localPath<>"Songs/Noushyou_Sakuretsu_Garu.sml",{11}]]];*)
 
 
 (* ::Input:: *)
@@ -277,6 +276,3 @@ AudioAdapt[rawData_]:=Block[
 (*AudioStop[];AudioPlay[#[[2]]]&@*)
 (*EchoFunction["time: ",#[[1]]&]@*)
 (*Timing[AudioAdapt[Parse[localPath<>"src/test/test.sml"]]];*)
-
-
-

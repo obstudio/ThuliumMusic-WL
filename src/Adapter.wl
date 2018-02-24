@@ -124,7 +124,7 @@ EventConstruct[trackData_,startTime_]:=If[MemberQ[instList,trackData[["Instrumen
 
 TrackConstruct[inst_,chan_,events_]:=Sound`MIDITrack[{
 	Sound`MIDIEvent[0,"SetTempo","Tempo"->1000000],
-	Sound`MIDIEvent[0,"ProgramCommand","Channel"->chan,"Value"->inst],
+	Sound`MIDIEvent[0,"ProgramCommand","Channel"->chan,"Value"->If[inst==128,0,inst]],
 	Sequence@@MapThread[Sound`MIDIEvent[##,"Channel"->chan]&][Transpose[
 		SortBy[events,{First,If[#[[2]]=="NoteOff",0,1]&}]
 	]]
@@ -139,7 +139,7 @@ MIDIConstruct[musicClip_]:=Block[
 		channelData,channelMap=<||>
 	},
 	channelData=GroupBy[musicClip,#Inst&->({
-		{Floor[$Resolution*#Start],"NoteOn","Note"->#Note,"Velocity"->Floor[127*#Vol]},
+		{Echo@Floor[$Resolution*#Start],"NoteOn","Note"->#Note,"Velocity"->Floor[127*#Vol]},
 		{Floor[$Resolution*#End],"NoteOff","Note"->#Note,"Velocity"->0}
 	}&)];
 	Do[
@@ -208,7 +208,7 @@ AudioAdapt[rawData_]:=Block[
 	{sectionData,rawData}];
 	Return[Total[Table[
 		AudioFade[
-			Sound@MIDIConstruct@Flatten@musicClip[["Events"]],
+			Echo@Sound@MIDIConstruct@Flatten@musicClip[["Events"]],
 		{musicClip[["FadeIn"]],musicClip[["FadeOut"]]}],
 	{musicClip,musicClips}]]];
 ];
@@ -223,16 +223,23 @@ AudioAdapt[rawData_]:=Block[
 
 
 (* ::Input:: *)
-(*With[{testfile=localPath<>"Songs/Noushyou_Sakuretsu_Garu"},*)
+(*With[{testfile=localPath<>"src/test/test"},*)
 (*Export[testfile<>".json",Tokenize[testfile<>".sml"][["Tokenizer"]]]*)
 (*];*)
 
 
 (* ::Input:: *)
-(*data=Parse[localPath<>"src/test/test.sml"];*)
+(*With[{testfile=localPath<>"Songs/PVZ/Watery_Grave"},*)
+(*Export[testfile<>".json",Tokenize[testfile<>".sml"][["Tokenizer"]]]*)
+(*];*)
 
 
 (* ::Input:: *)
+(*data=Parse[localPath<>"src/test/test.sml"]*)
+
+
+(* ::Input:: *)
+(*data=Parse[localPath<>"Songs/PVZ/Watery_Grave.sml"];*)
 (*Diagnose[data]*)
 
 
@@ -241,11 +248,11 @@ AudioAdapt[rawData_]:=Block[
 
 
 (* ::Input:: *)
-(*EmitSound@Sound@SoundNote[-25,1,"SlapBass"]*)
+(*EmitSound@Sound@SoundNote[5,1,"TubularBells"]*)
 
 
 (* ::Input:: *)
-(*EmitSound@Sound@SoundNote["RideBell",1]*)
+(*EmitSound@Sound@SoundNote["HighWoodblock",1]*)
 
 
 (* ::Subsubsection:: *)
@@ -259,7 +266,7 @@ AudioAdapt[rawData_]:=Block[
 (* ::Input:: *)
 (*MIDIStop[];MIDIPlay[#[[2]]]&@*)
 (*EchoFunction["time: ",#[[1]]&]@*)
-(*Timing[MIDIAdapt[Parse[localPath<>"Songs/Noushyou_Sakuretsu_Garu.sml",{11}]]];*)
+(*Timing[MIDIAdapt[Parse[localPath<>"Songs/PVZ/Watery_Grave.sml",-1]]];*)
 
 
 (* ::Input:: *)
@@ -279,4 +286,13 @@ AudioAdapt[rawData_]:=Block[
 (* ::Input:: *)
 (*AudioStop[];AudioPlay[#[[2]]]&@*)
 (*EchoFunction["time: ",#[[1]]&]@*)
-(*Timing[AudioAdapt[Parse[localPath<>"src/test/test.sml"]]];*)
+(*Timing[AudioAdapt[Parse[localPath<>"Songs/PVZ/Watery_Grave.sml",{4}]]];*)
+
+
+(* ::Input:: *)
+(*AudioStop[];AudioPlay[#[[2]]]&@*)
+(*EchoFunction["time: ",#[[1]]&]@*)
+(*Timing[MIDIAdapt[Parse[localPath<>"src/test/test.sml"]]];*)
+
+
+

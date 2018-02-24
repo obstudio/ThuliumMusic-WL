@@ -146,10 +146,10 @@ Tokenize[filepath_]:=Block[
 	
 	(* note *)
 	chordPatt=RE["["<>chordPack["Standard"]<>syntax[["Chord"]]<>"]*"];
-	pitch=degree~~pitOp~~chordPatt;
+	pitch=degree~~pitOp~~chordPatt~~volOp;
 	notePatt=pitch|("["~~pitch..~~"]")~~pitOp~~volOp~~durOp~~postOp;
-	pitchTok=StringCases[sd:degree~~po:pitOp~~ch:chordPatt:>
-		<|"Degree"->sd,"PitOp"->po,"Chord"->ch|>
+	pitchTok=StringCases[sd:degree~~po:pitOp~~ch:chordPatt~~vo:volOp:>
+		<|"Degree"->sd,"PitOp"->po,"Chord"->ch,"VolOp"->vo|>
 	];
 	noteRule=pts:pitch|("["~~pitch..~~"]")~~pit:pitOp~~vol:volOp~~dur:durOp~~pst:postOp:><|
 		"Type"->"Note","Pitches"->pitchTok[pts],

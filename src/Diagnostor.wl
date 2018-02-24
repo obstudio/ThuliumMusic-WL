@@ -7,17 +7,19 @@ Diagnose[rawData_]:=Block[
 	Do[
 		sectionOutput={};
 		Do[
-			AppendTo[sectionOutput,OpenerView[{
-				"Track: "<>trackData[["ID"]],
-				Column[Row[{
-					#ErrID,": ",#Args
-				}]&/@trackData[["Meta","Warnings"]]]
-			},True,Method->"Active"]],
+			If[trackData[["Meta","Warnings"]]!={},
+				AppendTo[sectionOutput,OpenerView[{
+					"Track: "<>trackData[["ID"]],
+					Column[Row[{
+						#ErrID,": ",#Args
+					}]&/@trackData[["Meta","Warnings"]]]
+				},True,Method->"Active"]]
+			],
 		{trackData,sectionData[["Tracks"]]}];
 		AppendTo[output,OpenerView[{
 			"Section",
 			Column[sectionOutput]
-		},True,Method->"Active"]],
+		},TrueQ[sectionOutput!={}],Method->"Active"]],
 	{sectionData,rawData}];
 	If[output!={},Print@Column[output]];
 ];

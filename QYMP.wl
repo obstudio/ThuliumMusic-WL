@@ -16,7 +16,8 @@ localPath=NotebookDirectory[];
 
 <<(localPath<>"src\\Adapter.wl")
 <<(localPath<>"src\\Syntax.wl")
-<<(localPath<>"src\\Tokenizer.wl")         (* SMML tokenizer *)
+<<(localPath<>"src\\Tokenizer.wl")
+<<(localPath<>"src\\Diagnostor.wl")
 
 <<(localPath<>"package\\Standard\\.init.wl")
 

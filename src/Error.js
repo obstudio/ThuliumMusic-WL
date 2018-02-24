@@ -16,10 +16,31 @@ class SMMLError extends Error {
 
 class BarLengthError extends SMMLError{
     constructor(id, index, length) {
-        super('BarLengthError', '', id, index, length)
+        super('BarLength', '', id, index, length)
+    }
+}
+
+class DupChordError extends SMMLError{
+    constructor(id, index, pitches) {
+        super('DupChord', '', id, index, pitches)
+    }
+}
+
+class TraceError extends SMMLError{
+    constructor(id, index, trace) {
+        super('Trace', '', id, index, trace)
+    }
+}
+
+class VolumeError extends SMMLError{
+    constructor(id, index, volume) {
+        super('Trace', '', id, index, volume)
     }
 }
 
 module.exports = {
-    BarLengthError
+    BarLengthError,
+    DupChordError,
+    TraceError,
+    VolumeError
 }

@@ -343,7 +343,7 @@ class TrackParser {
         const vol = this.Settings.Volume.length
         return [...this.Settings.Volume, ...new Array(total - vol).fill(this.Settings.Volume[vol - 1])].map((v) => v * scale)
     }
-
+      
     /**
     *
     * @param {SMML.Pitch} pitch

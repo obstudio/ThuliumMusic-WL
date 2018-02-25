@@ -1,0 +1,12 @@
+{
+	"Title": "PVZ",
+	"Comment": "植物大战僵尸",
+	"Abstract": "",
+	"Path": "PVZ\\",
+	"SongList": [
+		{"Song": "Watery_Grave"},
+		{"Song": "Brainiac_Maniac"},
+		{"Song": "Celebrawl"}
+	],
+	"IndexWidth": 0
+}

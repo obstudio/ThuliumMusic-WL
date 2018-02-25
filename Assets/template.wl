@@ -3,14 +3,26 @@
 Import[localPath<>"package\\Standard\\tutorial\\GraceNote.smd","List"]
 
 
-docUsage[usage_,effect_]:=Block[
-	{funcName,ArgList},
-	Cell[Column[{
-		RowBox[RenderText[usage]],
-		RowBox[RenderText[effect]]
-	}],CellMargins->{{0,0},{0,0}},
-	ShowCellBracket->False,Editable->False,
-	Background->LightBlue,CellFrame->{{0,0},{2,2}}]
+Options[RenderText]={
+	"Spacer"->0,
+	"Font"->{FontSize->20}
+};
+TextOptions=Keys@Options[RenderText];
+RenderText[line_String,OptionsPattern[]]:=Block[{output},
+	output=StringCases[line,{
+		"("~~text:Except["("|")"]..~~")":>RowBox[
+			Prepend[StyleBox["(",OptionValue["Font"]]]@
+			Append[StyleBox[")",OptionValue["Font"]]]@
+			RenderText[text,#->OptionValue[#]&/@TextOptions]
+		],
+		"*"~~text:Except["*"]..~~"*":>FrameBox[StyleBox[text,"TI",OptionValue["Font"]],
+			Background->RGBColor["#DDDDFF"],RoundingRadius->{6,6},
+			FrameStyle->Directive[RGBColor["#111133"],Dashing[4],Thickness[1]]
+		],
+		"\n":>Sequence["\n",TemplateBox[{OptionValue["Spacer"]},"Spacer1"]],
+		text:Except[Characters["*()\n"]]..:>StyleBox[text,OptionValue["Font"]]
+	}];
+	Return[output];
 ];
 
 
@@ -18,26 +30,6 @@ TutorialOptions={
 	ShowCellBracket->False,
 	Editable->False
 };
-
-
-Options[RenderText]={
-	"Spacer"->0,
-	"Font"->{FontSize->20}
-};
-RenderTextOptions=Keys@Options[RenderText];
-RenderText[line_String,OptionsPattern[]]:=Block[{output},
-	output=StringCases[line,{
-		"("~~text:Except["("|")"]..~~")":>RowBox[
-			Prepend[StyleBox["(",OptionValue["Font"]]]@
-			Append[StyleBox[")",OptionValue["Font"]]]@
-			RenderText[text,#->OptionValue[#]&/@RenderTextOptions]
-		],
-		"*"~~text:Except["*"]..~~"*":>StyleBox[text,"TI",OptionValue["Font"]],
-		"\n":>Sequence["\n",TemplateBox[{OptionValue["Spacer"]},"Spacer1"]],
-		text:Except[Characters["*()\n"]]..:>StyleBox[text,OptionValue["Font"]]
-	}];
-	Return[output];
-];
 
 
 RenderTutorial[data_]:=Block[
@@ -74,6 +66,13 @@ RenderTutorial[data_]:=Block[
 (*"Title"->"GraceNote",*)
 (*"Usage"->{*)
 (*"GraceNote(*subtrack*,*note*)\nprepend *subtrack* to *note* as gracenote.",*)
-(*"GraceNote(*subtrack*,*note*)\nprepend *subtrack* to *note* as gracenote."*)
+(*"(*subtrack*^)*note*\nis a simplified form of GraceNote()."*)
 (*}*)
 (*|>]];*)
+
+
+FrameBox[StyleBox["subtrack","TI"],BaseStyle->{Background->RGBColor["#DDDDFF"]},RoundingRadius->{6,6}
+,FrameStyle->Directive[RGBColor["#111133"],Dashing[4],Thickness[1]]]//DisplayForm
+
+
+Options[BaseStyle]

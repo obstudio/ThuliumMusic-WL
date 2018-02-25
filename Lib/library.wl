@@ -190,7 +190,7 @@ updateImage:=Block[{updates={},image,filename,meta},
 ];
 
 
-updateBuffer:=Block[{updates={},song,filename,hash,audio,messages,bufferList},
+updateBuffer:=Block[{updates={},song,filename,hash,audio,bufferList},
 	SetDirectory[dataPath];
 	bufferList=StringTake[FileNames["*.buffer","buffer",Infinity],{8,-8}];
 	DeleteFile[dataPath<>"Buffer\\"<>#<>".buffer"]&/@Complement[bufferList,songs];
@@ -215,7 +215,6 @@ updateBuffer:=Block[{updates={},song,filename,hash,audio,messages,bufferList},
 			audio=QYSParse[filename],
 			audio=AudioAdapt[Parse[filename]]
 		];
-		messages=Values[Options[audio,MetaInformation]][[1]][["Messages"]];
 		Export[dataPath<>"Buffer\\"<>song<>".buffer",audio,"MP3"],
 	{i,Length@updates}],
 	Panel[Column[{Spacer[{4,4}],

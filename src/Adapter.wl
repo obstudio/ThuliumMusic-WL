@@ -1,6 +1,6 @@
 (* ::Package:: *)
 
-(* ::Subsubsection:: *)
+(* ::Subsubsection::Closed:: *)
 (*Parser*)
 
 
@@ -125,7 +125,7 @@ EventConstruct[trackData_,startTime_]:=If[MemberQ[instList,trackData[["Instrumen
 TrackConstruct[inst_,chan_,events_]:=Sound`MIDITrack[{
 	Sound`MIDIEvent[0,"SetTempo","Tempo"->1000000],
 	Sound`MIDIEvent[0,"ProgramCommand","Channel"->chan,"Value"->If[inst==128,0,inst]],
-	Sequence@@MapThread[Sound`MIDIEvent[##,"Channel"->chan]&][Transpose[
+	Sequence@@MapThread[Insert[Sound`MIDIEvent[##],"Channel"->chan,-2]&][Transpose[
 		SortBy[events,{First,If[#[[2]]=="NoteOff",0,1]&}]
 	]]
 }];
@@ -134,13 +134,13 @@ $Resolution = 48;
 MIDIConstruct::channel = "The amount of channels exceeds 16. Some channels may be lost when exporting to a MIDI file.";
 MIDIConstruct::instid = "The sound consists of instrument with ID exceeding 128, thus cannot be transferred to MIDI.";
 
-MIDIConstruct[musicClip_]:=Block[
+MIDIConstruct[musicClip_,rate_]:=Block[
 	{
 		channelData,channelMap=<||>
 	},
 	channelData=GroupBy[musicClip,#Inst&->({
-		{Echo@Floor[$Resolution*#Start],"NoteOn","Note"->#Note,"Velocity"->Floor[127*#Vol]},
-		{Floor[$Resolution*#End],"NoteOff","Note"->#Note,"Velocity"->0}
+		{Floor[$Resolution*#Start/rate],"NoteOn","Note"->#Note,"Velocity"->Floor[127*#Vol]},
+		{Floor[$Resolution*#End/rate],"NoteOff","Note"->#Note,"Velocity"->0}
 	}&)];
 	Do[
 		If[instID==128,
@@ -158,7 +158,17 @@ MIDIConstruct[musicClip_]:=Block[
 ];
 
 
-MIDIAdapt[rawData_]:=Block[
+AdaptingOptions = {"Rate"->1.0,"Format"->"Audio"};
+Adapt::format = "Cannot adapt to format `1`.";
+Adapt::rate0 = "Cannot use 0 as speed rate.";
+
+Adapt[rawData_,OptionsPattern[AdaptingOptions]]:=Switch[OptionValue["Format"],
+	"MIDI",MIDIAdapt[rawData,OptionValue[Keys@AdaptingOptions]],
+	"Audio",AudioAdapt[rawData,OptionValue[Keys@AdaptingOptions]],
+	_,Message[Adapt::format,OptionValue["Format"]];Return[];
+];
+
+MIDIAdapt[rawData_,OptionsPattern[AdaptingOptions]]:=Block[
     {
 		duration=0,musicClip={}
     },
@@ -169,10 +179,10 @@ MIDIAdapt[rawData_]:=Block[
 		{trackData,sectionData[["Tracks"]]}]];
 		duration+=Max[sectionData[["Tracks",All,"Meta","Duration"]]],
 	{sectionData,rawData}];
-	Return[MIDIConstruct@Flatten@musicClip];
+	Return[MIDIConstruct[Flatten@musicClip,OptionValue["Rate"]]];
 ];
 
-AudioAdapt[rawData_]:=Block[
+AudioAdapt[rawData_,OptionsPattern[AdaptingOptions]]:=Block[
     {
 		duration=0,groups,
 		musicClips={},targetClip,
@@ -208,8 +218,12 @@ AudioAdapt[rawData_]:=Block[
 	{sectionData,rawData}];
 	Return[Total[Table[
 		AudioFade[
-			Echo@Sound@MIDIConstruct@Flatten@musicClip[["Events"]],
-		{musicClip[["FadeIn"]],musicClip[["FadeOut"]]}],
+			Sound@MIDIConstruct[Flatten@musicClip[["Events"]],OptionValue["Rate"]],
+		Switch[RealSign@OptionValue["Rate"],
+			1,{musicClip[["FadeIn"]],musicClip[["FadeOut"]]}/OptionValue["Rate"],
+			-1,{musicClip[["FadeOut"]],musicClip[["FadeIn"]]}/(-OptionValue["Rate"]),
+			0,Message[Adapt::rate0];Return[];
+		]],
 	{musicClip,musicClips}]]];
 ];
 
@@ -239,7 +253,7 @@ AudioAdapt[rawData_]:=Block[
 
 
 (* ::Input:: *)
-(*data=Parse[localPath<>"Songs/PVZ/Watery_Grave.sml"];*)
+(*data=Parse[localPath<>"Songs/PVZ/Brainiac_Maniac.sml"];*)
 (*Diagnose[data]*)
 
 
@@ -248,7 +262,7 @@ AudioAdapt[rawData_]:=Block[
 
 
 (* ::Input:: *)
-(*EmitSound@Sound@SoundNote[5,1,"TubularBells"]*)
+(*EmitSound@Sound@SoundNote[5,1,"ReedOrgan"]*)
 
 
 (* ::Input:: *)
@@ -266,7 +280,7 @@ AudioAdapt[rawData_]:=Block[
 (* ::Input:: *)
 (*MIDIStop[];MIDIPlay[#[[2]]]&@*)
 (*EchoFunction["time: ",#[[1]]&]@*)
-(*Timing[MIDIAdapt[Parse[localPath<>"Songs/PVZ/Watery_Grave.sml",-1]]];*)
+(*Timing[MIDIAdapt[Parse[localPath<>"Songs/PVZ/Watery_Grave.sml",1],"Rate"->1.5]];*)
 
 
 (* ::Input:: *)
@@ -286,13 +300,10 @@ AudioAdapt[rawData_]:=Block[
 (* ::Input:: *)
 (*AudioStop[];AudioPlay[#[[2]]]&@*)
 (*EchoFunction["time: ",#[[1]]&]@*)
-(*Timing[AudioAdapt[Parse[localPath<>"Songs/PVZ/Watery_Grave.sml",{4}]]];*)
+(*Timing[AudioAdapt[Parse[localPath<>"Songs/PVZ/Brainiac_Maniac.sml",{6}],"Rate"->1.5]];*)
 
 
 (* ::Input:: *)
 (*AudioStop[];AudioPlay[#[[2]]]&@*)
 (*EchoFunction["time: ",#[[1]]&]@*)
-(*Timing[MIDIAdapt[Parse[localPath<>"src/test/test.sml"]]];*)
-
-
-
+(*Timing[AudioAdapt[Parse[localPath<>"src/test/test.sml"]]];*)

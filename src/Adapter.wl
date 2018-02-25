@@ -102,7 +102,7 @@ Parse[origin_,partspec_]:=Block[
 
 
 (* ::Subsubsection:: *)
-(*Adapter*)
+(*Constructor*)
 
 
 EventConstruct[trackData_,startTime_]:=If[MemberQ[instList,trackData[["Instrument"]]],
@@ -136,12 +136,21 @@ MIDIConstruct::instid = "The sound consists of instrument with ID exceeding 128,
 
 MIDIConstruct[musicClip_,rate_]:=Block[
 	{
-		channelData,channelMap=<||>
+		channelData,channelMap=<||>,
+		duration
 	},
-	channelData=GroupBy[musicClip,#Inst&->({
-		{Floor[$Resolution*#Start/rate],"NoteOn","Note"->#Note,"Velocity"->Floor[127*#Vol]},
-		{Floor[$Resolution*#End/rate],"NoteOff","Note"->#Note,"Velocity"->0}
-	}&)];
+	If[rate>0,
+		channelData=GroupBy[musicClip,#Inst&->({
+			{Floor[$Resolution*#Start/rate],"NoteOn","Note"->#Note,"Velocity"->Floor[127*#Vol]},
+			{Floor[$Resolution*#End/rate],"NoteOff","Note"->#Note,"Velocity"->0}
+		}&)],
+		(* upend *)
+		duration=Max[#End&/@musicClip];
+		channelData=GroupBy[musicClip,#Inst&->({
+			{Floor[$Resolution*(duration+#Start/rate)],"NoteOff","Note"->#Note,"Velocity"->0},
+			{Floor[$Resolution*(duration+#End/rate)],"NoteOn","Note"->#Note,"Velocity"->Floor[127*#Vol]}
+		}&)];
+	];
 	Do[
 		If[instID==128,
 			AppendTo[channelMap,instID->9],
@@ -158,9 +167,13 @@ MIDIConstruct[musicClip_,rate_]:=Block[
 ];
 
 
+(* ::Subsubsection::Closed:: *)
+(*Adapter*)
+
+
 AdaptingOptions = {"Rate"->1.0,"Format"->"Audio"};
-Adapt::format = "Cannot adapt to format `1`.";
-Adapt::rate0 = "Cannot use 0 as speed rate.";
+Adapt::format = "`1` is not a adaptable format.";
+Adapt::invrate = "`1` is not a valid rate specification.";
 
 Adapt[rawData_,OptionsPattern[AdaptingOptions]]:=Switch[OptionValue["Format"],
 	"MIDI",MIDIAdapt[rawData,OptionValue[Keys@AdaptingOptions]],
@@ -173,6 +186,9 @@ MIDIAdapt[rawData_,OptionsPattern[AdaptingOptions]]:=Block[
 		duration=0,musicClip={}
     },
 	If[!ListQ[rawData],Return[]];
+	If[!Through[(Positive||Negative)@OptionValue["Rate"]],
+		Message[Adapt::invrate,OptionValue["Rate"]];Return[];
+	];
 	Do[
 		AppendTo[musicClip,Table[
 			EventConstruct[trackData,duration],
@@ -219,10 +235,10 @@ AudioAdapt[rawData_,OptionsPattern[AdaptingOptions]]:=Block[
 	Return[Total[Table[
 		AudioFade[
 			Sound@MIDIConstruct[Flatten@musicClip[["Events"]],OptionValue["Rate"]],
-		Switch[RealSign@OptionValue["Rate"],
-			1,{musicClip[["FadeIn"]],musicClip[["FadeOut"]]}/OptionValue["Rate"],
-			-1,{musicClip[["FadeOut"]],musicClip[["FadeIn"]]}/(-OptionValue["Rate"]),
-			0,Message[Adapt::rate0];Return[];
+		Switch[OptionValue["Rate"],
+			_?Positive,{musicClip[["FadeIn"]],musicClip[["FadeOut"]]}/OptionValue["Rate"],
+			_?Negative,{musicClip[["FadeOut"]],musicClip[["FadeIn"]]}/(-OptionValue["Rate"]),
+			_,Message[Adapt::invrate,OptionValue["Rate"]];Return[];
 		]],
 	{musicClip,musicClips}]]];
 ];

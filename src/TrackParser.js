@@ -78,7 +78,8 @@ class TrackParser {
                             meta.Warnings.push(new VolumeError(this.ID, [], vol))
                             vol = 1
                         }
-                        Object.assign({}, note, { Volume: vol})
+                        delete note.__oriDur
+                        return Object.assign({}, note, { Volume: vol})
                     })
                 }
             })
@@ -220,14 +221,6 @@ class TrackParser {
                 break
             }
         }
-        if (!this.isSubtrack && (leftIncomplete + rightIncomplete !== this.Settings.Bar)) {
-            if (leftIncomplete !== this.Settings.Bar) {
-                this.Context.warnings.push(new BarLengthError(this.ID, [0], leftIncomplete))
-            }
-            if (rightIncomplete !== this.Settings.Bar) {
-                this.Context.warnings.push(new BarLengthError(this.ID, [-1], rightIncomplete))
-            }
-        }
         const returnObj = {
             Content: result,
             Meta: {
@@ -248,6 +241,14 @@ class TrackParser {
                     FadeOut: this.FadeOut,
                     Duration: this.Duration,
                     Warnings: this.Warnings
+                }
+            }
+            if (leftIncomplete + rightIncomplete !== this.Settings.Bar) {
+                if (leftIncomplete !== this.Settings.Bar) {
+                    this.Context.warnings.push(new BarLengthError(this.ID, [0], leftIncomplete))
+                }
+                if (rightIncomplete && rightIncomplete !== this.Settings.Bar) {
+                    this.Context.warnings.push(new BarLengthError(this.ID, [-1], rightIncomplete))
                 }
             }
         }
@@ -277,7 +278,7 @@ class TrackParser {
                 const delta = this.parseDeltaPitch(note.PitOp)
                 const queue = this.Context.pitchQueue[this.Context.pitchQueue.length - this.Settings.Trace]
                 pitches.push(...[].concat(...queue.map((pitch) => this.Settings.Key.map((key) => key - this.Settings.Key[0] + pitch + delta))))
-                volumes.push(...[].concat(...new Array(queue.length).fill(this.getVolume(note))))
+                volumes.push(...[].concat(...new Array(queue.length).fill(this.getVolume(note.VolOp))))
             } else {
                 this.Context.warnings.push(new TraceError(this.ID, [this.Content.indexOf(note)], this.Settings.Trace))
             }
@@ -343,7 +344,7 @@ class TrackParser {
         const vol = this.Settings.Volume.length
         return [...this.Settings.Volume, ...new Array(total - vol).fill(this.Settings.Volume[vol - 1])].map((v) => v * scale)
     }
-      
+
     /**
     *
     * @param {SMML.Pitch} pitch

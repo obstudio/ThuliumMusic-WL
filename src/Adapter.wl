@@ -125,7 +125,7 @@ EventConstruct[trackData_,startTime_]:=If[MemberQ[instList,trackData[["Instrumen
 TrackConstruct[inst_,chan_,events_]:=Sound`MIDITrack[{
 	Sound`MIDIEvent[0,"SetTempo","Tempo"->1000000],
 	Sound`MIDIEvent[0,"ProgramCommand","Channel"->chan,"Value"->If[inst==128,0,inst]],
-	Sequence@@MapThread[Sound`MIDIEvent[##,"Channel"->chan]&][Transpose[
+	Sequence@@MapThread[Insert[Sound`MIDIEvent[##],"Channel"->chan,-2]&][Transpose[
 		SortBy[events,{First,If[#[[2]]=="NoteOff",0,1]&}]
 	]]
 }];
@@ -139,7 +139,7 @@ MIDIConstruct[musicClip_]:=Block[
 		channelData,channelMap=<||>
 	},
 	channelData=GroupBy[musicClip,#Inst&->({
-		{Echo@Floor[$Resolution*#Start],"NoteOn","Note"->#Note,"Velocity"->Floor[127*#Vol]},
+		{Floor[$Resolution*#Start],"NoteOn","Note"->#Note,"Velocity"->Floor[127*#Vol]},
 		{Floor[$Resolution*#End],"NoteOff","Note"->#Note,"Velocity"->0}
 	}&)];
 	Do[
@@ -208,7 +208,7 @@ AudioAdapt[rawData_]:=Block[
 	{sectionData,rawData}];
 	Return[Total[Table[
 		AudioFade[
-			Echo@Sound@MIDIConstruct@Flatten@musicClip[["Events"]],
+			Sound@MIDIConstruct@Flatten@musicClip[["Events"]],
 		{musicClip[["FadeIn"]],musicClip[["FadeOut"]]}],
 	{musicClip,musicClips}]]];
 ];

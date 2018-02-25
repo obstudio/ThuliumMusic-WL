@@ -1,0 +1,3 @@
+*.sml linguist-language=SMML
+*.smp linguist-language=SMML
+songs/* linguist-vendored=false

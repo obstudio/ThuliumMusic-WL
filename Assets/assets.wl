@@ -22,8 +22,35 @@ squareRounded[t_,r_,scheme_]:=If[r==1,
 ];
 
 
+progressBarShape[l_,r_,t_]:=BezierCurve[{
+	{l,1},{l-t,1},{l-1,t},{l-1,0},
+	{l-1,-t},{l-t,-1},{l,-1},{l,-1},
+	{r,-1},{r,-1},{r+t,-1},{r+1,-t},
+	{r+1,0},{r+1,t},{r+t,1},{r,1}
+}];
+progressBar[pro_,len_]:=With[
+	{	
+		content=progressBarShape[-len,len*(2pro-1),3/5],
+		profile=progressBarShape[-len,len,3/5],
+		texture=With[{s=1/5},{
+			{s,0},{s,0},{s,0},{s,0},
+			{s,0},{s,0},{s,0},{s,0},
+			{1-s,0},{1-s,0},{1-s,0},{1-s,0},
+			{1-s,0},{1-s,0},{1-s,0},{1-s,0}
+		}]
+	},
+	Graphics[{
+		RGBColor["#D0D0F0"],Thickness[1/len/4],
+		profile,Line[{{-len,1},{len,1}}],
+		RGBColor["#F0F0FF"],FilledCurve[{profile}],
+		Texture[Table[{c,1-c,1},{c,0,1,1/256}]],
+		FilledCurve[{content},VertexTextureCoordinates->texture]
+	},ContentSelectable->False]
+];
+
+
 (* progress bar *)
-progressBar[prog_,len_]:=Graphics[{
+progressController[prog_,len_]:=Graphics[{
 	CapForm["Round"],JoinForm["Round"],
 	Texture[Table[{c,1-c,1},{c,1/100,1/2,1/100}]],
 	Polygon[{{-0.04,-0.96},{-0.04,0.96},{prog*len,0.96},{prog*len,-0.96}},

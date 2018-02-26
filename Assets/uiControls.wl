@@ -30,7 +30,7 @@ uiPlayerControlsNew:={
 	Row[{
 		Column[{Style[Dynamic[timeDisplay[current["Position"]]],20],Spacer[1]}],
 		Spacer[8],
-		Magnify[progressBar[Dynamic[current["Position"]/duration],40],4],
+		Magnify[progressController[Dynamic[current["Position"]/duration],40],4],
 		Spacer[8],
 		Column[{Style[timeDisplay[duration],20],Spacer[1]}]
 	},ImageSize->Full,Alignment->Center],

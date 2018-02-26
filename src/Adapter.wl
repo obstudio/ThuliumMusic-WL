@@ -167,7 +167,7 @@ MIDIConstruct[musicClip_,rate_]:=Block[
 ];
 
 
-(* ::Subsubsection::Closed:: *)
+(* ::Subsubsection:: *)
 (*Adapter*)
 
 
@@ -202,9 +202,13 @@ AudioAdapt[rawData_,OptionsPattern[AdaptingOptions]]:=Block[
     {
 		duration=0,groups,
 		musicClips={},targetClip,
-		compactData,clipUsed
+		compactData,clipUsed,
+		output=0,clipCount,musicClip
     },
 	If[!ListQ[rawData],Return[]];
+	If[!Through[(Positive||Negative)@OptionValue["Rate"]],
+		Message[Adapt::invrate,OptionValue["Rate"]];Return[];
+	];
 	Do[
 		clipUsed={};
 		groups=GatherBy[sectionData[["Tracks"]],#Meta[[{"FadeIn","FadeOut"}]]&];
@@ -232,19 +236,24 @@ AudioAdapt[rawData_,OptionsPattern[AdaptingOptions]]:=Block[
 		{group,groups}];
 		duration+=Max[sectionData[["Tracks",All,"Meta","Duration"]]],
 	{sectionData,rawData}];
-	Return[Total[Table[
-		AudioFade[
+	
+	Monitor[Do[
+		musicClip=musicClips[[clipCount]];
+		output+=AudioFade[
 			Sound@MIDIConstruct[Flatten@musicClip[["Events"]],OptionValue["Rate"]],
-		Switch[OptionValue["Rate"],
-			_?Positive,{musicClip[["FadeIn"]],musicClip[["FadeOut"]]}/OptionValue["Rate"],
-			_?Negative,{musicClip[["FadeOut"]],musicClip[["FadeIn"]]}/(-OptionValue["Rate"]),
-			_,Message[Adapt::invrate,OptionValue["Rate"]];Return[];
-		]],
-	{musicClip,musicClips}]]];
+			If[OptionValue["Rate"]>0,
+				{musicClip[["FadeIn"]],musicClip[["FadeOut"]]}/OptionValue["Rate"],
+				{musicClip[["FadeOut"]],musicClip[["FadeIn"]]}/(-OptionValue["Rate"])
+			]
+		],
+	{clipCount,Echo@Length@musicClips}],
+	progressBar[(clipCount-1)/Length@musicClips,32]];
+	
+	Return[output];
 ];
 
 
-(* ::Subsubsection:: *)
+(* ::Subsubsection::Closed:: *)
 (*Debug*)
 
 
@@ -296,7 +305,7 @@ AudioAdapt[rawData_,OptionsPattern[AdaptingOptions]]:=Block[
 (* ::Input:: *)
 (*MIDIStop[];MIDIPlay[#[[2]]]&@*)
 (*EchoFunction["time: ",#[[1]]&]@*)
-(*Timing[MIDIAdapt[Parse[localPath<>"Songs/PVZ/Watery_Grave.sml",1],"Rate"->1.5]];*)
+(*Timing[MIDIAdapt[Parse[localPath<>"Songs/PVZ/Watery_Grave.sml",1],"Rate"->-1.5]];*)
 
 
 (* ::Input:: *)
@@ -316,7 +325,7 @@ AudioAdapt[rawData_,OptionsPattern[AdaptingOptions]]:=Block[
 (* ::Input:: *)
 (*AudioStop[];AudioPlay[#[[2]]]&@*)
 (*EchoFunction["time: ",#[[1]]&]@*)
-(*Timing[AudioAdapt[Parse[localPath<>"Songs/PVZ/Brainiac_Maniac.sml",{6}],"Rate"->1.5]];*)
+(*Timing[AudioAdapt[Parse[localPath<>"Songs/PVZ/Watery_Grave.sml"]]];*)
 
 
 (* ::Input:: *)

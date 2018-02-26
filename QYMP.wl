@@ -11,9 +11,6 @@ localPath=NotebookDirectory[];
 <<(localPath<>"Assets\\uiDeveloper.wl")    (* UI for developers *)
 <<(localPath<>"Lib\\library.wl")           (* library *)
 
-<<(localPath<>"Lib\\qysToken.wl")          (* QYS tokenizer *)
-<<(localPath<>"Lib\\parser.wl")            (* QYS parser *)
-
 <<(localPath<>"src\\Adapter.wl")
 <<(localPath<>"src\\Syntax.wl")
 <<(localPath<>"src\\Tokenizer.wl")

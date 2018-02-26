@@ -246,7 +246,7 @@ AudioAdapt[rawData_,OptionsPattern[AdaptingOptions]]:=Block[
 				{musicClip[["FadeOut"]],musicClip[["FadeIn"]]}/(-OptionValue["Rate"])
 			]
 		],
-	{clipCount,Echo@Length@musicClips}],
+	{clipCount,Length@musicClips}],
 	progressBar[(clipCount-1)/Length@musicClips,32]];
 	
 	Return[output];

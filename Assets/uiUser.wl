@@ -78,7 +78,7 @@ uiSettings:=DynamicModule[{choices},
 (*uiPlayer["Touhou\\Dream_Battle"]*)
 
 
-uiPlayer[song_]:=Module[{image,audio,imageExist=False,aspectRatio},
+uiPlayer[song_]:=Block[{image,audio,imageExist=False,aspectRatio},
 	AudioStop[];
 	If[index[[song,"Image"]]!="",
 		imageExist=True;
@@ -168,6 +168,8 @@ QYMP:=DynamicModule[{playlist},
 		Row[{
 			Row[{Spacer[40],caption["_QYMP","BigTitle"]},Alignment->Left,ImageSize->320],
 			Row[{
+				button["Refresh",DialogReturn[]],
+				Spacer[10],
 				button["EnterPlaylist",DialogReturn[pageData[["Main"]]=page;playlist;uiPlaylist[playlist]]],
 				Spacer[10],
 				button["About",DialogReturn[pageData[["Main"]]=page;uiAbout]],
@@ -175,19 +177,18 @@ QYMP:=DynamicModule[{playlist},
 				button["Settings",DialogReturn[pageData[["Main"]]=page;uiSettings]],
 				Spacer[10],
 				button["Exit",DialogReturn[pageData[["Main"]]=page;]],
-			Spacer[40]},Alignment->Right,ImageSize->{320,56}]
+			Spacer[40]},Alignment->Right,ImageSize->{400,60}]
 		}],
 		Spacer[1],
 		Dynamic@Row[{Spacer[60],SetterBar[Dynamic@playlist,
 			#->Row[{
-				
 				Row[{
 					caption[tagName[[playlistData[[#,"Type"]]]],"SongComment"]
 				},Alignment->{Center,Top},ImageSize->{80,38}],
 				caption[playlistData[[#,"Title"]],"SongName"],
 				Spacer[24],
 				caption[playlistData[[#,"Comment"]],"SongComment"]				
-			},ImageSize->{640,30}]&/@playlistsPaged[[page]],
+			},ImageSize->{720,30}]&/@playlistsPaged[[page]],
 			Appearance->"Vertical"
 		],Spacer[60]}],Spacer[1],
 		uiPageSelector,

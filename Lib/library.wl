@@ -31,22 +31,6 @@ aboutTags={"Version","Producer","Website"};
 langList={"chs","eng"};
 
 
-(* tokenizer related *)
-tonalityDict=<|
-	"C"->0,"G"->7,"D"->2,"A"->9,"E"->4,
-	"B"->-1,"#F"->6,"#C"->1,"F"->5,"bB"->-2,
-	"bE"->3,"bA"->8,"bD"->1,"bG"->6,"bC"->-1,
-	"F#"->6,"C#"->1,"Bb"->-2,"Gb"->6,
-	"Eb"->3,"Ab"->8,"Db"->1,"Cb"->-1
-|>;
-rep[pat_]:=rep[pat,","];
-rep[pat_,sep_]:=pat~~(sep~~pat)...;
-int=DigitCharacter..;
-word=LetterCharacter~~WordCharacter...;
-real=DigitCharacter...~~"."~~DigitCharacter...;
-key=Alternatives@Keys@tonalityDict;
-
-
 (* some functions *)
 textLength[string_]:=2StringLength[string]-StringCount[string,Alternatives@CharacterRange[32,127]];
 toBase32[n_]:=StringDelete[ToString@BaseForm[n,32],"\n"~~__];
@@ -217,7 +201,7 @@ updateBuffer:=Block[{updates={},song,filename,hash,audio,bufferList},
 		];
 		Export[dataPath<>"Buffer\\"<>song<>".buffer",audio,"MP3"],
 	{i,Length@updates}],
-	Panel[Column[{Spacer[{4,4}],
+	CreateWindow[Column[{Spacer[{4,4}],
 		text[["UpdatingBuffer"]],
 		Spacer[1],
 		ProgressIndicator[i,{1,Length@updates},ImageSize->{320,16}],
@@ -227,6 +211,6 @@ updateBuffer:=Block[{updates={},song,filename,hash,audio,bufferList},
 			Spacer[4],text[["Loading"]],
 			index[[updates[[i]],"SongName"]]
 		}],
-	Spacer[{4,4}]},Alignment->Center],ImageSize->400,Alignment->Center]];
+	Spacer[{4,4}]},Alignment->Center],ImageSize->{400,300}]];
 	Export[dataPath<>"Buffer.json",Normal@bufferHash[[Intersection[Keys@bufferHash,songs]]]];
 ];

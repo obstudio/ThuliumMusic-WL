@@ -63,6 +63,12 @@ class TrackParser {
         if (this.isSubtrack) {
             return [trackResult]
         } else {
+            if (this.Instruments.length === 0) {
+                this.Instruments.push({
+                    Instrument: 'Piano',
+                    Proportion: 1
+                })
+            }
             return this.Instruments.map((instrument) => {
                 const meta = Object.assign({}, trackResult.Meta, { Warnings: trackResult.Meta.Warnings.slice() })
                 if (instrument.Proportion === null) {

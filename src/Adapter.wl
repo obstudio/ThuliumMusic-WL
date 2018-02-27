@@ -237,17 +237,15 @@ AudioAdapt[rawData_,OptionsPattern[AdaptingOptions]]:=Block[
 		duration+=Max[sectionData[["Tracks",All,"Meta","Duration"]]],
 	{sectionData,rawData}];
 	
-	Monitor[Do[
-		musicClip=musicClips[[clipCount]];
-		output+=AudioFade[
+	output=Total@Table[
+		AudioFade[
 			Sound@MIDIConstruct[Flatten@musicClip[["Events"]],OptionValue["Rate"]],
 			If[OptionValue["Rate"]>0,
 				{musicClip[["FadeIn"]],musicClip[["FadeOut"]]}/OptionValue["Rate"],
 				{musicClip[["FadeOut"]],musicClip[["FadeIn"]]}/(-OptionValue["Rate"])
 			]
 		],
-	{clipCount,Length@musicClips}],
-	progressBar[(clipCount-1)/Length@musicClips,32]];
+	{musicClip,musicClips}];
 	
 	Return[output];
 ];

@@ -33,15 +33,14 @@ langList={"chs","eng"};
 
 (* some functions *)
 textLength[string_]:=2StringLength[string]-StringCount[string,Alternatives@CharacterRange[32,127]];
-toBase32[n_]:=StringDelete[ToString@BaseForm[n,32],"\n"~~__];
-timeDisplay[t_]:=Module[
-	{sec=Floor[QuantityMagnitude[UnitConvert[t,"Seconds"]]]},
+timeDisplay[time_]:=Block[
+	{sec=Floor[QuantityMagnitude[UnitConvert[time,"Seconds"]]]},
 	IntegerString[Floor[sec/60],10,2]<>":"<>IntegerString[Mod[sec,60],10,2]
 ];
 completeText[raw_,arg_]:=StringReplace[raw,{
-	"&"~~i:int:>ToString[arg[[ToExpression@i]],FormatType->InputForm],
-	"$"~~i:int:>"\""<>arg[[ToExpression@i]]<>"\"",
-	"#"~~i:int:>StringRiffle[ToString[#,FormatType->InputForm]&/@arg[[ToExpression@i]],", "]
+	"&"~~i:DigitCharacter:>ToString[arg[[ToExpression@i]],FormatType->InputForm],
+	"$"~~i:DigitCharacter:>"\""<>arg[[ToExpression@i]]<>"\"",
+	"#"~~i:DigitCharacter:>StringRiffle[ToString[#,FormatType->InputForm]&/@arg[[ToExpression@i]],", "]
 }];
 caption[string_String]:=caption[string,"None",{}];
 caption[string_String,argument_List]:=caption[string,"None",argument];
@@ -50,11 +49,6 @@ caption[string_String,style_String,argument_List]:=Style[completeText[Which[
 	StringLength@string>0&&StringPart[string,1]=="_",text[[StringDrop[string,1]]],
 	True,string
 ],argument],styleDict[[style]]];
-getArgument[string_,function_]:=Switch[function,
-	"Instr",{string},
-	"Chord",ToExpression/@StringSplit[string,","],
-	_,ToExpression[string]
-];
 
 
 playlistTemplate=<|
@@ -180,7 +174,7 @@ updateBuffer:=Block[{updates={},song,filename,hash,audio,bufferList},
 	DeleteFile[dataPath<>"Buffer\\"<>#<>".buffer"]&/@Complement[bufferList,songs];
 	Do[
 		filename=localPath<>"Songs\\"<>song<>"."<>index[[song,"Format"]];
-		hash=toBase32@FileHash[filename];
+		hash=IntegerString[FileHash[filename],32];
 		If[KeyExistsQ[bufferHash,song],
 			If[bufferHash[[song]]==hash && FileExistsQ[dataPath<>"Buffer\\"<>song<>".buffer"],
 				Continue[],
@@ -204,7 +198,7 @@ updateBuffer:=Block[{updates={},song,filename,hash,audio,bufferList},
 	CreateWindow[Column[{Spacer[{4,4}],
 		text[["UpdatingBuffer"]],
 		Spacer[1],
-		ProgressIndicator[i,{1,Length@updates},ImageSize->{320,16}],
+		Row[{progressBar[(i-1)/Length@updates,32]},ImageSize->{320,16}],
 		Spacer[1],
 		Row[{
 			caption["_Progression","Text",{i,Length@updates}],

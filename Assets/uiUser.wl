@@ -159,6 +159,12 @@ WindowTitle->text[["About"]],Background->styleColor[["Background"]]];
 (*uiAbout;*)
 
 
+Main:=If[!$Updated,
+	update,
+	QYMP;
+];
+
+
 QYMP:=DynamicModule[{playlist},
 	pageCount=Ceiling[Length@playlists/16];
 	If[pageData[["Main"]]>pageCount,pageData[["Main"]]=pageCount];
@@ -168,7 +174,7 @@ QYMP:=DynamicModule[{playlist},
 		Row[{
 			Row[{Spacer[40],caption["_QYMP","BigTitle"]},Alignment->Left,ImageSize->320],
 			Row[{
-				button["Refresh",DialogReturn[]],
+				button["Refresh",DialogReturn[update]],
 				Spacer[10],
 				button["EnterPlaylist",DialogReturn[pageData[["Main"]]=page;playlist;uiPlaylist[playlist]]],
 				Spacer[10],

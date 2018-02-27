@@ -188,23 +188,30 @@ updateBuffer:=Block[{updates={},song,filename,hash,audio,bufferList},
 	Monitor[Do[
 		song=updates[[i]];
 		filename=localPath<>"Songs\\"<>song<>"."<>index[[song,"Format"]];
-		bufferHash[[song]]=toBase32@FileHash[filename];
-		If[index[[song,"Format"]]=="qys",
-			audio=QYSParse[filename],
-			audio=AudioAdapt[Parse[filename]]
-		];
+		bufferHash[[song]]=IntegerString[FileHash[filename],32];
+		audio=AudioAdapt[Parse[filename]];
 		Export[dataPath<>"Buffer\\"<>song<>".buffer",audio,"MP3"],
 	{i,Length@updates}],
-	CreateWindow[Column[{Spacer[{4,4}],
+	Panel[Column[{Spacer[{4,4}],
 		text[["UpdatingBuffer"]],
 		Spacer[1],
-		Row[{progressBar[(i-1)/Length@updates,32]},ImageSize->{320,16}],
+		Row[{progressBar[(i-1)/Length@updates,24]},ImageSize->{400,20},Alignment->Center],
 		Spacer[1],
 		Row[{
 			caption["_Progression","Text",{i,Length@updates}],
 			Spacer[4],text[["Loading"]],
 			index[[updates[[i]],"SongName"]]
 		}],
-	Spacer[{4,4}]},Alignment->Center],ImageSize->{400,300}]];
+	Spacer[{4,4}]},Alignment->Center],ImageSize->{400,Full},Alignment->Center]];
 	Export[dataPath<>"Buffer.json",Normal@bufferHash[[Intersection[Keys@bufferHash,songs]]]];
 ];
+
+
+update:=(
+	refresh;
+	updateImage;
+	updateBuffer;
+	$Updated=True;
+	QYMP;
+);
+$Updated=False;

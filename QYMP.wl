@@ -9,12 +9,12 @@ localPath=NotebookDirectory[];
 <<(localPath<>"Assets\\uiControls.wl")     (* controls *)
 <<(localPath<>"Assets\\uiUser.wl")         (* UI for common users *)
 <<(localPath<>"Assets\\uiDeveloper.wl")    (* UI for developers *)
-<<(localPath<>"Lib\\library.wl")           (* library *)
 
-<<(localPath<>"src\\Adapter.wl")
-<<(localPath<>"src\\Syntax.wl")
-<<(localPath<>"src\\Tokenizer.wl")
-<<(localPath<>"src\\Diagnostor.wl")
+<<(localPath<>"src\\library.wl")           (* library *)
+<<(localPath<>"src\\Adapter.wl")           (* adapter *)
+<<(localPath<>"src\\Syntax.wl")            (* syntax *)
+<<(localPath<>"src\\Tokenizer.wl")         (* tokenizer *)
+<<(localPath<>"src\\Diagnostor.wl")        (* diagnoser *)
 
 <<(localPath<>"package\\Standard\\.init.wl")
 
@@ -88,11 +88,7 @@ imageData=Association/@Association@Import[dataPath<>"image.json"];
 
 
 (* ::Input::Initialization:: *)
-refresh;updateImage;updateBuffer;
-
-
-(* ::Input::Initialization:: *)
-QYMP;
+Main;
 
 
 (* ::Subsubsection:: *)

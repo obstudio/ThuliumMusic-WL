@@ -68,6 +68,9 @@ class TrackParser {
                 if (instrument.Proportion === null) {
                     instrument.Proportion = 1
                 }
+                if (instrument.Instrument === '') {
+                    instrument.Instrument = 'Piano'
+                }
                 return {
                     Instrument: instrument.Instrument,
                     ID: this.ID ? `${this.ID}#${instrument.Instrument}` : instrument.Instrument,

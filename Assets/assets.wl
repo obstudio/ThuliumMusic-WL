@@ -19,9 +19,9 @@ c22.98,0.39,59.32,7.82,69.48,10.78C555.89,325.38,569.07,330.54,569.07,330.54z";
 SVGPathD[string_]:=Block[
 	{
 		commands,
-		prev={0,0},this,
+		prev={0,0},this,ctrl,
 		init={0,0},move,
-		segments={},points={},
+		segments={},points={{0,0}},
 		components={Line[{{0,0}}]}
 	},
 	commands=StringCases[string,
@@ -37,89 +37,95 @@ SVGPathD[string_]:=Block[
 				move[this,command[["Args"]]];
 				init=this;
 				If[!MatchQ[components,{Line[{_}]}],
-					AppendTo[segments,components];
+					AppendTo[segments,<|
+						"Points"->points,
+						"Segment"->components
+					|>];
 				];
-				components={Line[{this}]},
+				points={};components={},
 			"H",
-				move[this,{command[["Args",1]],0}];
-				AppendTo[components,Line[{this}]],
+				move[this,{command[["Args",1]],0}],
 			"V",
-				move[this,{0,command[["Args",1]]}];
-				AppendTo[components,Line[{this}]],
+				move[this,{0,command[["Args",1]]}],
 			"Z",
-				this=init;
-				AppendTo[components,Line[{this}]],
+				this=init,
 			"L",
-				move[this,command[["Args"]]];
-				AppendTo[components,Line[{this}]],
+				move[this,command[["Args"]]],
 			"C",
 				move[this,command[["Args",5;;6]]];
-				AppendTo[components,BezierCurve[
-					If[UpperCaseQ@command[["Name"]],0,prev]+#&/@Partition[command[["Args"]],2]
-				]],
+				ctrl=If[UpperCaseQ@command[["Name"]],0,prev]+#&/@Partition[command[["Args"]],2],
 			_,
 				Echo@command[["Name"]];
+		];
+		If[MemberQ[Characters["MmZzLlHhVv"],command[["Name"]]],
+			AppendTo[points,this];
+			AppendTo[components,Line[{this}]],
+			points=Join[points,ctrl];
+			AppendTo[components,BezierCurve[ctrl]];
 		];
 		prev=this,
 	{command,commands}];
 	If[!MatchQ[components,{Line[{_}]}],
-		AppendTo[segments,components]
+		AppendTo[segments,<|
+			"Points"->points,
+			"Segment"->components
+		|>];
 	];
 	Return[segments];
 ];
 
 
-(* ::Input:: *)
-(*SVGPathD[LogoCloud]//FilledCurve//Graphics*)
-
-
-(* basic graphics *)
-squareRounded[t_,r_,scheme_]:=If[r==1,
-	GraphicsGroup[{
-		scheme[["Grounding"]],Disk[{0,0},1-t],
-		scheme[["Margin"]],Thickness[t],Circle[{0,0},1-t]
-	}],
-	GraphicsGroup[{
-		scheme[["Grounding"]],
-		Rectangle[{t-1,t-1},{1-t,1-t},RoundingRadius->{r-t,r-t}],
-		scheme[["Margin"]],Thickness[t],CapForm["Round"],
-		Circle[{r-1,r-1},r-t,{Pi,3Pi/2}],Circle[{1-r,1-r},r-t,{0,Pi/2}],
-		Circle[{1-r,r-1},r-t,{-Pi/2,0}],Circle[{r-1,1-r},r-t,{Pi/2,Pi}],
-		Line[{{r-1,t-1},{1-r,t-1}}],Line[{{r-1,1-t},{1-r,1-t}}],
-		Line[{{t-1,r-1},{t-1,1-r}}],Line[{{1-t,r-1},{1-t,1-r}}]
-	}]
+CurveMerge[segment_]:=Block[
+	{pts={Level[segment[[1]],1]}},
+	Do[
+		Switch[Head[component],
+			Line,
+				AppendTo[pts,ConstantArray[Level[component,{2}],3]],
+			BezierCurve,
+				AppendTo[pts,Level[component,1]]
+		],
+	{component,Drop[segment,1]}];
+	Return[BezierCurve[Flatten[pts,2]]];
 ];
 
 
-progressBarShape[l_,r_,t_]:=BezierCurve[{
+(* ::Input:: *)
+(*SVGPathD[LogoCloud][[1,"Segment"]]//CurveMerge*)
+
+
+VertexAssign[vertices_,{pt1x_,pt1y_}->pos1_,{pt2x_,pt2y_}->pos2_]:={
+	((pos1-pos2)*((pt1x-pt2x)*#[[1]]+(pt1y-pt2y)*#[[2]])
+	 +pos1*(-pt1x*pt2x+pt2x^2-pt1y*pt2y+pt2y^2)
+	 +pos2*(pt1x^2-pt1x*pt2x+pt1y^2-pt1y*pt2y)
+	)/((pt1x-pt2x)^2+(pt1y-pt2y)^2),
+0}&/@vertices;
+
+
+progressBarShape[l_,r_,t_]:={
 	{l,1},{l-t,1},{l-1,t},{l-1,0},
 	{l-1,-t},{l-t,-1},{l,-1},{l,-1},
 	{r,-1},{r,-1},{r+t,-1},{r+1,-t},
 	{r+1,0},{r+1,t},{r+t,1},{r,1}
-}];
+};
 progressBar[pro_,len_]:=With[
 	{	
 		content=progressBarShape[-len,len*(2pro-1),3/5],
-		profile=progressBarShape[-len,len,3/5],
-		texture=With[{s=1/5},{
-			{s,0},{s,0},{s,0},{s,0},
-			{s,0},{s,0},{s,0},{s,0},
-			{1-s,0},{1-s,0},{1-s,0},{1-s,0},
-			{1-s,0},{1-s,0},{1-s,0},{1-s,0}
-		}]
+		profile=progressBarShape[-len,len,3/5]
 	},
 	Graphics[{
 		RGBColor["#D0D0F0"],Thickness[1/len/4],
-		profile,Line[{{-len,1},{len,1}}],
-		RGBColor["#F0F0FF"],FilledCurve[{profile}],
+		BezierCurve[profile],Line[{{-len,1},{len,1}}],
+		RGBColor["#F0F0FF"],FilledCurve[{BezierCurve[profile]}],
 		Texture[Table[{c,1-c,1},{c,0,1,1/256}]],
-		FilledCurve[{content},VertexTextureCoordinates->texture]
+		FilledCurve[{BezierCurve[content]},
+			VertexTextureCoordinates->VertexAssign[content,{-len,0}->1/5,{len,0}->4/5]
+		]
 	},ContentSelectable->False]
 ];
 
 
 (* ::Input:: *)
-(*progressBar[0.3,32]*)
+(*progressBar[0.7,32]*)
 
 
 (* progress bar *)
@@ -145,6 +151,24 @@ progressController[prog_,len_]:=Graphics[{
 	Circle[{prog*len,0},1.6],
 	Circle[{prog*len,0},0.56]	
 }];
+
+
+(* basic graphics *)
+squareRounded[t_,r_,scheme_]:=If[r==1,
+	GraphicsGroup[{
+		scheme[["Grounding"]],Disk[{0,0},1-t],
+		scheme[["Margin"]],Thickness[t],Circle[{0,0},1-t]
+	}],
+	GraphicsGroup[{
+		scheme[["Grounding"]],
+		Rectangle[{t-1,t-1},{1-t,1-t},RoundingRadius->{r-t,r-t}],
+		scheme[["Margin"]],Thickness[t],CapForm["Round"],
+		Circle[{r-1,r-1},r-t,{Pi,3Pi/2}],Circle[{1-r,1-r},r-t,{0,Pi/2}],
+		Circle[{1-r,r-1},r-t,{-Pi/2,0}],Circle[{r-1,1-r},r-t,{Pi/2,Pi}],
+		Line[{{r-1,t-1},{1-r,t-1}}],Line[{{r-1,1-t},{1-r,1-t}}],
+		Line[{{t-1,r-1},{t-1,1-r}}],Line[{{1-t,r-1},{1-t,1-r}}]
+	}]
+];
 
 
 (* page selector *)
@@ -224,7 +248,9 @@ buttonData=<|
 	"Settings"->GraphicsGroup[{
 		Thickness[0.12],
 		Circle[{0,0},0.3],
-		Table[Rotate[Rectangle[{-0.15,0.3},{0.15,0.53},RoundingRadius->{0.05,0.05}],\[Theta],{0,0}],{\[Theta],0,2Pi,Pi/3}]
+		Table[Rotate[
+			Rectangle[{-0.15,0.3},{0.15,0.53},RoundingRadius->{0.05,0.05}],
+		theta,{0,0}],{theta,0,2Pi,Pi/3}]
 	}],
 	"Add"->GraphicsGroup[{
 		Thickness[0.12],CapForm["Round"],

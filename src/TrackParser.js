@@ -1,4 +1,4 @@
-const { BarLengthError, DupChordError, TraceError, VolumeError } = require('./Error')
+const { BarLengthError, DupChordError, TraceError, VolumeError, UndefinedTokenError } = require('./Error')
 
 class TrackParser {
     /**
@@ -224,9 +224,10 @@ class TrackParser {
                     StartTime: this.Context.startTime
                 })
                 break
+            case 'Undefined':
+                this.Context.warnings.push(new UndefinedTokenError(this.ID, [this.Content.indexOf(token)], token))
             case 'Clef':
             case 'Whitespace':
-            case 'Undefined':
                 break
             }
         }

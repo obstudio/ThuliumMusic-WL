@@ -1,4 +1,4 @@
-class SMMLError extends Error {
+class TmError extends Error {
     constructor(errID, msg, ...args) {
         super(msg)
         this.name = errID
@@ -14,27 +14,33 @@ class SMMLError extends Error {
     }
 }
 
-class BarLengthError extends SMMLError{
+class BarLengthError extends TmError{
     constructor(id, index, length) {
         super('BarLength', '', id, index, length)
     }
 }
 
-class DupChordError extends SMMLError{
+class DupChordError extends TmError{
     constructor(id, index, pitches) {
         super('DupChord', '', id, index, pitches)
     }
 }
 
-class TraceError extends SMMLError{
+class TraceError extends TmError{
     constructor(id, index, trace) {
         super('Trace', '', id, index, trace)
     }
 }
 
-class VolumeError extends SMMLError{
+class VolumeError extends TmError{
     constructor(id, index, volume) {
         super('Trace', '', id, index, volume)
+    }
+}
+
+class UndefinedTokenError extends TmError{
+    constructor(id, index, token) {
+        super('Undef', '', id, index, token)
     }
 }
 
@@ -42,5 +48,6 @@ module.exports = {
     BarLengthError,
     DupChordError,
     TraceError,
-    VolumeError
+    VolumeError,
+    UndefinedTokenError
 }

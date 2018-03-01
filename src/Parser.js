@@ -1,6 +1,7 @@
 const Loader = require('./LibLoader')
 const GlobalSetting = require('./GlobalSetting')
 const { TrackParser } = require('./TrackParser')
+const { DiffDurError } = require('./Error')
 
 class Parser {
     /**
@@ -115,7 +116,7 @@ class Parser {
         section.Settings.filter((token) => token.Type === 'FUNCTION')
             .forEach((token) => this.libraries.FunctionPackage.applyFunction({ Settings: this.sectionContext.Settings, Context: {} }, token))
         const instrStatistic = {}
-        return {
+        const sec = {
             ID: section.ID,
             Tracks: [].concat(...section.Tracks.map((track) => {
                 const tempTracks = new TrackParser(track, this.sectionContext.Settings, this.libraries).parseTrack()
@@ -130,8 +131,14 @@ class Parser {
                     }
                 }
                 return tempTracks
-            }))
+            })),
+            Warnings: []
         }
+        const max = Math.max(...sec.Tracks.map((track) => track.Meta.Duration))
+        if (!sec.Tracks.every((track) => track.Meta.Duration === max)) {
+            sec.Warnings.push(new DiffDurError(sec.ID, this.tokenizedData.Sections.indexOf(section)))
+        }
+        return sec
     }
 }
 

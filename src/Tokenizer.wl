@@ -269,7 +269,7 @@ Tokenize[filepath_]:=Block[
 			If[sectionData!={},
 				AppendTo[sections,<|
 					"Comments"->comments,
-					"Settings"->blankTrack,
+					"Settings"->Flatten@blankTrack,
 					"Tracks"->sectionData
 				|>];
 				blankTrack={};
@@ -302,7 +302,7 @@ Tokenize[filepath_]:=Block[
 			]];
 			AppendTo[trackData,"Content"->trackTok[line]];
 			If[ContainsNone[#Type&/@trackData[["Content"]],{"Note","Subtrack","Macrotrack"}],
-				blankTrack=trackData[["Content"]],
+				AppendTo[blankTrack,trackData[["Content"]]],
 				AppendTo[sectionData,trackData];	
 			];
 			
@@ -311,7 +311,7 @@ Tokenize[filepath_]:=Block[
 	];
 	If[sectionData!={},AppendTo[sections,<|
 		"Comments"->comments,
-		"Settings"->blankTrack,
+		"Settings"->Flatten@blankTrack,
 		"Tracks"->sectionData
 	|>]];
 	

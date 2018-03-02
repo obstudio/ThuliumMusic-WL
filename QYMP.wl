@@ -14,7 +14,7 @@ localPath=NotebookDirectory[];
 <<(localPath<>"src\\Adapter.wl")           (* adapter *)
 <<(localPath<>"src\\Syntax.wl")            (* syntax *)
 <<(localPath<>"src\\Tokenizer.wl")         (* tokenizer *)
-<<(localPath<>"src\\Diagnostor.wl")        (* diagnoser *)
+<<(localPath<>"ide\\Diagnostor.wl")        (* diagnoser *)
 
 <<(localPath<>"package\\Standard\\.init.wl")
 

@@ -101,7 +101,7 @@ Parse[origin_,partspec_]:=Block[
 ];
 
 
-(* ::Subsubsection:: *)
+(* ::Subsubsection::Closed:: *)
 (*Constructor*)
 
 
@@ -155,7 +155,7 @@ MIDIConstruct[musicClip_,rate_]:=Block[
 		If[instID==128,
 			AppendTo[channelMap,instID->9],
 			AppendTo[channelMap,instID->LengthWhile[
-				Range[0,Length@channelData],MemberQ[Values@channelMap,#]&
+				Range[0,Length@channelData],MemberQ[Append[Values@channelMap,9],#]&
 			]];
 		],
 	{instID,Keys@channelData}];	
@@ -167,13 +167,18 @@ MIDIConstruct[musicClip_,rate_]:=Block[
 ];
 
 
-(* ::Subsubsection:: *)
+(* ::Subsubsection::Closed:: *)
 (*Adapter*)
 
 
 AdaptingOptions = {"Rate"->1.0,"Format"->"Audio"};
 Adapt::format = "`1` is not a adaptable format.";
 Adapt::invrate = "`1` is not a valid rate specification.";
+Adapt::usage = "\
+\!\(\*RowBox[{\"Adapt\",\"[\",RowBox[{StyleBox[\"data\",\"TI\"],\",\",StyleBox[\"options\",\"TI\"]}],\"]\"}]\)\n
+The contents of \!\(\*StyleBox[\"options\",\"TI\"]\) can be the following: 
+\!\(\*RowBox[{\"\t\",\"   Rate \",\"\t\",\"\t\",\"       1.0\",\"\t\",\"\t\",\"     Speed rate\"}]\)
+\!\(\*RowBox[{\"\t\",\"Format\",\"\t\",\"\t\",\"Audio\",\"\t\",\"\t\",\"Adapting format\"}]\)";
 
 Adapt[rawData_,OptionsPattern[AdaptingOptions]]:=Switch[OptionValue["Format"],
 	"MIDI",MIDIAdapt[rawData,OptionValue[Keys@AdaptingOptions]],
@@ -266,7 +271,7 @@ AudioAdapt[rawData_,OptionsPattern[AdaptingOptions]]:=Block[
 
 
 (* ::Input:: *)
-(*With[{testfile=localPath<>"Songs/PVZ/Watery_Grave"},*)
+(*With[{testfile=localPath<>"Songs/Touhou/TH11-Chireiden/Taeta_Hashi"},*)
 (*Export[testfile<>".json",Tokenize[testfile<>".sml"][["Tokenizer"]]]*)
 (*];*)
 
@@ -276,7 +281,7 @@ AudioAdapt[rawData_,OptionsPattern[AdaptingOptions]]:=Block[
 
 
 (* ::Input:: *)
-(*data=Parse[localPath<>"Songs/PVZ/Brainiac_Maniac.sml"];*)
+(*data=Parse[localPath<>"Songs/Touhou/Egoist.sml"];*)
 (*Diagnose[data]*)
 
 
@@ -285,11 +290,11 @@ AudioAdapt[rawData_,OptionsPattern[AdaptingOptions]]:=Block[
 
 
 (* ::Input:: *)
-(*EmitSound@Sound@SoundNote[5,1,"ReedOrgan"]*)
+(*EmitSound@Sound@SoundNote[5,1,"GuitarDistorted"]*)
 
 
 (* ::Input:: *)
-(*EmitSound@Sound@SoundNote["HighWoodblock",1]*)
+(*EmitSound@Sound@SoundNote["MuteSurdo",1]*)
 
 
 (* ::Subsubsection:: *)
@@ -303,13 +308,19 @@ AudioAdapt[rawData_,OptionsPattern[AdaptingOptions]]:=Block[
 (* ::Input:: *)
 (*MIDIStop[];MIDIPlay[#[[2]]]&@*)
 (*EchoFunction["time: ",#[[1]]&]@*)
-(*Timing[MIDIAdapt[Parse[localPath<>"Songs/PVZ/Watery_Grave.sml",1],"Rate"->-1.5]];*)
+(*Timing[MIDIAdapt[Parse[localPath<>"Songs/Touhou/Egoist.sml"],"Rate"->1]];*)
 
 
 (* ::Input:: *)
 (*MIDIStop[];MIDIPlay[#[[2]]]&@*)
 (*EchoFunction["time: ",#[[1]]&]@*)
-(*Timing[MIDIAdapt[Parse[localPath<>"src/test/test.sml"]]];*)
+(*Timing[MIDIAdapt[Parse[localPath<>"Songs/Touhou/TH11-Chireiden/Kyuujigoku_Kaidou.sml"],"Rate"->1.2]];*)
+
+
+(* ::Input:: *)
+(*MIDIStop[];MIDIPlay[#[[2]]]&@*)
+(*EchoFunction["time: ",#[[1]]&]@*)
+(*Timing[MIDIAdapt[Parse[localPath<>"src/test/test.sml"],"Rate"->1.2]];*)
 
 
 (* ::Subsubsection:: *)
@@ -323,7 +334,7 @@ AudioAdapt[rawData_,OptionsPattern[AdaptingOptions]]:=Block[
 (* ::Input:: *)
 (*AudioStop[];AudioPlay[#[[2]]]&@*)
 (*EchoFunction["time: ",#[[1]]&]@*)
-(*Timing[AudioAdapt[Parse[localPath<>"Songs/PVZ/Watery_Grave.sml"]]];*)
+(*Timing[AudioAdapt[Parse[localPath<>"Songs/Touhou/Sis_Puella_Magica.sml"],"Rate"->1.2]];*)
 
 
 (* ::Input:: *)

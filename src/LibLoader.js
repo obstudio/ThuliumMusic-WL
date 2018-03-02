@@ -4,7 +4,7 @@ const { SubtrackParser } = require('./TrackParser')
 class LibLoader {
     /**
      *
-     * @param {SMML.Library[]} libs
+     * @param {Tm.Library[]} libs
      */
     constructor(libs = [], withDefault = true) {
         this.libs = libs
@@ -32,7 +32,7 @@ class LibLoader {
 
     /**
      * load internal lib
-     * @param {SMML.InternalLibrary} lib 
+     * @param {Tm.InternalLibrary} lib 
      */
     loadLibrary(lib) {
         switch (lib.Type) {
@@ -65,7 +65,7 @@ class LibLoader {
 
     /**
      * 
-     * @param {SMML.Library[]} content 
+     * @param {Tm.Library[]} content 
      */
     loadSubPackage(content) {
         const sub = new LibLoader(content, false).load()

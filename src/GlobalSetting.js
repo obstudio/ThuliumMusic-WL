@@ -50,7 +50,7 @@ class GlobalSetting {
 
     /**
      * 
-     * @param {SMML.GlobalSetting} globalSetting 
+     * @param {Tm.GlobalSetting} globalSetting 
      * @param {string} key 
      * @param {number} value 
      * @param {function} criterion 

@@ -100,7 +100,7 @@ class TrackParser {
         let pointer = 0
         while (pointer < length) {
             const token = this.Content[pointer]
-            if (token.Type === 'Macrotrack' || token.Name in this.Libraries.Track) {
+            if (token.Type === 'Macrotrack' && token.Name in this.Libraries.Track) {
                 const macro = this.Libraries.Track[token.Name]
                 this.Content.splice(pointer, 1, ...macro)
                 // pointer += macro.length - 1
@@ -116,15 +116,16 @@ class TrackParser {
         if (this.Content.length === 1) return
         const last = this.Content.pop()
         const last2 = this.Content.pop()
-        if (last.Type === 'BarLine' && last2.Type === 'BarLine') {
-            last2.Terminal = true
-            this.Content.push(last2)
+        if (last.Type === 'BarLine' && last2.Type === 'BarLine') {            
+            this.Content.push(Object.assign({}, last2, {Terminal: true}))
         } else {
             if (last.Type === 'BarLine') {
-                last.Terminal = true
+                this.Content.push(last2)
+                this.Content.push(Object.assign({}, last, {Terminal: true}))
+            } else {
+                this.Content.push(last2)
+                this.Content.push(last)
             }
-            this.Content.push(last2)
-            this.Content.push(last)
         }
     }
 
@@ -442,8 +443,13 @@ class SubtrackParser extends TrackParser {
     constructor(track, sectionSettings, libraries, pitchQueue) {
         super(track, sectionSettings, libraries, true)
         this.Repeat = track.Repeat
-        this.Context.pitchQueue = pitchQueue.slice()
-        this.oriPitchQueueLength = pitchQueue.length
+        if (pitchQueue === undefined) {
+            this.Context.pitchQueue = []
+            this.oriPitchQueueLength = 0
+        } else {
+            this.Context.pitchQueue = pitchQueue.slice()
+            this.oriPitchQueueLength = pitchQueue.length
+        }
     }
 
     parseTrack() {

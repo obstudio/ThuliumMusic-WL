@@ -33,12 +33,30 @@ module.exports = {
                 result.push(Object.assign({}, ts[index].Content[j], { StartTime: startTime, Duration: pow }))
             }
         }
+        let incomplete = []
+        let single
+        if (ts[0].Meta.Single && ts[1].Meta.Single) {
+            incomplete[0] = ts[1].Meta.Incomplete[0]
+            single = true
+        } else if (ts[0].Meta.Single) {
+            incomplete[0] = ts[1].Meta.Incomplete[0]
+            incomplete[1] = ts[1].Meta.Incomplete[1]
+            single = false
+        } else if (ts[1].Meta.Single) {
+            incomplete[0] = ts[0].Meta.Incomplete[0]
+            incomplete[1] = ts[1].Meta.Incomplete[0]
+            single = false
+        } else {
+            incomplete[0] = ts[0].Meta.Incomplete[0]
+            incomplete[1] = ts[1].Meta.Incomplete[1]
+            single = false
+        }
         return {
             Content: result,
             Meta: {
                 Duration: ts[1].Meta.Duration,
-                Incomplete: ts[1].Meta.Incomplete,
-                Single: ts[1].Meta.Single,
+                Incomplete: incomplete,
+                Single: single,
                 Warnings: [],
                 PitchQueue: [...ts[0].Meta.PitchQueue, ...ts[1].Meta.PitchQueue],
                 NotesBeforeTie: ts[(num - 1) % 2].Meta.NotesBeforeTie
@@ -55,7 +73,12 @@ module.exports = {
             note.StartTime *= scale
         })
         t.Meta.Duration *= scale
-        t.Meta.Incomplete[0] *= scale
+        if (t.Meta.Single) {
+            t.Meta.Incomplete[0] *= scale
+        } else {
+            t.Meta.Incomplete[0] *= scale
+            t.Meta.Incomplete[1] *= scale
+        }
         return t
     },
 
@@ -83,13 +106,28 @@ module.exports = {
                 __oriDur: 1 / port * 60 / this.Settings.Speed
             }
         })
+        result.push(...t2.Content.map((note) => (note.StartTime += duration, note)))
+        const single = t1.Meta.Single && t2.Meta.Single
+        let incomplete = []
+        if (single) {
+            incomplete[0] = t1.Meta.Incomplete[0] + t2.Meta.Incomplete[0]
+        } else if (t1.Meta.Single) {
+            incomplete[0] = t1.Meta.Incomplete[0] + t2.Meta.Incomplete[0]
+            incomplete[1] = t2.Meta.Incomplete[1]
+        } else if (t2.Meta.Single) {
+            incomplete[0] = t1.Meta.Incomplete[0]
+            incomplete[1] = t1.Meta.Incomplete[1] + t2.Meta.Incomplete[0]
+        } else {
+            incomplete[0] = t1.Meta.Incomplete[0]
+            incomplete[1] = t2.Meta.Incomplete[1]
+        }
 
         return {
             Content: result,
             Meta: {
                 Duration: duration,
-                Incomplete: t2.Meta.Incomplete,
-                Single: t2.Meta.Single,
+                Incomplete: incomplete,
+                Single: single,
                 Warnings: [],
                 PitchQueue: [...t1.Meta.PitchQueue, ...t2.Meta.PitchQueue],
                 NotesBeforeTie: [result[result.length - 1]]

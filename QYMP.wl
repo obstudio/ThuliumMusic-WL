@@ -10,6 +10,8 @@ localPath=NotebookDirectory[];
 <<(localPath<>"Assets\\uiUser.wl")         (* UI for common users *)
 <<(localPath<>"Assets\\uiDeveloper.wl")    (* UI for developers *)
 
+Needs["graphics`",localPath<>"dist\\Graphics.mx"];
+
 <<(localPath<>"src\\library.wl")           (* library *)
 <<(localPath<>"src\\Adapter.wl")           (* adapter *)
 <<(localPath<>"src\\Syntax.wl")            (* syntax *)

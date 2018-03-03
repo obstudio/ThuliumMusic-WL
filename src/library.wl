@@ -156,14 +156,14 @@ updateImage:=Block[{updates={},image,filename,meta},
 	Panel[Column[{Spacer[{4,4}],
 		text[["UpdatingImage"]],
 		Spacer[1],
-		ProgressIndicator[i,{1,Length@updates},ImageSize->{320,16}],
+		Row[{Graphics@{progressBar[(i-1)/Length@updates,24]}},ImageSize->{400,20},Alignment->Center],
 		Spacer[1],
 		Row[{
 			caption["_Progression","Text",{i,Length@updates}],
 			Spacer[4],text[["Loading"]],
 			updates[[i]]
 		}],
-	Spacer[{4,4}]},Alignment->Center],ImageSize->400,Alignment->Center]];
+	Spacer[{4,4}]},Alignment->Center],ImageSize->{400,Full},Alignment->Center]];
 	Export[dataPath<>"Image.json",Normal/@Normal@imageData];
 ];
 
@@ -195,7 +195,7 @@ updateBuffer:=Block[{updates={},song,filename,hash,audio,bufferList},
 	Panel[Column[{Spacer[{4,4}],
 		text[["UpdatingBuffer"]],
 		Spacer[1],
-		Row[{progressBar[(i-1)/Length@updates,24]},ImageSize->{400,20},Alignment->Center],
+		Row[{Graphics@{progressBar[(i-1)/Length@updates,24]}},ImageSize->{400,20},Alignment->Center],
 		Spacer[1],
 		Row[{
 			caption["_Progression","Text",{i,Length@updates}],

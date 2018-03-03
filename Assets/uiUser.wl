@@ -252,7 +252,17 @@ uiPlaylist[playlist_]:=DynamicModule[{song},
 					},ImageSize->playlistInfo[["IndexWidth"]],Alignment->Center],
 					Spacer[4]
 				],
-				caption[index[[#[["Song"]],"SongName"]],"SongName"],
+				If[MemberQ[index[[#[["Song"]],"Tags"]],"$INCOMP"],
+					Row[{
+						caption["["<>If[KeyExistsQ[tagDict[["$INCOMP"]],userInfo[["Language"]]],
+							tagDict[["$INCOMP",userInfo[["Language"]]]],
+							tagDict[["$INCOMP",tagDict[["$INCOMP","Origin"]]]]
+						]<>"]","SongComment"],
+						Spacer[20],
+						caption[index[[#[["Song"]],"SongName"]],"SongComment"]
+					}],
+					caption[index[[#[["Song"]],"SongName"]],"SongName"]
+				],
 				If[KeyExistsQ[index[[#[["Song"]]]],"Comment"],
 					Row[{Spacer[24],caption[index[[#[["Song"]],"Comment"]],"SongComment"]}],
 					Nothing

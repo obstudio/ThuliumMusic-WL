@@ -240,11 +240,13 @@ module.exports = {
         return Object.assign(t, { Content: result })
     },
 
-    ConOct(octave) {
+    ConOct(octave, scale = 1) {
         if (octave === 0) {
             this.Settings.Key = [this.Settings.Key[0]]
+            this.Settings.Volume = [this.Settings.Volume[0]]
         } else {
             this.Settings.Key = [this.Settings.Key[0], this.Settings.Key[0] + octave * 12]
+            this.Settings.Volume = [this.Settings.Volume[0], this.Settings.Volume[0] * scale]
         }
         // this.Settings.assignSetting('ConOct', octave, (octave) => Number.isInteger(octave))
         // this.Settings.assignSetting('ConOctVolume', volumeScale, (volume) => volume >= 0)

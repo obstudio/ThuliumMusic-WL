@@ -47,6 +47,7 @@ functionCodeTok[str_]:=If[StringMatchQ[str,functionCode],
 		name:RE["[a-zA-Z]\\w*"]~~RE["\\s*\\([^\\{\\}]*\\)\\s*\\{"]~~js:jsCode~~RE["\\}"]:><|
 			"Name"->name,
 			"Code"->str,
+			"VoidQ"->StringEndsQ[js,"return"~~jsCode],
 			"Syntax"->StringCases[js,"/****"~~" "..~~stx:Shortest[__]~~" "..~~"****/":>stx]
 		|>
 	][[1]],

@@ -11,7 +11,7 @@ settingList={
 syntaxTemplate=<|"Chord"->{},"Function"->{},"Macro"->{}|>;
 syntaxTags=<|
 	"Chord"->"Notation",
-	"Function"->{"Name","Syntax"}
+	"Function"->{"Name","Syntax","VoidQ"}
 |>;
 blankLineQ[str_]:=Or[
 	StringMatchQ[str,WhitespaceCharacter...],
@@ -45,7 +45,7 @@ Tokenize[filepath_]:=Block[
 		functionTok,functionTokList={},
 		argRule,argType,argData,
 		typePatt,typeTok,
-		funcName,noteRule,
+		funcName,nonVoid,noteRule,
 		objectPatt,trackTok,
 		bracketRule,objectTok,
 		
@@ -205,6 +205,10 @@ Tokenize[filepath_]:=Block[
 		{abbr,argData[["Syntax"]]}],
 	{funcCount,Length@syntax[["Function"]]}];
 	
+	nonVoid=Join[
+		nonVoidPack["Standard"],
+		Select[syntax[["Function"]],!#VoidQ&][[All,"Name"]]
+	];
 	funcName=funcNamePack["Standard"]|Alternatives@@syntax[["Function",All,"Name"]];
 	functionPatt=Alternatives@@functionPattList;
 	functionTok[str_]:=Block[{pattID},
@@ -302,8 +306,11 @@ Tokenize[filepath_]:=Block[
 			]];
 			AppendTo[trackData,"Content"->trackTok[line]];
 			If[ContainsNone[#Type&/@trackData[["Content"]],{"Note","Subtrack","Macrotrack"}],
-				AppendTo[blankTrack,trackData[["Content"]]],
-				AppendTo[sectionData,trackData];	
+				If[ContainsNone[Select[trackData[["Content"]],#Type=="FUNCTION"&][[All,"Name"]],nonVoid],
+					AppendTo[blankTrack,trackData[["Content"]]],
+					AppendTo[sectionData,trackData];
+				],
+				AppendTo[sectionData,trackData];
 			];
 			
 		];

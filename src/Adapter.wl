@@ -125,9 +125,13 @@ EventConstruct[trackData_,startTime_]:=If[MemberQ[instList,trackData[["Instrumen
 TrackConstruct[inst_,chan_,events_]:=Sound`MIDITrack[{
 	Sound`MIDIEvent[0,"SetTempo","Tempo"->1000000],
 	Sound`MIDIEvent[0,"ProgramCommand","Channel"->chan,"Value"->If[inst==128,0,inst]],
-	Sequence@@MapThread[Insert[Sound`MIDIEvent[##],"Channel"->chan,-2]&][Transpose[
-		SortBy[events,{First,If[#[[2]]=="NoteOff",0,1]&}]
-	]]
+	Sequence@@(Sound`MIDIEvent[
+		Floor[#Time],
+		If[#Event==1,"NoteOn","NoteOff"],
+		"Note"->#Note,
+		"Channel"->chan,
+		"Velocity"->#Velocity
+	]&/@SortBy[events,{#Time&,#Event&}])
 }];
 
 $Resolution = 48;
@@ -141,14 +145,14 @@ MIDIConstruct[musicClip_,rate_]:=Block[
 	},
 	If[rate>0,
 		channelData=GroupBy[musicClip,#Inst&->({
-			{Floor[$Resolution*#Start/rate],"NoteOn","Note"->#Note,"Velocity"->Floor[127*#Vol]},
-			{Floor[$Resolution*#End/rate],"NoteOff","Note"->#Note,"Velocity"->0}
+			<|"Time"->$Resolution*#Start/rate,"Note"->#Note,"Velocity"->Floor[127*#Vol],"Event"->1|>,
+			<|"Time"->$Resolution*#End/rate,"Note"->#Note,"Velocity"->0,"Event"->0|>
 		}&)],
 		(* upend *)
 		duration=Max[#End&/@musicClip];
 		channelData=GroupBy[musicClip,#Inst&->({
-			{Floor[$Resolution*(duration+#Start/rate)],"NoteOff","Note"->#Note,"Velocity"->0},
-			{Floor[$Resolution*(duration+#End/rate)],"NoteOn","Note"->#Note,"Velocity"->Floor[127*#Vol]}
+			<|"Time"->$Resolution*(duration+#End/rate),"Note"->#Note,"Velocity"->Floor[127*#Vol],"Event"->1|>,
+			<|"Time"->$Resolution*(duration+#Start/rate),"Note"->#Note,"Velocity"->0,"Event"->0|>
 		}&)];
 	];
 	Do[
@@ -256,7 +260,7 @@ AudioAdapt[rawData_,OptionsPattern[AdaptingOptions]]:=Block[
 ];
 
 
-(* ::Subsubsection::Closed:: *)
+(* ::Subsubsection:: *)
 (*Debug*)
 
 
@@ -281,7 +285,7 @@ AudioAdapt[rawData_,OptionsPattern[AdaptingOptions]]:=Block[
 
 
 (* ::Input:: *)
-(*data=Parse[localPath<>"Songs/Touhou/Egoist.sml"];*)
+(*data=Parse[localPath<>"Songs/Touhou/Border_of_Life.sml"];*)
 (*Diagnose[data]*)
 
 
@@ -290,11 +294,11 @@ AudioAdapt[rawData_,OptionsPattern[AdaptingOptions]]:=Block[
 
 
 (* ::Input:: *)
-(*EmitSound@Sound@SoundNote[5,1,"GuitarDistorted"]*)
+(*EmitSound@Sound@SoundNote[5,1,"SopranoSax"]*)
 
 
 (* ::Input:: *)
-(*EmitSound@Sound@SoundNote["MuteSurdo",1]*)
+(*EmitSound@Sound@SoundNote["VoiceAahs",1]*)
 
 
 (* ::Subsubsection:: *)
@@ -308,19 +312,19 @@ AudioAdapt[rawData_,OptionsPattern[AdaptingOptions]]:=Block[
 (* ::Input:: *)
 (*MIDIStop[];MIDIPlay[#[[2]]]&@*)
 (*EchoFunction["time: ",#[[1]]&]@*)
-(*Timing[MIDIAdapt[Parse[localPath<>"Songs/Touhou/Egoist.sml"],"Rate"->1]];*)
+(*Timing[MIDIAdapt[Parse[localPath<>"Songs/Touhou/Border_of_Life.sml",1],"Rate"->1]];*)
 
 
 (* ::Input:: *)
 (*MIDIStop[];MIDIPlay[#[[2]]]&@*)
 (*EchoFunction["time: ",#[[1]]&]@*)
-(*Timing[MIDIAdapt[Parse[localPath<>"Songs/Touhou/TH11-Chireiden/Kyuujigoku_Kaidou.sml"],"Rate"->1.2]];*)
+(*Timing[MIDIAdapt[Parse[localPath<>"Songs/Touhou/TH11-Chireiden/Hana_ni_Kaze.sml"],"Rate"->1.2]];*)
 
 
 (* ::Input:: *)
 (*MIDIStop[];MIDIPlay[#[[2]]]&@*)
 (*EchoFunction["time: ",#[[1]]&]@*)
-(*Timing[MIDIAdapt[Parse[localPath<>"src/test/test.sml"],"Rate"->1.2]];*)
+(*Timing[MIDIAdapt[Parse[localPath<>"src/test/test.sml"]]];*)
 
 
 (* ::Subsubsection:: *)
@@ -334,10 +338,14 @@ AudioAdapt[rawData_,OptionsPattern[AdaptingOptions]]:=Block[
 (* ::Input:: *)
 (*AudioStop[];AudioPlay[#[[2]]]&@*)
 (*EchoFunction["time: ",#[[1]]&]@*)
-(*Timing[AudioAdapt[Parse[localPath<>"Songs/Touhou/Sis_Puella_Magica.sml"],"Rate"->1.2]];*)
+(*Timing[AudioAdapt[Parse[localPath<>"Songs/Touhou/Border_of_Life.sml",1],"Rate"->1]];*)
 
 
 (* ::Input:: *)
 (*AudioStop[];AudioPlay[#[[2]]]&@*)
 (*EchoFunction["time: ",#[[1]]&]@*)
 (*Timing[AudioAdapt[Parse[localPath<>"src/test/test.sml"]]];*)
+
+
+(* ::Input:: *)
+(*QYMP;*)

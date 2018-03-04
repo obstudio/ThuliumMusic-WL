@@ -338,7 +338,7 @@ module.exports = {
     Stac(restProportion, index = 1) {
         if (typeof restProportion !== 'number') throw new TypeError('Non-numeric value passed in as Stac')
         if (!((restProportion) => restProportion >= 0 && restProportion <= 1)(restProportion)) throw new RangeError('Stac out of range')
-        if (![0, 1, 2].includes(index)) throw new RangeError('Stac index out of range')
+        if (!(index >= 0 && Number.isInteger(index))) throw new RangeError('Stac index out of range')
         this.Settings.Stac[index] = restProportion
     }
 }

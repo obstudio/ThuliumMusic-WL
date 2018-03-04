@@ -30,7 +30,15 @@ uiPlayerControlsNew:={
 	Row[{
 		Column[{Style[Dynamic[timeDisplay[current["Position"]]],20],Spacer[1]}],
 		Spacer[8],
-		Magnify[progressBar[Dynamic[current["Position"]/duration],40],4],
+		Magnify[
+			EventHandler[Dynamic@Graphics[{
+				progressBar[current["Position"]/duration,16],
+				progressBlock[current["Position"]/duration,16]
+			}],
+			{"MouseDragged":>(
+				current["Position"]=duration*progressLocate[CurrentValue[{"MousePosition","Graphics"}][[1]],16]
+			)}],
+		3.6],
 		Spacer[8],
 		Column[{Style[timeDisplay[duration],20],Spacer[1]}]
 	},ImageSize->Full,Alignment->Center],
@@ -51,7 +59,7 @@ uiPlayerControlsNew:={
 		DynamicModule[{style="Default"},
 			EventHandler[Dynamic@button["Stop",style],{
 				"MouseDown":>(style="Clicked"),
-				"MouseUp":>(style="Default";current["State"]="Stopped")
+				"MouseUp":>(style="Default";current["State"]="Stopped";current["Position"]=0)
 			}]
 		],
 		Spacer[20],

@@ -102,7 +102,7 @@ Parse[origin_,partspec_]:=Block[
 
 
 (* ::Subsubsection:: *)
-(*Adapter*)
+(*Constructor*)
 
 
 EventConstruct[trackData_,startTime_]:=If[MemberQ[instList,trackData[["Instrument"]]],
@@ -125,9 +125,13 @@ EventConstruct[trackData_,startTime_]:=If[MemberQ[instList,trackData[["Instrumen
 TrackConstruct[inst_,chan_,events_]:=Sound`MIDITrack[{
 	Sound`MIDIEvent[0,"SetTempo","Tempo"->1000000],
 	Sound`MIDIEvent[0,"ProgramCommand","Channel"->chan,"Value"->If[inst==128,0,inst]],
-	Sequence@@MapThread[Insert[Sound`MIDIEvent[##],"Channel"->chan,-2]&][Transpose[
-		SortBy[events,{First,If[#[[2]]=="NoteOff",0,1]&}]
-	]]
+	Sequence@@(Sound`MIDIEvent[
+		Floor[#Time],
+		If[#Event==1,"NoteOn","NoteOff"],
+		"Note"->#Note,
+		"Channel"->chan,
+		"Velocity"->#Velocity
+	]&/@SortBy[events,{#Time&,#Event&}])
 }];
 
 $Resolution = 48;
@@ -136,17 +140,26 @@ MIDIConstruct::instid = "The sound consists of instrument with ID exceeding 128,
 
 MIDIConstruct[musicClip_,rate_]:=Block[
 	{
-		channelData,channelMap=<||>
+		channelData,channelMap=<||>,
+		duration
 	},
-	channelData=GroupBy[musicClip,#Inst&->({
-		{Floor[$Resolution*#Start/rate],"NoteOn","Note"->#Note,"Velocity"->Floor[127*#Vol]},
-		{Floor[$Resolution*#End/rate],"NoteOff","Note"->#Note,"Velocity"->0}
-	}&)];
+	If[rate>0,
+		channelData=GroupBy[musicClip,#Inst&->({
+			<|"Time"->$Resolution*#Start/rate,"Note"->#Note,"Velocity"->Floor[127*#Vol],"Event"->1|>,
+			<|"Time"->$Resolution*#End/rate,"Note"->#Note,"Velocity"->0,"Event"->0|>
+		}&)],
+		(* upend *)
+		duration=Max[#End&/@musicClip];
+		channelData=GroupBy[musicClip,#Inst&->({
+			<|"Time"->$Resolution*(duration+#End/rate),"Note"->#Note,"Velocity"->Floor[127*#Vol],"Event"->1|>,
+			<|"Time"->$Resolution*(duration+#Start/rate),"Note"->#Note,"Velocity"->0,"Event"->0|>
+		}&)];
+	];
 	Do[
 		If[instID==128,
 			AppendTo[channelMap,instID->9],
 			AppendTo[channelMap,instID->LengthWhile[
-				Range[0,Length@channelData],MemberQ[Values@channelMap,#]&
+				Range[0,Length@channelData],MemberQ[Append[Values@channelMap,9],#]&
 			]];
 		],
 	{instID,Keys@channelData}];	
@@ -158,9 +171,18 @@ MIDIConstruct[musicClip_,rate_]:=Block[
 ];
 
 
+(* ::Subsubsection::Closed:: *)
+(*Adapter*)
+
+
 AdaptingOptions = {"Rate"->1.0,"Format"->"Audio"};
-Adapt::format = "Cannot adapt to format `1`.";
-Adapt::rate0 = "Cannot use 0 as speed rate.";
+Adapt::format = "`1` is not a adaptable format.";
+Adapt::invrate = "`1` is not a valid rate specification.";
+Adapt::usage = "\
+\!\(\*RowBox[{\"Adapt\",\"[\",RowBox[{StyleBox[\"data\",\"TI\"],\",\",StyleBox[\"options\",\"TI\"]}],\"]\"}]\)\n
+The contents of \!\(\*StyleBox[\"options\",\"TI\"]\) can be the following: 
+\!\(\*RowBox[{\"\t\",\"   Rate \",\"\t\",\"\t\",\"       1.0\",\"\t\",\"\t\",\"     Speed rate\"}]\)
+\!\(\*RowBox[{\"\t\",\"Format\",\"\t\",\"\t\",\"Audio\",\"\t\",\"\t\",\"Adapting format\"}]\)";
 
 Adapt[rawData_,OptionsPattern[AdaptingOptions]]:=Switch[OptionValue["Format"],
 	"MIDI",MIDIAdapt[rawData,OptionValue[Keys@AdaptingOptions]],
@@ -173,6 +195,9 @@ MIDIAdapt[rawData_,OptionsPattern[AdaptingOptions]]:=Block[
 		duration=0,musicClip={}
     },
 	If[!ListQ[rawData],Return[]];
+	If[!Through[(Positive||Negative)@OptionValue["Rate"]],
+		Message[Adapt::invrate,OptionValue["Rate"]];Return[];
+	];
 	Do[
 		AppendTo[musicClip,Table[
 			EventConstruct[trackData,duration],
@@ -186,9 +211,13 @@ AudioAdapt[rawData_,OptionsPattern[AdaptingOptions]]:=Block[
     {
 		duration=0,groups,
 		musicClips={},targetClip,
-		compactData,clipUsed
+		compactData,clipUsed,
+		output=0,clipCount,musicClip
     },
 	If[!ListQ[rawData],Return[]];
+	If[!Through[(Positive||Negative)@OptionValue["Rate"]],
+		Message[Adapt::invrate,OptionValue["Rate"]];Return[];
+	];
 	Do[
 		clipUsed={};
 		groups=GatherBy[sectionData[["Tracks"]],#Meta[[{"FadeIn","FadeOut"}]]&];
@@ -216,15 +245,18 @@ AudioAdapt[rawData_,OptionsPattern[AdaptingOptions]]:=Block[
 		{group,groups}];
 		duration+=Max[sectionData[["Tracks",All,"Meta","Duration"]]],
 	{sectionData,rawData}];
-	Return[Total[Table[
+	
+	output=Total@Table[
 		AudioFade[
 			Sound@MIDIConstruct[Flatten@musicClip[["Events"]],OptionValue["Rate"]],
-		Switch[RealSign@OptionValue["Rate"],
-			1,{musicClip[["FadeIn"]],musicClip[["FadeOut"]]}/OptionValue["Rate"],
-			-1,{musicClip[["FadeOut"]],musicClip[["FadeIn"]]}/(-OptionValue["Rate"]),
-			0,Message[Adapt::rate0];Return[];
-		]],
-	{musicClip,musicClips}]]];
+			If[OptionValue["Rate"]>0,
+				{musicClip[["FadeIn"]],musicClip[["FadeOut"]]}/OptionValue["Rate"],
+				{musicClip[["FadeOut"]],musicClip[["FadeIn"]]}/(-OptionValue["Rate"])
+			]
+		],
+	{musicClip,musicClips}];
+	
+	Return[output];
 ];
 
 
@@ -243,17 +275,17 @@ AudioAdapt[rawData_,OptionsPattern[AdaptingOptions]]:=Block[
 
 
 (* ::Input:: *)
-(*With[{testfile=localPath<>"Songs/PVZ/Watery_Grave"},*)
+(*With[{testfile=localPath<>"Songs/Touhou/TH15-Kanjuden/Seijyouki_no_Pierrot"},*)
 (*Export[testfile<>".json",Tokenize[testfile<>".sml"][["Tokenizer"]]]*)
 (*];*)
 
 
 (* ::Input:: *)
-(*data=Parse[localPath<>"src/test/test.sml"]*)
+(*data=Parse[localPath<>"src/test/test.sml"];Diagnose[data]*)
 
 
 (* ::Input:: *)
-(*data=Parse[localPath<>"Songs/PVZ/Brainiac_Maniac.sml"];*)
+(*data=Parse[localPath<>"Songs/Touhou/TH15-Kanjuden/Kokyou_Hoshi_Utsuru_Umi.sml"];*)
 (*Diagnose[data]*)
 
 
@@ -262,11 +294,11 @@ AudioAdapt[rawData_,OptionsPattern[AdaptingOptions]]:=Block[
 
 
 (* ::Input:: *)
-(*EmitSound@Sound@SoundNote[5,1,"ReedOrgan"]*)
+(*EmitSound@Sound@SoundNote[5,1,"SopranoSax"]*)
 
 
 (* ::Input:: *)
-(*EmitSound@Sound@SoundNote["HighWoodblock",1]*)
+(*EmitSound@Sound@SoundNote["VoiceAahs",1]*)
 
 
 (* ::Subsubsection:: *)
@@ -280,7 +312,13 @@ AudioAdapt[rawData_,OptionsPattern[AdaptingOptions]]:=Block[
 (* ::Input:: *)
 (*MIDIStop[];MIDIPlay[#[[2]]]&@*)
 (*EchoFunction["time: ",#[[1]]&]@*)
-(*Timing[MIDIAdapt[Parse[localPath<>"Songs/PVZ/Watery_Grave.sml",1],"Rate"->1.5]];*)
+(*Timing[MIDIAdapt[Parse[localPath<>"Songs/Touhou/Border_of_Life.sml",1],"Rate"->1]];*)
+
+
+(* ::Input:: *)
+(*MIDIStop[];MIDIPlay[#[[2]]]&@*)
+(*EchoFunction["time: ",#[[1]]&]@*)
+(*Timing[MIDIAdapt[Parse[localPath<>"Songs/Touhou/TH15-Kanjuden/Kokyou_Hoshi_Utsuru_Umi.sml"],"Rate"->1.2]];*)
 
 
 (* ::Input:: *)
@@ -300,10 +338,14 @@ AudioAdapt[rawData_,OptionsPattern[AdaptingOptions]]:=Block[
 (* ::Input:: *)
 (*AudioStop[];AudioPlay[#[[2]]]&@*)
 (*EchoFunction["time: ",#[[1]]&]@*)
-(*Timing[AudioAdapt[Parse[localPath<>"Songs/PVZ/Brainiac_Maniac.sml",{6}],"Rate"->1.5]];*)
+(*Timing[AudioAdapt[Parse[localPath<>"Songs/Touhou/TH15-Kanjuden/Wasuregataki.sml",1],"Rate"->1]];*)
 
 
 (* ::Input:: *)
 (*AudioStop[];AudioPlay[#[[2]]]&@*)
 (*EchoFunction["time: ",#[[1]]&]@*)
 (*Timing[AudioAdapt[Parse[localPath<>"src/test/test.sml"]]];*)
+
+
+(* ::Input:: *)
+(*QYMP;*)

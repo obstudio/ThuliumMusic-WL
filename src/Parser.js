@@ -1,12 +1,14 @@
 const Loader = require('./LibLoader')
 const GlobalSetting = require('./GlobalSetting')
 const { TrackParser } = require('./TrackParser')
+const { DiffDurError } = require('./Error')
+const EPSILON = 0.0000000001
 
 class Parser {
     /**
-     * SMML Parser
-     * @param {SMML.TokenizedData} tokenizedData 经过tok的JSON对象
-     * @param {SMML.Adapter} adapter 可选的Adapter
+     * Tm Parser
+     * @param {Tm.TokenizedData} tokenizedData 经过tok的JSON对象
+     * @param {Tm.Adapter} adapter 可选的Adapter
      * @example
      * new Parser(tokenizedData)
      * new Parser(tokenizedData, new MIDIAdapter())
@@ -109,13 +111,13 @@ class Parser {
 
     /**
      * parse section
-     * @param {SMML.Section} section
+     * @param {Tm.Section} section
      */
     parseSection(section) {
         section.Settings.filter((token) => token.Type === 'FUNCTION')
             .forEach((token) => this.libraries.FunctionPackage.applyFunction({ Settings: this.sectionContext.Settings, Context: {} }, token))
         const instrStatistic = {}
-        return {
+        const sec = {
             ID: section.ID,
             Tracks: [].concat(...section.Tracks.map((track) => {
                 const tempTracks = new TrackParser(track, this.sectionContext.Settings, this.libraries).parseTrack()
@@ -130,8 +132,14 @@ class Parser {
                     }
                 }
                 return tempTracks
-            }))
+            })),
+            Warnings: []
         }
+        const max = Math.max(...sec.Tracks.map((track) => track.Meta.Duration))
+        if (!sec.Tracks.every((track) => Math.abs(track.Meta.Duration - max) < EPSILON)) {
+            sec.Warnings.push(new DiffDurError(sec.ID, this.tokenizedData.Sections.indexOf(section)))
+        }
+        return sec
     }
 }
 

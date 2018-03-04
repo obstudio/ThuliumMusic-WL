@@ -1,9 +1,9 @@
-const { BarLengthError, DupChordError, TraceError, VolumeError } = require('./Error')
+const { BarLengthError, DupChordError, TraceError, VolumeError, UndefinedTokenError } = require('./Error')
 
 class TrackParser {
     /**
      * 
-     * @param {SMML.ParsedTrack} trackResult 
+     * @param {Tm.ParsedTrack} trackResult 
      */
     static processPedal(trackResult) {
         const content = trackResult.Content
@@ -34,8 +34,8 @@ class TrackParser {
 
     /**
      *
-     * @param {SMML.Track} track
-     * @param {SMML.GlobalSetting} sectionSettings
+     * @param {Tm.Track} track
+     * @param {Tm.GlobalSetting} sectionSettings
      */
     constructor(track, sectionSettings, libraries, isSubtrack = false) {
         this.isSubtrack = isSubtrack
@@ -54,7 +54,7 @@ class TrackParser {
     }
 
     /**
-     * @returns {SMML.ParsedTrack[]}
+     * @returns {Tm.ParsedTrack[]}
      */
     parseTrack() {
         this.preprocess()
@@ -63,10 +63,19 @@ class TrackParser {
         if (this.isSubtrack) {
             return [trackResult]
         } else {
+            if (this.Instruments.length === 0) {
+                this.Instruments.push({
+                    Instrument: 'Piano',
+                    Proportion: 1
+                })
+            }
             return this.Instruments.map((instrument) => {
                 const meta = Object.assign({}, trackResult.Meta, { Warnings: trackResult.Meta.Warnings.slice() })
                 if (instrument.Proportion === null) {
                     instrument.Proportion = 1
+                }
+                if (instrument.Instrument === '') {
+                    instrument.Instrument = 'Piano'
                 }
                 return {
                     Instrument: instrument.Instrument,
@@ -79,7 +88,7 @@ class TrackParser {
                             vol = 1
                         }
                         delete note.__oriDur
-                        return Object.assign({}, note, { Volume: vol})
+                        return Object.assign({}, note, { Volume: vol })
                     })
                 }
             })
@@ -91,7 +100,7 @@ class TrackParser {
         let pointer = 0
         while (pointer < length) {
             const token = this.Content[pointer]
-            if (token.Type === 'Macrotrack' || token.Name in this.Libraries.Track) {
+            if (token.Type === 'Macrotrack' && token.Name in this.Libraries.Track) {
                 const macro = this.Libraries.Track[token.Name]
                 this.Content.splice(pointer, 1, ...macro)
                 // pointer += macro.length - 1
@@ -107,21 +116,22 @@ class TrackParser {
         if (this.Content.length === 1) return
         const last = this.Content.pop()
         const last2 = this.Content.pop()
-        if (last.Type === 'BarLine' && last2.Type === 'BarLine') {
-            last2.Terminal = true
-            this.Content.push(last2)
+        if (last.Type === 'BarLine' && last2.Type === 'BarLine') {            
+            this.Content.push(Object.assign({}, last2, {Terminal: true}))
         } else {
             if (last.Type === 'BarLine') {
-                last.Terminal = true
+                this.Content.push(last2)
+                this.Content.push(Object.assign({}, last, {Terminal: true}))
+            } else {
+                this.Content.push(last2)
+                this.Content.push(last)
             }
-            this.Content.push(last2)
-            this.Content.push(last)
         }
     }
 
     /**
      * parse track content
-     * @returns {SMML.ParsedTrack}
+     * @returns {Tm.ParsedTrack}
      */
     parseTrackContent() {
         const result = []
@@ -132,106 +142,110 @@ class TrackParser {
 
         for (const token of this.Content) {
             switch (token.Type) {
-            case 'FUNCTION':
-            case 'Subtrack':
-                if (token.Type === 'FUNCTION') {
-                    subtrack = this.Libraries.FunctionPackage.applyFunction(this, token)
-                    if (subtrack === undefined) continue
-                } else {
-                    subtrack = new SubtrackParser(token, this.Settings, this.Libraries, this.Context.pitchQueue).parseTrack()
-                }
-                subtrack.Content.forEach((tok) => {
-                    if (tok.Type === 'Note') {
-                        tok.StartTime += this.Context.startTime
+                case 'FUNCTION':
+                case 'Subtrack':
+                    if (token.Type === 'FUNCTION') {
+                        subtrack = this.Libraries.FunctionPackage.applyFunction(this, token)
+                        if (subtrack === undefined) continue
+                    } else {
+                        subtrack = new SubtrackParser(token, this.Settings, this.Libraries, this.Context.pitchQueue).parseTrack()
                     }
-                })
-                // this.Context.pitchQueue.push(...subtrack.Meta.PitchQueue)
-                this.Context.startTime += subtrack.Meta.Duration
-                this.Context.notesBeforeTie = subtrack.Meta.NotesBeforeTie
-                this.Context.warnings.push(...subtrack.Meta.Warnings.map((warning) => {
-                    warning.args[0] = this.ID
-                    warning.args[1].unshift(this.Content.indexOf(token))
-                    return warning
-                }))
-                if (subtrack.Meta.Single) {
-                    if (leftFirst) {
-                        leftIncomplete += subtrack.Meta.Incomplete[0]
-                        if (this.isLegalBar(leftIncomplete)) {
+                    subtrack.Content.forEach((tok) => {
+                        if (tok.Type === 'Note') {
+                            tok.StartTime += this.Context.startTime
+                        }
+                    })
+                    this.Context.pitchQueue.push(...subtrack.Meta.PitchQueue)
+                    this.Context.startTime += subtrack.Meta.Duration
+                    this.Context.notesBeforeTie = subtrack.Meta.NotesBeforeTie
+                    this.Context.afterTie = subtrack.Meta.AfterTie
+                    this.Context.warnings.push(...subtrack.Meta.Warnings.map((warning) => {
+                        warning.args[0] = this.ID
+                        warning.args[1].unshift(this.Content.indexOf(token))
+                        return warning
+                    }))
+                    if (subtrack.Meta.Single) {
+                        if (leftFirst) {
+                            leftIncomplete += subtrack.Meta.Incomplete[0]
+                            if (this.isLegalBar(leftIncomplete)) {
+                                leftFirst = false
+                                rightIncomplete = 0
+                            }
+                        } else {
+                            rightIncomplete += subtrack.Meta.Incomplete[0]
+                            if (this.isLegalBar(rightIncomplete)) {
+                                rightIncomplete = 0
+                            }
+                        }
+                    } else {
+                        if (leftFirst) {
+                            leftIncomplete += subtrack.Meta.Incomplete[0]
                             leftFirst = false
-                            rightIncomplete = 0
-                        }
-                    } else {
-                        rightIncomplete += subtrack.Meta.Incomplete[0]
-                        if (this.isLegalBar(rightIncomplete)) {
-                            rightIncomplete = 0
+                            rightIncomplete = subtrack.Meta.Incomplete[1]
+                            if (this.isLegalBar(rightIncomplete)) {
+                                rightIncomplete = 0
+                            }
+                        } else {
+                            rightIncomplete += subtrack.Meta.Incomplete[0]
+                            if (!this.isLegalBar(rightIncomplete)) {
+                                this.Context.warnings.push(new BarLengthError(this.ID, [this.Content.indexOf(token)], rightIncomplete))
+                            }
+                            rightIncomplete = subtrack.Meta.Incomplete[1]
+                            if (this.isLegalBar(rightIncomplete)) {
+                                rightIncomplete = 0
+                            }
                         }
                     }
-                } else {
+                    result.push(...subtrack.Content)
+                    break
+                case 'Note':
+                    this.Context.notesBeforeTie = this.parseNote(token)
                     if (leftFirst) {
-                        leftIncomplete += subtrack.Meta.Incomplete[0]
-                        leftFirst = false
-                        rightIncomplete = subtrack.Meta.Incomplete[1]
-                        if (this.isLegalBar(rightIncomplete)) {
-                            rightIncomplete = 0
-                        }
+                        leftIncomplete += this.parseBeat(token)
                     } else {
-                        rightIncomplete += subtrack.Meta.Incomplete[0]
+                        rightIncomplete += this.parseBeat(token)
+                    }
+                    result.push(...this.Context.notesBeforeTie.filter((note) => result.indexOf(note) === -1))
+                    break
+                case 'Tie':
+                    this.Context.afterTie = true
+                    break
+                case 'BarLine':
+                    leftFirst = false
+                    if (token.Terminal !== true) {
                         if (!this.isLegalBar(rightIncomplete)) {
                             this.Context.warnings.push(new BarLengthError(this.ID, [this.Content.indexOf(token)], rightIncomplete))
                         }
-                        rightIncomplete = subtrack.Meta.Incomplete[1]
-                        if (this.isLegalBar(rightIncomplete)) {
-                            rightIncomplete = 0
-                        }
+                        rightIncomplete = 0
                     }
-                }
-                result.push(...subtrack.Content)
-                break
-            case 'Note':
-                this.Context.notesBeforeTie = this.parseNote(token)
-                if (leftFirst) {
-                    leftIncomplete += this.parseBeat(token)
-                } else {
-                    rightIncomplete += this.parseBeat(token)
-                }
-                result.push(...this.Context.notesBeforeTie.filter((note) => result.indexOf(note) === -1))
-                break
-            case 'Tie':
-                this.Context.afterTie = true
-                break
-            case 'BarLine':
-                leftFirst = false
-                if (token.Terminal !== true) {
-                    if (!this.isLegalBar(rightIncomplete)) {
-                        this.Context.warnings.push(new BarLengthError(this.ID, [this.Content.indexOf(token)], rightIncomplete))
-                    }
-                    rightIncomplete = 0
-                }
-                break
-            case 'PedalPress':
-            case 'PedalRelease':
-                result.push({
-                    Type: token.Type,
-                    StartTime: this.Context.startTime
-                })
-                break
-            case 'Clef':
-            case 'Whitespace':
-            case 'Undefined':
-                break
+                    break
+                case 'PedalPress':
+                case 'PedalRelease':
+                    result.push({
+                        Type: token.Type,
+                        StartTime: this.Context.startTime
+                    })
+                    break
+                case 'Undefined':
+                    this.Context.warnings.push(new UndefinedTokenError(this.ID, [this.Content.indexOf(token)], token))
+                    break
+                case 'Clef':
+                case 'Whitespace':
+                    break
             }
         }
         const returnObj = {
             Content: result,
             Meta: {
                 Warnings: this.Context.warnings,
-                PitchQueue: this.Context.pitchQueue,
+                PitchQueue: this.isSubtrack ? this.Context.pitchQueue.slice(this.oriPitchQueueLength) : this.Context.pitchQueue,
                 FadeIn: this.Settings.FadeIn,
                 FadeOut: this.Settings.FadeOut,
                 Duration: this.Context.startTime,
                 Single: leftFirst,
                 Incomplete: [leftIncomplete, rightIncomplete],
-                NotesBeforeTie: this.Context.notesBeforeTie
+                NotesBeforeTie: this.Context.notesBeforeTie,
+                AfterTie: this.Context.afterTie
             }
         }
         if (!this.isSubtrack) {
@@ -243,26 +257,26 @@ class TrackParser {
                     Warnings: this.Warnings
                 }
             }
-            if (leftIncomplete + rightIncomplete !== this.Settings.Bar) {
+/*             if (leftIncomplete + rightIncomplete !== this.Settings.Bar) {
                 if (leftIncomplete !== this.Settings.Bar) {
                     this.Context.warnings.push(new BarLengthError(this.ID, [0], leftIncomplete))
                 }
                 if (rightIncomplete && rightIncomplete !== this.Settings.Bar) {
                     this.Context.warnings.push(new BarLengthError(this.ID, [-1], rightIncomplete))
                 }
-            }
+            } */
         }
         return returnObj
     }
 
     isLegalBar(bar) {
-        return bar === undefined || bar === this.Settings.Bar || bar === 0
+        return bar === undefined || (bar - this.Settings.Bar) < 0.0000001 || bar === 0
     }
 
     /**
      *
-     * @param {SMML.NoteToken} note
-     * @returns {SMML.ParsedNote[]}
+     * @param {Tm.NoteToken} note
+     * @returns {Tm.ParsedNote[]}
      */
     parseNote(note) {
         const pitches = []
@@ -277,6 +291,7 @@ class TrackParser {
             if (this.Context.pitchQueue.length >= this.Settings.Trace) {
                 const delta = this.parseDeltaPitch(note.PitOp)
                 const queue = this.Context.pitchQueue[this.Context.pitchQueue.length - this.Settings.Trace]
+                pitchQueue.push(...queue)
                 pitches.push(...[].concat(...queue.map((pitch) => this.Settings.Key.map((key) => key - this.Settings.Key[0] + pitch + delta))))
                 volumes.push(...[].concat(...new Array(queue.length).fill(this.getVolume(note.VolOp))))
             } else {
@@ -347,7 +362,7 @@ class TrackParser {
 
     /**
     *
-    * @param {SMML.Pitch} pitch
+    * @param {Tm.Pitch} pitch
     * @returns {number[]}
     */
     parseChord(pitch) {
@@ -372,7 +387,7 @@ class TrackParser {
 
     /**
      *
-     * @param {SMML.Pitch} pitch
+     * @param {Tm.Pitch} pitch
      * @returns {number[]}
      */
     parsePitch(pitch, base) {
@@ -386,7 +401,7 @@ class TrackParser {
 
     /**
      *
-     * @param {SMML.NoteToken} note
+     * @param {Tm.NoteToken} note
      * @returns {number}
      */
     parseBeat(note) {
@@ -397,27 +412,27 @@ class TrackParser {
         while (pointer < length) {
             const char = note.DurOp.charAt(pointer)
             switch (char) {
-            case '=':
-                duration /= 4
-                pointer += 1
-                break
-            case '-':
-                duration += 1
-                pointer += 1
-                break
-            case '_':
-                duration /= 2
-                pointer += 1
-                break
-            case '.':
-                dotCount = 1
-                pointer += 1
-                while (note.DurOp.charAt(pointer) === '.') {
-                    dotCount += 1
+                case '=':
+                    duration /= 4
                     pointer += 1
-                }
-                duration *= 2 - Math.pow(2, -dotCount)
-                break
+                    break
+                case '-':
+                    duration += 1
+                    pointer += 1
+                    break
+                case '_':
+                    duration /= 2
+                    pointer += 1
+                    break
+                case '.':
+                    dotCount = 1
+                    pointer += 1
+                    while (note.DurOp.charAt(pointer) === '.') {
+                        dotCount += 1
+                        pointer += 1
+                    }
+                    duration *= 2 - Math.pow(2, -dotCount)
+                    break
             }
         }
         return duration * Math.pow(2, -this.Settings.Duration)
@@ -430,7 +445,13 @@ class SubtrackParser extends TrackParser {
     constructor(track, sectionSettings, libraries, pitchQueue) {
         super(track, sectionSettings, libraries, true)
         this.Repeat = track.Repeat
-        this.Context.pitchQueue = pitchQueue.slice()
+        if (pitchQueue === undefined) {
+            this.Context.pitchQueue = []
+            this.oriPitchQueueLength = 0
+        } else {
+            this.Context.pitchQueue = pitchQueue.slice()
+            this.oriPitchQueueLength = pitchQueue.length
+        }
     }
 
     parseTrack() {
@@ -441,16 +462,6 @@ class SubtrackParser extends TrackParser {
 
     preprocess() {
         this.mergeMacro()
-        if (this.Repeat !== -1 && this.Content.length >= 1) {
-            const last = this.Content[this.Content.length - 1]
-            if (last.Type !== 'BarLine') {
-                this.Content.push({
-                    Type: 'BarLine',
-                    Skip: false,
-                    Order: [0]
-                })
-            }
-        }
         if (this.Repeat > 0) {
             const temp = []
             const repeatArray = this.Content.filter((token) => token.Type === 'BarLine' && token.Order[0] !== 0)
@@ -475,9 +486,24 @@ class SubtrackParser extends TrackParser {
                         temp.push(token)
                     }
                 }
+                temp.push({
+                    Type: 'BarLine',
+                    Skip: false,
+                    Order: [0]
+                })
             }
             this.Content = temp
         } else {
+            if (this.Repeat !== -1 && this.Content.length >= 1) {
+                const last = this.Content[this.Content.length - 1]
+                if (last.Type !== 'BarLine') {
+                    this.Content.push({
+                        Type: 'BarLine',
+                        Skip: false,
+                        Order: [0]
+                    })
+                }
+            }
             const skip = this.Content.findIndex((tok) => tok.Skip === true)
             let temp
             if (skip === -1) {

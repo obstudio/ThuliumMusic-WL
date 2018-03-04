@@ -13,4 +13,10 @@ Instru = 'Note disaccords with current instrument $1.'
 
 BarLen = 'Number of beats is expected to be !1, but !2 was found.'
 
+# Message Global::Arg
+
+Fraction = 'The first argument %1 should not be a fraction.'
+Incomplete = 'Cannot fill the duration by subtrack @1.'
+Empty = 'The argument @1 should not be an empty subtrack.'
+
 # End

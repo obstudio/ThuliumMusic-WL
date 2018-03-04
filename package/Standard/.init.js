@@ -3,7 +3,7 @@ const { SubtrackParser } = require('../../src/TrackParser')
 module.exports = {
     Tremolo1(expr, subtrack) {
         const t = new SubtrackParser(subtrack, this.Settings, this.Libraries, this.pitchQueue).parseTrack()
-        const pow = Math.pow(2, -expr) * 60 / this.Settings.Speed
+        const pow = Math.pow(2, -(expr)) * 60 / this.Settings.Speed
         const num = Math.round(t.Meta.Duration / pow)
         const result = []
         const length = t.Content.length
@@ -22,7 +22,7 @@ module.exports = {
 
     Tremolo2(expr, subtrack1, subtrack2) {
         const ts = [new SubtrackParser(subtrack1, this.Settings, this.Libraries, this.pitchQueue).parseTrack(), new SubtrackParser(subtrack2, this.Settings, this.Libraries, this.pitchQueue).parseTrack()]
-        const pow = Math.pow(2, -expr) * 60 / this.Settings.Speed
+        const pow = Math.pow(2, -(expr)) * 60 / this.Settings.Speed
         const num = Math.round(ts[1].Meta.Duration / pow)
         const lengths = ts.map((t) => t.Content.length)
         const result = []
@@ -33,12 +33,30 @@ module.exports = {
                 result.push(Object.assign({}, ts[index].Content[j], { StartTime: startTime, Duration: pow }))
             }
         }
+        let incomplete = []
+        let single
+        if (ts[0].Meta.Single && ts[1].Meta.Single) {
+            incomplete[0] = ts[1].Meta.Incomplete[0]
+            single = true
+        } else if (ts[0].Meta.Single) {
+            incomplete[0] = ts[1].Meta.Incomplete[0]
+            incomplete[1] = ts[1].Meta.Incomplete[1]
+            single = false
+        } else if (ts[1].Meta.Single) {
+            incomplete[0] = ts[0].Meta.Incomplete[0]
+            incomplete[1] = ts[1].Meta.Incomplete[0]
+            single = false
+        } else {
+            incomplete[0] = ts[0].Meta.Incomplete[0]
+            incomplete[1] = ts[1].Meta.Incomplete[1]
+            single = false
+        }
         return {
             Content: result,
             Meta: {
                 Duration: ts[1].Meta.Duration,
-                Incomplete: ts[1].Meta.Incomplete,
-                Single: true,
+                Incomplete: incomplete,
+                Single: single,
                 Warnings: [],
                 PitchQueue: [...ts[0].Meta.PitchQueue, ...ts[1].Meta.PitchQueue],
                 NotesBeforeTie: ts[(num - 1) % 2].Meta.NotesBeforeTie
@@ -50,10 +68,17 @@ module.exports = {
         const scale = Math.pow(2, Math.floor(Math.log2(expr))) / expr
         const t = new SubtrackParser(subtrack, this.Settings, this.Libraries, this.pitchQueue).parseTrack()
         t.Content.forEach((note) => {
+            note.__oriDur *= scale
             note.Duration *= scale
             note.StartTime *= scale
         })
         t.Meta.Duration *= scale
+        if (t.Meta.Single) {
+            t.Meta.Incomplete[0] *= scale
+        } else {
+            t.Meta.Incomplete[0] *= scale
+            t.Meta.Incomplete[1] *= scale
+        }
         return t
     },
 
@@ -77,16 +102,32 @@ module.exports = {
                 Pitch: pitch,
                 Volume: t2.Content[0].Volume,
                 Duration: 1 / port * 60 / this.Settings.Speed,
-                StartTime: index / port * 60 / this.Settings.Speed
+                StartTime: index / port * 60 / this.Settings.Speed,
+                __oriDur: 1 / port * 60 / this.Settings.Speed
             }
         })
+        result.push(...t2.Content.map((note) => (note.StartTime += duration, note)))
+        const single = t1.Meta.Single && t2.Meta.Single
+        let incomplete = []
+        if (single) {
+            incomplete[0] = t1.Meta.Incomplete[0] + t2.Meta.Incomplete[0]
+        } else if (t1.Meta.Single) {
+            incomplete[0] = t1.Meta.Incomplete[0] + t2.Meta.Incomplete[0]
+            incomplete[1] = t2.Meta.Incomplete[1]
+        } else if (t2.Meta.Single) {
+            incomplete[0] = t1.Meta.Incomplete[0]
+            incomplete[1] = t1.Meta.Incomplete[1] + t2.Meta.Incomplete[0]
+        } else {
+            incomplete[0] = t1.Meta.Incomplete[0]
+            incomplete[1] = t2.Meta.Incomplete[1]
+        }
 
         return {
             Content: result,
             Meta: {
                 Duration: duration,
-                Incomplete: [duration],
-                Single: true,
+                Incomplete: incomplete,
+                Single: single,
                 Warnings: [],
                 PitchQueue: [...t1.Meta.PitchQueue, ...t2.Meta.PitchQueue],
                 NotesBeforeTie: [result[result.length - 1]]
@@ -109,11 +150,13 @@ module.exports = {
         t1.Content.forEach((note) => {
             note.Duration = actualDur
             note.StartTime *= dur
+            note.__oriDur = actualDur
         })
         const total = actualDur * num
         t2.Content.forEach((note) => {
             note.StartTime += total
             note.Duration -= total
+            note.__oriDur -= total
         })
         return {
             Content: [...t1.Content, ...t2.Content],
@@ -136,13 +179,15 @@ module.exports = {
         const total = actualDur * num
         t1.Content.forEach((note) => {
             note.Duration -= total
+            note.__oriDur -= total
         })
         t2.Content.forEach((note) => {
             note.Duration = actualDur
+            note.__oriDur = actualDur
             note.StartTime *= dur
-            note.StartTime += t1.Content[0].Duration
+            note.StartTime += t1.Meta.Duration - total
         })
-
+        t1.Meta.NotesBeforeTie = t2.Meta.NotesBeforeTie
         return {
             Content: [...t1.Content, ...t2.Content],
             Meta: t1.Meta
@@ -154,6 +199,7 @@ module.exports = {
         const ferm = this.Settings.getOrSetDefault('Ferm', 2)
         t.Content.forEach((note) => {
             note.Duration *= ferm
+            note.__oriDur *= ferm
             note.StartTime *= ferm
         })
         t.Meta.Duration *= ferm
@@ -177,6 +223,7 @@ module.exports = {
                 const temp = Object.assign({}, cur)
                 sum.push(temp)
                 temp.Duration = actualDur
+                temp.__oriDur = actualDur
                 for (const note of sum) {
                     result.push(Object.assign({}, note, { StartTime: actualDur * index }))
                 }
@@ -184,6 +231,7 @@ module.exports = {
                 t.Content.forEach((note) => {
                     note.StartTime += actualDur * index
                     note.Duration -= actualDur * index
+                    note.__oriDur -= actualDur * index
                 })
                 result.push(...t.Content)
             }
@@ -192,11 +240,13 @@ module.exports = {
         return Object.assign(t, { Content: result })
     },
 
-    ConOct(octave) {
+    ConOct(octave, scale = 1) {
         if (octave === 0) {
             this.Settings.Key = [this.Settings.Key[0]]
+            this.Settings.Volume = [this.Settings.Volume[0]]
         } else {
             this.Settings.Key = [this.Settings.Key[0], this.Settings.Key[0] + octave * 12]
+            this.Settings.Volume = [this.Settings.Volume[0], this.Settings.Volume[0] * scale]
         }
         // this.Settings.assignSetting('ConOct', octave, (octave) => Number.isInteger(octave))
         // this.Settings.assignSetting('ConOctVolume', volumeScale, (volume) => volume >= 0)
@@ -288,7 +338,7 @@ module.exports = {
     Stac(restProportion, index = 1) {
         if (typeof restProportion !== 'number') throw new TypeError('Non-numeric value passed in as Stac')
         if (!((restProportion) => restProportion >= 0 && restProportion <= 1)(restProportion)) throw new RangeError('Stac out of range')
-        if (![0, 1, 2].includes(index)) throw new RangeError('Stac index out of range')
+        if (!(index >= 0 && Number.isInteger(index))) throw new RangeError('Stac index out of range')
         this.Settings.Stac[index] = restProportion
     }
 }

@@ -20,6 +20,12 @@ funcNamePack["Standard"]=Alternatives[
 	
 ];
 
+nonVoidPack["Standard"]={
+	"Tremolo1","Tremolo2",
+	"Portamento","Fermata","Tuplet",
+	"GraceNote","Appoggiatura","Arpeggio"
+};
+
 (* function simplified *)
 funcSimpPack["Standard"]:=Sequence[
 	

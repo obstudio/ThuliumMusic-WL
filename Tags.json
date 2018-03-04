@@ -1,5 +1,11 @@
 {
-	"ACG": {
+    "$INCOMP": {
+        "Alias": ["$INCOMP"],
+        "Origin": "eng",
+        "chs": "未完成",
+        "eng": "Incomplete"
+    },
+    "ACG": {
         "Alias": ["ACG","二次元","にじげん"],
         "Origin": "eng",
         "chs": "二次元",

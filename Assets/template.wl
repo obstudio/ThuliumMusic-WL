@@ -15,10 +15,7 @@ RenderText[line_String,OptionsPattern[]]:=Block[{output},
 			Append[StyleBox[")",OptionValue["Font"]]]@
 			RenderText[text,#->OptionValue[#]&/@TextOptions]
 		],
-		"*"~~text:Except["*"]..~~"*":>FrameBox[StyleBox[text,"TI",OptionValue["Font"]],
-			Background->RGBColor["#DDDDFF"],RoundingRadius->{6,6},
-			FrameStyle->Directive[RGBColor["#111133"],Dashing[4],Thickness[1]]
-		],
+		"*"~~text:Except["*"]..~~"*":>StyleBox[text,"TI",OptionValue["Font"]],
 		"\n":>Sequence["\n",TemplateBox[{OptionValue["Spacer"]},"Spacer1"]],
 		text:Except[Characters["*()\n"]]..:>StyleBox[text,OptionValue["Font"]]
 	}];

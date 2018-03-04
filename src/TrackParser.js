@@ -270,7 +270,7 @@ class TrackParser {
     }
 
     isLegalBar(bar) {
-        return bar === undefined || bar === this.Settings.Bar || bar === 0
+        return bar === undefined || (bar - this.Settings.Bar) < 0.0000001 || bar === 0
     }
 
     /**

@@ -158,6 +158,7 @@ class TrackParser {
                     this.Context.pitchQueue.push(...subtrack.Meta.PitchQueue)
                     this.Context.startTime += subtrack.Meta.Duration
                     this.Context.notesBeforeTie = subtrack.Meta.NotesBeforeTie
+                    this.Context.afterTie = subtrack.Meta.AfterTie
                     this.Context.warnings.push(...subtrack.Meta.Warnings.map((warning) => {
                         warning.args[0] = this.ID
                         warning.args[1].unshift(this.Content.indexOf(token))
@@ -243,7 +244,8 @@ class TrackParser {
                 Duration: this.Context.startTime,
                 Single: leftFirst,
                 Incomplete: [leftIncomplete, rightIncomplete],
-                NotesBeforeTie: this.Context.notesBeforeTie
+                NotesBeforeTie: this.Context.notesBeforeTie,
+                AfterTie: this.Context.afterTie
             }
         }
         if (!this.isSubtrack) {

@@ -101,7 +101,7 @@ Parse[origin_,partspec_]:=Block[
 ];
 
 
-(* ::Subsubsection::Closed:: *)
+(* ::Subsubsection:: *)
 (*Constructor*)
 
 
@@ -275,17 +275,17 @@ AudioAdapt[rawData_,OptionsPattern[AdaptingOptions]]:=Block[
 
 
 (* ::Input:: *)
-(*With[{testfile=localPath<>"Songs/Touhou/TH11-Chireiden/Taeta_Hashi"},*)
+(*With[{testfile=localPath<>"Songs/Touhou/TH15-Kanjuden/Seijyouki_no_Pierrot"},*)
 (*Export[testfile<>".json",Tokenize[testfile<>".sml"][["Tokenizer"]]]*)
 (*];*)
 
 
 (* ::Input:: *)
-(*data=Parse[localPath<>"src/test/test.sml"]*)
+(*data=Parse[localPath<>"src/test/test.sml"];Diagnose[data]*)
 
 
 (* ::Input:: *)
-(*data=Parse[localPath<>"Songs/Touhou/Border_of_Life.sml"];*)
+(*data=Parse[localPath<>"Songs/Touhou/TH15-Kanjuden/Kokyou_Hoshi_Utsuru_Umi.sml"];*)
 (*Diagnose[data]*)
 
 
@@ -318,7 +318,7 @@ AudioAdapt[rawData_,OptionsPattern[AdaptingOptions]]:=Block[
 (* ::Input:: *)
 (*MIDIStop[];MIDIPlay[#[[2]]]&@*)
 (*EchoFunction["time: ",#[[1]]&]@*)
-(*Timing[MIDIAdapt[Parse[localPath<>"Songs/Touhou/TH11-Chireiden/Hana_ni_Kaze.sml"],"Rate"->1.2]];*)
+(*Timing[MIDIAdapt[Parse[localPath<>"Songs/Touhou/TH15-Kanjuden/Kokyou_Hoshi_Utsuru_Umi.sml"],"Rate"->1.2]];*)
 
 
 (* ::Input:: *)
@@ -338,7 +338,7 @@ AudioAdapt[rawData_,OptionsPattern[AdaptingOptions]]:=Block[
 (* ::Input:: *)
 (*AudioStop[];AudioPlay[#[[2]]]&@*)
 (*EchoFunction["time: ",#[[1]]&]@*)
-(*Timing[AudioAdapt[Parse[localPath<>"Songs/Touhou/Border_of_Life.sml",1],"Rate"->1]];*)
+(*Timing[AudioAdapt[Parse[localPath<>"Songs/Touhou/TH15-Kanjuden/Wasuregataki.sml",1],"Rate"->1]];*)
 
 
 (* ::Input:: *)

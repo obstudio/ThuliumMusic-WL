@@ -23,3 +23,7 @@ Diagnose[rawData_]:=Block[
 	{sectionData,rawData}];
 	If[output!={},Print@Column[output]];
 ];
+
+
+(* ::Input:: *)
+(*Parse[localPath<>"Songs/Touhou/TH15-Kanjuden/Pandemonic_Planet.sml"][[All,"Warnings"]]*)

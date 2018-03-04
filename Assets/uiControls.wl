@@ -59,7 +59,7 @@ uiPlayerControlsNew:={
 		DynamicModule[{style="Default"},
 			EventHandler[Dynamic@button["Stop",style],{
 				"MouseDown":>(style="Clicked"),
-				"MouseUp":>(style="Default";current["State"]="Stopped")
+				"MouseUp":>(style="Default";current["State"]="Stopped";current["Position"]=0)
 			}]
 		],
 		Spacer[20],

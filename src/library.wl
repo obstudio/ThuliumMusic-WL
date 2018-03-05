@@ -173,7 +173,7 @@ updateBuffer:=Block[{updates={},song,filename,hash,audio,bufferList},
 	bufferList=StringTake[FileNames["*.buffer","buffer",Infinity],{8,-8}];
 	DeleteFile[dataPath<>"Buffer\\"<>#<>".buffer"]&/@Complement[bufferList,songs];
 	Do[
-		filename=localPath<>"Songs\\"<>song<>"."<>index[[song,"Format"]];
+		filename=localPath<>"Songs\\"<>song<>".tm";
 		hash=IntegerString[FileHash[filename],32];
 		If[KeyExistsQ[bufferHash,song],
 			If[bufferHash[[song]]==hash && FileExistsQ[dataPath<>"Buffer\\"<>song<>".buffer"],
@@ -187,7 +187,7 @@ updateBuffer:=Block[{updates={},song,filename,hash,audio,bufferList},
 	If[updates=={},Return[]];
 	Monitor[Do[
 		song=updates[[i]];
-		filename=localPath<>"Songs\\"<>song<>"."<>index[[song,"Format"]];
+		filename=localPath<>"Songs\\"<>song<>".tm";
 		bufferHash[[song]]=IntegerString[FileHash[filename],32];
 		audio=AudioAdapt[Parse[filename]];
 		Export[dataPath<>"Buffer\\"<>song<>".buffer",audio,"MP3"],

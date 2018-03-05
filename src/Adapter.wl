@@ -1,6 +1,6 @@
 (* ::Package:: *)
 
-(* ::Subsubsection::Closed:: *)
+(* ::Subsubsection:: *)
 (*Parser*)
 
 
@@ -53,7 +53,7 @@ Parse[origin_,partspec_]:=Block[
 			Switch[ToLowerCase@FileExtension[origin],
 				"json",
 					rawData=ExternalEvaluate[JS,"Parse('"<>origin<>"')"],
-				"sml",
+				"tm",
 					tempFile=TempPath[];
 					Export[tempFile,Tokenize[origin][["Tokenizer"]]];
 					rawData=ExternalEvaluate[JS,"Parse('"<>tempFile<>"')"];
@@ -101,7 +101,7 @@ Parse[origin_,partspec_]:=Block[
 ];
 
 
-(* ::Subsubsection:: *)
+(* ::Subsubsection::Closed:: *)
 (*Constructor*)
 
 
@@ -285,7 +285,7 @@ AudioAdapt[rawData_,OptionsPattern[AdaptingOptions]]:=Block[
 
 
 (* ::Input:: *)
-(*data=Parse[localPath<>"Songs/Touhou/TH15-Kanjuden/Kokyou_Hoshi_Utsuru_Umi.sml"];*)
+(*data=Parse[localPath<>"Songs/Touhou/TH15-Kanjuden/Akumu_no_Sekai.sml"];*)
 (*Diagnose[data]*)
 
 
@@ -318,7 +318,7 @@ AudioAdapt[rawData_,OptionsPattern[AdaptingOptions]]:=Block[
 (* ::Input:: *)
 (*MIDIStop[];MIDIPlay[#[[2]]]&@*)
 (*EchoFunction["time: ",#[[1]]&]@*)
-(*Timing[MIDIAdapt[Parse[localPath<>"Songs/Touhou/TH15-Kanjuden/Kokyou_Hoshi_Utsuru_Umi.sml"],"Rate"->1.2]];*)
+(*Timing[MIDIAdapt[Parse[localPath<>"Songs/Touhou/TH15-Kanjuden/Akumu_no_Sekai.sml"],"Rate"->1.2]];*)
 
 
 (* ::Input:: *)

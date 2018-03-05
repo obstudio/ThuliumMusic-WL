@@ -66,7 +66,7 @@ module.exports = {
 
     Tuplet(expr, subtrack) {
         const scale = Math.pow(2, Math.floor(Math.log2(expr))) / expr
-        const t = new SubtrackParser(subtrack, this.Settings, this.Libraries, this.pitchQueue).parseTrack()
+        const t = new SubtrackParser(subtrack, this.Settings.extend({Bar: this.Settings.Bar / scale}), this.Libraries, this.pitchQueue).parseTrack()
         t.Content.forEach((note) => {
             note.__oriDur *= scale
             note.Duration *= scale

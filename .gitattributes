@@ -1,3 +1,4 @@
-*.sml linguist-language=SMML
-*.smp linguist-language=SMML
+*.tm linguist-language=Textualized Music
+*.tml linguist-language=Textualized Music Library
 songs/* linguist-detectable=false
+meta/* linguist-detectable=false

@@ -1,11 +1,9 @@
 /instrTest.wl
-/Songs/temp.qys
-/*.jpg
 /Resource/
 /Research/
-*_.qys
+/*.jpg
 /*.docx
 /*.png
-/Songs/interlude.qys
 *.txt
 test*.*
+test/*.*

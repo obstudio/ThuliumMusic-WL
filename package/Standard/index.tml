@@ -1,8 +1,8 @@
 //SMML Standard Package
 //Updated: 2018.2.9.
 
-# Include "Settings.smp"
-# Include "Segment.smp"
+# Include "Settings.tml"
+# Include "Segment.tml"
 
 # Chord
 

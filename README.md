@@ -1,10 +1,10 @@
-## Thulium Music Player (Wolfram Language Version)
+# Thulium Music Player (Wolfram Language Version)
 
 A simple program aimed to play electronic music on any platforms or devices.
 
 ## Installation
 
-To run Thulium Music Player, you need to install **[Node.js](https://nodejs.org/en/)**.
+To run Thulium Music Player, you need to install **[Mathematica](http://www.wolfram.com/mathematica/)** and **[Node.js](https://nodejs.org/en/)**.
 
 After installation, run Node.js command prompt:
 

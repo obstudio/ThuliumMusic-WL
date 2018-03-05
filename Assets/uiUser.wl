@@ -9,7 +9,7 @@ uiSetPath:=DynamicModule[{path=dataPathTemplate},
 		Spacer[96],
 		Column[{
 			Spacer[{48,48}],
-			Image[logo,ImageSize->{512,Automatic}],
+			Graphics[{logo},ImageSize->{512,Automatic}],
 			Spacer[1],
 			caption["_ChooseBasePath","Title"],
 			Row[{
@@ -60,10 +60,10 @@ uiSettings:=DynamicModule[{choices},
 				userInfo=choices;
 				Export[userPath<>"Default.json",Normal@userInfo];
 				refreshLanguage;
-				DialogReturn[QYMP],
+				DialogReturn[homepage],
 			ImageSize->150],
 			Spacer[10],
-			Button[text[["Return"]],DialogReturn[QYMP],ImageSize->150]
+			Button[text[["Return"]],DialogReturn[homepage],ImageSize->150]
 		}],Spacer[{40,40}]
 	},Center,ItemSize->Full],
 	Background->styleColor[["Background"]],WindowTitle->text[["Settings"]]]
@@ -141,7 +141,7 @@ uiAbout:=CreateDialog[Column[{Spacer[{40,40}],
 	caption["_About","Title"],
 	Spacer[{20,20}],
 	Row[{Spacer[60],Column[{
-		caption["_QYMP","Subtitle"],
+		caption["_Thulium","Subtitle"],
 		Spacer[4],
 		Grid[{
 			{caption[tagName[["Version"]],"Text"],caption["1.7","Text"]},
@@ -150,7 +150,7 @@ uiAbout:=CreateDialog[Column[{Spacer[{40,40}],
 		},Alignment->Left]
 	},Alignment->Left,ItemSize->Full],Spacer[60]}],
 	Spacer[{20,20}],
-	Button[text[["Return"]],DialogReturn[QYMP],ImageSize->100],
+	Button[text[["Return"]],DialogReturn[homepage],ImageSize->100],
 Spacer[{40,40}]},Center,ItemSize->Full],
 WindowTitle->text[["About"]],Background->styleColor[["Background"]]];
 
@@ -161,18 +161,18 @@ WindowTitle->text[["About"]],Background->styleColor[["Background"]]];
 
 Main:=If[!$Updated,
 	update,
-	QYMP;
+	homepage;
 ];
 
 
-QYMP:=DynamicModule[{playlist},
+homepage:=DynamicModule[{playlist},
 	pageCount=Ceiling[Length@playlists/16];
 	If[pageData[["Main"]]>pageCount,pageData[["Main"]]=pageCount];
 	playlistsPaged=Partition[playlists,UpTo@Ceiling[Length@playlists/pageCount]];
 	page=pageData[["Main"]];
 	CreateDialog[Column[{Spacer[{40,40}],
 		Row[{
-			Row[{Spacer[40],caption["_QYMP","BigTitle"]},Alignment->Left,ImageSize->320],
+			Row[{Spacer[40],caption["_Thulium","BigTitle"]},Alignment->Left,ImageSize->320],
 			Row[{
 				button["Refresh",DialogReturn[update]],
 				Spacer[10],
@@ -200,12 +200,12 @@ QYMP:=DynamicModule[{playlist},
 		uiPageSelector,
 		Spacer[{40,40}]
 	},Center,ItemSize->Full],
-	WindowTitle->text[["QYMP"]],Background->styleColor[["Background"]]]
+	WindowTitle->text[["Thulium"]],Background->styleColor[["Background"]]]
 ];
 
 
 (* ::Input:: *)
-(*QYMP;*)
+(*homepage;*)
 
 
 uiPlaylist[playlist_]:=DynamicModule[{song},
@@ -234,7 +234,7 @@ uiPlaylist[playlist_]:=DynamicModule[{song},
 					button["Add",DialogReturn[pageData[[playlist]]=page;uiAddSong]],
 					Spacer[10]}],
 				Nothing],
-				button["ArrowL",DialogReturn[pageData[[playlist]]=page;QYMP]],
+				button["ArrowL",DialogReturn[pageData[[playlist]]=page;homepage]],
 			Spacer[40]},Alignment->Right,ImageSize->{480,56}]
 		}],
 		If[playlistInfo[["Comment"]]!="",

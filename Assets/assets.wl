@@ -1,9 +1,5 @@
 (* ::Package:: *)
 
-(* load local assets *)
-logo=Import[localPath<>"Assets\\Logo.png"];
-
-
 (* QYMP Logo *)
 LogoCloud="M836.15,454.53c90.25,18.32,158.21,98.11,158.21,193.791c0,109.22-88.54,197.729-197.75,197.729h-568.5
 c-122.87,0-222.46-99.6-222.46-222.46c0-96.97,62.07-179.44,148.62-209.9c-0.22-4.15-0.32-8.34-0.32-12.57
@@ -16,17 +12,24 @@ c65.69-6.311,115.29-49.53,110.78-96.53c-0.53-5.48-1.771-10.77-3.65-15.83h-0.01L4
 c22.98,0.39,59.32,7.82,69.48,10.78C555.89,325.38,569.07,330.54,569.07,330.54z";
 
 
+logo=Scale[{
+	RGBColor["#00A0E9"],
+	FilledCurve[{BezierCurve[CurveMerge[#Segment]]}]&[SVGPathD[LogoCloud][[1]]],
+	RGBColor["#FFFFFF"],
+	FilledCurve[{BezierCurve[CurveMerge[#Segment]]}]&[SVGPathD[LogoNote][[1]]]
+},{1,-1}];
+
+
 (* ::Input:: *)
-(*Graphics[{*)
+(*Graphics[{Scale[{*)
 (*Texture[Table[{c,1-c,1},{c,0,1,1/256}]],*)
-(*Scale[FilledCurve[{BezierCurve[CurveMerge[#Segment]]},*)
+(*FilledCurve[{BezierCurve[CurveMerge[#Segment]]},*)
 (*VertexTextureCoordinates->VertexAssign[CurveMerge[#Segment],{0,0}->0,{1000,0}->1]*)
-(*]&[SVGPathD[LogoCloud][[1]]],{1,-1}]*)
-(*}]*)
-
-
-(* ::Input:: *)
-(*progressSlider[0.5,16]*)
+(*]&[SVGPathD[LogoCloud][[1]]],*)
+(*White,*)
+(*FilledCurve[{BezierCurve[CurveMerge[#Segment]]}*)
+(*]&[SVGPathD[LogoNote][[1]]]},*)
+(*{1,-1}]}]*)
 
 
 (* progress bar *)

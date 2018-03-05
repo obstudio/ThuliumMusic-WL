@@ -4,6 +4,7 @@
 	"Abstract": "",
 	"Path": "Touhou\\",
 	"SongList": [
+		{"Index": "妖妖梦一面道中曲", "Song": "Deep_Mountain"},
 		{"Index": "妖妖梦四面道中曲", "Song": "Tenkuu_Hana_Miyako"},
 		{"Index": "妖妖梦四面BOSS曲", "Song": "Phantom_Ensemble"},
 		{"Index": "妖妖梦六面BOSS曲", "Song": "Sumizome_Sakura"},

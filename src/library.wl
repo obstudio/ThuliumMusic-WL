@@ -212,6 +212,6 @@ update:=(
 	updateImage;
 	updateBuffer;
 	$Updated=True;
-	QYMP;
+	homepage;
 );
 $Updated=False;

@@ -21,7 +21,7 @@ H		sex+			[], 10
 s		septem			[], 11
 o		octo			[], 12
 u		octo (Under)	[-1]-12, []
-i		1st inversion	[1]+12, [2;]
+i		1st inversion	12, [2;]
 j		2nd inversion	[;2]+12, [3;]
 k		3rd inversion	[;3]+12, [4;]
 

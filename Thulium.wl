@@ -1,7 +1,7 @@
 (* ::Package:: *)
 
 (* ::Text:: *)
-(*Qingyun Music Player*)
+(*Thulium Music Player*)
 
 
 localPath=NotebookDirectory[];
@@ -21,6 +21,12 @@ Needs["graphics`",localPath<>"dist\\Graphics.mx"];
 <<(localPath<>"package\\Standard\\.init.wl")
 
 
+If[Length@FindExternalEvaluators["NodeJS"]==0,
+	AbortProtect[Abort[];CreateDialog[{
+		TextCell["Cannot find Node.js as external evaluator."],
+		DefaultButton[]
+	}]];
+];
 JS=StartExternalSession["NodeJS"];
 ExternalEvaluate[JS,File[localPath<>"src\\SMML.js"]]
 ExternalEvaluate[JS,"const fs = require('fs')"]
@@ -85,15 +91,7 @@ If[!FileExistsQ[dataPath<>"Image.json"],Export[dataPath<>"Image.json",{}]];
 imageData=Association/@Association@Import[dataPath<>"image.json"];
 
 
-(* ::Subsubsection:: *)
-(*Engine Start*)
-
-
-(* ::Input::Initialization:: *)
-Main;
-
-
-(* ::Subsubsection:: *)
+(* ::Subsubsection::Closed:: *)
 (*Test Code*)
 
 
@@ -101,25 +99,9 @@ Main;
 (*AudioStop[];*)
 
 
-(* ::Input:: *)
-(*AudioStop[];AudioPlay@QYSParse[localPath<>"Songs\\Touhou\\Houkainohi.qys"];*)
+(* ::Subsubsection:: *)
+(*Engine Start*)
 
 
-(* ::Input:: *)
-(*AudioStop[];AudioPlay@QYSParse[localPath<>"Songs\\test.qys"];*)
-
-
-(* ::Input:: *)
-(*Options[QYSParse[localPath<>"Songs\\Touhou\\Houkainohi.qys"]]*)
-
-
-(* ::Input:: *)
-(*Print[index["Touhou\\Hartmann_No_Youkai_Otome","Comment"]];*)
-
-
-(* ::Input:: *)
-(*EmitSound@Sound@SoundNote[23,.5,"Halo"]*)
-
-
-(* ::Input:: *)
-(*EmitSound@Sound@SoundNote["PanFlute"]*)
+(* ::Input::Initialization:: *)
+Main;

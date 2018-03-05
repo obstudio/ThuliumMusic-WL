@@ -56,7 +56,7 @@ functionCodeTok[str_]:=If[StringMatchQ[str,functionCode],
 ];
 
 number=integer~~""|("."~~unsigned);
-expression=(integer~~""|("/"|"."~~unsigned))|("Log2("~~unsigned~~")");
+expression=RE["[+\\-]?\\d+([\\./]\\d*)?|Log2\\(\\d+\\)([+\\-]\\d+)?"];
 string=Except["\""|"("|")"|"{"|"}"|"["|"]"|"<"|">"]..;
 subtrack=Nest[(("{"~~#~~"}")|Except["{"|"}"])...&,Except["{"|"}"]...,4];
 argument=expression|("\""~~string~~"\"")|("{"~~subtrack~~"}");

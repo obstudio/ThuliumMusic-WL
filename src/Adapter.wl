@@ -1,6 +1,6 @@
 (* ::Package:: *)
 
-(* ::Subsubsection:: *)
+(* ::Subsubsection::Closed:: *)
 (*Parser*)
 
 
@@ -265,32 +265,32 @@ AudioAdapt[rawData_,OptionsPattern[AdaptingOptions]]:=Block[
 
 
 (* ::Input:: *)
-(*Parse[Tokenize[localPath<>"src/test/test.sml"][["Tokenizer"]]]*)
+(*Parse[Tokenize[localPath<>"src/test/test.tm"][["Tokenizer"]]]*)
 
 
 (* ::Input:: *)
-(*With[{testfile=localPath<>"src/test/test"},*)
-(*Export[testfile<>".json",Tokenize[testfile<>".sml"][["Tokenizer"]]]*)
+(*With[{testfile=localPath<>"Songs/PVZ/Watery_Grave"},*)
+(*Export[testfile<>".json",Parse[testfile<>".tm"]]*)
 (*];*)
 
 
 (* ::Input:: *)
-(*With[{testfile=localPath<>"Songs/Touhou/TH15-Kanjuden/Seijyouki_no_Pierrot"},*)
-(*Export[testfile<>".json",Tokenize[testfile<>".sml"][["Tokenizer"]]]*)
+(*With[{testfile=localPath<>"Songs/PVZ/Watery_Grave"},*)
+(*Export[testfile<>".json",Tokenize[testfile<>".tm"][["Tokenizer"]]]*)
 (*];*)
 
 
 (* ::Input:: *)
-(*data=Parse[localPath<>"src/test/test.sml"];Diagnose[data]*)
+(*data=Parse[localPath<>"src/test/test.tm"];Diagnose[data]*)
 
 
 (* ::Input:: *)
-(*data=Parse[localPath<>"Songs/Touhou/TH15-Kanjuden/Akumu_no_Sekai.sml"];*)
+(*data=Parse[localPath<>"Songs/Touhou/TH15-Kanjuden/Akumu_no_Sekai.tm"];*)
 (*Diagnose[data]*)
 
 
 (* ::Input:: *)
-(*MIDIPlay@MIDIAdapt[Parse[localPath<>"src/test/test.sml"]]*)
+(*MIDIPlay@MIDIAdapt[Parse[localPath<>"src/test/test.tm"]]*)
 
 
 (* ::Input:: *)
@@ -312,19 +312,19 @@ AudioAdapt[rawData_,OptionsPattern[AdaptingOptions]]:=Block[
 (* ::Input:: *)
 (*MIDIStop[];MIDIPlay[#[[2]]]&@*)
 (*EchoFunction["time: ",#[[1]]&]@*)
-(*Timing[MIDIAdapt[Parse[localPath<>"Songs/Touhou/Border_of_Life.sml",1],"Rate"->1]];*)
+(*Timing[MIDIAdapt[Parse[localPath<>"Songs/Touhou/Border_of_Life.tm",{2}],"Rate"->1]];*)
 
 
 (* ::Input:: *)
 (*MIDIStop[];MIDIPlay[#[[2]]]&@*)
 (*EchoFunction["time: ",#[[1]]&]@*)
-(*Timing[MIDIAdapt[Parse[localPath<>"Songs/Touhou/TH15-Kanjuden/Akumu_no_Sekai.sml"],"Rate"->1.2]];*)
+(*Timing[MIDIAdapt[Parse[localPath<>"Songs/Touhou/TH15-Kanjuden/Akumu_no_Sekai.tm"],"Rate"->1.2]];*)
 
 
 (* ::Input:: *)
 (*MIDIStop[];MIDIPlay[#[[2]]]&@*)
 (*EchoFunction["time: ",#[[1]]&]@*)
-(*Timing[MIDIAdapt[Parse[localPath<>"src/test/test.sml"]]];*)
+(*Timing[MIDIAdapt[Parse[localPath<>"src/test/test.tm"]]];*)
 
 
 (* ::Subsubsection:: *)
@@ -338,13 +338,13 @@ AudioAdapt[rawData_,OptionsPattern[AdaptingOptions]]:=Block[
 (* ::Input:: *)
 (*AudioStop[];AudioPlay[#[[2]]]&@*)
 (*EchoFunction["time: ",#[[1]]&]@*)
-(*Timing[AudioAdapt[Parse[localPath<>"Songs/Touhou/TH15-Kanjuden/Wasuregataki.sml",1],"Rate"->1]];*)
+(*Timing[AudioAdapt[Parse[localPath<>"Songs/Touhou/TH15-Kanjuden/Wasuregataki.tm",1],"Rate"->1]];*)
 
 
 (* ::Input:: *)
 (*AudioStop[];AudioPlay[#[[2]]]&@*)
 (*EchoFunction["time: ",#[[1]]&]@*)
-(*Timing[AudioAdapt[Parse[localPath<>"src/test/test.sml"]]];*)
+(*Timing[AudioAdapt[Parse[localPath<>"src/test/test.tm"]]];*)
 
 
 (* ::Input:: *)

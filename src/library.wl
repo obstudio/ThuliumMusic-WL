@@ -92,7 +92,7 @@ refresh:=Block[
 		StringCases[dir__~~"\\"~~Except["\\"]..:>dir]/@Values@index[[songs,"Image"]]
 	];
 	Do[
-		If[!DirectoryQ[dataPath<>"image\\"<>dir],CreateDirectory[dataPath<>"image\\"<>dir]],
+		If[!DirectoryQ[dataPath<>"images\\"<>dir],CreateDirectory[dataPath<>"images\\"<>dir]],
 	{dir,imageDirList}];
 	playlists=Association/@Import[localPath<>"playlist.json"];
 	playlistData=<||>;

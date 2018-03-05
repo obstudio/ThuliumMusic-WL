@@ -37,10 +37,9 @@ putTextInfo[song_,textInfo_]:=Module[
 
 
 tagTemplate=<|"Image"->"","Uploader"->"","Tags"->{}|>;
-addSong[songPath_,textInfo_]:=Module[{song,metaInfo,audio,format},
+addSong[songPath_,textInfo_]:=Module[{song,metaInfo,audio},
 	song=StringDrop[songPath,-4];
-	format=StringTake[songPath,-3];
-	AppendTo[index,song->Join[textInfo,tagTemplate,<|"Format"->format|>]];
+	AppendTo[index,song->Join[textInfo,tagTemplate]];
 	putTextInfo[song,textInfo];
 ];
 
@@ -53,8 +52,8 @@ ignoreList={"temp.qys","test.qys"};
 uiAddSong:=DynamicModule[{songPath,textInfo,candidates},
 	textInfo=AssociationMap[""&,textInfoTags];
 	SetDirectory[localPath];
-	candidates=Complement[StringDrop[FileNames["*.qys"|"*.sml","Songs",Infinity],6],
-		#<>"."<>index[[#,"Format"]]&/@songs,
+	candidates=Complement[StringDrop[FileNames["*.tm","Songs",Infinity],6],
+		#<>".tm"&/@songs,
 		ignoreList
 	];
 	CreateDialog[Column[{Spacer[{40,40}],

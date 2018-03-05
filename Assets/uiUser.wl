@@ -144,7 +144,7 @@ uiAbout:=CreateDialog[Column[{Spacer[{40,40}],
 		caption["_Thulium","Subtitle"],
 		Spacer[4],
 		Grid[{
-			{caption[tagName[["Version"]],"Text"],caption["1.7","Text"]},
+			{caption[tagName[["Version"]],"Text"],caption["2.0","Text"]},
 			{caption[tagName[["Producer"]],"Text"],caption["_Obstudio","Text"]},
 			{caption[tagName[["Website"]],"Text"],caption["qymp.ob-studio.cn","Text"]}
 		},Alignment->Left]

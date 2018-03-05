@@ -1,13 +1,14 @@
 {
+    "Uploader": "",
     "SongName": "Banana",
     "Lyricist": "",
     "Composer": "",
     "Adapter": "",
-    "Comment": "Minion Song",
+    "Tags": [
+        "Strings"
+    ],
     "Abstract": "",
-    "Image": "",
-    "Format": "sml",
+    "Comment": "Minion Song",
     "Origin": "",
-    "Uploader": "",
-    "Tags": ["Strings"]
+    "Image": ""
 }

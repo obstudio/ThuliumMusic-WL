@@ -1,13 +1,14 @@
 {
+    "Uploader": "",
     "SongName": "灵知的太阳信仰",
     "Lyricist": "",
     "Composer": "ZUN",
     "Adapter": "Shigma",
-    "Comment": "霊知の太陽信仰 ~ Nuclear Fusion",
+    "Tags": [
+        "$INCOMP"
+    ],
     "Abstract": "东方地灵殿6面BOSS曲 灵乌路空主题曲",
-    "Image": "Touhou\\Reiuji_Utsuho.jpg",
-    "Format": "sml",
+    "Comment": "霊知の太陽信仰 ~ Nuclear Fusion",
     "Origin": "",
-    "Uploader": "",
-    "Tags": ["$INCOMP"]
+    "Image": "Touhou\\Reiuji_Utsuho.jpg"
 }

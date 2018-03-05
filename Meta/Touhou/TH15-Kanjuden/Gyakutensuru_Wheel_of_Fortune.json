@@ -1,13 +1,15 @@
 {
+    "Uploader": "",
     "SongName": "逆转的命运之轮",
     "Lyricist": "",
     "Composer": "ZUN",
     "Adapter": "触手猴 LittleRed",
-    "Comment": "逆転するホイールオブフォーチュン",
+    "Tags": [
+        "Touhou",
+        "Touhou15"
+    ],
     "Abstract": "东方绀珠传4面BOSS曲 稀神探女主题曲",
-    "Image": "Touhou\\Kishin_Sagume.jpg",
-    "Format": "sml",
+    "Comment": "逆転するホイールオブフォーチュン",
     "Origin": "",
-    "Uploader": "",
-    "Tags": ["Touhou","Touhou15"]
+    "Image": "Touhou\\Kishin_Sagume.jpg"
 }

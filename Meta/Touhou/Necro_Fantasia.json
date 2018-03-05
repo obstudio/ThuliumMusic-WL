@@ -1,13 +1,16 @@
 {
+    "Uploader": "",
     "SongName": "亡灵幻想曲",
     "Lyricist": "",
     "Composer": "ZUN",
     "Adapter": "まらしぃ",
-    "Comment": "ネクロファンタジア",
+    "Tags": [
+        "Touhou",
+        "Touhou7",
+        "Piano"
+    ],
     "Abstract": "东方妖妖梦PH面BOSS曲 八云紫主题曲",
-    "Image": "Touhou\\Yakumo_Yukari.png",
-    "Format": "sml",
+    "Comment": "ネクロファンタジア",
     "Origin": "",
-    "Uploader": "",
-    "Tags": ["Touhou","Touhou7","Piano"]
+    "Image": "Touhou\\Yakumo_Yukari.png"
 }

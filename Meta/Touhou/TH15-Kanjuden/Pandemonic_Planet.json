@@ -1,13 +1,15 @@
 {
+    "Uploader": "",
     "SongName": "嘈乱的星球",
     "Lyricist": "",
     "Composer": "ZUN",
     "Adapter": "触手猴 LittleRed",
-    "Comment": "パンデモニックプラネット",
+    "Tags": [
+        "Touhou",
+        "Touhou15"
+    ],
     "Abstract": "东方绀珠传EX面BOSS曲 赫卡提亚·拉碧斯拉祖利主题曲",
-    "Image": "Touhou\\Hecatia_Lapislazuli.png",
-    "Format": "sml",
+    "Comment": "パンデモニックプラネット",
     "Origin": "",
-    "Uploader": "",
-    "Tags": ["Touhou","Touhou15"]
+    "Image": "Touhou\\Hecatia_Lapislazuli.png"
 }

@@ -1,13 +1,15 @@
 {
+    "Uploader": "",
     "SongName": "法界之火",
     "Lyricist": "",
     "Composer": "ZUN",
     "Adapter": "LittleRed",
-    "Comment": "法界の火",
+    "Tags": [
+        "Touhou",
+        "Touhou12"
+    ],
     "Abstract": "东方星莲船6面道中曲",
-    "Image": "",
-    "Format": "sml",
+    "Comment": "法界の火",
     "Origin": "",
-    "Uploader": "",
-    "Tags": ["Touhou","Touhou12"]
+    "Image": ""
 }

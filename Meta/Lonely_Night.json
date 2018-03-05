@@ -1,13 +1,16 @@
 {
+    "Uploader": "",
     "SongName": "寂寞之夜",
     "Lyricist": "",
     "Composer": "三輪学",
     "Adapter": "",
-    "Comment": "寂しい夜",
+    "Tags": [
+        "ACG",
+        "YosugaNoSora",
+        "Piano"
+    ],
     "Abstract": "",
-    "Image": "",
-    "Format": "sml",
+    "Comment": "寂しい夜",
     "Origin": "",
-    "Uploader": "",
-    "Tags": ["ACG","YosugaNoSora","Piano"]
+    "Image": ""
 }

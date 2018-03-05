@@ -1,13 +1,16 @@
 {
+    "Uploader": "",
     "SongName": "渚",
     "Lyricist": "",
     "Composer": "麻枝准",
     "Adapter": "",
-    "Comment": "",
+    "Tags": [
+        "ACG",
+        "Clannad",
+        "Piano"
+    ],
     "Abstract": "《Clannad》插曲",
-    "Image": "",
-    "Format": "sml",
+    "Comment": "",
     "Origin": "",
-    "Uploader": "",
-    "Tags": ["ACG","Clannad","Piano"]
+    "Image": ""
 }

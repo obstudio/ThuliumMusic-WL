@@ -1,13 +1,15 @@
 {
+    "Uploader": "",
     "SongName": "飞翔于宇宙的不可思议巫女",
     "Lyricist": "",
     "Composer": "ZUN",
     "Adapter": "触手猴 LittleRed",
-    "Comment": "宇宙を飛ぶ不思議な巫女",
+    "Tags": [
+        "Touhou",
+        "Touhou15"
+    ],
     "Abstract": "东方绀珠传3面道中曲",
-    "Image": "",
-    "Format": "sml",
+    "Comment": "宇宙を飛ぶ不思議な巫女",
     "Origin": "",
-    "Uploader": "",
-    "Tags": ["Touhou","Touhou15"]
+    "Image": ""
 }

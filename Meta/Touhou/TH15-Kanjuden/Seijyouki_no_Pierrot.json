@@ -1,13 +1,15 @@
 {
+    "Uploader": "",
     "SongName": "星条旗的小丑",
     "Lyricist": "",
     "Composer": "ZUN",
     "Adapter": "触手猴 LittleRed",
-    "Comment": "星条旗のピエロ",
+    "Tags": [
+        "Touhou",
+        "Touhou15"
+    ],
     "Abstract": "东方绀珠传5面BOSS曲 克劳恩皮丝主题曲",
-    "Image": "Touhou\\Clownpiece.png",
-    "Format": "sml",
+    "Comment": "星条旗のピエロ",
     "Origin": "",
-    "Uploader": "",
-    "Tags": ["Touhou","Touhou15"]
+    "Image": "Touhou\\Clownpiece.png"
 }

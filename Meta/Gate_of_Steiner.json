@@ -1,13 +1,16 @@
 {
+    "Uploader": "",
     "SongName": "Gate of Steiner",
     "Lyricist": "",
     "Composer": "阿保剛",
     "Adapter": "",
-    "Comment": "",
+    "Tags": [
+        "ACG",
+        "SteinsGate",
+        "Piano"
+    ],
     "Abstract": "《命运石之门》插曲",
-    "Image": "",
-    "Format": "sml",
+    "Comment": "",
     "Origin": "",
-    "Uploader": "",
-    "Tags": ["ACG","SteinsGate","Piano"]
+    "Image": ""
 }

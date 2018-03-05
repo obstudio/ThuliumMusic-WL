@@ -1,13 +1,15 @@
 {
+    "Uploader": "",
     "SongName": "湖面倒映着纯净的月光",
     "Lyricist": "",
     "Composer": "ZUN",
     "Adapter": "触手猴 LittleRed",
-    "Comment": "湖は浄めの月光を映して",
+    "Tags": [
+        "Touhou",
+        "Touhou15"
+    ],
     "Abstract": "东方绀珠传2面道中曲",
-    "Image": "",
-    "Format": "sml",
+    "Comment": "湖は浄めの月光を映して",
     "Origin": "",
-    "Uploader": "",
-    "Tags": ["Touhou","Touhou15"]
+    "Image": ""
 }

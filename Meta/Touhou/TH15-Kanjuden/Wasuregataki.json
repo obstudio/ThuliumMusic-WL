@@ -1,13 +1,15 @@
 {
+    "Uploader": "",
     "SongName": "忘不了，那曾依凭之绿",
     "Lyricist": "",
     "Composer": "ZUN",
     "Adapter": "触手猴 LittleRed",
-    "Comment": "忘れがたき、よすがの緑",
+    "Tags": [
+        "Touhou",
+        "Touhou15"
+    ],
     "Abstract": "东方绀珠传1面道中曲",
-    "Image": "",
-    "Format": "sml",
+    "Comment": "忘れがたき、よすがの緑",
     "Origin": "",
-    "Uploader": "",
-    "Tags": ["Touhou","Touhou15"]
+    "Image": ""
 }

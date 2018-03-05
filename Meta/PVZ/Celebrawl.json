@@ -1,13 +1,14 @@
 {
-    "Uploader": "",
-    "Format": "sml",
     "SongName": "Celebrawl",
+    "Uploader": "",
     "Lyricist": "",
     "Composer": "Laura Shigihara",
     "Adapter": "",
-    "Comment": "",
+    "Tags": [
+        "PVZ"
+    ],
     "Abstract": "《植物大战僵尸》解谜BGM",
-    "Tags": ["PVZ"],
-    "Origin": "",
-    "Image": ""
+    "Comment": "",
+    "Image": "",
+    "Origin": ""
 }

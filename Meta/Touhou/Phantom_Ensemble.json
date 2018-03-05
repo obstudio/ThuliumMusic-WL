@@ -1,13 +1,15 @@
 {
+    "Uploader": "",
     "SongName": "幽灵乐团",
     "Lyricist": "",
     "Composer": "ZUN",
     "Adapter": "",
-    "Comment": "幽霊楽団",
+    "Tags": [
+        "Touhou",
+        "Touhou7"
+    ],
     "Abstract": "东方妖妖梦4面BOSS曲 普莉兹姆利巴三姐妹主题曲",
-    "Image": "Touhou\\Prismriver_Sisters.jpg",
-    "Format": "sml",
+    "Comment": "幽霊楽団",
     "Origin": "",
-    "Uploader": "",
-    "Tags": ["Touhou","Touhou7"]
+    "Image": "Touhou\\Prismriver_Sisters.jpg"
 }

@@ -1,13 +1,15 @@
 {
+    "Uploader": "",
     "SongName": "东方之珠",
     "Lyricist": "郑国江",
     "Composer": "顾嘉辉",
     "Adapter": "",
-    "Comment": "主歌部分",
+    "Tags": [
+        "Chorus",
+        "$INCOMP"
+    ],
     "Abstract": "",
-    "Image": "",
-    "Format": "sml",
+    "Comment": "主歌部分",
     "Origin": "",
-    "Uploader": "",
-    "Tags": ["Chorus","$INCOMP"]
+    "Image": ""
 }

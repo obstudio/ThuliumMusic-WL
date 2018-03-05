@@ -1,13 +1,16 @@
 {
+    "Uploader": "",
     "SongName": "空中闪耀",
     "Lyricist": "",
     "Composer": "戸越まごめ",
     "Adapter": "",
-    "Comment": "空に光る",
+    "Tags": [
+        "ACG",
+        "Clannad",
+        "Piano"
+    ],
     "Abstract": "《Clannad》插曲",
-    "Image": "",
-    "Format": "sml",
+    "Comment": "空に光る",
     "Origin": "",
-    "Uploader": "",
-    "Tags": ["ACG","Clannad","Piano"]
+    "Image": ""
 }

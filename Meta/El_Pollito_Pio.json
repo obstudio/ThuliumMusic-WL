@@ -1,13 +1,15 @@
 {
+    "Uploader": "",
     "SongName": "小鸡哔哔",
     "Lyricist": "",
     "Composer": "",
     "Adapter": "",
-    "Comment": "El Pollito Pio",
+    "Tags": [
+        "ACG",
+        "Vocaloid"
+    ],
     "Abstract": "",
-    "Image": "",
-    "Format": "sml",
+    "Comment": "El Pollito Pio",
     "Origin": "",
-    "Uploader": "",
-    "Tags": ["ACG","Vocaloid"]
+    "Image": ""
 }

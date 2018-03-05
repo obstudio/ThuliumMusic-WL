@@ -1,13 +1,14 @@
 {
-    "Format": "sml",
     "Uploader": "",
     "SongName": "Brainiac Maniac",
     "Lyricist": "",
     "Composer": "Laura Shigihara",
     "Adapter": "",
-    "Tags": ["PVZ"],
-    "Abstract": "《植物大战僵尸》僵王博士BGM",
     "Comment": "",
-    "Image": "",
-    "Origin": ""
+    "Abstract": "《植物大战僵尸》僵王博士BGM",
+    "Tags": [
+        "PVZ"
+    ],
+    "Origin": "",
+    "Image": ""
 }

@@ -1,13 +1,15 @@
 {
+    "Uploader": "",
     "SongName": "命运的阴暗面",
     "Lyricist": "",
     "Composer": "ZUN",
     "Adapter": "",
-    "Comment": "運命のダークサイド",
+    "Tags": [
+        "Touhou",
+        "Touhou10"
+    ],
     "Abstract": "东方风神录2面BOSS曲 键山雏主题曲",
-    "Image": "Touhou\\Kagiyama_Hina.jpg",
-    "Format": "sml",
+    "Comment": "運命のダークサイド",
     "Origin": "",
-    "Uploader": "",
-    "Tags": ["Touhou","Touhou10"]
+    "Image": "Touhou\\Kagiyama_Hina.jpg"
 }

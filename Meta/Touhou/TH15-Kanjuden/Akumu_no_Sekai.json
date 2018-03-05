@@ -1,13 +1,15 @@
 {
+    "Uploader": "",
     "SongName": "前所未见的噩梦世界",
     "Lyricist": "",
     "Composer": "ZUN",
     "Adapter": "触手猴 LittleRed",
-    "Comment": "見た事が無い悪夢の世界",
+    "Tags": [
+        "Touhou",
+        "Touhou15"
+    ],
     "Abstract": "东方绀珠传EX面道中曲",
-    "Image": "",
-    "Format": "sml",
+    "Comment": "見た事が無い悪夢の世界",
     "Origin": "",
-    "Uploader": "",
-    "Tags": ["Touhou","Touhou15"]
+    "Image": ""
 }

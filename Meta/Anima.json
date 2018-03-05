@@ -1,13 +1,15 @@
 {
+    "Uploader": "",
     "SongName": "ANiMA",
     "Lyricist": "",
     "Composer": "xi",
     "Adapter": "",
-    "Comment": "",
+    "Tags": [
+        "Deemo",
+        "Piano"
+    ],
     "Abstract": "《deemo》游戏配曲",
-    "Image": "",
-    "Format": "sml",
+    "Comment": "",
     "Origin": "",
-    "Uploader": "",
-    "Tags": ["Deemo","Piano"]
+    "Image": ""
 }

@@ -1,13 +1,15 @@
 {
+    "Uploader": "",
     "SongName": "遥远的38万公里的旅行",
     "Lyricist": "",
     "Composer": "ZUN",
     "Adapter": "触手猴 LittleRed",
-    "Comment": "遥か38万キロのボヤージュ",
+    "Tags": [
+        "Touhou",
+        "Touhou15"
+    ],
     "Abstract": "东方绀珠传5面道中曲",
-    "Image": "",
-    "Format": "sml",
+    "Comment": "遥か38万キロのボヤージュ",
     "Origin": "",
-    "Uploader": "",
-    "Tags": ["Touhou","Touhou15"]
+    "Image": ""
 }

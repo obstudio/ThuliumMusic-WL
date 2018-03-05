@@ -1,13 +1,15 @@
 {
+    "Uploader": "",
     "SongName": "鬼子电报员",
     "Lyricist": "",
     "Composer": "三泽康広",
     "Adapter": "",
-    "Comment": "宴会开始",
+    "Tags": [
+        "ACG",
+        "Umaru"
+    ],
     "Abstract": "",
-    "Image": "",
-    "Format": "sml",
+    "Comment": "宴会开始",
     "Origin": "",
-    "Uploader": "",
-    "Tags": ["ACG","Umaru"]
+    "Image": ""
 }

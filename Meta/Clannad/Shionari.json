@@ -1,13 +1,15 @@
 {
+    "Uploader": "",
     "SongName": "潮鸣",
     "Lyricist": "",
     "Composer": "折戸伸治",
     "Adapter": "",
-    "Comment": "潮鳴り",
+    "Tags": [
+        "ACG",
+        "Clannad"
+    ],
     "Abstract": "《Clannad》插曲",
-    "Image": "",
-    "Format": "sml",
+    "Comment": "潮鳴り",
     "Origin": "",
-    "Uploader": "",
-    "Tags": ["ACG","Clannad"]
+    "Image": ""
 }

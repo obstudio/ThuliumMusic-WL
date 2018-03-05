@@ -25,7 +25,7 @@ percList=Keys@percDict;
 (* tags *)
 metaInfoTags={"SectionCount","RealTrackCount","Duration","Instruments"};
 textInfoTags={"SongName","Lyricist","Composer","Adapter","Comment","Abstract","Origin"};
-otherInfoTags={"Format","Image","Uploader","Tags"};
+otherInfoTags={"Image","Uploader","Tags"};
 imageTags={"Title","Painter","PainterID","IllustID","Source","URL"};
 aboutTags={"Version","Producer","Website"};
 langList={"chs","eng"};

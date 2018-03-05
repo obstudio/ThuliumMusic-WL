@@ -1,13 +1,16 @@
 {
+    "Uploader": "",
     "SongName": "Border of Life",
     "Lyricist": "",
     "Composer": "ZUN",
     "Adapter": "",
-    "Comment": "ボーダーオブライフ",
+    "Tags": [
+        "Touhou",
+        "Touhou7",
+        "$INCOMP"
+    ],
     "Abstract": "东方妖妖梦6面BOSS曲 西行寺幽幽子主题曲",
-    "Origin": "",
+    "Comment": "ボーダーオブライフ",
     "Image": "",
-    "Uploader": "",
-    "Tags": ["Touhou","Touhou7","$INCOMP"],
-    "Format": "sml"
+    "Origin": ""
 }

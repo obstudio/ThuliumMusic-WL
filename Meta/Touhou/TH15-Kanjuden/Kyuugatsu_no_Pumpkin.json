@@ -1,13 +1,15 @@
 {
+    "Uploader": "",
     "SongName": "九月的南瓜",
     "Lyricist": "",
     "Composer": "ZUN",
     "Adapter": "触手猴 LittleRed",
-    "Comment": "九月のパンプキン",
+    "Tags": [
+        "Touhou",
+        "Touhou15"
+    ],
     "Abstract": "东方绀珠传2面BOSS曲 铃瑚主题曲",
-    "Image": "Touhou\\Ringo.png",
-    "Format": "sml",
+    "Comment": "九月のパンプキン",
     "Origin": "",
-    "Uploader": "",
-    "Tags": ["Touhou","Touhou15"]
+    "Image": "Touhou\\Ringo.png"
 }

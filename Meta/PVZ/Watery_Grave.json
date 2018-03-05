@@ -1,13 +1,14 @@
 {
-    "Uploader": "",
-    "Format": "sml",
     "SongName": "Watery Grave",
+    "Uploader": "",
     "Lyricist": "",
     "Composer": "Laura Shigihara",
     "Adapter": "",
-    "Comment": "",
+    "Tags": [
+        "PVZ"
+    ],
     "Abstract": "《植物大战僵尸》泳池BGM",
-    "Tags": ["PVZ"],
-    "Origin": "",
-    "Image": ""
+    "Comment": "",
+    "Image": "",
+    "Origin": ""
 }

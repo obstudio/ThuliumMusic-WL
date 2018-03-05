@@ -1,13 +1,15 @@
 {
+    "Uploader": "",
     "SongName": "彩虹猫",
     "Lyricist": "",
     "Composer": "daniwellP",
     "Adapter": "",
-    "Comment": "Nyan cat",
+    "Tags": [
+        "ACG",
+        "Vocaloid"
+    ],
     "Abstract": "",
-    "Image": "",
-    "Format": "sml",
+    "Comment": "Nyan cat",
     "Origin": "",
-    "Uploader": "",
-    "Tags": ["ACG","Vocaloid"]
+    "Image": ""
 }

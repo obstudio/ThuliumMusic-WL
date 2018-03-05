@@ -36,7 +36,8 @@
 		{"Index": "绀珠传六面BOSS曲", "Song": "TH15-Kanjuden\\Pure_Furies"},
 		{"Index": "绀珠传EX面道中曲", "Song": "TH15-Kanjuden\\Akumu_no_Sekai"},
 		{"Index": "绀珠传EX面BOSS曲", "Song": "TH15-Kanjuden\\Pandemonic_Planet"},
-		{"Index": "组曲串烧", "Song": "Touhou_Mix_1"}
+		{"Index": "组曲串烧", "Song": "Touhou_Mix_1"},
+		{"Index": "组曲串烧", "Song": "Touhou_Mix_2"}
 	],
 	"IndexWidth": 240
 }

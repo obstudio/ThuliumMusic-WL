@@ -221,7 +221,7 @@ Tokenize[filepath_]:=Block[
 			<|"Type"->"Subtrack","Content"->trackTok[sub],"Repeat"->-ToExpression@n|>,
 		"{"~~sub:subtrack~~"}":>
 			<|"Type"->"Subtrack","Content"->trackTok[sub],"Repeat"->Max[-1,
-				StringCases[sub,"/"~~i:orderListC~~":":>orderTok[i]]
+				StringCases[sub,"\\"~~i:orderListC~~":":>orderTok[i]]
 			]|>
 	];
 	

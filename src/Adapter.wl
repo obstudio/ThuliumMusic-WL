@@ -345,7 +345,3 @@ AudioAdapt[rawData_,OptionsPattern[AdaptingOptions]]:=Block[
 (*AudioStop[];AudioPlay[#[[2]]]&@*)
 (*EchoFunction["time: ",#[[1]]&]@*)
 (*Timing[AudioAdapt[Parse[localPath<>"src/test/test.tm"]]];*)
-
-
-(* ::Input:: *)
-(*QYMP;*)

@@ -38,7 +38,7 @@ putTextInfo[song_,textInfo_]:=Module[
 
 tagTemplate=<|"Image"->"","Uploader"->"","Tags"->{}|>;
 addSong[songPath_,textInfo_]:=Module[{song,metaInfo,audio},
-	song=StringDrop[songPath,-4];
+	song=StringDelete[songPath,RegularExpression["\\.\\w+$"]];
 	AppendTo[index,song->Join[textInfo,tagTemplate]];
 	putTextInfo[song,textInfo];
 ];

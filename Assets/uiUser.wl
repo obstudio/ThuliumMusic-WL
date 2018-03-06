@@ -4,7 +4,7 @@
 (*uiSetPath;*)
 
 
-uiSetPath:=DynamicModule[{path=dataPathTemplate},
+uiSetPath:=DynamicModule[{path=defaultDataPath},
 	CreateDialog[Row[{
 		Spacer[96],
 		Column[{

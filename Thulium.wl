@@ -23,7 +23,7 @@ Needs["graphics`",localPath<>"dist\\Graphics.mx"];
 
 If[Length@FindExternalEvaluators["NodeJS"]==0,
 	AbortProtect[Abort[];CreateDialog[{
-		TextCell["Cannot find Node.js as external evaluator."],
+		TextCell["Thulium Music Player requires Node.js as external evaluator. Please follow the guide to install Node.js and Zeromq first."],
 		DefaultButton[]
 	}]];
 ];

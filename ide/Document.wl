@@ -155,6 +155,3 @@ EndPackage[];
 
 (* ::Input:: *)
 (*document`MakeDocument[localPath<>"docs/test.tmd"];*)
-
-
-

@@ -1,5 +1,31 @@
 (* ::Package:: *)
 
+(* ::Subsubsection:: *)
+(*Packages Initialization*)
+
+
+initJS := (
+	If[Length@FindExternalEvaluators["NodeJS"]==0,
+		CreateDialog[{
+			TextCell["Thulium Music Player requires Node.js as external evaluator."],
+			TextCell["Please follow the guide to install Node.js and Zeromq first."],
+			DefaultButton[]
+		}];
+		Abort[];
+	];
+	System`JS = StartExternalSession["NodeJS"];
+	ExternalEvaluate[JS, File[localPath<>"src\\SMML.js"]];
+	ExternalEvaluate[JS, "const fs = require('fs')"];
+	ExternalEvaluate[JS, "
+		function Parse(filePath) {
+			const data = JSON.parse(fs.readFileSync(filePath, 'utf8'))
+			return new SMML.Parser(data).parse()
+		}
+	"];
+	DeleteObject[Drop[ExternalSessions[],-1]];
+);
+
+
 (* path and template *)
 version=281;
 cloudPath="http://qymp.ob-studio.cn/assets/";
@@ -60,10 +86,6 @@ playlistTemplate=<|
 	"SongList"->"",
 	"IndexWidth"->0
 |>;
-
-
-(* ::Text:: *)
-(*Refresh & Update*)
 
 
 refreshLanguage:=Module[{langDataPath},
@@ -215,3 +237,51 @@ update:=(
 	homepage;
 );
 $Updated=False;
+
+
+(* local data *)
+colorData=Association@Import[localPath<>"Assets\\color.json"];                               (* colors *)
+styleColor=RGBColor/@Association@colorData[["StyleColor"]];
+buttonColor=RGBColor/@#&/@Association/@Association@colorData[["ButtonColor"]];
+pageSelectorColor=RGBColor/@#&/@Association/@Association@colorData[["PageSelectorColor"]];
+styleData=Association/@Association@Import[localPath<>"Assets\\style.json"];                  (* styles *)
+styleDict=Normal@Module[{outcome={}},
+	If[KeyExistsQ[#,"Size"],AppendTo[outcome,FontSize->#[["Size"]]]];
+	If[KeyExistsQ[#,"Family"],AppendTo[outcome,FontFamily->#[["Family"]]]];
+	If[KeyExistsQ[#,"Weight"],AppendTo[outcome,FontWeight->ToExpression@#[["Weight"]]]];
+	If[KeyExistsQ[#,"Color"],AppendTo[outcome,FontColor->styleColor[[#[["Color"]]]]]];
+outcome]&/@styleData;
+langDict=Association@Import[localPath<>"Lang\\Languages.json"];                      (* languages *)
+tagDict=Association/@Association@Import[localPath<>"Tags.json"];
+
+
+(* user data *)
+If[!DirectoryQ[userPath],
+	CreateDirectory[userPath];
+	userInfo=userTemplate;
+	refreshLanguage;
+	uiSetPath;
+	Export[userPath<>"Default.json",userInfo],
+	userInfo=Association@Import[userPath<>"Default.json"];
+	refreshLanguage;
+	If[userInfo[["Version"]]<version,
+		Do[
+			If[!KeyExistsQ[userInfo,tag],AppendTo[userInfo,tag->userTemplate[[tag]]]],
+		{tag,Keys@userTemplate}];
+		userInfo[["Version"]]=version;
+		Export[userPath<>"Default.json",userInfo];
+	];
+];
+If[!FileExistsQ[userPath<>"Favorite.json"],Export[userPath<>"Favorite.json",{}]];
+favorite=Import[userPath<>"Favorite.json"];
+
+
+(* program data *)
+dataPath=userInfo[["DataPath"]];
+If[!DirectoryQ[dataPath],CreateDirectory[dataPath]];
+If[!DirectoryQ[dataPath<>"buffer\\"],CreateDirectory[dataPath<>"buffer\\"]];
+If[!DirectoryQ[dataPath<>"images\\"],CreateDirectory[dataPath<>"images\\"]];
+If[!FileExistsQ[dataPath<>"Buffer.json"],Export[dataPath<>"Buffer.json",{}]];
+bufferHash=Association@Import[dataPath<>"Buffer.json"];
+If[!FileExistsQ[dataPath<>"Image.json"],Export[dataPath<>"Image.json",{}]];
+imageData=Association/@Association@Import[dataPath<>"image.json"];

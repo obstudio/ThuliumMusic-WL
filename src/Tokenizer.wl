@@ -1,6 +1,6 @@
 (* ::Package:: *)
 
-tokenize::nfound = "Cannot find file `1`.";
+Tokenize::nfound = "Cannot find file `1`.";
 
 typeHead="$"|"%"|"&"|"!"|"@";
 contextList={"End","Chord","Function","Track"};
@@ -54,7 +54,7 @@ Tokenize[filepath_]:=Block[
 	
 	If[FileExistsQ[filepath],
 		rawData=Import[filepath,"List"],
-		Message[tokenize::nfound,filepath];
+		Message[Tokenize::nfound,filepath];
 	];
 	
 	While[StringStartsQ[rawData[[lineCount]],"//"],
@@ -327,6 +327,7 @@ Tokenize[filepath_]:=Block[
 	Return[return];
 	
 ];
+
 
 
 (* ::Input:: *)

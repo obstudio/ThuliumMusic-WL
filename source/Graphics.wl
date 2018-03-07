@@ -1,7 +1,5 @@
 (* ::Package:: *)
 
-BeginPackage["graphics`"];
-
 SVGPathD[string_]:=Block[
 	{
 		commands,
@@ -116,17 +114,8 @@ progressBlock[pro_,len_]:=GraphicsGroup[{
 	Circle[{len*(2pro-1),0},0.7]
 }];
 
-SetAttributes[{
-	SVGPathD,
-	CurveMerge,
-	VertexAssign,
-	progressBarShape,
-	progressBar,
-	progressBlock,
-	progressLocate
-},{Protected,ReadProtected}];
 
-EndPackage[];
+
 
 
 (* ::Input:: *)

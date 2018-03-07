@@ -4,7 +4,7 @@ ParsePitch[token_]:=Block[
 	{
 		PitchOpDict=<|"#"->1,"b"->-1,"'"->12,","->-12|>
 	},
-	
+	Null
 ];
 AnalizeTonality[tokens_]:=Block[
 	{
@@ -13,7 +13,7 @@ AnalizeTonality[tokens_]:=Block[
 	Do[
 		Switch[token[["Type"]],
 			"Note",
-				
+				Null
 		],
 	{token,tokens}];
 ];

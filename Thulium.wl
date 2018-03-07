@@ -4,23 +4,12 @@
 (*Thulium Music Player v2.1*)
 
 
-System`localPath=NotebookDirectory[];
-<<(localPath<>"init.wl");
-
-<<(localPath<>"library/Tokenizer.wl");
-<<(localPath<>"library/Adapter.wl");
-<<(localPath<>"library/Syntax.wl");
-<<(localPath<>"library/Diagnostor.wl");
-<<(localPath<>"library/FrontEnd/Graphics.wl");
-<<(localPath<>"library/FrontEnd/Assistant.wl");
-<<(localPath<>"library/FrontEnd/Document.wl");
-<<(localPath<>"package/Standard/.init.wl");
-
-<<(localPath<>"assets/StyleSheet.wl");
-<<(localPath<>"assets/assets.wl");
-<<(localPath<>"assets/uiControls.wl");
-<<(localPath<>"assets/uiUser.wl");
-<<(localPath<>"assets/uiDeveloper.wl");
+System`localPath = NotebookDirectory[];
+SetDirectory[localPath];
+<< (localPath <> "init.wl");
+Scan[Get, FileNames["*.wl", "library", Infinity]];
+Scan[Get, FileNames["*.wl", "package", Infinity]];
+Scan[Get, FileNames["*.wl", "assets", Infinity]];
 
 
 initJS
@@ -29,5 +18,5 @@ initJS
 Main
 
 
-(* ::Subsubsection:: *)
-(*Test Code*)
+(* ::Input:: *)
+(*Assistant*)

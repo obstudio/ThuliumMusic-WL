@@ -6,23 +6,22 @@
 
 System`localPath=NotebookDirectory[];
 <<(localPath<>"init.wl");
-<<(localPath<>"source\\Graphics.wl");
 
-<<(localPath<>"src\\Tokenizer.wl");
-<<(localPath<>"src\\Adapter.wl")           (* adapter *)
-<<(localPath<>"src\\Syntax.wl");
+<<(localPath<>"library\\Graphics.wl");
+<<(localPath<>"library\\Document.wl");
+<<(localPath<>"library\\Tokenizer.wl");
+<<(localPath<>"library\\Adapter.wl");
+<<(localPath<>"library\\Syntax.wl");
 <<(localPath<>"package\\Standard\\.init.wl");
 
-<<(localPath<>"Assets\\assets.wl")         (* graphics *)
-<<(localPath<>"Assets\\uiControls.wl")     (* controls *)
-<<(localPath<>"Assets\\uiUser.wl")         (* UI for common users *)
-<<(localPath<>"Assets\\uiDeveloper.wl")    (* UI for developers *)
-
-<<(localPath<>"ide\\Diagnostor.wl")        (* diagnoser *)
+<<(localPath<>"assets\\assets.wl");
+<<(localPath<>"assets\\uiControls.wl");
+<<(localPath<>"assets\\uiUser.wl");
+<<(localPath<>"assets\\uiDeveloper.wl");
+<<(localPath<>"editor\\Diagnostor.wl");
 
 
 initJS
 
 
-(* ::Code::Initialization:: *)
 Main

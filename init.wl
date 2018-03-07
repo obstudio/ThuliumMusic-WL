@@ -14,7 +14,7 @@ initJS := (
 		Abort[];
 	];
 	System`JS = StartExternalSession["NodeJS"];
-	ExternalEvaluate[JS, File[localPath<>"src\\SMML.js"]];
+	ExternalEvaluate[JS, File[localPath<>"library\\Parser\\index.js"]];
 	ExternalEvaluate[JS, "const fs = require('fs')"];
 	ExternalEvaluate[JS, "
 		function Parse(filePath) {
@@ -42,8 +42,8 @@ userTemplate=<|
 
 
 (* instruments *)
-instDict=Association@Import[localPath<>"src\\Instrument.json"];
-percDict=Association@Import[localPath<>"src\\Percussion.json"];
+instDict=Association@Import[localPath<>"library\\Data\\Instrument.json"];
+percDict=Association@Import[localPath<>"library\\Data\\Percussion.json"];
 instList=Keys@instDict;
 percList=Keys@percDict;
 
@@ -89,7 +89,7 @@ playlistTemplate=<|
 
 
 refreshLanguage:=Module[{langDataPath},
-	langDataPath=localPath<>"Lang\\"<>userInfo[["Language"]]<>"\\";
+	langDataPath=localPath<>"language\\"<>userInfo[["Language"]]<>"\\";
 	tagName=Association@Import[langDataPath<>"GeneralTags.json"];
 	instrName=Association@Import[langDataPath<>"Instruments.json"];
 	text=Association@Import[langDataPath<>"GeneralTexts.json"];
@@ -251,7 +251,7 @@ styleDict=Normal@Module[{outcome={}},
 	If[KeyExistsQ[#,"Weight"],AppendTo[outcome,FontWeight->ToExpression@#[["Weight"]]]];
 	If[KeyExistsQ[#,"Color"],AppendTo[outcome,FontColor->styleColor[[#[["Color"]]]]]];
 outcome]&/@styleData;
-langDict=Association@Import[localPath<>"Lang\\Languages.json"];                      (* languages *)
+langDict=Association@Import[localPath<>"language\\Languages.json"];                      (* languages *)
 tagDict=Association/@Association@Import[localPath<>"Tags.json"];
 
 

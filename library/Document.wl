@@ -1,7 +1,5 @@
 (* ::Package:: *)
 
-BeginPackage["document`"];
-
 Options[RenderText] = {"Indent" -> 0};
 RenderText[line_String, OptionsPattern[]] := Block[{output},
 	output = StringCases[line, {
@@ -150,8 +148,7 @@ MakeDocument[filepath_String] := Block[
 	];
 ];
 
-EndPackage[];
 
 
 (* ::Input:: *)
-(*document`MakeDocument[localPath<>"docs/test.tmd"];*)
+(*MakeDocument[localPath<>"docs/test.tmd"];*)

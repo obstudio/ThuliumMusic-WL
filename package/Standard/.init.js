@@ -1,4 +1,4 @@
-const { SubtrackParser } = require('../../src/TrackParser')
+const { SubtrackParser } = require('../../library/Parser/TrackParser')
 
 module.exports = {
     Tremolo1(expr, subtrack) {

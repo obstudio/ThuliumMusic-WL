@@ -53,7 +53,7 @@ Tokenize[filepath_]:=Block[
 	},
 	
 	If[FileExistsQ[filepath],
-		rawData=Import[filepath,"List"],
+		rawData=StringSplit[Import[filepath,"String"],RE["\\r?\\n"]],
 		Message[Tokenize::nfound,filepath];
 	];
 	
@@ -142,7 +142,7 @@ Tokenize[filepath_]:=Block[
 		"Messages"->messages,
 		"Tokenizer"->tokenizer
 	|>;
-	If[StringTake[filepath,-4]==".smp"&&macroData=={},Return[return]];
+	If[StringTake[filepath,-4]==".tml"&&macroData=={},Return[return]];
 	
 	(* note *)
 	chordPatt=RE["["<>chordPack["Standard"]<>syntax[["Chord"]]<>"]*"];
@@ -316,7 +316,7 @@ Tokenize[filepath_]:=Block[
 		];
 		lineCount++;
 	];
-	If[sectionData!={},AppendTo[sections,<|
+	If[sectionData!={}||blankTrack!={},AppendTo[sections,<|
 		"Comments"->comments,
 		"Settings"->Flatten@blankTrack,
 		"Tracks"->sectionData

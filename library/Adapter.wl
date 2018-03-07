@@ -281,7 +281,15 @@ AudioAdapt[rawData_,OptionsPattern[AdaptingOptions]]:=Block[
 
 
 (* ::Input:: *)
-(*data=Parse[localPath<>"src/test/test.tm"];Diagnose[data]*)
+(*Tokenize[localPath<>"Research/test.tm"][["Tokenizer"]]*)
+
+
+(* ::Input:: *)
+(*Parse[localPath<>"Research/test.tm"]*)
+
+
+(* ::Input:: *)
+(*data=Parse[localPath<>"Research/test.tm"];Diagnose[data]*)
 
 
 (* ::Input:: *)
@@ -324,7 +332,7 @@ AudioAdapt[rawData_,OptionsPattern[AdaptingOptions]]:=Block[
 (* ::Input:: *)
 (*MIDIStop[];MIDIPlay[#[[2]]]&@*)
 (*EchoFunction["time: ",#[[1]]&]@*)
-(*Timing[MIDIAdapt[Parse[localPath<>"src/test/test.tm"]]];*)
+(*Timing[MIDIAdapt[Parse[localPath<>"Research/test.tm"]]];*)
 
 
 (* ::Subsubsection:: *)
@@ -344,4 +352,4 @@ AudioAdapt[rawData_,OptionsPattern[AdaptingOptions]]:=Block[
 (* ::Input:: *)
 (*AudioStop[];AudioPlay[#[[2]]]&@*)
 (*EchoFunction["time: ",#[[1]]&]@*)
-(*Timing[AudioAdapt[Parse[localPath<>"src/test/test.tm"]]];*)
+(*Timing[AudioAdapt[Parse[localPath<>"Research/test.tm"]]];*)

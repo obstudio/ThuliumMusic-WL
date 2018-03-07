@@ -14,16 +14,20 @@ initJS := (
 		Abort[];
 	];
 	System`JS = StartExternalSession["NodeJS"];
-	ExternalEvaluate[JS, File[localPath<>"library\\Parser\\index.js"]];
+	ExternalEvaluate[JS, File[localPath<>"library\\Parser\\Parser.js"]];
 	ExternalEvaluate[JS, "const fs = require('fs')"];
 	ExternalEvaluate[JS, "
 		function Parse(filePath) {
 			const data = JSON.parse(fs.readFileSync(filePath, 'utf8'))
-			return new SMML.Parser(data).parse()
+			return new Parser(data).parse()
 		}
 	"];
 	DeleteObject[Drop[ExternalSessions[],-1]];
 );
+
+
+(* ::Input:: *)
+(*initJS;*)
 
 
 (* path and template *)

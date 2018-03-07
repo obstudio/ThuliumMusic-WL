@@ -200,7 +200,7 @@ homepage:=DynamicModule[{playlist},
 		uiPageSelector,
 		Spacer[{40,40}]
 	},Center,ItemSize->Full],
-	WindowTitle->text[["Thulium"]],Background->styleColor[["Background"]]]
+	WindowTitle->text[["Thulium"]],Background->styleColor[["Background"]](*,WindowFrame\[Rule]"Frameless"*)]
 ];
 
 

@@ -1,60 +1,14 @@
 (* ::Package:: *)
 
-Options[RenderText] = {"Indent" -> 0};
-RenderText[line_String, OptionsPattern[]] := Block[{output},
+RenderText[line_String] := Block[{output},
 	output = StringCases[line, {
 		"**"~~text:Except["*"]..~~"**" :> StyleBox[text, FontWeight -> Bold],
 		"*"~~text:Except["*"]..~~"*" :> StyleBox[text, FontSlant -> Italic],
 		"~~"~~text:Except["*"]..~~"~~" :> StyleBox[text, FontVariations -> {"StrikeThrough" -> True}],
 		"_"~~text:Except["*"]..~~"_" :> StyleBox[text, FontVariations -> {"Underline" -> True}],
-		(*"\n" \[RuleDelayed] Sequence["\n",TemplateBox[{OptionValue["Indent"]},"Spacer1"]],*)
 		text:RegularExpression["[^_~\\*]+"] :> text
 	}];
 	Return[output];
-];
-
-$StyleSheet = Notebook[
-	{
-		Cell[StyleData["Title"],
-			CellMargins -> {{72, 72}, {20, 40}},
-			FontFamily -> "Source Sans Pro Semibold",
-			(* FontSize: 60 *)
-			(* TextAlignment: Left *)
-			FontWeight -> "DemiBold",
-			FontColor -> RGBColor["#111111"]
-		],
-		Cell[StyleData["Usage"],
-			CellMargins -> {{0, 0}, {0, 0}},
-			CellFrame -> {{0, 0}, {1, 1}},
-			CellFrameColor -> RGBColor["#77BBFF"],
-			Background -> RGBColor["#DDEEFF"],
-			FontFamily -> "Cambria",
-			FontSize -> 24,
-			FontColor -> RGBColor["#000000"]
-		],
-		Cell[StyleData["Text"],
-			CellMargins -> {{48, 15}, {4, 8}},
-			FontFamily -> "Calibri",
-			FontSize -> 24,
-			FontWeight -> "Plain",
-			FontColor -> RGBColor["#111111"]
-		],
-		Cell[StyleData["Separator"],
-			(* CellFrame: {{0, 0}, {0, 2}} *)
-			(* CellFrameColor: #777777 *)
-			CellMargins -> {{40, 40}, {1, 1}},
-			CellSize -> {Inherited, 4},
-			Selectable -> False
-		],
-		Cell[StyleData["UsageSeparator"],
-			(* CellFrame: {{0, 0}, {0, 2}} *)
-			CellFrameColor -> RGBColor["#77BBFF"],
-			CellMargins -> {{0, 0}, {0, 0}},
-			CellSize -> {Inherited, 4},
-			Selectable -> False
-		]
-	},
-	Visible -> False
 ];
 
 MakeDocument::nfound = "Cannot find file `1`.";
@@ -78,12 +32,12 @@ MakeDocument[filepath_String] := Block[
 		line = rawData[[lineCount]];
 		Which[
 			StringMatchQ[line, RegularExpression["\\-{3,} *"]],
-				AppendTo[cells, Cell[" ", "Separator",
+				AppendTo[cells, Cell[" ", "Separator1",
 					CellFrame -> {{0, 0}, {0, 2}},
 					CellFrameColor -> RGBColor["#777777"]
 				]],
 			StringMatchQ[line, RegularExpression["={3,} *"]],
-				AppendTo[cells, Cell[" ", "Separator",
+				AppendTo[cells, Cell[" ", "Separator1",
 					CellFrame -> {{0, 0}, {0, 4}},
 					CellFrameColor -> RGBColor["#999999"]
 				]],
@@ -122,9 +76,9 @@ MakeDocument[filepath_String] := Block[
 				tmpboxes = {};
 				lineCount -= 1;
 				AppendTo[cells, Cell[CellGroupData[{
-					Cell[" ", "UsageSeparator", CellFrame -> {{0, 0}, {2, 0}}],
+					Cell[" ", "Separator2", CellFrame -> {{0, 0}, {2, 0}}],
 					Sequence @@ tmpcells,
-					Cell[" ", "UsageSeparator", CellFrame -> {{0, 0}, {0, 2}}]
+					Cell[" ", "Separator2", CellFrame -> {{0, 0}, {0, 2}}]
 				}]]],
 			!StringMatchQ[line, RegularExpression["\\s*"]],
 				AppendTo[cells, Cell[BoxData[RowBox @ RenderText @ line], "Text"]];
@@ -138,8 +92,8 @@ MakeDocument[filepath_String] := Block[
 		WindowElements -> {"VerticalScrollBar"},
 		Background -> RGBColor["#F7F7F7"],
 		WindowSize -> {1024, 768},
-		System`ClosingSaveDialog -> False,
-		StyleDefinitions -> $StyleSheet,
+		ClosingSaveDialog -> False,
+		StyleDefinitions -> StyleSheet["Documemt"],
 		ShowCellBracket -> False,
 		Saveable -> False,
 		Editable -> False,

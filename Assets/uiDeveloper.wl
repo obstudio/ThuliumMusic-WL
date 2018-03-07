@@ -48,7 +48,7 @@ addSong[songPath_,textInfo_]:=Module[{song,metaInfo,audio},
 (*uiAddSong;*)
 
 
-ignoreList={"temp.qys","test.qys"};
+ignoreList={"test.qys"};
 uiAddSong:=DynamicModule[{songPath,textInfo,candidates},
 	textInfo=AssociationMap[""&,textInfoTags];
 	SetDirectory[localPath];

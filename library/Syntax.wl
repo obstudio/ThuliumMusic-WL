@@ -72,17 +72,17 @@ notationPadded=RE["[&\\|\\s\\^\\*]*"];
 notationPatt=Alternatives[
 	"+"|"ToCoda"|"Coda"|"s"|"Segno"|"DC"|"DaCapo"|"DS"|"DaSegno",
 	"||:"|":||"|("["~~orderListP~~"]")|Whitespace,
-	("\\"~~orderListC~~":")|"|"|"\\"|"^"|"&"|"*"
+	("\\"~~orderListC~~":")|"|"|"/"|"\\"|"^"|"&"|"*"
 ];
 notationTok=StringCases[{
 	space:Whitespace:><|"Type"->"Whitespace","Content"->space|>,
 	"||:":><|"Type"->"RepeatBegin"|>,
 	":||":><|"Type"->"RepeatEnd"|>,
 	"["~~ol:orderListP~~"]":><|"Type"->"Volta","Order"->orderTok[ol]|>,
-	bl:"\\"~~ol:orderListC~~":":>
-		<|"Type"->"BarLine","Skip"->False,"Order"->orderTok[ol]|>,
-	bl:"|"|"\\":>
-		<|"Type"->"BarLine","Skip"->(bl=="\\"),"Order"->{0}|>,
+	"\\"~~ol:orderListC~~":":>
+		<|"Type"->"BarLine","Skip"->False,"Overlay"->False,"Order"->orderTok[ol]|>,
+	bl:"|"|"\\"|"/":>
+		<|"Type"->"BarLine","Skip"->(bl=="\\"),"Overlay"->(bl=="/"),"Order"->{0}|>,
 	"^":><|"Type"->"Tie"|>,
 	"&":><|"Type"->"PedalPress"|>,
 	"*":><|"Type"->"PedalRelease"|>,

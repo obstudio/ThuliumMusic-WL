@@ -81,18 +81,18 @@ RenderContent[rawData_List] := Block[
 				tmpCell = Cell[
 					StringDelete[line, RegularExpression["^\\-*\\^+ *"]],
 					"Section",
-					CellMargins -> {{48, 48} + markCount1 * 12, {10, 18}},
-					FontSize -> 48 - markCount2 * 24
+					CellMargins -> {{48, 48} + markCount * 12, {10, 18}},
+					FontSize -> 48 - markCount2 * 12
 				];
 				tmpData = {};
 				lineCount += 1;
 				While[And[
 					lineCount <= Length[rawData],
 					With[{line = rawData[[lineCount]]},Nor[
-						StringStartsQ[line, Repeated["#", markCount + 1]],
+						StringStartsQ[line, Repeated["#", markCount]],
 						And[
 							StringStartsQ[line, RegularExpression["\\-*\\^+"]],
-							StringLength @ StringCases[line, RegularExpression["^\\-*\\^+"]] <= markCount
+							StringLength @ StringCases[line, RegularExpression["^\\-*\\^+"]][[1]] <= markCount
 						],
 						StringMatchQ[line, RegularExpression["={3,} *"]]
 					]]],

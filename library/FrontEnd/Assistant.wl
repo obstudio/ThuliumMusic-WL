@@ -1,24 +1,40 @@
 (* ::Package:: *)
 
+FileSelecter := Block[{candidates},
+DynamicModule[{songName},
+	SetDirectory[localPath];
+	candidates = Select[StringTake[FileNames["*.tm", "Songs", Infinity], {7, -4}],
+		!StringMatchQ[#, Alternatives @@ Join[songs, ignoreList], IgnoreCase -> True]&
+	];
+	CreateDialog[Column[{
+		Spacer[{360,20}],
+		SetterBar[Dynamic[songName], candidates, Appearance -> "Vertical"],
+		Button["Confirm", DialogReturn[Dynamic[songName]]],
+		Spacer[{360,20}]
+	}, Alignment -> Center], WindowSize -> All]
+]];
+
+
+(* ::Input:: *)
+(*FileSelecter*)
+
+
 Assistant::exteval = "Assistant requires an external evaluator.";
-Assistant::index = "Assistant requires a song index.";
 
 ignoreList = {"test"};
 Assistant := Block[
 	{
-		candidates, songName = ""
+		candidates,
+		songPath,
+		songName = ""
 	},
 	If[Length[ExternalSessions[]] == 0,
 		Message[Assistant::exteval];
 		Return[];
 	];
-	If[!NameQ["songs"], refresh];
-	Options[$FrontEnd, NotebookBrowseDirectory] = localPath<>"Songs";
-	candidates = Select[StringTake[FileNames["*.tm", "Songs", Infinity], {7, -4}],
-		!StringMatchQ[#, Alternatives @@ Join[songs, ignoreList], IgnoreCase -> True]&
-	];
+	SetOptions[$FrontEnd, NotebookBrowseDirectory -> localPath <> "Songs"];
 	CreateDialog[{
-		Cell[Row[{}]]
+		Cell[Row[{FileNameSetter[songPath, Appearance -> buttonDisplay["Search"]]}]]
 	}, WindowSize -> {800, 600}, WindowTitle -> text["Assistant"]];
 ];
 
@@ -27,4 +43,5 @@ Assistant := Block[
 (*Assistant*)
 
 
-Options@$FrontEnd
+(* ::Input:: *)
+(*Main*)

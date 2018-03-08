@@ -23,7 +23,6 @@ StyleSheet["Documemt"] = Notebook[
 			CellMargins -> {{48, 15}, {4, 8}},
 			FontFamily -> "Calibri",
 			FontSize -> 24,
-			FontWeight -> "Plain",
 			FontColor -> RGBColor["#111111"]
 		],
 		Cell[StyleData["Separator1"],
@@ -39,6 +38,13 @@ StyleSheet["Documemt"] = Notebook[
 			CellMargins -> {{0, 0}, {0, 0}},
 			CellSize -> {Inherited, 4},
 			Selectable -> False
+		],
+		Cell[StyleData["Section"],
+			(* CellMargins: {{48, 48}, {10, 18}} *)
+			ShowGroupOpener -> True,
+			FontFamily -> "Corbel",
+			FontSize -> 32,
+			FontColor -> RGBColor["#772200"]
 		]
 	},
 	Visible -> False

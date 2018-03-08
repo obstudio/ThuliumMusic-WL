@@ -218,6 +218,9 @@ class TrackParser {
                         }
                         rightIncomplete = 0
                     }
+                    if (token.Overlay) {
+                        this.Context.startTime = 0
+                    }
                     break
                 case 'PedalPress':
                 case 'PedalRelease':

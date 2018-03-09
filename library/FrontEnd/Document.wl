@@ -55,6 +55,8 @@ SpacerCell[w_Integer, h_Integer, t_Integer, OptionsPattern[]] := Cell["", "Text"
 	Selectable -> False
 ];
 
+DingBatList = {"\[FilledDiamond]", "\[EmptyDiamond]", "\[FilledCircle]", "\[EmptyCircle]", "\[FilledSquare]", "\[EmptySquare]", "\[FilledUpTriangle]", "\[EmptyUpTriangle]"};
+
 (* Main *)
 RenderContent[rawData_List] := Block[
 	{
@@ -66,7 +68,7 @@ RenderContent[rawData_List] := Block[
 	$tmpTag := "tmpCell" <> ToString[$tmpID];
 	lineCount = 1;
 	
-	Return @ Flatten[Reap[
+	Return @ Flatten[Last @ Reap[
 		While[lineCount <= Length[rawData],
 			line = rawData[[lineCount]];
 			lineCount += 1;
@@ -90,7 +92,7 @@ RenderContent[rawData_List] := Block[
 					], "Cell"],
 				
 				(* Usage *)
-				StringStartsQ[line, RegularExpression["\\-*\\?"]],
+				StringStartsQ[line, "-"...~~"?"],
 					Sow[Cell[CellGroupData[{
 						SpacerCell[0, 0, -2, CellFrameColor -> RGBColor["#77BBFF"]],
 						Sequence @@ (Cell[BoxData[RowBox[#]],
@@ -99,18 +101,18 @@ RenderContent[rawData_List] := Block[
 							CellFrameColor -> RGBColor["#77BBFF"],
 							Background -> RGBColor["#DDEEFF"],
 							LineSpacing -> {1.5, 0}
-						]&/@ Reap[
+						]&/@ Last @ Reap[
 							$tmpID = 0;
 							lineCount -= 1;
-							While[lineCount <= Length[rawData] && StringStartsQ[line, RegularExpression["-*\\?"]],
-								markCount = StringLength @ StringCases[line, RegularExpression["^-*"]][[1]];
+							While[lineCount <= Length[rawData] && StringStartsQ[line, RegularExpression["\\-*\\?"]],
+								markCount = StringLength @ StringCases[line, RegularExpression["^\\-*"]][[1]];
 								If[markCount == 0, $tmpID += 1, Sow["\n", $tmpTag]];
 								Sow[TemplateBox[{48 + markCount * 24}, "Spacer1"], $tmpTag];
 								Sow[RenderText[StringDelete[line, RegularExpression["^-*\\? *"]], "Usage"], $tmpTag];
 								lineCount += 1;
 								line = rawData[[lineCount]];
 							];
-						][[-1]]),
+						]),
 						SpacerCell[0, 0, 2, CellFrameColor -> RGBColor["#77BBFF"]]
 					}]], "Cell"],
 				
@@ -131,7 +133,30 @@ RenderContent[rawData_List] := Block[
 							RenderText[StringDelete[line, RegularExpression["^\\-*\\^+ *"]], "Section"],
 							ShowGroupOpener -> True,
 							CellMargins -> {{48, 48} + markCount * 12, {10, 18}},
-							FontSize -> 48 - (markCount - markCount1) * 12
+							FontSize -> 48 - (markCount - markCount1) * 6
+						],
+						Sequence @@ RenderContent[rawData[[lineCount ;; lineNext - 1]]]
+					}]], "Cell"];
+					lineCount = lineNext,
+				
+				(* Unordered List *)
+				StringStartsQ[line, "-"...~~"+"],
+					markCount = StringLength @ StringCases[line, RegularExpression["^\\-*"]][[1]];
+					lineNext = lineCount + LengthWhile[rawData[[lineCount ;; ]], And[
+						StringStartsQ[#, "-"...~~"+"],
+						StringLength @ StringCases[#, StartOfLine~~"-"...][[1]] > markCount
+					]&];
+					Sow[Cell[CellGroupData[{
+						Cell[
+							BoxData @ RowBox[{
+								TemplateBox[{4}, "Spacer1"],
+								RenderText[StringDelete[line, RegularExpression["^\\-*\\+ *"]], "Text"]
+							}],
+							CellDingbat -> AdjustmentBox[
+								StyleBox[DingBatList[[markCount + 1]], "DingBat"],
+								BoxBaselineShift -> -0.3
+							],
+							CellMargins -> {{72 + markCount * 16, 48}, {4, 4}}
 						],
 						Sequence @@ RenderContent[rawData[[lineCount ;; lineNext - 1]]]
 					}]], "Cell"];
@@ -139,11 +164,14 @@ RenderContent[rawData_List] := Block[
 				
 				(* Text *)
 				!StringMatchQ[line, RegularExpression["\\s*"]],
-					Sow[Cell[BoxData[RenderText[line, "Text"]], "Text"], "Cell"];
+					Sow[Cell[
+						BoxData[RenderText[line, "Text"]], 
+						CellMargins -> {{48, 15}, {8, 6}}
+					], "Cell"];
 				
 			];
 		],
-	"Cell"][[-1]], 1];
+	"Cell"], 1];
 ];
 
 (* API *)

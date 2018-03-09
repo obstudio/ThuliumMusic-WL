@@ -25,7 +25,6 @@ StyleSheet["Documemt"] = Notebook[{
 	],
 	
 	Cell[StyleData["Text"],
-		CellMargins -> {{48, 15}, {4, 8}},
 		FontFamily -> "Calibri",
 		FontSize -> 24
 	],
@@ -44,5 +43,11 @@ StyleSheet["Documemt"] = Notebook[{
 		FontFamily -> "\:5e7c\:5706",
 		FontSize -> 32,
 		FontColor -> RGBColor["#772200"]
+	],
+	
+	Cell[StyleData["DingBat"],
+		FontFamily -> "Source Sans Pro",
+		FontSize -> 20,
+		FontColor -> RGBColor["#777777"]
 	]
 }];

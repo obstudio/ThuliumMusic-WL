@@ -1,6 +1,6 @@
 (* ::Package:: *)
 
-(* BoxTools *)
+(* Box Tools *)
 BoxApply[StyleBox[boxspec__], options___] := StyleBox[boxspec, options];
 BoxApply[RowBox[boxes_List], options___] := RowBox[BoxApply[#, options]& /@ boxes];
 BoxSimplify[StyleBox[box_StyleBox, options___]] := Insert[box, Unevaluated[options], 2];
@@ -16,6 +16,7 @@ BoxSimplify[boxes_List] := If[Length[boxes] == 1, boxes[[1]],
 	}]
 ];
 
+(* Render Syntax *)
 RenderText[line_String, style_String] := Block[{output},
 	output = StringCases[line, {
 		"(("~~text:Except[")"]..~~"))" :>
@@ -36,6 +37,25 @@ RenderText[line_String, style_String] := Block[{output},
 	Return[BoxSimplify @ RowBox @ output];
 ];
 
+(* Spacer Cell *)
+Options[SpacerCell] = {
+	CellFrameColor -> Automatic,
+	Background -> Inherited
+};
+SpacerCell[h_Integer, op:OptionsPattern[]] := SpacerCell[0, h, 0, op];
+SpacerCell[w_Integer, h_Integer, op:OptionsPattern[]] := SpacerCell[w, h, 0, op];
+SpacerCell[w_Integer, h_Integer, t_Integer, OptionsPattern[]] := Cell["", "Text",
+	CellSize -> {Inherited, 1},
+	CellMargins -> {{w, w}, {h, h}},
+	CellElementSpacings -> {"CellMinHeight" -> 1},
+	CellFrame -> If[t >= 0, {{0, 0}, {0, t}}, {{0, 0}, {-t, 0}}],
+	CellFrameColor -> OptionValue[CellFrameColor],
+	CellFrameMargins -> 0, 
+	Background -> OptionValue[Background],
+	Selectable -> False
+];
+
+(* Main *)
 RenderContent[rawData_List] := Block[
 	{
 		line, lineCount, lineNext,
@@ -54,15 +74,9 @@ RenderContent[rawData_List] := Block[
 				
 				(* Separator *)
 				StringMatchQ[line, RegularExpression["\\-{3,} *"]],
-					Sow[Cell[" ", "Separator1",
-						CellFrame -> {{0, 0}, {0, 2}},
-						CellFrameColor -> RGBColor["#777777"]
-					], "Cell"],
+					Sow[SpacerCell[40, 1, 2, CellFrameColor -> RGBColor["#777777"]], "Cell"],
 				StringMatchQ[line, RegularExpression["={3,} *"]],
-					Sow[Cell[" ", "Separator1",
-						CellFrame -> {{0, 0}, {0, 4}},
-						CellFrameColor -> RGBColor["#999999"]
-					], "Cell"],
+					Sow[SpacerCell[40, 2, 4, CellFrameColor -> RGBColor["#999999"]], "Cell"],
 					
 				(* Title *)
 				StringStartsQ[line, RegularExpression["#"]],
@@ -78,8 +92,14 @@ RenderContent[rawData_List] := Block[
 				(* Usage *)
 				StringStartsQ[line, RegularExpression["\\-*\\?"]],
 					Sow[Cell[CellGroupData[{
-						Cell[" ", "Separator2", CellFrame -> {{0, 0}, {2, 0}}],
-						Sequence @@ (Cell[BoxData[RowBox[#]], "Usage"]& /@ Reap[
+						SpacerCell[0, 0, -2, CellFrameColor -> RGBColor["#77BBFF"]],
+						Sequence @@ (Cell[BoxData[RowBox[#]],
+							CellMargins -> {{0, 0}, {0, 0}},
+							CellFrame -> {{0, 0}, {1, 1}},
+							CellFrameColor -> RGBColor["#77BBFF"],
+							Background -> RGBColor["#DDEEFF"],
+							LineSpacing -> {1.5, 0}
+						]&/@ Reap[
 							$tmpID = 0;
 							lineCount -= 1;
 							While[lineCount <= Length[rawData] && StringStartsQ[line, RegularExpression["-*\\?"]],
@@ -91,7 +111,7 @@ RenderContent[rawData_List] := Block[
 								line = rawData[[lineCount]];
 							];
 						][[-1]]),
-						Cell[" ", "Separator2", CellFrame -> {{0, 0}, {0, 2}}]
+						SpacerCell[0, 0, 2, CellFrameColor -> RGBColor["#77BBFF"]]
 					}]], "Cell"],
 				
 				(* Section *)
@@ -109,7 +129,7 @@ RenderContent[rawData_List] := Block[
 					Sow[Cell[CellGroupData[{
 						Cell[
 							RenderText[StringDelete[line, RegularExpression["^\\-*\\^+ *"]], "Section"],
-							"Section",
+							ShowGroupOpener -> True,
 							CellMargins -> {{48, 48} + markCount * 12, {10, 18}},
 							FontSize -> 48 - (markCount - markCount1) * 12
 						],
@@ -126,7 +146,11 @@ RenderContent[rawData_List] := Block[
 	"Cell"][[-1]], 1];
 ];
 
+(* API *)
 RenderTMD::nfound = "Cannot find file `1`.";
+RenderTMD::usage = "\
+\!\(\*RowBox[{\"RenderTMD\",\"[\",RowBox[{StyleBox[\"filepath\",\"TI\"]}],\"]\"}]\)
+generate a document notebook for \!\(\*StyleBox[\"filepath\",\"TI\"]\).";
 
 RenderTMD[filepath_String] := Block[
 	{

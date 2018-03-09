@@ -1,15 +1,39 @@
 (* ::Package:: *)
 
-RenderText[line_String, options___] := Block[{output},
+(* BoxTools *)
+BoxApply[StyleBox[boxspec__], options___] := StyleBox[boxspec, options];
+BoxApply[RowBox[boxes_List], options___] := RowBox[BoxApply[#, options]& /@ boxes];
+BoxSimplify[StyleBox[box_StyleBox, options___]] := Insert[box, Unevaluated[options], 2];
+BoxSimplify[StyleBox[box_RowBox, options___]] := StyleBox[BoxSimplify[box], options];
+BoxSimplify[RowBox[boxes_List]] := BoxSimplify[boxes];
+BoxSimplify[boxes_List] := If[Length[boxes] == 1, boxes[[1]],
+	RowBox @ ReplaceRepeated[boxes, {
+		{pre___, PatternSequence[
+			StyleBox[str1_String, options___],
+			StyleBox[str2_String, options___]
+		], post___} :> {pre, StyleBox[str1 <> str2, options], post},
+		RowBox[boxes1_List] :> BoxSimplify[boxes1]
+	}]
+];
+
+RenderText[line_String, style_String] := Block[{output},
 	output = StringCases[line, {
-		"(("~~text:Except[")"]..~~"))" :> StyleBox[text, Smaller, FontColor -> RGBColor["#555555"]],
-		"**"~~text:Except["*"]..~~"**" :> StyleBox[text, FontWeight -> Bold],
-		"*"~~text:Except["*"]..~~"*" :> StyleBox[text, FontSlant -> Italic],
-		"~~"~~text:Except["~"]..~~"~~" :> StyleBox[text, FontVariations -> {"StrikeThrough" -> True}],
-		"_"~~text:Except["_"]..~~"_" :> StyleBox[text, FontVariations -> {"Underline" -> True}],
-		text:RegularExpression["[^_~\\*\\(\\)]+"] :> text
+		"(("~~text:Except[")"]..~~"))" :>
+			BoxApply[RenderText[text, style], Smaller, FontColor -> RGBColor["#555555"]],
+		"**"~~text:Except["*"]..~~"**" :>
+			BoxApply[RenderText[text, style], FontWeight -> Bold],
+		"*"~~text:Except["*"]..~~"*" :>
+			BoxApply[RenderText[text, style], FontSlant -> Italic],
+		"~~"~~text:Except["~"]..~~"~~" :>
+			BoxApply[RenderText[text, style], FontVariations -> {"StrikeThrough" -> True}],
+		"_"~~text:Except["_"]..~~"_" :>
+			BoxApply[RenderText[text, style], FontVariations -> {"Underline" -> True}],
+		text_ :> RowBox @ StringCases[text, {
+			text1__?(PrintableASCIIQ) :> StyleBox[text1, style],
+			text1__?(Not@*PrintableASCIIQ) :> StyleBox[text1, style <> "-chs"]
+		}]
 	}];
-	Return[StyleBox[RowBox[output], options]];
+	Return[BoxSimplify @ RowBox @ output];
 ];
 
 RenderContent[rawData_List] := Block[
@@ -44,9 +68,10 @@ RenderContent[rawData_List] := Block[
 				StringStartsQ[line, RegularExpression["#"]],
 					markCount = StringLength @ StringCases[line, RegularExpression["^#+"]][[1]];
 					Sow[Cell[
-						RenderText[StringDelete[line, RegularExpression["^#+ *| *#*$"]], "Title"],
-						"Title",
+						BoxData @ RenderText[StringDelete[line, RegularExpression["^#+ *| *#*$"]], "Title"],
+						CellMargins -> {{72, 72}, {20, 40}},
 						FontSize -> 72 - markCount * 12,
+						FontColor -> RGBColor["#111111"],
 						TextAlignment -> If[StringEndsQ[line, RegularExpression["# *"]], Center, Left]
 					], "Cell"],
 				

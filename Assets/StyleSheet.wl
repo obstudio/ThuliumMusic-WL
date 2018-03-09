@@ -3,12 +3,11 @@
 StyleSheet["Documemt"] = Notebook[
 	{
 		Cell[StyleData["Title"],
-			CellMargins -> {{72, 72}, {20, 40}},
 			FontFamily -> "Source Sans Pro Semibold",
-			(* FontSize: 60 *)
-			(* TextAlignment: Left *)
-			FontWeight -> "DemiBold",
-			FontColor -> RGBColor["#111111"]
+			FontWeight -> "DemiBold"
+		],
+		Cell[StyleData["Title-chs"],
+			FontFamily -> "\:9ed1\:4f53"
 		],
 		Cell[StyleData["Usage"],
 			CellMargins -> {{0, 0}, {0, 0}},
@@ -16,14 +15,12 @@ StyleSheet["Documemt"] = Notebook[
 			CellFrameColor -> RGBColor["#77BBFF"],
 			Background -> RGBColor["#DDEEFF"],
 			FontFamily -> "Cambria",
-			FontSize -> 24,
-			FontColor -> RGBColor["#000000"]
+			FontSize -> 24
 		],
 		Cell[StyleData["Text"],
 			CellMargins -> {{48, 15}, {4, 8}},
 			FontFamily -> "Calibri",
-			FontSize -> 24,
-			FontColor -> RGBColor["#111111"]
+			FontSize -> 24
 		],
 		Cell[StyleData["Separator1"],
 			(* CellFrame: {{0, 0}, {0, 2}} *)

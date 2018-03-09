@@ -109,6 +109,6 @@ SetAttributes[button,HoldRest];
 button[buttonName_,action_]:=DynamicModule[{style="Default"},
 	EventHandler[Dynamic@buttonDisplay[buttonName,style],{
 		"MouseDown":>(style="Clicked"),
-		"MouseUp":>(style="Default";ReleaseHold[action];)
+		"MouseUp":>(style="Default";action;)
 	}]
 ]

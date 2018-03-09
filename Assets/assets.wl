@@ -96,7 +96,7 @@ pageSelectorData=<|
 buttonDisplay[name_]:=buttonDisplay[name,"Default"];
 buttonDisplay[name_,style_]:=If[style=="Default",
 	Mouseover[buttonDisplay[name,"Basic"],buttonDisplay[name,"Mouseover"]],
-	Block[{scheme=buttonColor[[style]]},Graphics[{
+	With[{scheme=buttonColor[[style]]},Graphics[{
 		squareRounded[0.06,1,scheme],
 		scheme[["Body"]],name/.buttonData
 	},ContentSelectable->False]]

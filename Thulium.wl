@@ -24,3 +24,7 @@ Main
 
 (* ::Input:: *)
 (*Assistant*)
+
+
+(* ::Input:: *)
+(*RenderTMD[localPath<>"docs/test.tmd"]*)

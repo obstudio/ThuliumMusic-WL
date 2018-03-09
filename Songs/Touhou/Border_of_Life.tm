@@ -56,24 +56,6 @@
 6,3%%%%5#,3b%%%%%%6,3|%%%%%%5#,3b%%%%%%%%|
 6,3%%%%5#,3b%%%%%%6,3|%%%%%%7,4#%%%%%%%%|
 
-<Snare(40%)>
-0---|0---|0---|0---|0---|0---|0---|0-(3-)x-|
-
-<ElectricSnare(30%)>
-0---|0---|0---|0---|0---|0---|0---|0-(2-)x0|
-
-<BassDrum2(50%)>
-0---|0---|0---|0---|0---|0---|0---|0--Dur(2)x_x_x_0.x|
-
-<HiHatClosed(30%)>
-0---|0---|0---|0---|0---|0---|0---|0-(2-)x-|
-
-<CrashCymbal(20%)>
-0---|0---|0---|0---|0---|0---|0---|0-x-|
-
-<Clap(40%)>
-0---|0---|0---|0---|0---|0---|0---|0--(2-)x|
-
 //-------------------- Section B --------------------
 <BrightPiano> Stac(0)
 @theme1 @theme1 @theme1 @theme1
@@ -94,7 +76,7 @@ Oct(-1) @chorus2 Oct(0) @chorus2
 Oct(0) @chorus2 Oct(1) @chorus2
 Oct(0) @chorus2 Oct(1) @chorus2
 
-<Clavi(70%)>
+<Clavi(90%)>
 @accomp1 @accomp1 @accomp1 @accomp1
 
 <JazzGuitar(80%),SlapBass(80%)> Oct(-2) Dur(1)
@@ -122,6 +104,9 @@ Oct(0) @chorus2 Oct(1) @chorus2
 <Clavi(80%)>
 @accomp1 @accomp1 @accomp1 @accomp1 
 
+<JazzGuitar(60%),SlapBass(60%)> Oct(-2)
+@accomp2 @accomp2 @accomp2 @accomp2
+
 <Strings2(60%)>
 Oct(-2) @chorus2 Oct(-1) @chorus2
 Oct(-2) @chorus2 Oct(-1) @chorus2
@@ -133,8 +118,5 @@ Oct(-1) @chorus2 Oct(0) @chorus2
 <DrawbarOrgan(60%)>
 Oct(0) @chorus2 Oct(1) @chorus2
 Oct(0) @chorus2 Oct(1) @chorus2
-
-<JazzGuitar(60%),SlapBass(60%)> Oct(-2) Dur(1)
-@accomp2 @accomp2 @accomp2 @accomp2
 
 

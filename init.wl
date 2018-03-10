@@ -33,8 +33,8 @@ initJS := (
 (* path and template *)
 version=281;
 cloudPath="http://qymp.ob-studio.cn/assets/";
-defaultDataPath="C:\\ProgramData\\obstudio\\QYMP\\"; (* Update this *)
-userPath=$HomeDirectory<>"/AppData/Local/obstudio/QYMP/";
+defaultDataPath=StringReplace[FileNameDrop[$BaseDirectory],"\\"->"/"]<>"/ObStudio/QYMP/";
+userPath=StringReplace[FileNameDrop[$UserBaseDirectory],{"\\"->"/","Roaming"~~EndOfString->"Local"}]<>"/ObStudio/QYMP/";
 If[!DirectoryQ[defaultDataPath],CreateDirectory[defaultDataPath]];
 userTemplate=<|
 	"Version"->version,

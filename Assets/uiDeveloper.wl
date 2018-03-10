@@ -52,7 +52,7 @@ ignoreList={"test.qys"};
 uiAddSong:=DynamicModule[{songPath,textInfo,candidates},
 	textInfo=AssociationMap[""&,textInfoTags];
 	SetDirectory[localPath];
-	candidates=Complement[StringDrop[FileNames["*.tm","Songs",Infinity],6],
+	candidates=Complement[StringDrop[StringReplace["\\"->"/"]/@FileNames["*.tm","Songs",Infinity],6],
 		#<>".tm"&/@songs,
 		ignoreList
 	];

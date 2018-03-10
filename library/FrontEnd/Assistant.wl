@@ -3,7 +3,7 @@
 FileSelecter := Block[{candidates},
 DynamicModule[{songName},
 	SetDirectory[localPath];
-	candidates = Select[StringTake[FileNames["*.tm", "Songs", Infinity], {7, -4}],
+	candidates = Select[StringTake[StringReplace["\\"->"/"]/@FileNames["*.tm", "Songs", Infinity], {7, -4}],
 		!StringMatchQ[#, Alternatives @@ Join[songs, ignoreList], IgnoreCase -> True]&
 	];
 	CreateDialog[Column[{

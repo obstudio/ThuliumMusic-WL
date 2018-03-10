@@ -171,9 +171,9 @@ updateImage:=Block[{updates={},image,filename,meta},
 	If[updates=={},Return[]];
 	Monitor[Do[
 		filename=updates[[i]];
-		image=Import[cloudPath<>"images/"<>StringReplace[filename,"\\"->"/"]]; (* Update this *)
+		image=Import[cloudPath<>"images/"<>filename];
 		Export[dataPath<>"Images/"<>filename,image];
-		meta=Association@Import[cloudPath<>"images/"<>StringReplace[filename,{"\\"->"/","."~~__->".json"}]]; (* Update this *)
+		meta=Association@Import[cloudPath<>"images/"<>StringReplace[filename,"."~~__->".json"]];
 		If[KeyExistsQ[imageData,filename],
 			imageData[[filename]]=meta,
 			AppendTo[imageData,filename->meta]

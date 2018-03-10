@@ -34,7 +34,7 @@ initJS := (
 version=281;
 cloudPath="http://qymp.ob-studio.cn/assets/";
 defaultDataPath="C:\\ProgramData\\obstudio\\QYMP\\"; (* Update this *)
-userPath=StringReplace[$HomeDirectory,"\\"->"/"]<>"/AppData/Local/obstudio/QYMP/"; (* Update this *)
+userPath=$HomeDirectory<>"/AppData/Local/obstudio/QYMP/";
 If[!DirectoryQ[defaultDataPath],CreateDirectory[defaultDataPath]];
 userTemplate=<|
 	"Version"->version,
@@ -107,7 +107,7 @@ refresh:=Block[
 		playlistInfo,songList
 	},
 	SetDirectory[localPath];
-	metaTree=StringDrop[FileNames["*","Meta",Infinity],5];
+	metaTree=StringReplace["\\"->"/"]/@StringDrop[FileNames["*","Meta",Infinity],5];
 	songs=StringDrop[Select[metaTree,StringMatchQ[__~~".json"]],-5];
 	dirList=Select[metaTree,!StringMatchQ[#,__~~".json"]&];
 	Do[
@@ -115,7 +115,7 @@ refresh:=Block[
 	{dir,dirList}];
 	index=Association/@AssociationMap[Import[localPath<>"Meta/"<>#<>".json"]&,songs];
 	imageDirList=DeleteDuplicates@Flatten[
-		StringCases[dir__~~"\\"~~Except["\\"]..:>dir]/@Values@index[[songs,"Image"]] (* Update this *)
+		StringCases[dir__~~"/"~~Except["/"]..:>dir]/@Values@index[[songs,"Image"]]
 	];
 	Do[
 		If[!DirectoryQ[dataPath<>"images/"<>dir],CreateDirectory[dataPath<>"images/"<>dir]],
@@ -196,7 +196,7 @@ updateImage:=Block[{updates={},image,filename,meta},
 
 updateBuffer:=Block[{updates={},song,filename,hash,audio,bufferList},
 	SetDirectory[dataPath];
-	bufferList=StringTake[FileNames["*.buffer","buffer",Infinity],{8,-8}];
+	bufferList=StringReplace["\\"->"/"]/@StringTake[FileNames["*.buffer","buffer",Infinity],{8,-8}];
 	DeleteFile[dataPath<>"Buffer/"<>#<>".buffer"]&/@Complement[bufferList,songs];
 	Do[
 		filename=localPath<>"Songs/"<>song<>".tm";

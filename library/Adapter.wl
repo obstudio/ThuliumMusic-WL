@@ -52,11 +52,11 @@ Parse[origin_,partspec_]:=Block[
 			];
 			Switch[ToLowerCase@FileExtension[origin],
 				"json",
-					rawData=ExternalEvaluate[JS,"Parse('"<>origin<>"')"],
+					rawData=ExternalEvaluate[System`JS,"Parse('"<>origin<>"')"],
 				"tm",
 					tempFile=TempPath[];
 					Export[tempFile,Tokenize[origin][["Tokenizer"]]];
-					rawData=ExternalEvaluate[JS,"Parse('"<>tempFile<>"')"];
+					rawData=ExternalEvaluate[System`JS,"Parse('"<>tempFile<>"')"];
 					DeleteFile[tempFile],
 				"",
 					Message[Parse::ext2];Return[],
@@ -66,7 +66,7 @@ Parse[origin_,partspec_]:=Block[
 		_Association,
 			tempFile=TempPath[];
 			Export[tempFile,origin];
-			rawData=ExternalEvaluate[JS,"Parse('"<>tempFile<>"')"];
+			rawData=ExternalEvaluate[System`JS,"Parse('"<>tempFile<>"')"];
 			DeleteFile[tempFile],
 		_,
 			Message[Parse::type];Return[];
@@ -293,7 +293,7 @@ AudioAdapt[rawData_,OptionsPattern[AdaptingOptions]]:=Block[
 
 
 (* ::Input:: *)
-(*data=Parse[localPath<>"Songs/Touhou/TH15-Kanjuden/Akumu_no_Sekai.tm"];*)
+(*data=Parse[localPath<>"Songs/Touhou/TH11-Chireiden/3rd_Eye.tm"];*)
 (*Diagnose[data]*)
 
 
@@ -302,7 +302,7 @@ AudioAdapt[rawData_,OptionsPattern[AdaptingOptions]]:=Block[
 
 
 (* ::Input:: *)
-(*EmitSound@Sound@SoundNote[5,1,"SopranoSax"]*)
+(*EmitSound@Sound@SoundNote[5,1,"ElectricBass"]*)
 
 
 (* ::Input:: *)
@@ -320,13 +320,7 @@ AudioAdapt[rawData_,OptionsPattern[AdaptingOptions]]:=Block[
 (* ::Input:: *)
 (*MIDIStop[];MIDIPlay[#[[2]]]&@*)
 (*EchoFunction["time: ",#[[1]]&]@*)
-(*Timing[MIDIAdapt[Parse[localPath<>"Songs/Touhou/Border_of_Life.tm",{2}],"Rate"->1]];*)
-
-
-(* ::Input:: *)
-(*MIDIStop[];MIDIPlay[#[[2]]]&@*)
-(*EchoFunction["time: ",#[[1]]&]@*)
-(*Timing[MIDIAdapt[Parse[localPath<>"Songs/Touhou/TH15-Kanjuden/Akumu_no_Sekai.tm"],"Rate"->1.2]];*)
+(*Timing[MIDIAdapt[Parse[localPath<>"Songs/Touhou/TH11-Chireiden/3rd_Eye.tm",{1}],"Rate"->1.1]];*)
 
 
 (* ::Input:: *)
@@ -346,10 +340,14 @@ AudioAdapt[rawData_,OptionsPattern[AdaptingOptions]]:=Block[
 (* ::Input:: *)
 (*AudioStop[];AudioPlay[#[[2]]]&@*)
 (*EchoFunction["time: ",#[[1]]&]@*)
-(*Timing[AudioAdapt[Parse[localPath<>"Songs/Touhou/TH15-Kanjuden/Wasuregataki.tm",1],"Rate"->1]];*)
+(*Timing[AudioAdapt[Parse[localPath<>"Songs/Touhou/TH11-Chireiden/3rd_Eye.tm",{2}],"Rate"->1.1]];*)
 
 
 (* ::Input:: *)
 (*AudioStop[];AudioPlay[#[[2]]]&@*)
 (*EchoFunction["time: ",#[[1]]&]@*)
 (*Timing[AudioAdapt[Parse[localPath<>"Research/test.tm"]]];*)
+
+
+(* ::Input:: *)
+(*Export[localPath<>"test.mp3",AudioAdapt[Parse[localPath<>"Songs/Touhou/TH11-Chireiden/3rd_Eye.tm",1]]];*)

@@ -1,21 +1,5 @@
 (* ::Package:: *)
 
-(* Box Tools *)
-BoxApply[StyleBox[boxspec__], options___] := StyleBox[boxspec, options];
-BoxApply[RowBox[boxes_List], options___] := RowBox[BoxApply[#, options]& /@ boxes];
-BoxSimplify[StyleBox[box_StyleBox, options___]] := Insert[box, Unevaluated[options], 2];
-BoxSimplify[StyleBox[box_RowBox, options___]] := StyleBox[BoxSimplify[box], options];
-BoxSimplify[RowBox[boxes_List]] := BoxSimplify[boxes];
-BoxSimplify[boxes_List] := If[Length[boxes] == 1, boxes[[1]],
-	RowBox @ ReplaceRepeated[boxes, {
-		{pre___, PatternSequence[
-			StyleBox[str1_String, options___],
-			StyleBox[str2_String, options___]
-		], post___} :> {pre, StyleBox[str1 <> str2, options], post},
-		RowBox[boxes1_List] :> BoxSimplify[boxes1]
-	}]
-];
-
 (* Render Syntax *)
 RenderText[line_String, style_String] := Block[{output},
 	output = StringCases[line, {
@@ -37,32 +21,12 @@ RenderText[line_String, style_String] := Block[{output},
 	Return[BoxSimplify @ RowBox @ output];
 ];
 
-(* Spacer Cell *)
-Options[SpacerCell] = {
-	CellFrameColor -> Automatic,
-	Background -> Inherited
-};
-SpacerCell[h_Integer, op:OptionsPattern[]] := SpacerCell[0, h, 0, op];
-SpacerCell[w_Integer, h_Integer, op:OptionsPattern[]] := SpacerCell[w, h, 0, op];
-SpacerCell[w_Integer, h_Integer, t_Integer, OptionsPattern[]] := Cell["", "Text",
-	CellSize -> {Inherited, 1},
-	CellMargins -> {{w, w}, {h, h}},
-	CellElementSpacings -> {"CellMinHeight" -> 1},
-	CellFrame -> If[t >= 0, {{0, 0}, {0, t}}, {{0, 0}, {-t, 0}}],
-	CellFrameColor -> OptionValue[CellFrameColor],
-	CellFrameMargins -> 0, 
-	Background -> OptionValue[Background],
-	Selectable -> False
-];
-
-DingBatList = {"\[FilledDiamond]", "\[EmptyDiamond]", "\[FilledCircle]", "\[EmptyCircle]", "\[FilledSquare]", "\[EmptySquare]", "\[FilledUpTriangle]", "\[EmptyUpTriangle]"};
-
 (* Main *)
 RenderContent[rawData_List] := Block[
 	{
 		line, lineCount, lineNext,
 		markCount, markCount1,
-		$tmpID, $tmpTag
+		$tmpID, $tmpTag, tmData
 	},
 	
 	$tmpTag := "tmpCell" <> ToString[$tmpID];
@@ -76,9 +40,9 @@ RenderContent[rawData_List] := Block[
 				
 				(* Separator *)
 				StringMatchQ[line, RegularExpression["\\-{3,} *"]],
-					Sow[SpacerCell[40, 1, 2, CellFrameColor -> RGBColor["#777777"]], "Cell"],
+					Sow[SpacerCell[{40, 1}, 2, CellFrameColor -> RGBColor["#777777"]], "Cell"],
 				StringMatchQ[line, RegularExpression["={3,} *"]],
-					Sow[SpacerCell[40, 2, 4, CellFrameColor -> RGBColor["#999999"]], "Cell"],
+					Sow[SpacerCell[{40, 2}, 4, CellFrameColor -> RGBColor["#999999"]], "Cell"],
 					
 				(* Title *)
 				StringStartsQ[line, RegularExpression["#"]],
@@ -94,7 +58,7 @@ RenderContent[rawData_List] := Block[
 				(* Usage *)
 				StringStartsQ[line, "-"...~~"?"],
 					Sow[Cell[CellGroupData[{
-						SpacerCell[0, 0, -2, CellFrameColor -> RGBColor["#77BBFF"]],
+						SpacerCell[-2, CellFrameColor -> RGBColor["#77BBFF"]],
 						Sequence @@ (Cell[BoxData[RowBox[#]],
 							CellMargins -> {{0, 0}, {0, 0}},
 							CellFrame -> {{0, 0}, {1, 1}},
@@ -113,7 +77,7 @@ RenderContent[rawData_List] := Block[
 								line = rawData[[lineCount]];
 							];
 						]),
-						SpacerCell[0, 0, 2, CellFrameColor -> RGBColor["#77BBFF"]]
+						SpacerCell[2, CellFrameColor -> RGBColor["#77BBFF"]]
 					}]], "Cell"],
 				
 				(* Section *)
@@ -152,16 +116,29 @@ RenderContent[rawData_List] := Block[
 								TemplateBox[{4}, "Spacer1"],
 								RenderText[StringDelete[line, RegularExpression["^\\-*\\+ *"]], "Text"]
 							}],
-							CellDingbat -> AdjustmentBox[
-								StyleBox[DingBatList[[markCount + 1]], "DingBat"],
-								BoxBaselineShift -> -0.3
-							],
+							CellDingbat -> TemplateBox[{DingBatList[[markCount + 1]]}, "DingBat"],
 							CellMargins -> {{72 + markCount * 16, 48}, {4, 4}}
 						],
 						Sequence @@ RenderContent[rawData[[lineCount ;; lineNext - 1]]]
 					}]], "Cell"];
 					lineCount = lineNext,
 				
+				(* Mini-player *)
+				StringStartsQ[line, ">"],
+					tmData = "";
+					lineCount -= 1;
+					While[lineCount <= Length[rawData] && StringStartsQ[line, ">"],
+						If[tmData != "", tmData = tmData <> "\n"];
+						tmData = tmData <> StringDelete[line, RegularExpression["^>\\s*"]];
+						lineCount += 1;
+						line = rawData[[lineCount]];
+					];
+					Sow[Cell[
+						BoxData @ TemplateBox[{tmData}, "Miniplayer"],
+						CellMargins -> {{48, Automatic}, {8, 6}},
+						Selectable -> False
+					], "Cell"],
+					
 				(* Text *)
 				!StringMatchQ[line, RegularExpression["\\s*"]],
 					Sow[Cell[

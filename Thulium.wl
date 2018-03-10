@@ -10,13 +10,13 @@
 
 System`localPath = StringReplace[NotebookDirectory[],"\\"->"/"];
 SetDirectory[localPath];
-<< (localPath <> "init.wl");
-Scan[Get, StringReplace["\\"->"/"]/@FileNames["*.wl", "library", Infinity]];
-Scan[Get, StringReplace["\\"->"/"]/@FileNames["*.wl", "package", Infinity]];
-Scan[Get, StringReplace["\\"->"/"]/@FileNames["*.wl", "assets", Infinity]];
+<< (localPath <> "Preload.wl");
+Scan[Get, FileNames["*.wl", "library", Infinity]];
+Scan[Get, FileNames["*.wl", "package", Infinity]];
+Scan[Get, FileNames["*.wl", "assets", Infinity]];
 
 
-initJS
+InitializeParser
 
 
 Main

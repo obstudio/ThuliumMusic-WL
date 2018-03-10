@@ -1,10 +1,6 @@
 (* ::Package:: *)
 
-(* ::Subsubsection:: *)
-(*Packages Initialization*)
-
-
-initJS := (
+InitializeParser := (
 	If[Length@FindExternalEvaluators["NodeJS"]==0,
 		CreateDialog[{
 			TextCell["Thulium Music Player requires Node.js as external evaluator."],
@@ -14,9 +10,9 @@ initJS := (
 		Abort[];
 	];
 	System`JS = StartExternalSession["NodeJS"];
-	ExternalEvaluate[JS, File[localPath<>"library/Parser/Parser.js"]];
-	ExternalEvaluate[JS, "const fs = require('fs')"];
-	ExternalEvaluate[JS, "
+	ExternalEvaluate[System`JS, File[localPath<>"library/Parser/Parser.js"]];
+	ExternalEvaluate[System`JS, "const fs = require('fs')"];
+	ExternalEvaluate[System`JS, "
 		function Parse(filePath) {
 			const data = JSON.parse(fs.readFileSync(filePath, 'utf8'))
 			return new Parser(data).parse()
@@ -27,69 +23,7 @@ initJS := (
 
 
 (* ::Input:: *)
-(*initJS;*)
-
-
-(* path and template *)
-version=281;
-cloudPath="http://qymp.ob-studio.cn/assets/";
-defaultDataPath=StringReplace[FileNameDrop[$BaseDirectory],"\\"->"/"]<>"/ObStudio/QYMP/";
-userPath=StringReplace[FileNameDrop[$UserBaseDirectory],{"\\"->"/","Roaming"~~EndOfString->"Local"}]<>"/ObStudio/QYMP/";
-If[!DirectoryQ[defaultDataPath],CreateDirectory[defaultDataPath]];
-userTemplate=<|
-	"Version"->version,
-	"Language"->"chs",
-	"Developer"->False,
-	"Player"->"New",
-	"DataPath"->defaultDataPath
-|>;
-
-
-(* instruments *)
-instDict=Association@Import[localPath<>"library/Data/Instrument.json"];
-percDict=Association@Import[localPath<>"library/Data/Percussion.json"];
-instList=Keys@instDict;
-percList=Keys@percDict;
-
-
-(* tags *)
-metaInfoTags={"SectionCount","RealTrackCount","Duration","Instruments"};
-textInfoTags={"SongName","Lyricist","Composer","Adapter","Comment","Abstract","Origin"};
-otherInfoTags={"Image","Uploader","Tags"};
-imageTags={"Title","Painter","PainterID","IllustID","Source","URL"};
-aboutTags={"Version","Producer","Website"};
-langList={"chs","eng"};
-
-
-(* some functions *)
-textLength[string_]:=2StringLength[string]-StringCount[string,Alternatives@CharacterRange[32,127]];
-timeDisplay[time_]:=Block[
-	{sec=Floor[QuantityMagnitude[UnitConvert[time,"Seconds"]]]},
-	IntegerString[Floor[sec/60],10,2]<>":"<>IntegerString[Mod[sec,60],10,2]
-];
-completeText[raw_,arg_]:=StringReplace[raw,{
-	"&"~~i:DigitCharacter:>ToString[arg[[ToExpression@i]],FormatType->InputForm],
-	"$"~~i:DigitCharacter:>"\""<>arg[[ToExpression@i]]<>"\"",
-	"#"~~i:DigitCharacter:>StringRiffle[ToString[#,FormatType->InputForm]&/@arg[[ToExpression@i]],", "]
-}];
-caption[string_String]:=caption[string,"None",{}];
-caption[string_String,argument_List]:=caption[string,"None",argument];
-caption[string_String,style_String]:=caption[string,style,{}];
-caption[string_String,style_String,argument_List]:=Style[completeText[Which[
-	StringLength@string>0&&StringPart[string,1]=="_",text[[StringDrop[string,1]]],
-	True,string
-],argument],styleDict[[style]]];
-
-
-playlistTemplate=<|
-	"Type"->"Playlist",
-	"Path"->"",
-	"Title"->"",
-	"Abstract"->"",
-	"Comment"->"",
-	"SongList"->"",
-	"IndexWidth"->0
-|>;
+(*InitializeParser;*)
 
 
 refreshLanguage:=Module[{langDataPath},
@@ -241,51 +175,3 @@ update:=(
 	homepage;
 );
 $Updated=False;
-
-
-(* local data *)
-colorData=Association@Import[localPath<>"Assets/color.json"];                               (* colors *)
-styleColor=RGBColor/@Association@colorData[["StyleColor"]];
-buttonColor=RGBColor/@#&/@Association/@Association@colorData[["ButtonColor"]];
-pageSelectorColor=RGBColor/@#&/@Association/@Association@colorData[["PageSelectorColor"]];
-styleData=Association/@Association@Import[localPath<>"Assets/style.json"];                  (* styles *)
-styleDict=Normal@Module[{outcome={}},
-	If[KeyExistsQ[#,"Size"],AppendTo[outcome,FontSize->#[["Size"]]]];
-	If[KeyExistsQ[#,"Family"],AppendTo[outcome,FontFamily->#[["Family"]]]];
-	If[KeyExistsQ[#,"Weight"],AppendTo[outcome,FontWeight->ToExpression@#[["Weight"]]]];
-	If[KeyExistsQ[#,"Color"],AppendTo[outcome,FontColor->styleColor[[#[["Color"]]]]]];
-outcome]&/@styleData;
-langDict=Association@Import[localPath<>"language/Languages.json"];                      (* languages *)
-tagDict=Association/@Association@Import[localPath<>"Tags.json"];
-
-
-(* user data *)
-If[!DirectoryQ[userPath],
-	CreateDirectory[userPath];
-	userInfo=userTemplate;
-	refreshLanguage;
-	uiSetPath;
-	Export[userPath<>"Default.json",userInfo],
-	userInfo=Association@Import[userPath<>"Default.json"];
-	refreshLanguage;
-	If[userInfo[["Version"]]<version,
-		Do[
-			If[!KeyExistsQ[userInfo,tag],AppendTo[userInfo,tag->userTemplate[[tag]]]],
-		{tag,Keys@userTemplate}];
-		userInfo[["Version"]]=version;
-		Export[userPath<>"Default.json",userInfo];
-	];
-];
-If[!FileExistsQ[userPath<>"Favorite.json"],Export[userPath<>"Favorite.json",{}]];
-favorite=Import[userPath<>"Favorite.json"];
-
-
-(* program data *)
-dataPath=userInfo[["DataPath"]];
-If[!DirectoryQ[dataPath],CreateDirectory[dataPath]];
-If[!DirectoryQ[dataPath<>"buffer/"],CreateDirectory[dataPath<>"buffer/"]];
-If[!DirectoryQ[dataPath<>"images/"],CreateDirectory[dataPath<>"images/"]];
-If[!FileExistsQ[dataPath<>"Buffer.json"],Export[dataPath<>"Buffer.json",{}]];
-bufferHash=Association@Import[dataPath<>"Buffer.json"];
-If[!FileExistsQ[dataPath<>"Image.json"],Export[dataPath<>"Image.json",{}]];
-imageData=Association/@Association@Import[dataPath<>"image.json"];

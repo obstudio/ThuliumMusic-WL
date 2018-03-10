@@ -32,24 +32,6 @@ logo=Scale[{
 (*{1,-1}]}]*)
 
 
-(* basic graphics *)
-squareRounded[t_,r_,scheme_]:=If[r==1,
-	GraphicsGroup[{
-		scheme[["Grounding"]],Disk[{0,0},1-t],
-		scheme[["Margin"]],Thickness[t],Circle[{0,0},1-t]
-	}],
-	GraphicsGroup[{
-		scheme[["Grounding"]],
-		Rectangle[{t-1,t-1},{1-t,1-t},RoundingRadius->{r-t,r-t}],
-		scheme[["Margin"]],Thickness[t],CapForm["Round"],
-		Circle[{r-1,r-1},r-t,{Pi,3Pi/2}],Circle[{1-r,1-r},r-t,{0,Pi/2}],
-		Circle[{1-r,r-1},r-t,{-Pi/2,0}],Circle[{r-1,1-r},r-t,{Pi/2,Pi}],
-		Line[{{r-1,t-1},{1-r,t-1}}],Line[{{r-1,1-t},{1-r,1-t}}],
-		Line[{{t-1,r-1},{t-1,1-r}}],Line[{{1-t,r-1},{1-t,1-r}}]
-	}]
-];
-
-
 (* page selector *)
 pageSelectorDisplay[num_Integer,style_,size_]:=If[style=="Default",
 	Mouseover[pageSelectorDisplay[num,"Basic",size],pageSelectorDisplay[num,"Mouseover",size]],

@@ -40,9 +40,9 @@ RenderContent[rawData_List] := Block[
 				
 				(* Separator *)
 				StringMatchQ[line, RegularExpression["\\-{3,} *"]],
-					Sow[SpacerCell[{40, 1}, 2, CellFrameColor -> RGBColor["#777777"]], "Cell"],
+					Sow[SpacerCell[{40, 1}, 3, CellFrameColor -> RGBColor["#777777"]], "Cell"],
 				StringMatchQ[line, RegularExpression["={3,} *"]],
-					Sow[SpacerCell[{40, 2}, 4, CellFrameColor -> RGBColor["#999999"]], "Cell"],
+					Sow[SpacerCell[{40, 2}, 6, CellFrameColor -> RGBColor["#999999"]], "Cell"],
 					
 				(* Title *)
 				StringStartsQ[line, RegularExpression["#"]],
@@ -94,7 +94,7 @@ RenderContent[rawData_List] := Block[
 					]&];
 					Sow[Cell[CellGroupData[{
 						Cell[
-							RenderText[StringDelete[line, RegularExpression["^\\-*\\^+ *"]], "Section"],
+							BoxData @ RenderText[StringDelete[line, RegularExpression["^\\-*\\^+ *"]], "Section"],
 							ShowGroupOpener -> True,
 							CellMargins -> {{48, 48} + markCount * 12, {10, 18}},
 							FontSize -> 48 - (markCount - markCount1) * 6
@@ -123,27 +123,29 @@ RenderContent[rawData_List] := Block[
 					}]], "Cell"];
 					lineCount = lineNext,
 				
-				(* Mini-player *)
+				(* Comment *)
 				StringStartsQ[line, ">"],
-					tmData = "";
-					lineCount -= 1;
-					While[lineCount <= Length[rawData] && StringStartsQ[line, ">"],
-						If[tmData != "", tmData = tmData <> "\n"];
-						tmData = tmData <> StringDelete[line, RegularExpression["^>\\s*"]];
-						lineCount += 1;
-						line = rawData[[lineCount]];
-					];
+					lineNext = lineCount + LengthWhile[rawData[[lineCount ;; ]], StringStartsQ[#, ">"]&];
 					Sow[Cell[
-						BoxData @ TemplateBox[{tmData}, "Miniplayer"],
-						CellMargins -> {{48, Automatic}, {8, 6}},
-						Selectable -> False
-					], "Cell"],
+						BoxData @ RowBox[Riffle[Riffle[
+							Map[
+								RenderText[StringDelete[#, RegularExpression["^> *"]], "Comment"]&,
+								rawData[[lineCount - 1 ;; lineNext - 1]]
+							],
+							TemplateBox[{4}, "Spacer1"], {1, -2, 2}
+						], "\n", 3]],
+						LineSpacing -> {1, 12},
+						CellMargins -> {{54, 15}, {12, 12}},
+						CellFrame -> {{8, 0}, {0, 0}},
+						CellFrameColor -> RGBColor["#CCCCCC"]
+					], "Cell"];
+					lineCount = lineNext,
 					
 				(* Text *)
 				!StringMatchQ[line, RegularExpression["\\s*"]],
 					Sow[Cell[
 						BoxData[RenderText[line, "Text"]], 
-						CellMargins -> {{48, 15}, {8, 6}}
+						CellMargins -> {{48, 15}, {6, 6}}
 					], "Cell"];
 				
 			];
@@ -157,10 +159,7 @@ RenderTMD::usage = "\
 \!\(\*RowBox[{\"RenderTMD\",\"[\",RowBox[{StyleBox[\"filepath\",\"TI\"]}],\"]\"}]\)
 generate a document notebook for \!\(\*StyleBox[\"filepath\",\"TI\"]\).";
 
-RenderTMD[filepath_String] := Block[
-	{
-		rawData
-	},
+RenderTMD[filepath_String] := Block[{rawData},
 	
 	If[FileExistsQ[filepath],
 		rawData = StringSplit[Import[filepath, "Text", CharacterEncoding -> "UTF-8"], "\n"],

@@ -149,4 +149,54 @@ buttonData={
 (*Grid[buttonDisplay/@#&/@buttonNamePaged,ItemSize->{6,6},Spacings->{.5,0}]*)
 
 
+(* page selector *)
+pageSelectorDisplay[num_Integer,style_,size_]:=If[style=="Default",
+	Mouseover[pageSelectorDisplay[num,"Basic",size],pageSelectorDisplay[num,"Mouseover",size]],
+	Block[{scheme=pageSelectorColor[[style]]},Graphics[{
+		squareRounded[0.06,0.3,scheme],
+		Text[num,BaseStyle->{
+			FontWeight->If[StringContainsQ[style,"Current"],Bold,Plain],
+			FontSize->size,
+			FontColor->scheme[["Body"]]
+		}]
+	},ContentSelectable->False]]
+];
+pageSelectorDisplay[name_String,style_]:=If[style=="Default",
+	Mouseover[pageSelectorDisplay[name,"Basic"],pageSelectorDisplay[name,"Mouseover"]],
+	Block[{scheme=pageSelectorColor[[style]]},Graphics[{
+		squareRounded[0.06,0.3,scheme],
+		scheme[["Body"]],
+		pageSelectorData[name]
+	},ContentSelectable->False]]
+];
+pageSelectorData=<|
+	"Prev"->GraphicsGroup[{
+		Thickness[0.08],CapForm["Round"],JoinForm["Round"],
+		Line[{{0.32,0.48},{-0.36,0},{0.32,-0.48}}]
+	}],
+	"Next"->GraphicsGroup[{
+		Thickness[0.08],CapForm["Round"],JoinForm["Round"],
+		Line[{{-0.32,0.48},{0.36,0},{-0.32,-0.48}}]
+	}],
+	"First"->GraphicsGroup[{
+		Thickness[0.08],CapForm["Round"],JoinForm["Round"],
+		Line[{{-0.4,-0.48},{-0.4,0.48}}],
+		Line[{{0.44,0.48},{-0.16,0},{0.44,-0.48}}]
+	}],
+	"Last"->GraphicsGroup[{
+		Thickness[0.08],CapForm["Round"],JoinForm["Round"],
+		Line[{{0.4,-0.48},{0.4,0.48}}],
+		Line[{{-0.44,0.48},{0.16,0},{-0.44,-0.48}}]
+	}]
+|>;
 
+
+(* button *)
+buttonDisplay[name_]:=buttonDisplay[name,"Default"];
+buttonDisplay[name_,style_]:=If[style=="Default",
+	Mouseover[buttonDisplay[name,"Basic"],buttonDisplay[name,"Mouseover"]],
+	With[{scheme=buttonColor[[style]]},Graphics[{
+		squareRounded[0.06,1,scheme],
+		scheme[["Body"]],name/.buttonData
+	},ContentSelectable->False]]
+];

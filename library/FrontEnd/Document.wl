@@ -21,8 +21,7 @@ RenderText[line_String, style_String] := Block[{output},
 	Return[BoxSimplify @ RowBox @ output];
 ];
 
-(* Main *)
-RenderContent[rawData_List] := Block[
+RenderContent[rawData_List, id_Integer] := Block[
 	{
 		line, lineCount, lineNext,
 		markCount, markCount1,
@@ -40,9 +39,9 @@ RenderContent[rawData_List] := Block[
 				
 				(* Separator *)
 				StringMatchQ[line, RegularExpression["\\-{3,} *"]],
-					Sow[SpacerCell[{40, 1}, 3, CellFrameColor -> RGBColor["#777777"]], "Cell"],
+					Sow[SpacerCell[{40, 1}, 2, CellFrameColor -> RGBColor["#777777"]], "Cell"],
 				StringMatchQ[line, RegularExpression["={3,} *"]],
-					Sow[SpacerCell[{40, 2}, 6, CellFrameColor -> RGBColor["#999999"]], "Cell"],
+					Sow[SpacerCell[{40, 2}, 4, CellFrameColor -> RGBColor["#999999"]], "Cell"],
 					
 				(* Title *)
 				StringStartsQ[line, RegularExpression["#"]],
@@ -99,7 +98,7 @@ RenderContent[rawData_List] := Block[
 							CellMargins -> {{48, 48} + markCount * 12, {10, 18}},
 							FontSize -> 48 - (markCount - markCount1) * 6
 						],
-						Sequence @@ RenderContent[rawData[[lineCount ;; lineNext - 1]]]
+						Sequence @@ RenderContent[rawData[[lineCount ;; lineNext - 1]], id]
 					}]], "Cell"];
 					lineCount = lineNext,
 				
@@ -119,12 +118,12 @@ RenderContent[rawData_List] := Block[
 							CellDingbat -> TemplateBox[{DingBatList[[markCount + 1]]}, "DingBat"],
 							CellMargins -> {{72 + markCount * 16, 48}, {4, 4}}
 						],
-						Sequence @@ RenderContent[rawData[[lineCount ;; lineNext - 1]]]
+						Sequence @@ RenderContent[rawData[[lineCount ;; lineNext - 1]], id]
 					}]], "Cell"];
 					lineCount = lineNext,
 				
 				(* Comment *)
-				StringStartsQ[line, ">"],
+				StringStartsQ[line, ">"~~Except[">"]],
 					lineNext = lineCount + LengthWhile[rawData[[lineCount ;; ]], StringStartsQ[#, ">"]&];
 					Sow[Cell[
 						BoxData @ RowBox[Riffle[Riffle[
@@ -140,6 +139,19 @@ RenderContent[rawData_List] := Block[
 						CellFrameColor -> RGBColor["#CCCCCC"]
 					], "Cell"];
 					lineCount = lineNext,
+					
+				(* CodeBlock *)
+				StringStartsQ[line, "```"],
+					lineNext = lineCount + LengthWhile[rawData[[lineCount ;; ]], !StringStartsQ[#, "```"]&];
+					Sow[Cell[
+						BoxData @ TemplateBox[{
+							RowBox[Riffle[RenderText[#, "Code"]&/@ rawData[[lineCount ;; lineNext - 1]], "\n"]],
+							Dynamic @ CurrentValue[$GeneratedList[[id]], WindowSize][[1]] - 120,
+							(lineNext - lineCount) * 24 + 32
+						}, "CodeBlock"],
+						CellMargins -> {{48, 48}, {18, 18}}
+					], "Cell"];
+					lineCount = lineNext + 1,
 					
 				(* Text *)
 				!StringMatchQ[line, RegularExpression["\\s*"]],
@@ -167,7 +179,8 @@ RenderTMD[filepath_String] := Block[{rawData},
 		Return[];
 	];
 	
-	CreateDialog[RenderContent[rawData],
+	AppendTo[$GeneratedList, CreateDialog[
+		RenderContent[rawData, Length[$GeneratedList] + 1],
 		WindowTitle -> StringSplit[filepath,"/"|"\\"][[-1]],
 		WindowMargins -> {{80, Automatic}, {Automatic, 60}},
 		WindowElements -> {"VerticalScrollBar"},
@@ -179,9 +192,8 @@ RenderTMD[filepath_String] := Block[{rawData},
 		CellGrouping -> Manual,
 		Saveable -> False,
 		Editable -> False,
-		Copyable -> False,
-		Enabled -> False
-	];
+		Copyable -> False
+	]];
 ];
 
 

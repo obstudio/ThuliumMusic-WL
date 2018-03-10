@@ -1,5 +1,24 @@
 (* ::Package:: *)
 
+$GeneratedList = {};
+DingBatList = {"\[FilledDiamond]", "\[EmptyDiamond]", "\[FilledCircle]", "\[EmptyCircle]", "\[FilledSquare]", "\[EmptySquare]", "\[FilledUpTriangle]", "\[EmptyUpTriangle]"};
+
+
+(* some functions *)
+completeText[raw_,arg_]:=StringReplace[raw,{
+	"&"~~i:DigitCharacter:>ToString[arg[[ToExpression@i]],FormatType->InputForm],
+	"$"~~i:DigitCharacter:>"\""<>arg[[ToExpression@i]]<>"\"",
+	"#"~~i:DigitCharacter:>StringRiffle[ToString[#,FormatType->InputForm]&/@arg[[ToExpression@i]],", "]
+}];
+caption[string_String]:=caption[string,"None",{}];
+caption[string_String,argument_List]:=caption[string,"None",argument];
+caption[string_String,style_String]:=caption[string,style,{}];
+caption[string_String,style_String,argument_List]:=Style[completeText[Which[
+	StringLength@string>0&&StringPart[string,1]=="_",text[[StringDrop[string,1]]],
+	True,string
+],argument],styleDict[[style]]];
+
+
 (* Box Tools *)
 BoxApply[StyleBox[boxspec__], options___] := StyleBox[boxspec, options];
 BoxApply[RowBox[boxes_List], options___] := RowBox[BoxApply[#, options]& /@ boxes];
@@ -15,6 +34,7 @@ BoxSimplify[boxes_List] := If[Length[boxes] == 1, boxes[[1]],
 		RowBox[boxes1_List] :> BoxSimplify[boxes1]
 	}]
 ];
+
 
 (* Spacer Cell *)
 Options[SpacerCell] = {
@@ -33,26 +53,14 @@ SpacerCell[{w_Integer:0, h_Integer}, t_Integer:0, OptionsPattern[]] := Cell["", 
 	Selectable -> False
 ];
 
-DingBatList = {"\[FilledDiamond]", "\[EmptyDiamond]", "\[FilledCircle]", "\[EmptyCircle]", "\[FilledSquare]", "\[EmptySquare]", "\[FilledUpTriangle]", "\[EmptyUpTriangle]"};
 
-
-
-
-(* some functions *)
-textLength[string_]:=2StringLength[string]-StringCount[string,Alternatives@CharacterRange[32,127]];
-timeDisplay[time_]:=Block[
-	{sec=Floor[QuantityMagnitude[UnitConvert[time,"Seconds"]]]},
-	IntegerString[Floor[sec/60],10,2]<>":"<>IntegerString[Mod[sec,60],10,2]
+textLength[str_String] := 2 StringLength[str] - StringCount[str, Alternatives @ CharacterRange[32, 127]];
+timeDisplay[time_Quantity, levelspec_Integer] := With[
+	{sec = Floor[QuantityMagnitude[UnitConvert[time, "Seconds"]]]},
+	StringRiffle[{
+		If[StringLength[#] == 1, "0" <> #, #]&[IntegerString[Floor[sec / (60 ^ (levelspec - 1))], 10]],
+		Sequence @@ Table[
+			IntegerString[Floor[Mod[sec / (60 ^ (level - 1)), 60]], 10, 2],
+		{level, levelspec - 1, 1, -1}]
+	}, ":"]
 ];
-completeText[raw_,arg_]:=StringReplace[raw,{
-	"&"~~i:DigitCharacter:>ToString[arg[[ToExpression@i]],FormatType->InputForm],
-	"$"~~i:DigitCharacter:>"\""<>arg[[ToExpression@i]]<>"\"",
-	"#"~~i:DigitCharacter:>StringRiffle[ToString[#,FormatType->InputForm]&/@arg[[ToExpression@i]],", "]
-}];
-caption[string_String]:=caption[string,"None",{}];
-caption[string_String,argument_List]:=caption[string,"None",argument];
-caption[string_String,style_String]:=caption[string,style,{}];
-caption[string_String,style_String,argument_List]:=Style[completeText[Which[
-	StringLength@string>0&&StringPart[string,1]=="_",text[[StringDrop[string,1]]],
-	True,string
-],argument],styleDict[[style]]];

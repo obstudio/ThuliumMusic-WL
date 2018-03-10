@@ -2,7 +2,7 @@
 	"Title": "植物大战僵尸",
 	"Comment": "Plant vs. Zombies",
 	"Abstract": "",
-	"Path": "PVZ\\",
+	"Path": "PVZ/",
 	"SongList": [
 		{"Song": "Watery_Grave"},
 		{"Song": "Brainiac_Maniac"},

@@ -14,7 +14,7 @@ initJS := (
 		Abort[];
 	];
 	System`JS = StartExternalSession["NodeJS"];
-	ExternalEvaluate[JS, File[localPath<>"library\\Parser\\Parser.js"]];
+	ExternalEvaluate[JS, File[localPath<>"library/Parser/Parser.js"]];
 	ExternalEvaluate[JS, "const fs = require('fs')"];
 	ExternalEvaluate[JS, "
 		function Parse(filePath) {
@@ -33,8 +33,8 @@ initJS := (
 (* path and template *)
 version=281;
 cloudPath="http://qymp.ob-studio.cn/assets/";
-defaultDataPath="C:\\ProgramData\\obstudio\\QYMP\\";
-userPath=StringReplace[$HomeDirectory,"\\"->"/"]<>"/AppData/Local/obstudio/QYMP/";
+defaultDataPath="C:\\ProgramData\\obstudio\\QYMP\\"; (* Update this *)
+userPath=StringReplace[$HomeDirectory,"\\"->"/"]<>"/AppData/Local/obstudio/QYMP/"; (* Update this *)
 If[!DirectoryQ[defaultDataPath],CreateDirectory[defaultDataPath]];
 userTemplate=<|
 	"Version"->version,
@@ -46,8 +46,8 @@ userTemplate=<|
 
 
 (* instruments *)
-instDict=Association@Import[localPath<>"library\\Data\\Instrument.json"];
-percDict=Association@Import[localPath<>"library\\Data\\Percussion.json"];
+instDict=Association@Import[localPath<>"library/Data/Instrument.json"];
+percDict=Association@Import[localPath<>"library/Data/Percussion.json"];
 instList=Keys@instDict;
 percList=Keys@percDict;
 
@@ -93,7 +93,7 @@ playlistTemplate=<|
 
 
 refreshLanguage:=Module[{langDataPath},
-	langDataPath=localPath<>"language\\"<>userInfo[["Language"]]<>"\\";
+	langDataPath=localPath<>"language/"<>userInfo[["Language"]]<>"/";
 	tagName=Association@Import[langDataPath<>"GeneralTags.json"];
 	instrName=Association@Import[langDataPath<>"Instruments.json"];
 	text=Association@Import[langDataPath<>"GeneralTexts.json"];
@@ -111,20 +111,20 @@ refresh:=Block[
 	songs=StringDrop[Select[metaTree,StringMatchQ[__~~".json"]],-5];
 	dirList=Select[metaTree,!StringMatchQ[#,__~~".json"]&];
 	Do[
-		If[!DirectoryQ[dataPath<>"buffer\\"<>dir],CreateDirectory[dataPath<>"buffer\\"<>dir]],
+		If[!DirectoryQ[dataPath<>"buffer/"<>dir],CreateDirectory[dataPath<>"buffer/"<>dir]],
 	{dir,dirList}];
-	index=Association/@AssociationMap[Import[localPath<>"Meta\\"<>#<>".json"]&,songs];
+	index=Association/@AssociationMap[Import[localPath<>"Meta/"<>#<>".json"]&,songs];
 	imageDirList=DeleteDuplicates@Flatten[
-		StringCases[dir__~~"\\"~~Except["\\"]..:>dir]/@Values@index[[songs,"Image"]]
+		StringCases[dir__~~"\\"~~Except["\\"]..:>dir]/@Values@index[[songs,"Image"]] (* Update this *)
 	];
 	Do[
-		If[!DirectoryQ[dataPath<>"images\\"<>dir],CreateDirectory[dataPath<>"images\\"<>dir]],
+		If[!DirectoryQ[dataPath<>"images/"<>dir],CreateDirectory[dataPath<>"images/"<>dir]],
 	{dir,imageDirList}];
 	playlists=Association/@Import[localPath<>"playlist.json"];
 	playlistData=<||>;
 	songsClassified={};
 	Do[
-		playlistInfo=Append[Association@Import[localPath<>"Playlists\\"<>playlist,"JSON"],<|"Type"->"Playlist"|>];
+		playlistInfo=Append[Association@Import[localPath<>"Playlists/"<>playlist,"JSON"],<|"Type"->"Playlist"|>];
 		songList=#Song&/@Association/@playlistInfo[["SongList"]];
 		AppendTo[playlistData,<|playlist->playlistInfo|>];
 		AppendTo[songsClassified,playlistInfo[["Path"]]<>#&/@songList],
@@ -164,16 +164,16 @@ refresh:=Block[
 
 updateImage:=Block[{updates={},image,filename,meta},
 	Do[
-		If[KeyExistsQ[index[[song]],"Image"]&&!FileExistsQ[dataPath<>"Images\\"<>index[[song,"Image"]]],
+		If[KeyExistsQ[index[[song]],"Image"]&&!FileExistsQ[dataPath<>"Images/"<>index[[song,"Image"]]],
 			AppendTo[updates,index[[song,"Image"]]]
 		],
 	{song,songs}];
 	If[updates=={},Return[]];
 	Monitor[Do[
 		filename=updates[[i]];
-		image=Import[cloudPath<>"images/"<>StringReplace[filename,"\\"->"/"]];
-		Export[dataPath<>"Images\\"<>filename,image];
-		meta=Association@Import[cloudPath<>"images/"<>StringReplace[filename,{"\\"->"/","."~~__->".json"}]];
+		image=Import[cloudPath<>"images/"<>StringReplace[filename,"\\"->"/"]]; (* Update this *)
+		Export[dataPath<>"Images/"<>filename,image];
+		meta=Association@Import[cloudPath<>"images/"<>StringReplace[filename,{"\\"->"/","."~~__->".json"}]]; (* Update this *)
 		If[KeyExistsQ[imageData,filename],
 			imageData[[filename]]=meta,
 			AppendTo[imageData,filename->meta]
@@ -197,12 +197,12 @@ updateImage:=Block[{updates={},image,filename,meta},
 updateBuffer:=Block[{updates={},song,filename,hash,audio,bufferList},
 	SetDirectory[dataPath];
 	bufferList=StringTake[FileNames["*.buffer","buffer",Infinity],{8,-8}];
-	DeleteFile[dataPath<>"Buffer\\"<>#<>".buffer"]&/@Complement[bufferList,songs];
+	DeleteFile[dataPath<>"Buffer/"<>#<>".buffer"]&/@Complement[bufferList,songs];
 	Do[
-		filename=localPath<>"Songs\\"<>song<>".tm";
+		filename=localPath<>"Songs/"<>song<>".tm";
 		hash=IntegerString[FileHash[filename],32];
 		If[KeyExistsQ[bufferHash,song],
-			If[bufferHash[[song]]==hash && FileExistsQ[dataPath<>"Buffer\\"<>song<>".buffer"],
+			If[bufferHash[[song]]==hash && FileExistsQ[dataPath<>"Buffer/"<>song<>".buffer"],
 				Continue[],
 				AppendTo[updates,song];
 			],
@@ -213,10 +213,10 @@ updateBuffer:=Block[{updates={},song,filename,hash,audio,bufferList},
 	If[updates=={},Return[]];
 	Monitor[Do[
 		song=updates[[i]];
-		filename=localPath<>"Songs\\"<>song<>".tm";
+		filename=localPath<>"Songs/"<>song<>".tm";
 		bufferHash[[song]]=IntegerString[FileHash[filename],32];
 		audio=AudioAdapt[Parse[filename]];
-		Export[dataPath<>"Buffer\\"<>song<>".buffer",audio,"MP3"],
+		Export[dataPath<>"Buffer/"<>song<>".buffer",audio,"MP3"],
 	{i,Length@updates}],
 	Panel[Column[{Spacer[{4,4}],
 		text[["UpdatingBuffer"]],
@@ -244,18 +244,18 @@ $Updated=False;
 
 
 (* local data *)
-colorData=Association@Import[localPath<>"Assets\\color.json"];                               (* colors *)
+colorData=Association@Import[localPath<>"Assets/color.json"];                               (* colors *)
 styleColor=RGBColor/@Association@colorData[["StyleColor"]];
 buttonColor=RGBColor/@#&/@Association/@Association@colorData[["ButtonColor"]];
 pageSelectorColor=RGBColor/@#&/@Association/@Association@colorData[["PageSelectorColor"]];
-styleData=Association/@Association@Import[localPath<>"Assets\\style.json"];                  (* styles *)
+styleData=Association/@Association@Import[localPath<>"Assets/style.json"];                  (* styles *)
 styleDict=Normal@Module[{outcome={}},
 	If[KeyExistsQ[#,"Size"],AppendTo[outcome,FontSize->#[["Size"]]]];
 	If[KeyExistsQ[#,"Family"],AppendTo[outcome,FontFamily->#[["Family"]]]];
 	If[KeyExistsQ[#,"Weight"],AppendTo[outcome,FontWeight->ToExpression@#[["Weight"]]]];
 	If[KeyExistsQ[#,"Color"],AppendTo[outcome,FontColor->styleColor[[#[["Color"]]]]]];
 outcome]&/@styleData;
-langDict=Association@Import[localPath<>"language\\Languages.json"];                      (* languages *)
+langDict=Association@Import[localPath<>"language/Languages.json"];                      (* languages *)
 tagDict=Association/@Association@Import[localPath<>"Tags.json"];
 
 
@@ -283,8 +283,8 @@ favorite=Import[userPath<>"Favorite.json"];
 (* program data *)
 dataPath=userInfo[["DataPath"]];
 If[!DirectoryQ[dataPath],CreateDirectory[dataPath]];
-If[!DirectoryQ[dataPath<>"buffer\\"],CreateDirectory[dataPath<>"buffer\\"]];
-If[!DirectoryQ[dataPath<>"images\\"],CreateDirectory[dataPath<>"images\\"]];
+If[!DirectoryQ[dataPath<>"buffer/"],CreateDirectory[dataPath<>"buffer/"]];
+If[!DirectoryQ[dataPath<>"images/"],CreateDirectory[dataPath<>"images/"]];
 If[!FileExistsQ[dataPath<>"Buffer.json"],Export[dataPath<>"Buffer.json",{}]];
 bufferHash=Association@Import[dataPath<>"Buffer.json"];
 If[!FileExistsQ[dataPath<>"Image.json"],Export[dataPath<>"Image.json",{}]];

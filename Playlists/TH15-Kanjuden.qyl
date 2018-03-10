@@ -2,7 +2,7 @@
 	"Title": "东方绀珠传",
 	"Comment": "东方绀珠伝 ~ Legacy of Lunatic Kingdom",
 	"Abstract": "",
-	"Path": "Touhou\\TH15-Kanjuden\\",
+	"Path": "Touhou/TH15-Kanjuden/",
 	"SongList": [
 		{"Index": "一面道中曲", "Song": "Wasuregataki"},
 		{"Index": "一面BOSS曲", "Song": "Usagi_ha_Mai_Orita"},

@@ -2,7 +2,7 @@
 	"Title": "东方地灵殿",
 	"Comment": "東方地霊殿 ~ Subterranean Animism",
 	"Abstract": "",
-	"Path": "Touhou\\TH11-Chireiden\\",
+	"Path": "Touhou/TH11-Chireiden/",
 	"SongList": [
 		{"Index": "二面道中曲", "Song": "Taeta_Hashi"},
 		{"Index": "二面BOSS曲", "Song": "Ryokugann_No_Jealousy"},

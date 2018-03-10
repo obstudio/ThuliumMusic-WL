@@ -32,7 +32,7 @@ putTextInfo[song_,textInfo_]:=Module[
 		info[[tag]]=textInfo[[tag]],
 	{tag,textInfoTags}];
 	index[[song]]=info;
-	Export[localPath<>"Meta\\"<>song<>".json",index[[song]]];
+	Export[localPath<>"Meta/"<>song<>".json",index[[song]]];
 ];
 
 
@@ -80,7 +80,7 @@ uiDeleteSong[song_]:=CreateDialog[Column[{"",
 	Row[{
 		Button[text[["Confirm"]],
 			index=Delete[index,song];
-			DeleteFile[localPath<>"Meta\\"<>song<>".json"];
+			DeleteFile[localPath<>"Meta/"<>song<>".json"];
 			DialogReturn[refresh;uiPlaylist["All"]],
 		ImageSize->100],
 		Spacer[20],

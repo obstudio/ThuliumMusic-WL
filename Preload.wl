@@ -1,5 +1,18 @@
 (* ::Package:: *)
 
+Switch[$VersionNumber,
+	11.2, StatusAlias = "State",
+	11.3, StatusAlias = "Status",
+	_,
+		CreateDialog[{
+			TextCell["Sorry, but your Mathematica isn't updated enough."],
+			TextCell["Try to install Mathematica with version no less than 11.2."],
+			DefaultButton[]
+		}];
+		Abort[];
+];
+
+
 (* path and template *)
 version=281;
 cloudPath="http://qymp.ob-studio.cn/assets/";

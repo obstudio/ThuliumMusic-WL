@@ -9,17 +9,17 @@ uiPlayerControlsOld:={
 		Style[timeDisplay[duration],20]
 	}],Spacer[1],
 	Row[{Button[
-		Dynamic[Switch[current["State"],
+		Dynamic[Switch[current[StatusAlias],
 			"Playing",text[["Pause"]],
 			"Paused"|"Stopped",text[["Play"]]
 		]],
-		Switch[current["State"],
-			"Playing",current["State"]="Paused",
-			"Paused"|"Stopped",current["State"]="Playing"
+		Switch[current[StatusAlias],
+			"Playing",current[StatusAlias]="Paused",
+			"Paused"|"Stopped",current[StatusAlias]="Playing"
 		],
 		ImageSize->80],
 		Spacer[20],
-		Button[text[["Stop"]],current["State"]="Stopped",ImageSize->80],
+		Button[text[["Stop"]],current[StatusAlias]="Stopped",ImageSize->80],
 		Spacer[20],
 		Button[text[["Return"]],AudioStop[];DialogReturn[uiPlaylist[currentPlaylist]],ImageSize->80]			
 	}]
@@ -44,14 +44,14 @@ uiPlayerControlsNew:={
 	},ImageSize->Full,Alignment->Center],
 	Row[{
 		DynamicModule[{style="Default"},
-			Dynamic@Switch[current["State"],
+			Dynamic@Switch[current[StatusAlias],
 				"Playing",EventHandler[button["Pause",style],{
 					"MouseDown":>(style="Clicked"),
-					"MouseUp":>(style="Default";current["State"]="Paused")
+					"MouseUp":>(style="Default";current[StatusAlias]="Paused")
 				}],
 				"Paused"|"Stopped",EventHandler[button["Play",style],{
 					"MouseDown":>(style="Clicked"),
-					"MouseUp":>(style="Default";current["State"]="Playing")
+					"MouseUp":>(style="Default";current[StatusAlias]="Playing")
 				}]
 			]
 		],
@@ -59,7 +59,7 @@ uiPlayerControlsNew:={
 		DynamicModule[{style="Default"},
 			EventHandler[Dynamic@button["Stop",style],{
 				"MouseDown":>(style="Clicked"),
-				"MouseUp":>(style="Default";current["State"]="Stopped";current["Position"]=0)
+				"MouseUp":>(style="Default";current[StatusAlias]="Stopped";current["Position"]=0)
 			}]
 		],
 		Spacer[20],

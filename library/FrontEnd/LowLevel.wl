@@ -55,7 +55,7 @@ SpacerCell[{w_Integer:0, h_Integer}, t_Integer:0, OptionsPattern[]] := Cell["", 
 
 
 textLength[str_String] := 2 StringLength[str] - StringCount[str, Alternatives @ CharacterRange[32, 127]];
-timeDisplay[time_Quantity, levelspec_Integer] := With[
+timeDisplay[time_Quantity, levelspec_Integer:2] := With[
 	{sec = Floor[QuantityMagnitude[UnitConvert[time, "Seconds"]]]},
 	StringRiffle[{
 		If[StringLength[#] == 1, "0" <> #, #]&[IntegerString[Floor[sec / (60 ^ (levelspec - 1))], 10]],

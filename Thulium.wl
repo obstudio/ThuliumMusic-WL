@@ -8,7 +8,7 @@
 (*Please click the "Run All Code" button at the upper-right corner to run Thulium Music Player.*)
 
 
-System`localPath = StringReplace[NotebookDirectory[],"\\"->"/"];
+System`localPath = StringReplace[NotebookDirectory[], "\\"->"/"];
 SetDirectory[localPath];
 << (localPath <> "Preload.wl");
 Scan[Get, FileNames["*.wl", "library", Infinity]];
@@ -20,6 +20,10 @@ InitializeParser
 
 
 Main
+
+
+(* ::Input:: *)
+(*AudioStop[]*)
 
 
 (* ::Input:: *)

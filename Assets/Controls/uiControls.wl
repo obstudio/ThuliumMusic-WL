@@ -1,57 +1,57 @@
 (* ::Package:: *)
 
-uiPlayerControlsOld:={
+uiPlayerControlsOld := With[{StatusAlias = StatusAlias}, {
 	Row[{
-		Dynamic[Style[timeDisplay[current["Position"]],20]],
+		Dynamic[Style[timeDisplay[$CurrentStream["Position"]],20]],
 		Spacer[8],
-		ProgressIndicator[Dynamic[current["Position"]/duration],ImageSize->{240,16}],
+		ProgressIndicator[Dynamic[$CurrentStream["Position"]/$CurrentDuration],ImageSize->{240,16}],
 		Spacer[8],
-		Style[timeDisplay[duration],20]
+		Style[timeDisplay[$CurrentDuration],20]
 	}],Spacer[1],
 	Row[{Button[
-		Dynamic[Switch[current[StatusAlias],
+		Dynamic[Switch[$CurrentStream[StatusAlias],
 			"Playing",text[["Pause"]],
 			"Paused"|"Stopped",text[["Play"]]
 		]],
-		Switch[current[StatusAlias],
-			"Playing",current[StatusAlias]="Paused",
-			"Paused"|"Stopped",current[StatusAlias]="Playing"
+		Switch[$CurrentStream[StatusAlias],
+			"Playing",$CurrentStream[StatusAlias]="Paused",
+			"Paused"|"Stopped",$CurrentStream[StatusAlias]="Playing"
 		],
 		ImageSize->80],
 		Spacer[20],
-		Button[text[["Stop"]],current[StatusAlias]="Stopped",ImageSize->80],
+		Button[text[["Stop"]],$CurrentStream[StatusAlias]="Stopped",ImageSize->80],
 		Spacer[20],
 		Button[text[["Return"]],AudioStop[];DialogReturn[uiPlaylist[currentPlaylist]],ImageSize->80]			
 	}]
-};
+}];
 
 
-uiPlayerControlsNew:={
+uiPlayerControlsNew := With[{StatusAlias = StatusAlias}, {
 	Row[{
-		Column[{Style[Dynamic[timeDisplay[current["Position"]]],20],Spacer[1]}],
+		Column[{Style[Dynamic[timeDisplay[$CurrentStream["Position"]]],20],Spacer[1]}],
 		Spacer[8],
 		Magnify[
 			EventHandler[Dynamic@Graphics[{
-				progressBar[current["Position"]/duration,16],
-				progressBlock[current["Position"]/duration,16]
+				progressBar[$CurrentStream["Position"]/$CurrentDuration,16],
+				progressBlock[$CurrentStream["Position"]/$CurrentDuration,16]
 			}],
 			{"MouseDragged":>(
-				current["Position"]=duration*progressLocate[CurrentValue[{"MousePosition","Graphics"}][[1]],16]
+				$CurrentStream["Position"]=$CurrentDuration*progressLocate[CurrentValue[{"MousePosition","Graphics"}][[1]],16]
 			)}],
 		3.6],
 		Spacer[8],
-		Column[{Style[timeDisplay[duration],20],Spacer[1]}]
+		Column[{Style[timeDisplay[$CurrentDuration],20],Spacer[1]}]
 	},ImageSize->Full,Alignment->Center],
 	Row[{
 		DynamicModule[{style="Default"},
-			Dynamic@Switch[current[StatusAlias],
+			Dynamic@Switch[$CurrentStream[StatusAlias],
 				"Playing",EventHandler[button["Pause",style],{
 					"MouseDown":>(style="Clicked"),
-					"MouseUp":>(style="Default";current[StatusAlias]="Paused")
+					"MouseUp":>(style="Default";$CurrentStream[StatusAlias]="Paused")
 				}],
 				"Paused"|"Stopped",EventHandler[button["Play",style],{
 					"MouseDown":>(style="Clicked"),
-					"MouseUp":>(style="Default";current[StatusAlias]="Playing")
+					"MouseUp":>(style="Default";$CurrentStream[StatusAlias]="Playing")
 				}]
 			]
 		],
@@ -59,7 +59,7 @@ uiPlayerControlsNew:={
 		DynamicModule[{style="Default"},
 			EventHandler[Dynamic@button["Stop",style],{
 				"MouseDown":>(style="Clicked"),
-				"MouseUp":>(style="Default";current[StatusAlias]="Stopped";current["Position"]=0)
+				"MouseUp":>(style="Default";$CurrentStream[StatusAlias]="Stopped";$CurrentStream["Position"]=0)
 			}]
 		],
 		Spacer[20],
@@ -73,7 +73,7 @@ uiPlayerControlsNew:={
 			}]
 		]		
 	},ImageSize->{300,60},Alignment->Center]
-};
+}];
 
 
 uiPageSelector:=Row[{

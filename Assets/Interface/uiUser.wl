@@ -78,7 +78,12 @@ uiSettings:=DynamicModule[{choices},
 (*uiPlayer["Touhou/Dream_Battle"]*)
 
 
-uiPlayer[song_]:=Block[{image,audio,imageExist=False,aspectRatio},
+uiPlayer[song_]:=Block[
+	{
+		image, audio,
+		imageExist=False,
+		aspectRatio
+	},
 	AudioStop[];
 	If[index[[song,"Image"]]!="",
 		imageExist=True;
@@ -86,8 +91,8 @@ uiPlayer[song_]:=Block[{image,audio,imageExist=False,aspectRatio},
 		aspectRatio=ImageAspectRatio[image];
 	];
 	audio=Import[dataPath<>"Buffer/"<>song<>".buffer","MP3"];
-	duration=Duration[audio];
-	current=AudioPlay[audio];
+	$CurrentDuration=Duration[audio];
+	$CurrentStream=AudioPlay[audio];
 	CreateDialog[Row[{
 		If[imageExist,Row[{Spacer[48],Column[{Spacer[{40,40}],
 			Tooltip[ImageEffect[Image[image,ImageSize->Piecewise[{

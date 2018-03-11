@@ -1,7 +1,8 @@
 (* ::Package:: *)
 
 InitializeParser := (
-	If[Length@FindExternalEvaluators["NodeJS"]==0,
+	Off[General::shdw];
+	If[Length @ FindExternalEvaluators["NodeJS"] == 0,
 		CreateDialog[{
 			TextCell["Thulium Music Player requires Node.js as external evaluator."],
 			TextCell["Please follow the guide to install Node.js and Zeromq first."],
@@ -18,7 +19,8 @@ InitializeParser := (
 			return new Parser(data).parse()
 		}
 	"];
-	DeleteObject[Drop[ExternalSessions[],-1]];
+	DeleteObject[Drop[ExternalSessions[], -1]];
+	On[General::shdw];
 );
 
 

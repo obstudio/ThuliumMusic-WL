@@ -3,16 +3,19 @@
 (* Render Syntax *)
 RenderText[line_String, style_String] := Block[{output},
 	output = StringCases[line, {
-		"(("~~text:Except[")"]..~~"))" :>
+		"`"~~text:RegularExpression["([^`\\\\]|\\\\.)+"]~~"`" :>
+			TemplateBox[{RenderText[text, "Code"]}, "CodeBox"],
+		"(("~~text:RegularExpression["([^\\)\\\\]|\\\\.)+"]~~"))" :>
 			BoxApply[RenderText[text, style], Smaller, FontColor -> RGBColor["#555555"]],
-		"**"~~text:Except["*"]..~~"**" :>
+		"**"~~text:RegularExpression["([^\\*\\\\]|\\\\.)+"]~~"**" :>
 			BoxApply[RenderText[text, style], FontWeight -> Bold],
-		"*"~~text:Except["*"]..~~"*" :>
+		"*"~~text:RegularExpression["([^\\*\\\\]|\\\\.)+"]~~"*" :>
 			BoxApply[RenderText[text, style], FontSlant -> Italic],
-		"~~"~~text:Except["~"]..~~"~~" :>
+		"~~"~~text:RegularExpression["([^~\\\\]|\\\\.)+"]~~"~~" :>
 			BoxApply[RenderText[text, style], FontVariations -> {"StrikeThrough" -> True}],
-		"_"~~text:Except["_"]..~~"_" :>
-			BoxApply[RenderText[text, style], FontVariations -> {"Underline" -> True}],
+		"_"~~text:RegularExpression["([^_\\\\]|\\\\.)+"]~~"_" :>
+			BoxApply[RenderText[Echo@text, style], FontVariations -> {"Underline" -> True}],
+		"\\"~~text_ :> StyleBox[text, style],
 		text_ :> RowBox @ StringCases[text, {
 			text1__?(PrintableASCIIQ) :> StyleBox[text1, style],
 			text1__?(Not@*PrintableASCIIQ) :> StyleBox[text1, style <> "-chs"]
@@ -57,10 +60,10 @@ RenderContent[rawData_List, id_Integer] := Block[
 				(* Usage *)
 				StringStartsQ[line, "-"...~~"?"],
 					Sow[Cell[CellGroupData[{
-						SpacerCell[-2, CellFrameColor -> RGBColor["#77BBFF"]],
+						SpacerCell[-1, CellFrameColor -> RGBColor["#77BBFF"]],
 						Sequence @@ (Cell[BoxData[RowBox[#]],
 							CellMargins -> {{0, 0}, {0, 0}},
-							CellFrame -> {{0, 0}, {1, 1}},
+							CellFrame -> {{0, 0}, {0, 1}},
 							CellFrameColor -> RGBColor["#77BBFF"],
 							Background -> RGBColor["#DDEEFF"],
 							LineSpacing -> {1.5, 0}
@@ -200,3 +203,6 @@ RenderTMD[filepath_String] := Block[{rawData},
 
 (* ::Input:: *)
 (*RenderTMD[localPath<>"docs/test.tmd"];*)
+
+
+

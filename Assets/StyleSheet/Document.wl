@@ -63,59 +63,84 @@ StyleSheet["Documemt"] = Notebook[{
 	],
 	
 	Cell[StyleData["DingBat"],
-		TemplateBoxOptions -> {DisplayFunction -> (AdjustmentBox[
-			StyleBox[#,
-				FontFamily -> "Source Sans Pro",
-				FontSize -> 20,
-				FontColor -> RGBColor["#777777"]
-			],
-			BoxBaselineShift -> -0.3
-		]&)}
+		TemplateBoxOptions -> {DisplayFunction -> Function[
+			AdjustmentBox[
+				StyleBox[#,
+					FontFamily -> "Source Sans Pro",
+					FontSize -> 20,
+					FontColor -> RGBColor["#777777"]
+				],
+				BoxBaselineShift -> -0.3
+			]
+		]}
+	],
+	
+	Cell[StyleData["CodeBox"],
+		TemplateBoxOptions -> {DisplayFunction -> Function[
+			FrameBox[
+				RowBox[{
+					TemplateBox[{1}, "Spacer1"],
+					#,
+					TemplateBox[{1}, "Spacer1"]
+				}],
+				Background -> RGBColor[0.92, 0.92, 0.92],
+				ImageMargins -> {{1, 1}, {0, 0}},
+				ImageSize -> {Automatic, 32},
+				BoxFrame -> {{0, 0}, {0, 0}},
+				RoundingRadius -> {8, 8},
+				ContentPadding -> True,
+				BaselinePosition -> 1
+			]
+		]}
 	],
 	
 	Cell[StyleData["CodeBlock"],
-		TemplateBoxOptions -> {DisplayFunction -> (GraphicsBox[
-			{
-				GraphicsGroupBox[{
-					RGBColor[0.92, 0.92, 0.92],
-					RectangleBox[{0, 0}, {#2, #3}, RoundingRadius -> 16]
-				}, ContentSelectable -> False],
-				InsetBox[AdjustmentBox[#1,
-					LineSpacing -> {1, 4},
-					BoxBaselineShift -> 1
-				], {20, Center}, {Left, Center}, ContentSelectable -> True]
-			},
-			ContentSelectable -> True,
-			ImageSize -> #2,
-			PlotRange -> {{0, #2}, {0, #3}}
-		]&)}
+		TemplateBoxOptions -> {DisplayFunction -> Function[
+			GraphicsBox[
+				{
+					GraphicsGroupBox[{
+						RGBColor[0.92, 0.92, 0.92],
+						RectangleBox[{0, 0}, {#2, #3}, RoundingRadius -> 16]
+					}, ContentSelectable -> False],
+					InsetBox[AdjustmentBox[#1,
+						LineSpacing -> {1, 4},
+						BoxBaselineShift -> 1
+					], {20, Center}, {Left, Center}, ContentSelectable -> True]
+				},
+				PlotRange -> {{0, #2}, {0, #3}},
+				ContentSelectable -> True,
+				ImageSize -> {#2, Automatic}
+			]
+		]}
 	],
 	
 	Cell[StyleData["Miniplayer"],
-		TemplateBoxOptions -> {DisplayFunction -> (GraphicsBox[
-			{
-				RGBColor[0.92, 0.92, 0.92],
-				RectangleBox[{0, 0}, {600, 48}, RoundingRadius -> 16],
-				InsetBox[GraphicsBox[
-					{
-						RGBColor[0.96, 0.96, 0.96],
-						RectangleBox[{0, 0}, {400, 32}, RoundingRadius -> 8]
-					},
-					ImageSize -> 400,
-					PlotRange -> {{0, 400}, {0, 32}}
-				], {8, Center}, {Left, Center}],
-				InsetBox[AdjustmentBox[
-					StyleBox[#1,
-						FontSize -> 20,
-						FontColor -> RGBColor[0, 0, 0]
-					],
-					BoxBaselineShift -> 0.1
-				], {20, Center}, {Left, Center}]
-			},
-			ContentSelectable -> False,
-			ImageSize -> 600,
-			PlotRange -> {{0, 600}, {0, 48}}
-		]&)}
+		TemplateBoxOptions -> {DisplayFunction -> Function[
+			GraphicsBox[
+				{
+					RGBColor[0.92, 0.92, 0.92],
+					RectangleBox[{0, 0}, {600, 48}, RoundingRadius -> 16],
+					InsetBox[GraphicsBox[
+						{
+							RGBColor[0.96, 0.96, 0.96],
+							RectangleBox[{0, 0}, {400, 32}, RoundingRadius -> 8]
+						},
+						ImageSize -> 400,
+						PlotRange -> {{0, 400}, {0, 32}}
+					], {8, Center}, {Left, Center}],
+					InsetBox[AdjustmentBox[
+						StyleBox[#1,
+							FontSize -> 20,
+							FontColor -> RGBColor[0, 0, 0]
+						],
+						BoxBaselineShift -> 0.1
+					], {20, Center}, {Left, Center}]
+				},
+				ContentSelectable -> False,
+				ImageSize -> 600,
+				PlotRange -> {{0, 600}, {0, 48}}
+			]
+		]}
 	]
 	
 }];

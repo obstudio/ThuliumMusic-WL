@@ -4,9 +4,9 @@
 RenderText[line_String, style_String] := Block[{output},
 	output = StringCases[line, {
 		"`"~~text:RegularExpression["([^`\\\\]|\\\\.)+"]~~"`" :>
-			TemplateBox[{RenderText[text, "Code"]}, "CodeBox"],
+			TemplateBox[{StyleBox[text, "Code"]}, "CodeBox"],
 		"(("~~text:RegularExpression["([^\\)\\\\]|\\\\.)+"]~~"))" :>
-			BoxApply[RenderText[text, style], Smaller, FontColor -> RGBColor["#555555"]],
+			BoxApply[RenderText[text, style], FontSize -> Inherited * 0.7, FontColor -> RGBColor["#555555"]],
 		"**"~~text:RegularExpression["([^\\*\\\\]|\\\\.)+"]~~"**" :>
 			BoxApply[RenderText[text, style], FontWeight -> Bold],
 		"*"~~text:RegularExpression["([^\\*\\\\]|\\\\.)+"]~~"*" :>
@@ -14,7 +14,7 @@ RenderText[line_String, style_String] := Block[{output},
 		"~~"~~text:RegularExpression["([^~\\\\]|\\\\.)+"]~~"~~" :>
 			BoxApply[RenderText[text, style], FontVariations -> {"StrikeThrough" -> True}],
 		"_"~~text:RegularExpression["([^_\\\\]|\\\\.)+"]~~"_" :>
-			BoxApply[RenderText[Echo@text, style], FontVariations -> {"Underline" -> True}],
+			BoxApply[RenderText[text, style], FontVariations -> {"Underline" -> True}],
 		"\\"~~text_ :> StyleBox[text, style],
 		text_ :> RowBox @ StringCases[text, {
 			text1__?(PrintableASCIIQ) :> StyleBox[text1, style],
@@ -51,7 +51,7 @@ RenderContent[rawData_List, id_Integer] := Block[
 					markCount = StringLength @ StringCases[line, RegularExpression["^#+"]][[1]];
 					Sow[Cell[
 						BoxData @ RenderText[StringDelete[line, RegularExpression["^#+ *| *#*$"]], "Title"],
-						CellMargins -> {{72, 72}, {20, 40}},
+						CellMargins -> {{64, 64}, {30, 60}},
 						FontSize -> 72 - markCount * 12,
 						FontColor -> RGBColor["#111111"],
 						TextAlignment -> If[StringEndsQ[line, RegularExpression["# *"]], Center, Left]
@@ -98,8 +98,8 @@ RenderContent[rawData_List, id_Integer] := Block[
 						Cell[
 							BoxData @ RenderText[StringDelete[line, RegularExpression["^\\-*\\^+ *"]], "Section"],
 							ShowGroupOpener -> True,
-							CellMargins -> {{48, 48} + markCount * 12, {10, 18}},
-							FontSize -> 48 - (markCount - markCount1) * 6
+							CellMargins -> {{48, 48} + markCount * 18, {20, 40} / markCount},
+							FontSize -> 40 - (markCount - markCount1) * 6
 						],
 						Sequence @@ RenderContent[rawData[[lineCount ;; lineNext - 1]], id]
 					}]], "Cell"];
@@ -148,7 +148,9 @@ RenderContent[rawData_List, id_Integer] := Block[
 					lineNext = lineCount + LengthWhile[rawData[[lineCount ;; ]], !StringStartsQ[#, "```"]&];
 					Sow[Cell[
 						BoxData @ TemplateBox[{
-							RowBox[Riffle[RenderText[#, "Code"]&/@ rawData[[lineCount ;; lineNext - 1]], "\n"]],
+							RowBox[Riffle[
+								StyleBox[FormBox["\""<>#<>"\"", InputForm], "Code"]&/@ rawData[[lineCount ;; lineNext - 1]],
+							"\n"]],
 							Dynamic @ CurrentValue[$GeneratedList[[id]], WindowSize][[1]] - 120,
 							(lineNext - lineCount) * 24 + 32
 						}, "CodeBlock"],
@@ -174,7 +176,7 @@ RenderTMD::usage = "\
 \!\(\*RowBox[{\"RenderTMD\",\"[\",RowBox[{StyleBox[\"filepath\",\"TI\"]}],\"]\"}]\)
 generate a document notebook for \!\(\*StyleBox[\"filepath\",\"TI\"]\).";
 
-RenderTMD[filepath_String] := Block[{rawData},
+RenderTMD[filepath_String] := Block[{rawData, output},
 	
 	If[FileExistsQ[filepath],
 		rawData = StringSplit[Import[filepath, "Text", CharacterEncoding -> "UTF-8"], "\n"],
@@ -182,7 +184,7 @@ RenderTMD[filepath_String] := Block[{rawData},
 		Return[];
 	];
 	
-	AppendTo[$GeneratedList, CreateDialog[
+	output = CreateDialog[
 		RenderContent[rawData, Length[$GeneratedList] + 1],
 		WindowTitle -> StringSplit[filepath,"/"|"\\"][[-1]],
 		WindowMargins -> {{80, Automatic}, {Automatic, 60}},
@@ -196,13 +198,13 @@ RenderTMD[filepath_String] := Block[{rawData},
 		Saveable -> False,
 		Editable -> False,
 		Copyable -> False
-	]];
+	];
+	
+	AppendTo[$GeneratedList, output];
+	Return[output];
 ];
 
 
 
 (* ::Input:: *)
-(*RenderTMD[localPath<>"docs/test.tmd"];*)
-
-
-
+(*RenderTMD[localPath<>"docs/Standard/GraceNote.tmd"]*)

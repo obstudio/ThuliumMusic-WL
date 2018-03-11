@@ -104,8 +104,8 @@ StyleSheet["Documemt"] = Notebook[{
 					}, ContentSelectable -> False],
 					InsetBox[AdjustmentBox[#1,
 						LineSpacing -> {1, 4},
-						BoxBaselineShift -> 1
-					], {20, Center}, {Left, Center}, ContentSelectable -> True]
+						BoxBaselineShift -> 0.5
+					], {20, Center}, {Left, Center}, ContentSelectable -> True, Alignment->Left]
 				},
 				PlotRange -> {{0, #2}, {0, #3}},
 				ContentSelectable -> True,
@@ -148,3 +148,6 @@ StyleSheet["Documemt"] = Notebook[{
 
 (* ::Input:: *)
 (*RenderTMD[localPath<>"docs/test.tmd"];*)
+
+
+

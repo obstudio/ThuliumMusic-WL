@@ -340,7 +340,7 @@ AudioAdapt[rawData_,OptionsPattern[AdaptingOptions]]:=Block[
 (* ::Input:: *)
 (*AudioStop[];AudioPlay[#[[2]]]&@*)
 (*EchoFunction["time: ",#[[1]]&]@*)
-(*Timing[AudioAdapt[Parse[localPath<>"Songs/Touhou/TH11-Chireiden/3rd_Eye.tm"],"Rate"->1.1]];*)
+(*Timing[AudioAdapt[Parse[localPath<>"Songs/Touhou/TH11-Chireiden/3rd_Eye.tm",{5,6}],"Rate"->1.1]];*)
 
 
 (* ::Input:: *)

@@ -75,7 +75,7 @@ uiSettings:=DynamicModule[{choices},
 
 
 (* ::Input:: *)
-(*uiPlayer["Touhou/Dream_Battle"]*)
+(*uiPlayer["Touhou/TH11-Chireiden/3rd_Eye"]*)
 
 
 uiPlayer[song_]:=Block[
@@ -98,7 +98,7 @@ uiPlayer[song_]:=Block[
 			Tooltip[ImageEffect[Image[image,ImageSize->Piecewise[{
 					{{Automatic,600},aspectRatio>2},
 					{{480,Automatic},aspectRatio<1/2},
-					{{Automatic,400},aspectRatio<1&&aspectRatio>1/2},
+					{{Automatic,400},aspectRatio<=1&&aspectRatio>1/2},
 					{{360,Automatic},aspectRatio>1&&aspectRatio<2}
 				}]],{"FadedFrame"}],
 				If[imageData[[index[[song,"Image"]]]]!=<||>,

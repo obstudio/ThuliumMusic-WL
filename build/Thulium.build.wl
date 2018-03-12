@@ -28,7 +28,7 @@ Export[localPath <> "Thulium.nb", CreateDocument[
 				"Click ",
 				TemplateBox[{Unevaluated[Main],"here"}, "Thulium-Hyperlink"],
 				" to run the front end."
-			}], "Thulium-Instruction", CellOpen -> Dynamic[Thulium`$Initialized]]
+			}], "Thulium-Instruction"]
 		}]],
 		Cell[BoxData @ MakeBoxes[
 			AudioStop[];

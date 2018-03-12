@@ -7,6 +7,7 @@ CurveMerge::usage = "CurveMerge merges a Bezier curve from segments.";
 VertexAssign::usage = "VertexAssign assigns vertices with a coordinate.";
 progressBar::usage = "Draw a progress bar.";
 progressBlock::usage = "Draw a progress block.";
+progressLocate::usage = "Location to progression";
 squareRounded::usage = "Draw a rounded square.";
 
 Begin["`Private`"];
@@ -146,3 +147,14 @@ End[];
 
 EndPackage[];
 
+
+
+DeclarePackage["graphics`",{
+	"SVGPathD",
+	"CurveMerge",
+	"VertexAssign",
+	"progressBar",
+	"progressBlock",
+	"progressLocate",
+	"squareRounded"
+}]

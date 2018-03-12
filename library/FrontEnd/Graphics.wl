@@ -1,5 +1,16 @@
 (* ::Package:: *)
 
+BeginPackage["graphics`"];
+
+SVGPathD::usage = "SVGPathD parses a svg path command.";
+CurveMerge::usage = "CurveMerge merges a Bezier curve from segments.";
+VertexAssign::usage = "VertexAssign assigns vertices with a coordinate.";
+progressBar::usage = "Draw a progress bar.";
+progressBlock::usage = "Draw a progress block.";
+squareRounded::usage = "Draw a rounded square.";
+
+Begin["`Private`"];
+
 SVGPathD[string_]:=Block[
 	{
 		commands,
@@ -102,7 +113,7 @@ progressBar[pro_,len_]:=With[
 ];
 
 progressLocate[posx_,len_]:=Piecewise[
-	{{0,posx<-len},{1,posx>len}},
+	{{0,posx<-len},{1,posx>len||!NumberQ[posx]}},
 	(posx/len+1)/2
 ];
 
@@ -113,27 +124,6 @@ progressBlock[pro_,len_]:=GraphicsGroup[{
 	Circle[{len*(2pro-1),0},1.4],
 	Circle[{len*(2pro-1),0},0.7]
 }];
-
-
-
-
-
-(* ::Input:: *)
-(*DumpSave[ParentDirectory[NotebookDirectory[]]<>"/dist/graphics.mx","graphics`"];*)
-
-
-(* ::Input:: *)
-(*Graphics[{*)
-(*Texture[Table[{c,1-c,1},{c,0,1,1/256}]],*)
-(*Scale[FilledCurve[{BezierCurve[CurveMerge[#Segment]]},*)
-(*VertexTextureCoordinates->VertexAssign[CurveMerge[#Segment],{0,0}->0,{1000,0}->1]*)
-(*]&[SVGPathD[LogoCloud][[1]]],{1,-1}]*)
-(*}]*)
-
-
-(* ::Input:: *)
-(*progressBar[0.7,32]*)
-
 
 (* basic graphics *)
 squareRounded[t_,r_,scheme_]:=If[r==1,
@@ -151,3 +141,8 @@ squareRounded[t_,r_,scheme_]:=If[r==1,
 		Line[{{t-1,r-1},{t-1,1-r}}],Line[{{1-t,r-1},{1-t,1-r}}]
 	}]
 ];
+
+End[];
+
+EndPackage[];
+

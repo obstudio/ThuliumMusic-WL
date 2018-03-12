@@ -1,6 +1,6 @@
 (* ::Package:: *)
 
-InitializeThulium := (
+build`InitializeThulium := Hold[
 	localPath = StringReplace[NotebookDirectory[], "\\"->"/"];
 	SetDirectory[localPath];
 	Scan[Get, FileNames["*.wl", "library", Infinity]];
@@ -8,8 +8,9 @@ InitializeThulium := (
 	Scan[Get, FileNames["*.wl", "assets", Infinity]];
 	Get[localPath <> "Preload.wl"];
 	Thulium`$Initialized = True;
-);
+];
 
+With[{InitializeThulium = build`InitializeThulium},
 Export[localPath <> "Thulium.nb", CreateDocument[
 	{
 		Cell["Thulium Music Player v2.1", "Thulium-Title"],
@@ -21,12 +22,12 @@ Export[localPath <> "Thulium.nb", CreateDocument[
 			}], "Thulium-Instruction"],
 			Cell[BoxData @ RowBox[{
 				"Click ",
-				TemplateBox[{Unevaluated[InitializeParser],"here"}, "Thulium-Hyperlink"],
+				TemplateBox[{Unevaluated[InitializeParser], "here"}, "Thulium-Hyperlink"],
 				" to initialize the parser."
 			}], "Thulium-Instruction"],
 			Cell[BoxData @ RowBox[{
 				"Click ",
-				TemplateBox[{Unevaluated[Main],"here"}, "Thulium-Hyperlink"],
+				TemplateBox[{Unevaluated[Main], "here"}, "Thulium-Hyperlink"],
 				" to run the front end."
 			}], "Thulium-Instruction"]
 		}]],
@@ -41,3 +42,4 @@ Export[localPath <> "Thulium.nb", CreateDocument[
 	Magnification -> 1.2,
 	Saveable -> False
 ]];
+]

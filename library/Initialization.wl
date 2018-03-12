@@ -28,7 +28,7 @@ InitializeParser := (
 (*InitializeParser;*)
 
 
-refreshLanguage:=Module[{langDataPath},
+refreshLanguage := Block[{langDataPath},
 	langDataPath=localPath<>"language/"<>userInfo[["Language"]]<>"/";
 	tagName=Association@Import[langDataPath<>"GeneralTags.json"];
 	instrName=Association@Import[langDataPath<>"Instruments.json"];

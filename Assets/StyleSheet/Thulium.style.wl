@@ -24,6 +24,7 @@ StyleSheet["Thulium"] = Notebook[{
 		CellMargins -> {{60, Inherited}, {Inherited, Inherited}},
 		LanguageCategory -> "Input",
 		ShowCellBracket -> False,
+		CellContext -> "Global`",
 		Evaluatable -> False,
 		Editable -> False,
 		Deletable -> False
@@ -36,7 +37,7 @@ StyleSheet["Thulium"] = Notebook[{
 				TagBox[
 					TagBox[
 						StyleBox[#2, Underlined],
-						EventHandlerTag @ {"MouseClicked" :> #1}
+						EventHandlerTag @ {"MouseClicked" :> ReleaseHold[#1]}
 					],
 					MouseAppearanceTag @ "LinkHand"
 				]

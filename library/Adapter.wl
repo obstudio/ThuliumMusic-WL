@@ -351,3 +351,15 @@ AudioAdapt[rawData_,OptionsPattern[AdaptingOptions]]:=Block[
 
 (* ::Input:: *)
 (*Export[localPath<>"test.mp3",AudioAdapt[Parse[localPath<>"Songs/Touhou/TH11-Chireiden/3rd_Eye.tm",1]]];*)
+
+
+(* ::Subsubsection:: *)
+(*Interpretation*)
+
+
+(* ::Input:: *)
+(*CurrentValue[{StyleDefinitions,"Quantity"}]*)
+
+
+(* ::Input:: *)
+(*CurrentValue[{StyleDefinitions,"QuantityPanel"}]*)

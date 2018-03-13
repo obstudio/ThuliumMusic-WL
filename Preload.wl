@@ -13,6 +13,18 @@ Switch[$VersionNumber,
 ];
 
 
+Off[General::shdw];
+If[Length @ FindExternalEvaluators["NodeJS"] == 0,
+	CreateDialog[{
+		TextCell["Thulium Music Player requires Node.js as external evaluator."],
+		TextCell["Please follow the guide to install Node.js and Zeromq first."],
+		DefaultButton[]
+	}];
+	Abort[];
+];
+On[General::shdw];
+
+
 (* path and template *)
 version=281;
 cloudPath="http://qymp.ob-studio.cn/assets/";

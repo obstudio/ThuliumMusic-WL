@@ -1,33 +1,5 @@
 (* ::Package:: *)
 
-InitializeParser := (
-	Off[General::shdw];
-	If[Length @ FindExternalEvaluators["NodeJS"] == 0,
-		CreateDialog[{
-			TextCell["Thulium Music Player requires Node.js as external evaluator."],
-			TextCell["Please follow the guide to install Node.js and Zeromq first."],
-			DefaultButton[]
-		}];
-		Abort[];
-	];
-	System`JS = StartExternalSession["NodeJS"];
-	ExternalEvaluate[System`JS, File[localPath<>"library/Parser/Parser.js"]];
-	ExternalEvaluate[System`JS, "const fs = require('fs')"];
-	ExternalEvaluate[System`JS, "
-		function Parse(filePath) {
-			const data = JSON.parse(fs.readFileSync(filePath, 'utf8'))
-			return new Parser(data).parse()
-		}
-	"];
-	DeleteObject[Drop[ExternalSessions[], -1]];
-	On[General::shdw];
-);
-
-
-(* ::Input:: *)
-(*InitializeParser;*)
-
-
 refreshLanguage := Block[{langDataPath},
 	langDataPath=localPath<>"language/"<>userInfo[["Language"]]<>"/";
 	tagName=Association@Import[langDataPath<>"GeneralTags.json"];
@@ -179,36 +151,22 @@ update:=(
 $Updated=False;
 
 
-init`updateImage := Block[{updates={},image,filename,meta},
-	Do[
-		If[KeyExistsQ[index[[song]],"Image"]&&!FileExistsQ[dataPath<>"Images/"<>index[[song,"Image"]]],
-			AppendTo[updates,index[[song,"Image"]]]
-		],
-	{song,songs}];
-	If[updates=={},Return[]];
-	Monitor[Do[
-		filename=updates[[i]];
-		image=Import[cloudPath<>"images/"<>filename];
-		Export[dataPath<>"Images/"<>filename,image];
-		meta=Association@Import[cloudPath<>"images/"<>StringReplace[filename,"."~~__->".json"]];
-		If[KeyExistsQ[imageData,filename],
-			imageData[[filename]]=meta,
-			AppendTo[imageData,filename->meta]
-		],
-	{i,Length@updates}],
-	Panel[Column[{Spacer[{4,4}],
-		text[["UpdatingImage"]],
-		Spacer[1],
-		Row[{Graphics@{progressBar[(i-1)/Length@updates,24]}},ImageSize->{400,20},Alignment->Center],
-		Spacer[1],
-		Row[{
-			caption["_Progression","Text",{i,Length@updates}],
-			Spacer[4],text[["Loading"]],
-			updates[[i]]
-		}],
-	Spacer[{4,4}]},Alignment->Center],ImageSize->{400,Full},Alignment->Center]];
-	Export[dataPath<>"Image.json",Normal/@Normal@imageData];
+InitializeParser := Monitor[
+	Off[General::shdw];
+	System`JS = StartExternalSession["NodeJS"];
+	ExternalEvaluate[System`JS, File[localPath <> "library/Parser/Parser.js"]];
+	ExternalEvaluate[System`JS, "const fs = require('fs')"];
+	ExternalEvaluate[System`JS, "
+		function Parse(filePath) {
+			const data = JSON.parse(fs.readFileSync(filePath, 'utf8'))
+			return new Parser(data).parse()
+		}
+	"];
+	DeleteObject[Drop[ExternalSessions[], -1]];
+	On[General::shdw],
+	DisplayForm @ TemplateBox[{AdjustmentBox[
+		StyleBox["Initializing Node.js as external evaluator...", "Thulium-Monitor"],
+		BoxMargins -> {{2, 2}, {1, 1}},
+		BoxBaselineShift -> 0.7
+	]}, "Thulium-Monitor"]
 ];
-
-
-CellEpilog

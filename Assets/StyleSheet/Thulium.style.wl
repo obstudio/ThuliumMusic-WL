@@ -33,49 +33,35 @@ StyleSheet["Thulium"] = Notebook[{
 	
 	Cell[StyleData["Thulium-TextButton-Tooltip"],
 		FontFamily -> "Calibri",
-		FontSize -> 16
+		FontSize -> 20
 	],
 	
-	Cell[StyleData["Thulium-Instruction"],
-		FontFamily -> "Corbel",
-		FontSize -> 16,
-		FontWeight -> Bold,
-		FontColor -> RGBColor["#553399"],
-		CellMargins -> {{60, Inherited}, {Inherited, Inherited}},
-		LanguageCategory -> "Input",
+	Cell[StyleData["Thulium-Initialization"],
+		FontSize -> 1,
+		FontColor -> RGBColor[0, 0, 0, 0],
+		CellSize -> {Inherited, 1},
+		CellMargins -> {{24, 24}, {16, 16}},
+		CellElementSpacings -> {"CellMinHeight" -> 1},
+		CellFrame -> {{0, 0}, {0, 2}},
+		CellFrameColor -> RGBColor["#999999"],
+		CellFrameMargins -> 0,
+		Background -> Inherited,
 		ShowCellBracket -> False,
-		CellContext -> "Global`",
-		Evaluatable -> False,
-		Editable -> False,
-		Deletable -> False
-	],
-	
-	Cell[StyleData["Thulium-Hyperlink"],
-		TemplateBoxOptions -> {
-			Editable -> False,
-			DisplayFunction -> Function[
-				TagBox[
-					TagBox[
-						StyleBox[#2, Underlined],
-						EventHandlerTag @ {"MouseClicked" :> ReleaseHold[#1]}
-					],
-					MouseAppearanceTag @ "LinkHand"
-				]
-			],
-			InterpretationFunction -> (#1&)
-		}
+		ShowCellLabel -> False,
+		Evaluatable -> True,
+		CellGroupingRules -> "InputGrouping"
 	],
 	
 	Cell[StyleData["Thulium-TextButton-Display"],
 		TemplateBoxOptions -> {DisplayFunction -> Function[
 			FrameBox[
 				RowBox[{
-					TemplateBox[{1}, "Spacer1"],
+					TemplateBox[{4}, "Spacer1"],
 					AdjustmentBox[
 						StyleBox[#1, FontColor -> #2],
 						BoxBaselineShift -> 0.5
 					],
-					TemplateBox[{1}, "Spacer1"]
+					TemplateBox[{4}, "Spacer1"]
 				}],
 				Background -> #3,
 				ImageMargins -> {{1, 1}, {0, 0}},
@@ -119,19 +105,27 @@ StyleSheet["Thulium"] = Notebook[{
 				}, "Thulium-TextButton-Display"]
 			}, Dynamic @ CurrentValue["MouseOver"]]
 		]}
+	],
+	
+	Cell[StyleData["Thulium-Monitor"],
+		FontFamily -> "Calibri",
+		FontSize -> 20,
+		TemplateBoxOptions -> {DisplayFunction -> Function[
+			FrameBox[#1,
+				Background -> RGBColor[0.96, 0.96, 0.96],
+				BoxFrame -> {{0, 0}, {0, 0}},
+				RoundingRadius -> {8, 8},
+				ContentPadding -> True
+			]
+		]}
 	]
 	
 }];
 
 
 (* ::Input:: *)
-(*CurrentValue[{StyleDefinitions, "Text"}]*)
+(*CurrentValue[{StyleDefinitions, "PrintTemporary"}]*)
 
 
-(* ::Input:: *)
-(*CreateDocument[{*)
-(*Cell[BoxData@*)
-(*TemplateBox[{"1234567","7654321",Hold@Print[233]},"Thulium-TextButton"],*)
-(*FontSize->20]*)
-(*},StyleDefinitions -> StyleSheet["Thulium"],*)
-(*Deployed->True,Saveable->False,Magnification->2];*)
+(* ::InheritFromParent:: *)
+(*{CellMargins->{{60,Inherited},{Inherited,Inherited}},CellGroupingRules->"GraphicsGrouping",StripStyleOnPaste->True,PageBreakWithin->False,GroupPageBreakWithin->False,GeneratedCell->True,CellAutoOverwrite->True,ShowCellLabel->False,DefaultFormatType->DefaultOutputFormatType,AutoItalicWords->{},AutoQuoteCharacters->{},PasteAutoQuoteCharacters->{},LanguageCategory->None,FormatType->InputForm,ShowStringCharacters->False,CounterIncrements->"Print",StyleMenuListing->None}*)

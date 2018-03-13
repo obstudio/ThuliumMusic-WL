@@ -10,10 +10,10 @@
 NotebookFileLineBreakTest
 NotebookFileLineBreakTest
 NotebookDataPosition[       158,          7]
-NotebookDataLength[      5036,        132]
-NotebookOptionsPosition[      1874,         59]
-NotebookOutlinePosition[      4637,        128]
-CellTagsIndexPosition[      4594,        125]
+NotebookDataLength[      6311,        163]
+NotebookOptionsPosition[      2122,         66]
+NotebookOutlinePosition[      6035,        161]
+CellTagsIndexPosition[      5959,        156]
 WindowTitle->Thulium
 WindowFrame->Normal*)
 
@@ -21,37 +21,44 @@ WindowFrame->Normal*)
 Notebook[{
 Cell["Thulium Music Player v2.1", "Thulium-Title"],
 
-Cell[CellGroupData[{
-
 Cell[BoxData[
- RowBox[{"Click", " ", 
-  TemplateBox[{Unevaluated[
-     Hold[$CellContext`localPath = StringReplace[
-         NotebookDirectory[], "\\" -> "/"]; 
-      SetDirectory[$CellContext`localPath]; Scan[Get, 
-        FileNames["*.wl", "library", Infinity]]; Scan[Get, 
-        FileNames["*.wl", "package", Infinity]]; Scan[Get, 
-        FileNames["*.wl", "assets", Infinity]]; Get[
-        StringJoin[$CellContext`localPath, "Preload.wl"]]; 
-      Thulium`$Initialized = True; Null]],"here"},
-   "Thulium-Hyperlink"], " ", 
-  RowBox[{"to", " ", "initialize", " ", "the", " ", 
-   RowBox[{"program", "."}]}]}]], "Thulium-Instruction"],
+ RowBox[{
+  TemplateBox[{
+   StyleBox["Initialize Thulium", "Thulium-TextButton-Content"],StyleBox[
+    "Click to initialize the kernel.", "Thulium-TextButton-Tooltip"],
+    Hold[$CellContext`localPath = StringReplace[
+        NotebookDirectory[], "\\" -> "/"]; 
+     SetDirectory[$CellContext`localPath]; Scan[Get, 
+       FileNames["*.wl", "library", Infinity]]; Scan[Get, 
+       FileNames["*.wl", "package", Infinity]]; Scan[Get, 
+       FileNames["*.wl", "assets", Infinity]]; Get[
+       StringJoin[$CellContext`localPath, "Preload.wl"]]; Null]},
+   "Thulium-TextButton"], 
+  TemplateBox[{4},
+   "Spacer1"], 
+  TemplateBox[{
+   StyleBox["Initialize Parser", "Thulium-TextButton-Content"],StyleBox[
+    "Click to initialize the Parser.", "Thulium-TextButton-Tooltip"],
+    Hold[$CellContext`InitializeParser]},
+   "Thulium-TextButton"], 
+  TemplateBox[{4},
+   "Spacer1"], 
+  TemplateBox[{
+   StyleBox["Start Front End", "Thulium-TextButton-Content"],StyleBox[
+    "Click to run the front end.", "Thulium-TextButton-Tooltip"],
+    Hold[$CellContext`Main]},
+   "Thulium-TextButton"]}]], "Thulium-Controls"],
 
-Cell[BoxData[
- RowBox[{"Click", " ", 
-  TemplateBox[{Unevaluated[$CellContext`InitializeParser],"here"},
-   "Thulium-Hyperlink"], " ", 
-  RowBox[{"to", " ", "initialize", " ", "the", " ", 
-   RowBox[{"parser", "."}]}]}]], "Thulium-Instruction"],
-
-Cell[BoxData[
- RowBox[{"Click", " ", 
-  TemplateBox[{Unevaluated[$CellContext`Main],"here"},
-   "Thulium-Hyperlink"], " ", 
-  RowBox[{"to", " ", "run", " ", "the", " ", "front", " ", 
-   RowBox[{"end", "."}]}]}]], "Thulium-Instruction"]
-}, Open  ]],
+Cell["", "Text",
+ Selectable->False,
+ CellFrame->{{0, 0}, {0, 2}},
+ ShowCellBracket->False,
+ CellMargins->{{24, 24}, {16, 16}},
+ CellElementSpacings->{"CellMinHeight"->1},
+ CellFrameMargins->0,
+ CellFrameColor->GrayLevel[0.7],
+ CellSize->{Inherited, 1},
+ CellTags->"Bottom-Of-Head"],
 
 Cell[BoxData[
  RowBox[{
@@ -59,21 +66,31 @@ Cell[BoxData[
 },
 Saveable->False,
 CellGrouping->Manual,
-WindowSize->{760, 776},
-WindowMargins->{{569, Automatic}, {Automatic, 94}},
+WindowSize->{1024, 768},
+WindowMargins->{{437, Automatic}, {Automatic, 98}},
 WindowElements->{"VerticalScrollBar"},
 WindowTitle->"Thulium",
-Magnification->1.2,
+Magnification->1.5,
 FrontEndVersion->"11.3 for Microsoft Windows (64-bit) (March 6, 2018)",
 StyleDefinitions->Notebook[{
    Cell[
     StyleData[StyleDefinitions -> "Default.nb"]], 
    Cell[
     StyleData["Thulium-Title"], Editable -> False, Deletable -> False, 
-    ShowCellBracket -> False, CellMargins -> {{32, Inherited}, {16, 32}}, 
+    ShowCellBracket -> False, CellMargins -> {{40, Inherited}, {16, 32}}, 
     Evaluatable -> False, LineSpacing -> {1, 4}, LanguageCategory -> 
     "NaturalLanguage", FontFamily -> "Source Sans Pro", FontSize -> 36, 
     FontColor -> RGBColor[0.2, 0.3333333333333333, 0.6]], 
+   Cell[
+    StyleData["Thulium-Controls"], Editable -> False, Deletable -> False, 
+    ShowCellBracket -> False, CellMargins -> {{48, 48}, {8, 8}}, Deployed -> 
+    True, Evaluatable -> False, TextAlignment -> Center], 
+   Cell[
+    StyleData["Thulium-TextButton-Content"], FontFamily -> "Book Antiqua", 
+    FontSize -> 16], 
+   Cell[
+    StyleData["Thulium-TextButton-Tooltip"], FontFamily -> "Calibri", 
+    FontSize -> 16], 
    Cell[
     StyleData["Thulium-Instruction"], Editable -> False, Deletable -> False, 
     ShowCellBracket -> False, 
@@ -90,50 +107,64 @@ StyleDefinitions->Notebook[{
         MouseAppearanceTag["LinkHand"]]& ), Editable -> False, 
       InterpretationFunction -> (#& )}], 
    Cell[
-    StyleData["Thulium-Button-Display"], 
+    StyleData["Thulium-TextButton-Display"], 
     TemplateBoxOptions -> {DisplayFunction -> (FrameBox[
         RowBox[{
           TemplateBox[{1}, "Spacer1"], 
-          StyleBox[#, FontColor -> #2], 
+          AdjustmentBox[
+           StyleBox[#, FontColor -> #2], BoxBaselineShift -> 0.5], 
           TemplateBox[{1}, "Spacer1"]}], Background -> #3, 
         ImageMargins -> {{1, 1}, {0, 0}}, ImageSize -> {Automatic, 32}, 
         BoxFrame -> {{0, 0}, {0, 0}}, RoundingRadius -> {8, 8}, 
         ContentPadding -> True, BaselinePosition -> 1]& )}], 
    Cell[
-    StyleData["Thulium-Button"], 
-    TemplateBoxOptions -> {DisplayFunction -> (TagBox[
-        TagBox[
-         PaneSelectorBox[{True -> TemplateBox[{#, 
-              RGBColor[0.08, 0.04, 0], 
-              RGBColor[0.8, 0.9, 1]}, "Thulium-Button-Display"], False -> 
-           TemplateBox[{#, 
-              RGBColor[0.2, 0.1, 0], 
-              RGBColor[0.92, 0.96, 1]}, "Thulium-Button-Display"]}, 
-          Dynamic[
-           CurrentValue["MouseOver"]]], 
-         EventHandlerTag[{"MouseClicked" :> #2}]], 
-        MouseAppearanceTag["LinkHand"]]& )}]}, Visible -> False, 
-  FrontEndVersion -> "11.3 for Microsoft Windows (64-bit) (March 6, 2018)", 
-  StyleDefinitions -> "Default.nb"]
+    StyleData["Thulium-TextButton"], 
+    TemplateBoxOptions -> {
+     DisplayFunction -> (PaneSelectorBox[{True -> TooltipBox[
+           TagBox[
+            TagBox[
+             PaneSelectorBox[{True -> TemplateBox[{#, 
+                  RGBColor[0, 0, 0], 
+                  RGBColor[0.3, 0.7, 1]}, "Thulium-TextButton-Display"], 
+               False -> TemplateBox[{#, 
+                  RGBColor[0.08, 0.04, 0], 
+                  RGBColor[0.8, 0.9, 1]}, "Thulium-TextButton-Display"]}, 
+              Dynamic[
+               CurrentValue["MouseButtonTest"]]], 
+             EventHandlerTag[{"MouseClicked" :> ReleaseHold[#3]}]], 
+            MouseAppearanceTag["LinkHand"]], #2, TooltipDelay -> 0.2, 
+           TooltipStyle -> {
+            CellFrameColor -> RGBColor[0.7, 0.7, 0.6, 0.5], Background -> 
+             RGBColor[1, 1, 0.9, 0.7]}], False -> TemplateBox[{#, 
+            RGBColor[0.2, 0.1, 0], 
+            RGBColor[0.92, 0.96, 1]}, "Thulium-TextButton-Display"]}, 
+        Dynamic[
+         CurrentValue["MouseOver"]]]& )}]}, Visible -> False, FrontEndVersion -> 
+  "11.3 for Microsoft Windows (64-bit) (March 6, 2018)", StyleDefinitions -> 
+  "Default.nb"]
 ]
 (* End of Notebook Content *)
 
 (* Internal cache information *)
 (*CellTagsOutline
-CellTagsIndex->{}
+CellTagsIndex->{
+ "Bottom-Of-Head"->{
+  Cell[1758, 51, 282, 9, 105, "Text",ExpressionUUID->"d5f7988b-4e38-4b96-aba0-9e41bcf32f35",
+   CellTags->"Bottom-Of-Head"]}
+ }
 *)
 (*CellTagsIndex
-CellTagsIndex->{}
+CellTagsIndex->{
+ {"Bottom-Of-Head", 5810, 150}
+ }
 *)
 (*NotebookFileOutline
 Notebook[{
-Cell[579, 21, 50, 0, 84, "Thulium-Title",ExpressionUUID->"9c8cf80d-b5b8-4a3a-a2db-381b768a94cf"],
-Cell[CellGroupData[{
-Cell[654, 25, 640, 13, 84, "Thulium-Instruction",ExpressionUUID->"f093543a-0080-4c6f-ac51-2b4c1f4f7eb6"],
-Cell[1297, 40, 244, 5, 84, "Thulium-Instruction",ExpressionUUID->"3e1c61a5-57c8-41bb-92b2-3f93b93efcb0"],
-Cell[1544, 47, 236, 5, 84, "Thulium-Instruction",ExpressionUUID->"ce7b717e-e752-4916-a2df-afc3529fc192"]
-}, Open  ]],
-Cell[1795, 55, 75, 2, 84, "Input",ExpressionUUID->"5a58e7d3-53c5-472a-b586-889a161c767e"]
+Cell[579, 21, 50, 0, 105, "Thulium-Title",ExpressionUUID->"0d8046a7-2482-45fb-9f90-4096efa955b7"],
+Cell[632, 23, 1123, 26, 105, "Thulium-Controls",ExpressionUUID->"cfc5486c-553b-4fff-84dc-ec1bfa3a4a44"],
+Cell[1758, 51, 282, 9, 105, "Text",ExpressionUUID->"d5f7988b-4e38-4b96-aba0-9e41bcf32f35",
+ CellTags->"Bottom-Of-Head"],
+Cell[2043, 62, 75, 2, 105, "Input",ExpressionUUID->"7d8cc2ac-9e31-4ffd-a39a-7455157d5db6"]
 }
 ]
 *)

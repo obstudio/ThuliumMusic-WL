@@ -9,11 +9,31 @@ StyleSheet["Thulium"] = Notebook[{
 		FontColor -> RGBColor["#335599"],
 		LineSpacing -> {1, 4},
 		LanguageCategory -> "NaturalLanguage",
-		CellMargins -> {{32, Inherited}, {16, 32}},
+		CellMargins -> {{40, Inherited}, {16, 32}},
 		ShowCellBracket -> False,
 		Evaluatable -> False,
 		Editable -> False,
 		Deletable -> False
+	],
+	
+	Cell[StyleData["Thulium-Controls"],
+		CellMargins -> {{48, 48}, {8, 8}},
+		TextAlignment -> Center,
+		ShowCellBracket -> False,
+		Evaluatable -> False,
+		Editable -> False,
+		Deletable -> False,
+		Deployed -> True
+	],
+	
+	Cell[StyleData["Thulium-TextButton-Content"],
+		FontFamily -> "Book Antiqua",
+		FontSize -> 16
+	],
+	
+	Cell[StyleData["Thulium-TextButton-Tooltip"],
+		FontFamily -> "Calibri",
+		FontSize -> 16
 	],
 	
 	Cell[StyleData["Thulium-Instruction"],
@@ -46,12 +66,15 @@ StyleSheet["Thulium"] = Notebook[{
 		}
 	],
 	
-	Cell[StyleData["Thulium-Button-Display"],
+	Cell[StyleData["Thulium-TextButton-Display"],
 		TemplateBoxOptions -> {DisplayFunction -> Function[
 			FrameBox[
 				RowBox[{
 					TemplateBox[{1}, "Spacer1"],
-					StyleBox[#1, FontColor -> #2],
+					AdjustmentBox[
+						StyleBox[#1, FontColor -> #2],
+						BoxBaselineShift -> 0.5
+					],
 					TemplateBox[{1}, "Spacer1"]
 				}],
 				Background -> #3,
@@ -65,22 +88,36 @@ StyleSheet["Thulium"] = Notebook[{
 		]}
 	],
 	
-	Cell[StyleData["Thulium-Button"],
+	Cell[StyleData["Thulium-TextButton"],
 		TemplateBoxOptions -> {DisplayFunction -> Function[
-			TagBox[
-				TagBox[
-					PaneSelectorBox[{
-						True -> TemplateBox[{#1,
-							RGBColor[0.08, 0.04, 0],
-							RGBColor[0.8, 0.9, 1]
-						}, "Thulium-Button-Display"],
-						False -> TemplateBox[{#1,
-							RGBColor[0.2, 0.1, 0],
-							RGBColor[0.92, 0.96, 1]
-						}, "Thulium-Button-Display"]
-					}, Dynamic[CurrentValue["MouseOver"]]],
-				EventHandlerTag @ {"MouseClicked" :> #2}],
-			MouseAppearanceTag @ "LinkHand"]
+			PaneSelectorBox[{
+				True -> TooltipBox[
+					TagBox[
+						TagBox[
+							PaneSelectorBox[{
+								True -> TemplateBox[{#1,
+									RGBColor[0, 0, 0],
+									RGBColor[0.3, 0.7, 1]
+								}, "Thulium-TextButton-Display"],
+								False -> TemplateBox[{#1,
+									RGBColor[0.08, 0.04, 0],
+									RGBColor[0.8, 0.9, 1]
+								}, "Thulium-TextButton-Display"]
+							}, Dynamic @ CurrentValue["MouseButtonTest"]],
+						EventHandlerTag @ {"MouseClicked" :> ReleaseHold[#3]}],
+					MouseAppearanceTag @ "LinkHand"],
+					#2,
+					TooltipDelay -> 0.2,
+					TooltipStyle -> {
+						CellFrameColor -> RGBColor[0.7, 0.7, 0.6, 0.5],
+						Background -> RGBColor[1, 1, 0.9, 0.7]
+					}
+				],
+				False -> TemplateBox[{#1,
+					RGBColor[0.2, 0.1, 0],
+					RGBColor[0.92, 0.96, 1]
+				}, "Thulium-TextButton-Display"]
+			}, Dynamic @ CurrentValue["MouseOver"]]
 		]}
 	]
 	
@@ -94,7 +131,7 @@ StyleSheet["Thulium"] = Notebook[{
 (* ::Input:: *)
 (*CreateDocument[{*)
 (*Cell[BoxData@*)
-(*TemplateBox[{"1234567",Unevaluated@Print[233]},"Thulium-Button"],*)
+(*TemplateBox[{"1234567","7654321",Hold@Print[233]},"Thulium-TextButton"],*)
 (*FontSize->20]*)
 (*},StyleDefinitions -> StyleSheet["Thulium"],*)
 (*Deployed->True,Saveable->False,Magnification->2];*)

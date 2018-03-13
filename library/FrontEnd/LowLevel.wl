@@ -39,7 +39,8 @@ BoxSimplify[boxes_List] := If[Length[boxes] == 1, boxes[[1]],
 (* Spacer Cell *)
 Options[SpacerCell] = {
 	CellFrameColor -> Automatic,
-	Background -> Inherited
+	Background -> Inherited,
+	CellTags -> None
 };
 SpacerCell[t_Integer, op:OptionsPattern[]] := SpacerCell[{0, 0}, t, op];
 SpacerCell[{w_Integer:0, h_Integer}, t_Integer:0, OptionsPattern[]] := Cell["", "Text",
@@ -49,7 +50,9 @@ SpacerCell[{w_Integer:0, h_Integer}, t_Integer:0, OptionsPattern[]] := Cell["", 
 	CellFrame -> If[t >= 0, {{0, 0}, {0, t}}, {{0, 0}, {-t, 0}}],
 	CellFrameColor -> OptionValue[CellFrameColor],
 	CellFrameMargins -> 0, 
+	CellTags -> OptionValue[CellTags],
 	Background -> OptionValue[Background],
+	ShowCellBracket -> False,
 	Selectable -> False
 ];
 

@@ -177,3 +177,38 @@ update:=(
 	homepage;
 );
 $Updated=False;
+
+
+init`updateImage := Block[{updates={},image,filename,meta},
+	Do[
+		If[KeyExistsQ[index[[song]],"Image"]&&!FileExistsQ[dataPath<>"Images/"<>index[[song,"Image"]]],
+			AppendTo[updates,index[[song,"Image"]]]
+		],
+	{song,songs}];
+	If[updates=={},Return[]];
+	Monitor[Do[
+		filename=updates[[i]];
+		image=Import[cloudPath<>"images/"<>filename];
+		Export[dataPath<>"Images/"<>filename,image];
+		meta=Association@Import[cloudPath<>"images/"<>StringReplace[filename,"."~~__->".json"]];
+		If[KeyExistsQ[imageData,filename],
+			imageData[[filename]]=meta,
+			AppendTo[imageData,filename->meta]
+		],
+	{i,Length@updates}],
+	Panel[Column[{Spacer[{4,4}],
+		text[["UpdatingImage"]],
+		Spacer[1],
+		Row[{Graphics@{progressBar[(i-1)/Length@updates,24]}},ImageSize->{400,20},Alignment->Center],
+		Spacer[1],
+		Row[{
+			caption["_Progression","Text",{i,Length@updates}],
+			Spacer[4],text[["Loading"]],
+			updates[[i]]
+		}],
+	Spacer[{4,4}]},Alignment->Center],ImageSize->{400,Full},Alignment->Center]];
+	Export[dataPath<>"Image.json",Normal/@Normal@imageData];
+];
+
+
+CellEpilog

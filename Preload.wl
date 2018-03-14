@@ -110,3 +110,4 @@ If[!FileExistsQ[dataPath <> "Index.mx"],
 	DumpSave[dataPath <> "Index.mx", index],
 	Get[dataPath <> "Index.mx"]
 ];
+imageData = Association /@ Association @ Import[dataPath <> "image.json"];

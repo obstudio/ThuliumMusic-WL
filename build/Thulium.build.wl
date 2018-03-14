@@ -17,33 +17,40 @@ build`InitializeThulium := Hold[
 With[{InitializeThulium = build`InitializeThulium},
 	build`TemporaryNotebook = CreateDocument[
 		{
-			Cell["Thulium Music Player v2.1", "Thulium-Title", CellTags -> "$title"],
+			Cell[
+				BoxData @ RowBox[{
+					StyleBox["Thulium Music Player", "$TitleText"],
+					TemplateBox[{4}, "Spacer1"],
+					TemplateBox[{"\"v2.1\""}, "$TitleVersion"]
+				}],
+				"$Title", CellTags -> "$title"
+			],
 			Cell[BoxData @ RowBox[{
 				TemplateBox[{
 					"Initialize Thulium",
 					"Click to initialize the kernel.",
 					InitializeThulium
-				}, "Thulium-TextButton"],
+				}, "$TextButton"],
 				TemplateBox[{4}, "Spacer1"],
 				TemplateBox[{
 					"Initialize Parser",
 					"Click to initialize the parser.",
 					Unevaluated @ InitializeParser
-				}, "Thulium-TextButton-Monitored"],
+				}, "$TextButtonMonitored"],
 				TemplateBox[{4}, "Spacer1"],
 				TemplateBox[{
 					"Initialize Songs",
 					"Click to initialize the songs.",
 					Unevaluated @ update
-				}, "Thulium-TextButton-Monitored"],
+				}, "$TextButtonMonitored"],
 				TemplateBox[{4}, "Spacer1"],
 				TemplateBox[{
 					"Start Front End",
 					"Click to run the front end.",
 					Hold @ homepage
-				}, "Thulium-TextButton"]
-			}], "Thulium-Controls"],
-			Cell[BoxData @ MakeBoxes @ Null, "Thulium-Initialization", CellTags -> "$init"],
+				}, "$TextButton"]
+			}], "$Controls"],
+			Cell[BoxData @ MakeBoxes @ Null, "$Initialization", CellTags -> "$init"],
 			Cell[BoxData @ MakeBoxes[
 				AudioStop[];
 			], "Input"]
@@ -53,7 +60,7 @@ With[{InitializeThulium = build`InitializeThulium},
 		WindowTitle -> "Thulium",
 		WindowElements -> {"VerticalScrollBar"},
 		WindowSize -> {1440, 768},
-		Magnification -> 1.5,
+		Magnification -> 2,
 		Saveable -> False
 	];
 	NotebookSave[build`TemporaryNotebook, localPath <> "Thulium.nb"];

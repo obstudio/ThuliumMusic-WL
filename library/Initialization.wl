@@ -24,6 +24,27 @@ playlistTemplate=<|
 |>;
 
 
+InitializeParser := Monitor[
+	Off[General::shdw];
+	System`JS = StartExternalSession["NodeJS"];
+	ExternalEvaluate[System`JS, File[localPath <> "library/Parser/Parser.js"]];
+	ExternalEvaluate[System`JS, "const fs = require('fs')"];
+	ExternalEvaluate[System`JS, "
+		function Parse(filePath) {
+			const data = JSON.parse(fs.readFileSync(filePath, 'utf8'))
+			return new Parser(data).parse()
+		}
+	"];
+	DeleteObject[Drop[ExternalSessions[], -1]];
+	On[General::shdw],
+	(* monitor *)
+	MonitorDisplay[Style[
+		"Initializing Node.js as external evaluator ......",
+		"PrintTemporary"
+	]]
+];
+
+
 updateIndex := Block[
 	{
 		metaTree, songsClassified,
@@ -76,18 +97,18 @@ updateIndex := Block[
 			}]
 		}];
 		pageData=AssociationMap[1&,Prepend[playlists,"Main"]],
-		DisplayForm @ TemplateBox[{AdjustmentBox[
-			StyleBox["Constructing index...", "Thulium-Monitor"],
-			BoxMargins -> {{2, 2}, {1, 1}},
-			BoxBaselineShift -> 0.7
-		]}, "Thulium-Monitor"]
+		(* monitor *)
+		MonitorDisplay[Style[
+			"Constructing music index ......",
+			"PrintTemporary"
+		]]
 	]
 ];
 
 
-updateImage:=Block[
+updateImage := Block[
 	{
-		updates={},image,filename,meta,
+		updates={}, image, filename, meta,
 		imageData = Association /@ Association @ Import[dataPath <> "image.json"]
 	},
 	Do[
@@ -96,34 +117,35 @@ updateImage:=Block[
 		],
 	{song,songs}];
 	If[updates=={},Return[]];
-	Monitor[Do[
-		filename=updates[[i]];
-		image=Import[cloudPath<>"images/"<>filename];
-		Export[dataPath<>"Images/"<>filename,image];
-		meta=Association@Import[cloudPath<>"images/"<>StringReplace[filename,"."~~__->".json"]];
-		If[KeyExistsQ[imageData,filename],
-			imageData[[filename]]=meta,
-			AppendTo[imageData,filename->meta]
-		],
-	{i,Length@updates}],
-	Panel[Column[{Spacer[{4,4}],
-		text[["UpdatingImage"]],
-		Spacer[1],
-		Row[{Graphics@{progressBar[(i-1)/Length@updates,24]}},ImageSize->{400,20},Alignment->Center],
-		Spacer[1],
-		Row[{
-			caption["_Progression","Text",{i,Length@updates}],
-			Spacer[4],text[["Loading"]],
-			updates[[i]]
-		}],
-	Spacer[{4,4}]},Alignment->Center],ImageSize->{400,Full},Alignment->Center]];
-	Export[dataPath<>"Image.json",Normal/@Normal@imageData];
+	Monitor[
+		Do[
+			filename=updates[[i]];
+			image=Import[cloudPath<>"images/"<>filename];
+			Export[dataPath<>"Images/"<>filename,image];
+			meta=Association@Import[cloudPath<>"images/"<>StringReplace[filename,"."~~__->".json"]];
+			If[KeyExistsQ[imageData,filename],
+				imageData[[filename]]=meta,
+				AppendTo[imageData,filename->meta]
+			],
+		{i,Length@updates}];
+		Export[dataPath <>"Image.json", imageData],
+		(* monitor *)
+		MonitorDisplay[Style[Column[{
+			"Downloading images from the internet ......",
+			Graphics[progressBar[(i - 1) / Length[updates], 24], ImageSize -> {400, 20}],
+			Row[{
+				"Loading: ", Spacer[2],
+				updates[[i]], Spacer[6],
+				"(", i, "/", Length[updates], ")"
+			}]
+		}, Alignment -> Center], "PrintTemporary"]]
+	];
 ];
 
 
-updateBuffer:=Block[
+updateBuffer := Block[
 	{
-		updates={},song,filename,hash,audio,bufferList,
+		updates={}, song, filename, hash, audio, bufferList,
 		bufferHash = Association @ Import[dataPath <> "Buffer.json"]
 	},
 	SetDirectory[dataPath];
@@ -142,65 +164,46 @@ updateBuffer:=Block[
 		],
 	{song,songs}];
 	If[updates=={},Return[]];
-	Monitor[Do[
-		song=updates[[i]];
-		filename=localPath<>"Songs/"<>song<>".tm";
-		bufferHash[[song]]=IntegerString[FileHash[filename],32];
-		audio=AudioAdapt[Parse[filename]];
-		Export[dataPath<>"Buffer/"<>song<>".buffer",audio,"MP3"],
-	{i,Length@updates}],
-	Panel[Column[{Spacer[{4,4}],
-		text[["UpdatingBuffer"]],
-		Spacer[1],
-		Row[{Graphics@{progressBar[(i-1)/Length@updates,24]}},ImageSize->{400,20},Alignment->Center],
-		Spacer[1],
-		Row[{
-			caption["_Progression","Text",{i,Length@updates}],
-			Spacer[4],text[["Loading"]],
-			index[[updates[[i]],"SongName"]]
-		}],
-	Spacer[{4,4}]},Alignment->Center],ImageSize->{400,Full},Alignment->Center]];
-	Export[dataPath<>"Buffer.json",Normal@bufferHash[[Intersection[Keys@bufferHash,songs]]]];
-	ResetDirectory[];
+	Monitor[
+		Do[
+			song=updates[[i]];
+			filename=localPath<>"Songs/"<>song<>".tm";
+			bufferHash[[song]]=IntegerString[FileHash[filename],32];
+			audio=AudioAdapt[Parse[filename]];
+			Export[dataPath<>"Buffer/"<>song<>".buffer",audio,"MP3"],
+		{i,Length@updates}];
+		Export[dataPath<>"Buffer.json",bufferHash[[Intersection[Keys@bufferHash,songs]]]];
+		ResetDirectory[],
+		(* monitor *)
+		MonitorDisplay[Style[Column[{
+			"Generating music buffer ......",
+			Graphics[progressBar[(i - 1) / Length[updates], 24], ImageSize -> {400, 20}],
+			Row[{
+				"Loading: ", Spacer[2],
+				updates[[i]], Spacer[6],
+				"(", i, "/", Length[updates], ")"
+			}]
+		}, Alignment -> Center], "PrintTemporary"]]
+	];
 ];
 
 
-update := (
-	updateIndex;
-	updateImage;
-	updateBuffer;
-);
+update := (updateIndex; updateImage; updateBuffer);
 
 
-InitializeParser := Monitor[
-	Off[General::shdw];
-	System`JS = StartExternalSession["NodeJS"];
-	ExternalEvaluate[System`JS, File[localPath <> "library/Parser/Parser.js"]];
-	ExternalEvaluate[System`JS, "const fs = require('fs')"];
-	ExternalEvaluate[System`JS, "
-		function Parse(filePath) {
-			const data = JSON.parse(fs.readFileSync(filePath, 'utf8'))
-			return new Parser(data).parse()
-		}
-	"];
-	DeleteObject[Drop[ExternalSessions[], -1]];
-	On[General::shdw],
-	DisplayForm @ TemplateBox[{AdjustmentBox[
-		StyleBox["Initializing Node.js as external evaluator...", "Thulium-Monitor"],
-		BoxMargins -> {{2, 2}, {1, 1}},
-		BoxBaselineShift -> 0.7
-	]}, "Thulium-Monitor"]
-];
-
-
-SetAttributes[WriteEvaluate, HoldAllComplete];
-WriteEvaluate[expression_] := (
-	NotebookLocate["$init"];
-	NotebookWrite[EvaluationNotebook[], Cell[
-		BoxData @ MakeBoxes @ Evaluate @ expression,
-		"Thulium-Initialization",
-		CellTags -> "$init"
-	], All];
-	SelectionEvaluate[EvaluationNotebook[]];
-	NotebookLocate["$title"];
+MonitorDisplay[content_] := (
+	Framed[
+		Pane[content,
+			Scrollbars -> False,
+			Alignment -> {Center, Center},
+			ImageMargins -> {{4, 4}, {4, 4}},
+			ImageSize -> {
+				Dynamic @ CurrentValue[EvaluationNotebook[], WindowSize][[1]] / 2 - 180,
+			Automatic}
+		],
+		Background -> RGBColor[0.98, 0.98, 1],
+		RoundingRadius -> {8, 8},
+		ContentPadding -> True,
+		FrameStyle -> None
+	]
 );

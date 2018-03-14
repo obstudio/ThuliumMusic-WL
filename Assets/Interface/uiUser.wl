@@ -173,8 +173,6 @@ homepage:=DynamicModule[{playlist},
 		Row[{
 			Row[{Spacer[40],caption["_Thulium","BigTitle"]},Alignment->Left,ImageSize->320],
 			Row[{
-				button["Refresh",DialogReturn[update]],
-				Spacer[10],
 				button["EnterPlaylist",DialogReturn[pageData[["Main"]]=page;playlist;uiPlaylist[playlist]]],
 				Spacer[10],
 				button["About",DialogReturn[pageData[["Main"]]=page;uiAbout]],

@@ -81,29 +81,47 @@ StyleSheet["Thulium"] = Notebook[{
 					TagBox[
 						TagBox[
 							PaneSelectorBox[{
-								True -> TemplateBox[{#1,
+								True -> TemplateBox[{
+									StyleBox[#1, "Thulium-TextButton-Content"],
 									RGBColor[0, 0, 0],
 									RGBColor[0.3, 0.7, 1]
 								}, "Thulium-TextButton-Display"],
-								False -> TemplateBox[{#1,
+								False -> TemplateBox[{
+									StyleBox[#1, "Thulium-TextButton-Content"],
 									RGBColor[0.08, 0.04, 0],
 									RGBColor[0.8, 0.9, 1]
 								}, "Thulium-TextButton-Display"]
 							}, Dynamic @ CurrentValue["MouseButtonTest"]],
-						EventHandlerTag @ {"MouseClicked" :> ReleaseHold[#3]}],
+						EventHandlerTag @ {"MouseClicked" :> ReleaseHold @ #3}],
 					MouseAppearanceTag @ "LinkHand"],
-					#2,
+					StyleBox[#2, "Thulium-TextButton-Tooltip"],
 					TooltipDelay -> 0.2,
 					TooltipStyle -> {
 						CellFrameColor -> RGBColor[0.7, 0.7, 0.6, 0.5],
 						Background -> RGBColor[1, 1, 0.9, 0.7]
 					}
 				],
-				False -> TemplateBox[{#1,
+				False -> TemplateBox[{
+					StyleBox[#1, "Thulium-TextButton-Content"],
 					RGBColor[0.2, 0.1, 0],
 					RGBColor[0.92, 0.96, 1]
 				}, "Thulium-TextButton-Display"]
 			}, Dynamic @ CurrentValue["MouseOver"]]
+		]}
+	],
+	
+	Cell[StyleData["Thulium-TextButton-Monitored"],
+		TemplateBoxOptions -> {DisplayFunction -> Function[
+			TemplateBox[{#1, #2, Hold[
+				NotebookLocate["$init"];
+				NotebookWrite[EvaluationNotebook[], Cell[
+					BoxData @ MakeBoxes @ Evaluate @ #3,
+					"Thulium-Initialization",
+					CellTags -> "$init"
+				], All];
+				SelectionEvaluate[EvaluationNotebook[]];
+				NotebookLocate["$title"];
+			]}, "Thulium-TextButton"]
 		]}
 	],
 	
@@ -125,7 +143,3 @@ StyleSheet["Thulium"] = Notebook[{
 
 (* ::Input:: *)
 (*CurrentValue[{StyleDefinitions, "PrintTemporary"}]*)
-
-
-(* ::InheritFromParent:: *)
-(*{CellMargins->{{60,Inherited},{Inherited,Inherited}},CellGroupingRules->"GraphicsGrouping",StripStyleOnPaste->True,PageBreakWithin->False,GroupPageBreakWithin->False,GeneratedCell->True,CellAutoOverwrite->True,ShowCellLabel->False,DefaultFormatType->DefaultOutputFormatType,AutoItalicWords->{},AutoQuoteCharacters->{},PasteAutoQuoteCharacters->{},LanguageCategory->None,FormatType->InputForm,ShowStringCharacters->False,CounterIncrements->"Print",StyleMenuListing->None}*)

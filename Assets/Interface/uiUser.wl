@@ -164,12 +164,6 @@ WindowTitle->text[["About"]],Background->styleColor[["Background"]]];
 (*uiAbout;*)
 
 
-Main:=If[!$Updated,
-	update,
-	homepage;
-];
-
-
 homepage:=DynamicModule[{playlist},
 	pageCount=Ceiling[Length@playlists/16];
 	If[pageData[["Main"]]>pageCount,pageData[["Main"]]=pageCount];
@@ -205,7 +199,7 @@ homepage:=DynamicModule[{playlist},
 		uiPageSelector,
 		Spacer[{40,40}]
 	},Center,ItemSize->Full],
-	WindowTitle->text[["Thulium"]],Background->styleColor[["Background"]](*,WindowFrame\[Rule]"Frameless"*)]
+	WindowTitle->text[["Thulium"]],Background->styleColor[["Background"]](*,WindowFrame\[Rule]"Frameless"*)];
 ];
 
 

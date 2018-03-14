@@ -1,7 +1,11 @@
 (* ::Package:: *)
 
-refreshLanguage := Block[{langDataPath},
-	langDataPath=localPath<>"language/"<>userInfo[["Language"]]<>"/";
+dirCreate[path_] := If[!DirectoryQ[path], CreateDirectory[path]];
+jsonCreate[path_] := If[!FileExistsQ[path], Export[path, {}]];
+
+
+refreshLanguage := With[
+	{langDataPath=localPath<>"language/"<>userInfo[["Language"]]<>"/"},
 	tagName=Association@Import[langDataPath<>"GeneralTags.json"];
 	instrName=Association@Import[langDataPath<>"Instruments.json"];
 	text=Association@Import[langDataPath<>"GeneralTexts.json"];
@@ -9,68 +13,83 @@ refreshLanguage := Block[{langDataPath},
 ];
 
 
-refresh:=Block[
+playlistTemplate=<|
+	"Type"->"Playlist",
+	"Path"->"",
+	"Title"->"",
+	"Abstract"->"",
+	"Comment"->"",
+	"SongList"->"",
+	"IndexWidth"->0
+|>;
+
+
+updateIndex := Block[
 	{
-		metaTree,songsClassified,
-		playlistInfo,songList
+		metaTree, songsClassified,
+		playlistInfo, songList
 	},
-	SetDirectory[localPath];
-	metaTree=StringReplace["\\"->"/"]/@StringDrop[FileNames["*","Meta",Infinity],5];
-	songs=StringDrop[Select[metaTree,StringMatchQ[__~~".json"]],-5];
-	dirList=Select[metaTree,!StringMatchQ[#,__~~".json"]&];
-	Do[
-		If[!DirectoryQ[dataPath<>"buffer/"<>dir],CreateDirectory[dataPath<>"buffer/"<>dir]],
-	{dir,dirList}];
-	index=Association/@AssociationMap[Import[localPath<>"Meta/"<>#<>".json"]&,songs];
-	imageDirList=DeleteDuplicates@Flatten[
-		StringCases[dir__~~"/"~~Except["/"]..:>dir]/@Values@index[[songs,"Image"]]
-	];
-	Do[
-		If[!DirectoryQ[dataPath<>"images/"<>dir],CreateDirectory[dataPath<>"images/"<>dir]],
-	{dir,imageDirList}];
-	playlists=Association/@Import[localPath<>"playlist.json"];
-	playlistData=<||>;
-	songsClassified={};
-	Do[
-		playlistInfo=Append[Association@Import[localPath<>"Playlists/"<>playlist,"JSON"],<|"Type"->"Playlist"|>];
-		songList=#Song&/@Association/@playlistInfo[["SongList"]];
-		AppendTo[playlistData,<|playlist->playlistInfo|>];
-		AppendTo[songsClassified,playlistInfo[["Path"]]<>#&/@songList],
-	{playlist,Select[playlists,#Type=="Playlist"&][[All,"Name"]]}];
-	Do[
-		songList=Keys@Select[Normal@index,MemberQ[Values[#][["Tags"]],tag]&];
-		playlistInfo=ReplacePart[playlistTemplate,{
-			"Type"->"Tag",
-			"Title"->If[KeyExistsQ[tagDict,tag],
-				If[KeyExistsQ[tagDict[[tag]],userInfo[["Language"]]],
-					tagDict[[tag,userInfo[["Language"]]]],
-					tagDict[[tag,tagDict[[tag,"Origin"]]]]
-				],
-			tag],
-			"SongList"->({"Song"->#}&)/@songList
+	Monitor[
+		SetDirectory[localPath];
+		metaTree = StringReplace["\\" -> "/"] /@ StringDrop[FileNames["*", "Meta", Infinity], 5];
+		songs = StringDrop[Select[metaTree, StringMatchQ[__~~".json"]], -5];
+		dirList = Select[metaTree, !StringMatchQ[#, __~~".json"]&];
+		Scan[dirCreate[dataPath <> "buffer/" <> #]&, dirList];
+		index = Association /@ AssociationMap[Import[localPath <> "Meta/" <> # <> ".json"]&, songs];
+		DumpSave[dataPath <> "Index.mx", index];
+		imageDirList = DeleteDuplicates @ Flatten[
+			StringCases[dir__~~"/"~~Except["/"].. :> dir] /@ Values @ index[[All, "Image"]]
+		];
+		Scan[dirCreate[dataPath <> "images/" <> #]&, imageDirList];
+		playlists = Association /@ Import[localPath <> "playlist.json"];
+		playlistData = <||>;
+		songsClassified = {};
+		Do[
+			playlistInfo=Append[Association@Import[localPath<>"Playlists/"<>playlist,"JSON"],<|"Type"->"Playlist"|>];
+			songList=#Song&/@Association/@playlistInfo[["SongList"]];
+			AppendTo[playlistData,<|playlist->playlistInfo|>];
+			AppendTo[songsClassified,playlistInfo[["Path"]]<>#&/@songList],
+		{playlist,Select[playlists,#Type=="Playlist"&][[All,"Name"]]}];
+		Do[
+			songList=Keys@Select[Normal@index,MemberQ[Values[#][["Tags"]],tag]&];
+			playlistInfo=ReplacePart[playlistTemplate,{
+				"Type"->"Tag",
+				"Title"->If[KeyExistsQ[tagDict,tag],
+					If[KeyExistsQ[tagDict[[tag]],userInfo[["Language"]]],
+						tagDict[[tag,userInfo[["Language"]]]],
+						tagDict[[tag,tagDict[[tag,"Origin"]]]]
+					],
+				tag],
+				"SongList"->({"Song"->#}&)/@songList
+			}];
+			AppendTo[playlistData,<|tag->playlistInfo|>];
+			AppendTo[songsClassified,playlistInfo[["Path"]]<>#&/@songList],
+		{tag,Select[playlists,#Type=="Tag"&][[All,"Name"]]}];
+		playlists=Join[{"All","Unclassified"},playlists[[All,"Name"]]];
+		PrependTo[playlistData,{
+			"All"->ReplacePart[playlistTemplate,{
+				"Type"->"Class","Title"->text[["AllSongs"]],"SongList"->({"Song"->#}&/@songs)
+			}],
+			"Unclassified"->ReplacePart[playlistTemplate,{
+				"Type"->"Class","Title"->text[["Unclassified"]],
+				"SongList"->({"Song"->#}&/@Complement[songs,Flatten@songsClassified])
+			}]
 		}];
-		AppendTo[playlistData,<|tag->playlistInfo|>];
-		AppendTo[songsClassified,playlistInfo[["Path"]]<>#&/@songList],
-	{tag,Select[playlists,#Type=="Tag"&][[All,"Name"]]}];
-	playlists=Join[{"All","Unclassified"},playlists[[All,"Name"]]];
-	PrependTo[playlistData,{
-		"All"->ReplacePart[playlistTemplate,{
-			"Type"->"Class","Title"->text[["AllSongs"]],"SongList"->({"Song"->#}&/@songs)
-		}],
-		"Unclassified"->ReplacePart[playlistTemplate,{
-			"Type"->"Class","Title"->text[["Unclassified"]],
-			"SongList"->({"Song"->#}&/@Complement[songs,Flatten@songsClassified])
-		}]
-	}];
-	pageData=AssociationMap[1&,Prepend[playlists,"Main"]];
+		pageData=AssociationMap[1&,Prepend[playlists,"Main"]],
+		DisplayForm @ TemplateBox[{AdjustmentBox[
+			StyleBox["Constructing index...", "Thulium-Monitor"],
+			BoxMargins -> {{2, 2}, {1, 1}},
+			BoxBaselineShift -> 0.7
+		]}, "Thulium-Monitor"]
+	]
 ];
 
 
-(* ::Input:: *)
-(*refresh;*)
-
-
-updateImage:=Block[{updates={},image,filename,meta},
+updateImage:=Block[
+	{
+		updates={},image,filename,meta,
+		imageData = Association /@ Association @ Import[dataPath <> "image.json"]
+	},
 	Do[
 		If[KeyExistsQ[index[[song]],"Image"]&&!FileExistsQ[dataPath<>"Images/"<>index[[song,"Image"]]],
 			AppendTo[updates,index[[song,"Image"]]]
@@ -102,7 +121,11 @@ updateImage:=Block[{updates={},image,filename,meta},
 ];
 
 
-updateBuffer:=Block[{updates={},song,filename,hash,audio,bufferList},
+updateBuffer:=Block[
+	{
+		updates={},song,filename,hash,audio,bufferList,
+		bufferHash = Association @ Import[dataPath <> "Buffer.json"]
+	},
 	SetDirectory[dataPath];
 	bufferList=StringReplace["\\"->"/"]/@StringTake[FileNames["*.buffer","buffer",Infinity],{8,-8}];
 	DeleteFile[dataPath<>"Buffer/"<>#<>".buffer"]&/@Complement[bufferList,songs];
@@ -138,17 +161,15 @@ updateBuffer:=Block[{updates={},song,filename,hash,audio,bufferList},
 		}],
 	Spacer[{4,4}]},Alignment->Center],ImageSize->{400,Full},Alignment->Center]];
 	Export[dataPath<>"Buffer.json",Normal@bufferHash[[Intersection[Keys@bufferHash,songs]]]];
+	ResetDirectory[];
 ];
 
 
-update:=(
-	refresh;
+update := (
+	updateIndex;
 	updateImage;
 	updateBuffer;
-	$Updated=True;
-	homepage;
 );
-$Updated=False;
 
 
 InitializeParser := Monitor[
@@ -170,3 +191,16 @@ InitializeParser := Monitor[
 		BoxBaselineShift -> 0.7
 	]}, "Thulium-Monitor"]
 ];
+
+
+SetAttributes[WriteEvaluate, HoldAllComplete];
+WriteEvaluate[expression_] := (
+	NotebookLocate["$init"];
+	NotebookWrite[EvaluationNotebook[], Cell[
+		BoxData @ MakeBoxes @ Evaluate @ expression,
+		"Thulium-Initialization",
+		CellTags -> "$init"
+	], All];
+	SelectionEvaluate[EvaluationNotebook[]];
+	NotebookLocate["$title"];
+);

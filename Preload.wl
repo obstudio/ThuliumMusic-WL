@@ -13,58 +13,18 @@ Switch[$VersionNumber,
 ];
 
 
-Off[General::shdw];
-If[Length @ FindExternalEvaluators["NodeJS"] == 0,
-	CreateDialog[{
-		TextCell["Thulium Music Player requires Node.js as external evaluator."],
-		TextCell["Please follow the guide to install Node.js and Zeromq first."],
-		DefaultButton[]
-	}];
-	Abort[];
-];
-On[General::shdw];
-
-
-(* path and template *)
-version=281;
-cloudPath="http://qymp.ob-studio.cn/assets/";
-defaultDataPath=StringReplace[FileNameDrop[$BaseDirectory],"\\"->"/"]<>"/ObStudio/QYMP/";
-userPath=StringReplace[FileNameDrop[$UserBaseDirectory],{"\\"->"/","Roaming"~~EndOfString->"Local"}]<>"/ObStudio/QYMP/";
-If[!DirectoryQ[defaultDataPath],CreateDirectory[defaultDataPath]];
-userTemplate=<|
-	"Version"->version,
-	"Language"->"chs",
-	"Developer"->False,
-	"Player"->"New",
-	"DataPath"->defaultDataPath
-|>;
-
+(* tags *)
+textInfoTags = {"SongName", "Lyricist", "Composer", "Adapter", "Comment", "Abstract", "Origin"};
+otherInfoTags = {"Image", "Uploader", "Tags"};
+imageTags = {"Title", "Painter", "PainterID", "IllustID", "Source", "URL"};
+aboutTags = {"Version", "Producer", "Website"};
+langList = {"chs", "eng"};
 
 (* instruments *)
-instDict=Association@Import[localPath<>"library/Data/Instrument.json"];
-percDict=Association@Import[localPath<>"library/Data/Percussion.json"];
-instList=Keys@instDict;
-percList=Keys@percDict;
-
-
-(* tags *)
-textInfoTags={"SongName","Lyricist","Composer","Adapter","Comment","Abstract","Origin"};
-otherInfoTags={"Image","Uploader","Tags"};
-imageTags={"Title","Painter","PainterID","IllustID","Source","URL"};
-aboutTags={"Version","Producer","Website"};
-langList={"chs","eng"};
-
-
-playlistTemplate=<|
-	"Type"->"Playlist",
-	"Path"->"",
-	"Title"->"",
-	"Abstract"->"",
-	"Comment"->"",
-	"SongList"->"",
-	"IndexWidth"->0
-|>;
-
+instDict = Association @ Import[localPath <> "library/Data/Instrument.json"];
+percDict = Association @ Import[localPath <> "library/Data/Percussion.json"];
+instList = Keys @ instDict;
+percList = Keys @ percDict;
 
 (* local data *)
 colorData=Association@Import[localPath<>"Assets/color.json"];                               (* colors *)
@@ -82,33 +42,71 @@ langDict=Association@Import[localPath<>"language/Languages.json"];              
 tagDict=Association/@Association@Import[localPath<>"Tags.json"];
 
 
-(* user data *)
+version = 509;
+cloudPath = "http://qymp.ob-studio.cn/assets/";
+With[{defaultDataPath = StringReplace[FileNameDrop[$BaseDirectory], "\\" -> "/"] <> "/ObStudio/QYMP/"},
+	If[!DirectoryQ[defaultDataPath], CreateDirectory[defaultDataPath]];
+	userInfoTemplate=<|
+		"Version" -> version,
+		"NodeJS" -> False,
+		"Language" -> "chs",
+		"Developer" -> False,
+		"Player" -> "New",
+		"DataPath" -> defaultDataPath
+	|>;
+];
+
+
+userPath = StringReplace[FileNameDrop[$UserBaseDirectory], {"\\" -> "/", "Roaming"~~EndOfString -> "Local"}] <> "/ObStudio/QYMP/";
 If[!DirectoryQ[userPath],
+	(* initial use *)
 	CreateDirectory[userPath];
-	userInfo=userTemplate;
+	userInfo = userInfoTemplate;
 	refreshLanguage;
 	uiSetPath;
-	Export[userPath<>"Default.json",userInfo],
-	userInfo=Association@Import[userPath<>"Default.json"];
+	Export[userPath <> "Default.json", userInfo],
+	(* general case *)
+	userInfo = Association @ Import[userPath <> "Default.json"];
 	refreshLanguage;
-	If[userInfo[["Version"]]<version,
-		Do[
-			If[!KeyExistsQ[userInfo,tag],AppendTo[userInfo,tag->userTemplate[[tag]]]],
-		{tag,Keys@userTemplate}];
-		userInfo[["Version"]]=version;
-		Export[userPath<>"Default.json",userInfo];
+	If[userInfo[["Version"]] < version,
+		Scan[
+			If[!KeyExistsQ[userInfo, #], AppendTo[userInfo, # -> userInfoTemplate[[#]]]]&,
+			Keys @ userInfoTemplate
+		];
+		userInfo[["Version"]] = version;
+		Export[userPath <> "Default.json", userInfo];
 	];
 ];
-If[!FileExistsQ[userPath<>"Favorite.json"],Export[userPath<>"Favorite.json",{}]];
-favorite=Import[userPath<>"Favorite.json"];
+If[!FileExistsQ[userPath <> "Favorite.json"], Export[userPath <> "Favorite.json",{}]];
+favorite = Import[userPath <> "Favorite.json"];
+
+
+(* Find Node.js as external evaluator *)
+If[!userInfo[["NodeJS"]],
+	Off[General::shdw];
+	If[Length @ FindExternalEvaluators["NodeJS"] == 0,
+		CreateDialog[{
+			TextCell["Thulium Music Player requires Node.js as external evaluator."],
+			TextCell["Please follow the guide to install Node.js and Zeromq first."],
+			DefaultButton[]
+		}];
+		Abort[],
+		userInfo[["NodeJS"]] = True;
+		Export[userPath <> "Default.json", userInfo];
+	];
+	On[General::shdw];
+];
 
 
 (* program data *)
-dataPath=userInfo[["DataPath"]];
-If[!DirectoryQ[dataPath],CreateDirectory[dataPath]];
-If[!DirectoryQ[dataPath<>"buffer/"],CreateDirectory[dataPath<>"buffer/"]];
-If[!DirectoryQ[dataPath<>"images/"],CreateDirectory[dataPath<>"images/"]];
-If[!FileExistsQ[dataPath<>"Buffer.json"],Export[dataPath<>"Buffer.json",{}]];
-bufferHash=Association@Import[dataPath<>"Buffer.json"];
-If[!FileExistsQ[dataPath<>"Image.json"],Export[dataPath<>"Image.json",{}]];
-imageData=Association/@Association@Import[dataPath<>"image.json"];
+dataPath = userInfo[["DataPath"]];
+dirCreate[dataPath];
+dirCreate[dataPath <> "buffer/"];
+dirCreate[dataPath <> "images/"];
+jsonCreate[dataPath <> "Buffer.json"];
+jsonCreate[dataPath <> "Image.json"];
+If[!FileExistsQ[dataPath <> "Index.mx"],
+	index = <||>;
+	DumpSave[dataPath <> "Index.mx", index],
+	Get[dataPath <> "Index.mx"]
+];

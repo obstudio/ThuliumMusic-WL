@@ -46,11 +46,40 @@ Interpretation[
 ]];
 
 
+InstrTest[p___]:=EmitSound@Sound@SoundNote[p];
+
+
 WorkBenchTemplate = Hold[{
 	Cell[BoxData @ MakeBoxes[
 		MusicStop[];
 	], "Input"],
 	Cell[BoxData @ MakeBoxes[
-		Adapter["Touhou/TH11-Chireiden/3rd_Eye.tm", Format -> "MIDI"]
+		Diagnose @ Parse[localPath<>"Songs/Touhou/TH11-Chireiden/3rd_Eye.tm"]
+	], "Input"],
+	Cell[BoxData @ MakeBoxes[
+		InstrTest[5, 1, "ElectricBass"]
+	], "Input"],
+	Cell[BoxData @ MakeBoxes[
+		InstrTest["BassDrum", 1]
+	], "Input"],
+	Cell[BoxData @ MakeBoxes[
+		MIDIPlay @ MIDIAdapt[Parse[localPath <> "Songs/Touhou/TH11-Chireiden/3rd_Eye.tm"], Rate -> 1.1]
+	], "Input"],
+	Cell[BoxData @ MakeBoxes[
+		AudioPlay @ AudioAdapt[Parse[localPath <> "Songs/Touhou/TH11-Chireiden/3rd_Eye.tm"], Rate -> 1.1]
 	], "Input"]
 }];
+
+
+SaveWorkBench := Block[{benchData},
+	benchData = NotebookRead @ Cells[CellStyle -> {"Input", "Music", "Text"}];
+	Export[userPath <> "WorkBench.nb", benchData];
+];
+
+
+LoadWorkBench := Block[{benchData},
+	NotebookDelete[Cells[CellStyle -> {"Input", "Output", "Music", "Text"}]];
+	benchData = First @ Import[userPath <> "WorkBench.nb", "Notebook"];
+	SelectionMove[First @ Cells[CellTags -> "$init"], After, Cell, AutoScroll -> False];
+	NotebookWrite[EvaluationNotebook[], benchData];
+];

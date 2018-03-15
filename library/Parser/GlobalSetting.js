@@ -12,7 +12,7 @@ class GlobalSetting {
         Duration = 0,
         FadeIn = 0,
         FadeOut = 0,
-        Rev = 0,
+        Rev = 0
     } = {}) {
         this.Key = Key
         this.Bar = Bar
@@ -60,7 +60,6 @@ class GlobalSetting {
         if (!criterion(value)) throw new RangeError(`${key} out of range`)
         this[key] = value
     }
-
 }
 
 module.exports = GlobalSetting

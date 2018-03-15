@@ -66,7 +66,7 @@ module.exports = {
 
     Tuplet(expr, subtrack) {
         const scale = Math.pow(2, Math.floor(Math.log2(expr))) / expr
-        const t = new SubtrackParser(subtrack, this.Settings.extend({Bar: this.Settings.Bar / scale}), this.Libraries, this.pitchQueue).parseTrack()
+        const t = new SubtrackParser(subtrack, this.Settings.extend({ Bar: this.Settings.Bar / scale }), this.Libraries, this.pitchQueue).parseTrack()
         t.Content.forEach((note) => {
             note.__oriDur *= scale
             note.Duration *= scale
@@ -106,7 +106,10 @@ module.exports = {
                 __oriDur: 1 / port * 60 / this.Settings.Speed
             }
         })
-        result.push(...t2.Content.map((note) => (note.StartTime += duration, note)))
+        result.push(...t2.Content.map((note) => {
+            note.StartTime += duration
+            return note
+        }))
         const single = t1.Meta.Single && t2.Meta.Single
         let incomplete = []
         if (single) {
@@ -287,8 +290,8 @@ module.exports = {
             'B': -1,
             'F': 5
         }
-        let delta = Tonality[match[3]] + (match[2] === undefined ? 0 : (match[2] === '#' ? match[1].length : -match[1].length))
-            + (match[5] === undefined ? 0 : (match[5] === '\'' ? (12 * match[4].length) : (-12 * match[4].length))) - this.Settings.Key[0]
+        let delta = Tonality[match[3]] + (match[2] === undefined ? 0 : (match[2] === '#' ? match[1].length : -match[1].length)) +
+            (match[5] === undefined ? 0 : (match[5] === '\'' ? (12 * match[4].length) : (-12 * match[4].length))) - this.Settings.Key[0]
         for (var i = 0, length = this.Settings.Key.length; i < length; i++) {
             this.Settings.Key[i] += delta
         }

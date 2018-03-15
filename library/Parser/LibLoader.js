@@ -60,7 +60,12 @@ class LibLoader {
 
     loadCode(data) {
         const code = 'this.result.FunctionPackage.Custom = {' + data.map((func) => func.Code).join(',') + '}'
-        eval(code)
+        try {
+            /* eslint-disable-next-line no-eval */
+            eval(code) // FIXME: change to other methods
+        } catch (e) {
+            console.log('Script grammar error')
+        }
     }
 
     /**
@@ -118,20 +123,21 @@ LibLoader.Default = {
                 pitchQueue: parser.Context.pitchQueue
             }, token.Argument.map((arg) => {
                 switch (arg.Type) {
-                case 'Number':
-                case 'String':
-                    return arg.Content
-                case 'Expression':
-                    return eval(arg.Content.replace(/Log2/g, 'Math.log2'))
-                default:
-                    return arg
+                    case 'Number':
+                    case 'String':
+                        return arg.Content
+                    case 'Expression':
+                        /* eslint-disable-next-line no-eval */
+                        return eval(arg.Content.replace(/Log2/g, 'Math.log2'))
+                    default:
+                        return arg
                 }
             }))
         },
-        locateFunction (name) {
+        locateFunction(name) {
             if (name in this.STD) return this.STD[name]
             if (name in this.Custom) return this.Custom[name]
-            return () => {}
+            return () => { }
         }
     },
     MIDIEventList: {},

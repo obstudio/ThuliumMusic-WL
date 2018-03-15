@@ -1,60 +1,51 @@
-class TmError extends Error {
-    constructor(errID, msg, ...args) {
-        super(msg)
-        this.name = errID
-        this.args = args
+class TmError {
+    constructor(err, pos, arg) {
+        this.name = err
+        this.arg = arg
+        this.pos = pos
     }
 
     toJSON() {
         return {
-            ErrID: this.name,
-            Args: this.args,
-            // Message: this.message
+            Err: this.name,
+            Arg: this.arg,
+            Pos: this.pos
         }
     }
 }
 
-class BarLengthError extends TmError{
-    constructor(id, index, length) {
-        super('BarLength', '', id, index, length)
+TmError.Types = {
+    Section: {
+        DiffDuration: 'Section::DiffDuration',
+        InitiativeBar: 'Section::InitiativeBar',
+        FinalBar: 'Section::FinalBar',
+        Mismatch: 'Section::Mismatch'
+    },
+    Track: {
+        BarLength: 'Track::BarLength',
+        UnexpVolta: 'Track::UnexpVolta',
+        UnexpCoda: 'Track::UnexpCoda',
+        MultiCoda: 'Track::MultiCoda',
+        MultiVolta: 'Track::MultiVolta',
+        Instrument: 'Track::Instrument',
+        Undefined: 'Track::Undefined',
+        FadeOverLong: 'Track::FadeOverLong'
+    },
+    Note: {
+        ChordRange: 'Note::ChordRange',
+        ChordOverride: 'Note::ChordOverride',
+        Reduplicate: 'Note::Reduplicate',
+        OutOfRegister: 'Note::OutOfRegister',
+        ScaleDegree: 'Note::ScaleDegree',
+        NoPrevious: 'Note::NoPrevious',
+        VolumeLimit: 'Note::VolumeLimit'
+    },
+    Arg: {
+        OutOfRange: 'Arg::OutOfRange',
+        UniNote: 'Arg::UniNote',
+        NotLog2: 'Arg::NotLog2',
+        WrongType: 'Arg::WrongType'
     }
 }
 
-class DupChordError extends TmError{
-    constructor(id, index, pitches) {
-        super('DupChord', '', id, index, pitches)
-    }
-}
-
-class TraceError extends TmError{
-    constructor(id, index, trace) {
-        super('Trace', '', id, index, trace)
-    }
-}
-
-class VolumeError extends TmError{
-    constructor(id, index, volume) {
-        super('Trace', '', id, index, volume)
-    }
-}
-
-class UndefinedTokenError extends TmError{
-    constructor(id, index, token) {
-        super('Undef', '', id, index, token)
-    }
-}
-
-class DiffDurError extends TmError{
-    constructor(id, index) {
-        super('Sect::DiffDur', '', id, index)
-    }
-}
-
-module.exports = {
-    BarLengthError,
-    DupChordError,
-    TraceError,
-    VolumeError,
-    UndefinedTokenError,
-    DiffDurError
-}
+module.exports = TmError

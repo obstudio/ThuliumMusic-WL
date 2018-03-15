@@ -1,6 +1,7 @@
 (* ::Package:: *)
 
-Diagnose[rawData_]:=Block[
+Diagnose[filepath_String]:=Diagnose[Parse[filepath]];
+Diagnose[rawData_Association]:=Block[
 	{
 		output={},sectionOutput
 	},

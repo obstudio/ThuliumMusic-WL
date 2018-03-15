@@ -201,7 +201,7 @@ MonitorDisplay[content_] := (
 				Dynamic @ CurrentValue[EvaluationNotebook[], WindowSize][[1]] / 2 - 180,
 			Automatic}
 		],
-		Background -> RGBColor[0.98, 0.98, 1],
+		Background -> RGBColor[0.96, 0.98, 1],
 		RoundingRadius -> {8, 8},
 		ContentPadding -> True,
 		FrameStyle -> None

@@ -10,24 +10,24 @@
 NotebookFileLineBreakTest
 NotebookFileLineBreakTest
 NotebookDataPosition[       158,          7]
-NotebookDataLength[      7567,        194]
-NotebookOptionsPosition[      2206,         70]
-NotebookOutlinePosition[      7280,        191]
-CellTagsIndexPosition[      7189,        185]
-WindowTitle->Thulium
-WindowFrame->Normal*)
+NotebookDataLength[     12774,        318]
+NotebookOptionsPosition[      2583,         78]
+NotebookOutlinePosition[     12468,        314]
+CellTagsIndexPosition[     12347,        307]
+WindowTitle->Thulium Music Player
+WindowFrame->ModelessDialog*)
 
 (* Beginning of Notebook Content *)
 Notebook[{
 Cell[BoxData[
  RowBox[{
   StyleBox[
-   RowBox[{"Thulium", " ", "Music", " ", "Player"}], "$TitleText"], 
-  TemplateBox[{4},
+   RowBox[{"Thulium", " ", "Music", " ", "Player"}], "TitleText"], 
+  TemplateBox[{1},
    "Spacer1"], 
   TemplateBox[{"\"v2.1\""},
-   "$TitleVersion"]}]], "$Title",
- CellTags->"$title",ExpressionUUID->"4489a255-7d59-4d48-98e2-76743bf09da0"],
+   "TitleVersion"]}]], "Title",
+ CellTags->"$title",ExpressionUUID->"44d20522-a436-4b77-bee8-b41e1d2657a2"],
 
 Cell[BoxData[
  RowBox[{
@@ -39,78 +39,105 @@ Cell[BoxData[
        FileNames["*.wl", "library", Infinity]]; Scan[Get, 
        FileNames["*.wl", "package", Infinity]]; Scan[Get, 
        FileNames["*.wl", "assets", Infinity]]; Get[
-       StringJoin[$CellContext`localPath, "Preload.wl"]]; Null]},
-   "$TextButton"], 
+       StringJoin[$CellContext`localPath, "Preload.wl"]]; 
+     NotebookLocate["$msg:init"]; NotebookDelete[]; NotebookLocate["$init"]; 
+     SelectionMove[
+       EvaluationNotebook[], After, Cell, AutoScroll -> False]; NotebookWrite[
+       EvaluationNotebook[], 
+       ReleaseHold[$CellContext`WorkBenchTemplate]]; NotebookLocate["$title"]; 
+     Null]},
+   "TextButton"], 
   TemplateBox[{4},
    "Spacer1"], 
   TemplateBox[{
    "Initialize Parser","Click to initialize the parser.",
     Unevaluated[$CellContext`InitializeParser]},
-   "$TextButtonMonitored"], 
+   "TextButtonMonitored"], 
   TemplateBox[{4},
    "Spacer1"], 
   TemplateBox[{
    "Initialize Songs","Click to initialize the songs.",
     Unevaluated[$CellContext`update]},
-   "$TextButtonMonitored"], 
+   "TextButtonMonitored"], 
   TemplateBox[{4},
    "Spacer1"], 
   TemplateBox[{
    "Start Front End","Click to run the front end.",
     Hold[$CellContext`homepage]},
-   "$TextButton"]}]], "$Controls",ExpressionUUID->"d582e3a7-5094-44a9-acf6-\
-0f8f2d845cde"],
+   "TextButton"]}]], "Controls",ExpressionUUID->"f164289c-adb5-43e4-b79e-\
+ea4beecd05c7"],
 
-Cell[BoxData["Null"], "$Initialization",
- CellTags->"$init",ExpressionUUID->"23234145-3e41-4d3f-94a5-d0a451b0ba71"],
+Cell[BoxData["Null"], "Initialization",
+ CellTags->"$init",ExpressionUUID->"b21ccfbe-0933-4838-a661-d2c058e72a12"],
 
 Cell[BoxData[
- RowBox[{
-  RowBox[{"AudioStop", "[", "]"}], ";"}]], "Input",ExpressionUUID->"50147879-3783-409b-97c7-52690567cb78"]
+ TemplateBox[{
+  "Please click on the \"Initialize\" buttons in sequence to get started."},
+  "Tip"]], "Tip",
+ CellTags->"$msg:init",ExpressionUUID->"f28bd4c8-6bdb-4911-bf8f-b7aaa207a6de"]
 },
 Saveable->False,
 CellGrouping->Manual,
 WindowSize->{1440, 768},
 WindowMargins->{{229, Automatic}, {Automatic, 98}},
+WindowFrame->"ModelessDialog",
 WindowElements->{"VerticalScrollBar"},
-WindowTitle->"Thulium",
+WindowTitle->"Thulium Music Player",
 Magnification->2,
+Background->RGBColor[1., 1., 1.],
 FrontEndVersion->"11.3 for Microsoft Windows (64-bit) (March 6, 2018)",
 StyleDefinitions->Notebook[{
    Cell[
     StyleData[StyleDefinitions -> "Default.nb"]], 
    Cell[
-    StyleData["$TitleText"], FontFamily -> "Source Sans Pro", FontSize -> 32, 
+    StyleData["TitleText"], FontFamily -> "Source Sans Pro", FontSize -> 32, 
     FontColor -> RGBColor[0.06666666666666667, 0.3333333333333333, 0.6]], 
    Cell[
-    StyleData["$TitleVersion"], 
+    StyleData["TitleVersion"], 
     TemplateBoxOptions -> {DisplayFunction -> (StyleBox[
         FormBox[#, InputForm], FontFamily -> "Source Sans Pro", FontSize -> 
         24, FontColor -> RGBColor[0.3, 0.5, 0.8]]& )}], 
    Cell[
-    StyleData["$Title"], Editable -> False, Deletable -> False, 
+    StyleData["Title"], Editable -> False, Deletable -> False, 
     ShowCellBracket -> False, CellMargins -> {{40, 40}, {16, 32}}, 
     Evaluatable -> False, TextAlignment -> Center, ShowStringCharacters -> 
     False], 
    Cell[
-    StyleData["$Controls"], Editable -> False, Deletable -> False, 
+    StyleData["Controls"], Editable -> False, Deletable -> False, 
     ShowCellBracket -> False, CellMargins -> {{24, 24}, {8, 8}}, Deployed -> 
     True, Evaluatable -> False, TextAlignment -> Center], 
    Cell[
-    StyleData["$Initialization"], CellFrame -> {{0, 0}, {0, 2}}, 
-    ShowCellBracket -> False, CellMargins -> {{24, 24}, {16, 16}}, 
+    StyleData["Tip"], ShowCellBracket -> False, 
+    CellMargins -> {{60, 60}, {8, 4}}, Deployed -> True, Copyable -> False, 
+    ShowCellLabel -> False, TextAlignment -> Center, 
+    TemplateBoxOptions -> {DisplayFunction -> (FrameBox[
+        AdjustmentBox[
+         RowBox[{
+           StyleBox["\[LightBulb]", FontSize -> 18], 
+           TemplateBox[{4}, "Spacer1"], 
+           StyleBox[#, FontFamily -> "Calibri", FontSize -> 16]}], 
+         BoxBaselineShift -> 0, BoxMargins -> {{2, 2}, {2, 2}}], Background -> 
+        RGBColor[1, 0.96, 0.98], RoundingRadius -> {8, 8}, ContentPadding -> 
+        True, FrameStyle -> None]& )}], 
+   Cell[
+    StyleData["Initialization"], CellFrame -> {{0, 0}, {0, 2}}, 
+    ShowCellBracket -> False, CellMargins -> {{24, 24}, {8, 8}}, 
     CellElementSpacings -> {"CellMinHeight" -> 1}, Evaluatable -> True, 
     CellGroupingRules -> "InputGrouping", ShowCellLabel -> False, 
     CellFrameMargins -> 0, CellFrameColor -> RGBColor[0.6, 0.6, 0.6], 
     CellSize -> {Inherited, 1}, FontSize -> 1, FontColor -> 
     RGBColor[0, 0, 0, 0]], 
    Cell[
-    StyleData["$TextButtonContent"], FontFamily -> "Sitka Text", FontSize -> 
+    StyleData["TextButtonContent"], FontFamily -> "Sitka Text", FontSize -> 
     15], 
    Cell[
-    StyleData["$TextButtonTooltip"], FontFamily -> "Calibri", FontSize -> 24], 
+    StyleData["TextButtonTooltip"], 
+    TemplateBoxOptions -> {DisplayFunction -> (RowBox[{
+         TemplateBox[{1}, "Spacer1"], 
+         StyleBox[#, FontFamily -> "Calibri", FontSize -> 24], 
+         TemplateBox[{1}, "Spacer1"]}]& )}], 
    Cell[
-    StyleData["$TextButtonDisplay"], 
+    StyleData["TextButtonDisplay"], 
     TemplateBoxOptions -> {DisplayFunction -> (FrameBox[
         RowBox[{
           TemplateBox[{4}, "Spacer1"], 
@@ -121,53 +148,145 @@ StyleDefinitions->Notebook[{
         BoxFrame -> {{0, 0}, {0, 0}}, RoundingRadius -> {8, 8}, 
         ContentPadding -> True, BaselinePosition -> 1]& )}], 
    Cell[
-    StyleData["$TextButton"], 
+    StyleData["TextButton"], 
     TemplateBoxOptions -> {
      DisplayFunction -> (PaneSelectorBox[{True -> TooltipBox[
            TagBox[
             TagBox[
              PaneSelectorBox[{True -> TemplateBox[{
-                  StyleBox[#, "$TextButtonContent"], 
+                  StyleBox[#, "TextButtonContent"], 
                   RGBColor[0, 0, 0], 
-                  RGBColor[0.5, 0.8, 1]}, "$TextButtonDisplay"], False -> 
+                  RGBColor[0.5, 0.8, 1]}, "TextButtonDisplay"], False -> 
                TemplateBox[{
-                  StyleBox[#, "$TextButtonContent"], 
+                  StyleBox[#, "TextButtonContent"], 
                   RGBColor[0.08, 0.04, 0], 
-                  RGBColor[0.8, 0.9, 1]}, "$TextButtonDisplay"]}, 
+                  RGBColor[0.8, 0.9, 1]}, "TextButtonDisplay"]}, 
               Dynamic[
                CurrentValue["MouseButtonTest"]]], 
              EventHandlerTag[{"MouseClicked" :> ReleaseHold[#3]}]], 
             MouseAppearanceTag["LinkHand"]], 
-           StyleBox[#2, "$TextButtonTooltip"], TooltipDelay -> 0.2, 
+           TemplateBox[{#2}, "TextButtonTooltip"], TooltipDelay -> 0.2, 
            TooltipStyle -> {
             CellFrameColor -> RGBColor[0.7, 0.7, 0.6, 0.5], Background -> 
              RGBColor[1, 1, 0.9, 0.7]}], False -> TemplateBox[{
-            StyleBox[#, "$TextButtonContent"], 
+            StyleBox[#, "TextButtonContent"], 
             RGBColor[0.2, 0.1, 0], 
-            RGBColor[0.92, 0.96, 1]}, "$TextButtonDisplay"]}, 
+            RGBColor[0.92, 0.96, 1]}, "TextButtonDisplay"]}, 
         Dynamic[
          CurrentValue["MouseOver"]]]& )}], 
    Cell[
-    StyleData["$TextButtonMonitored"], 
+    StyleData["TextButtonMonitored"], 
     TemplateBoxOptions -> {DisplayFunction -> (TemplateBox[{#, #2, 
          Hold[NotebookLocate["$init"]; NotebookWrite[
             EvaluationNotebook[], 
             Cell[
              BoxData[
               MakeBoxes[
-               Evaluate[#3]]], "$Initialization", CellTags -> "$init"], All]; 
+               Evaluate[#3]]], "Initialization", CellTags -> "$init"], All]; 
           SelectionEvaluate[
             EvaluationNotebook[]]; NotebookLocate["$title"]; Null]}, 
-        "$TextButton"]& )}], 
+        "TextButton"]& )}], 
    Cell[
-    StyleData["PrintTemporary"], ShowCellBracket -> False, 
-    CellMargins -> {{60, 60}, {Inherited, Inherited}}, Deployed -> True, 
-    Copyable -> False, CellGroupingRules -> "GraphicsGrouping", GeneratedCell -> 
-    True, CellAutoOverwrite -> True, ShowCellLabel -> False, TextAlignment -> 
-    Center, FormatType -> InputForm, ShowStringCharacters -> False, 
-    FontFamily -> "Calibri", FontSize -> 16]}, Visible -> False, 
-  FrontEndVersion -> "11.3 for Microsoft Windows (64-bit) (March 6, 2018)", 
-  StyleDefinitions -> "Default.nb"]
+    StyleData["PrintTemporary", StyleDefinitions -> "PrintTemporary"], 
+    ShowCellBracket -> False, CellMargins -> {{60, 60}, {8, 4}}, Deployed -> 
+    True, Copyable -> False, TextAlignment -> Center, FontFamily -> "Calibri",
+     FontSize -> 16], 
+   Cell[
+    StyleData["AdapterSong"], FontFamily -> "Cambria", FontSize -> 12, 
+    FontWeight -> Bold, FontColor -> RGBColor[0.5, 0.4, 0.3]], 
+   Cell[
+    StyleData["AdapterTag"], FontFamily -> "Calibri", FontSize -> 20, 
+    FontColor -> RGBColor[0.6, 0.5, 0.4]], 
+   Cell[
+    StyleData["AdapterMeta"], FontFamily -> "Calibri", FontSize -> 20, 
+    FontColor -> RGBColor[0.2, 0.1, 0.3]], 
+   Cell[
+    StyleData["Input", StyleDefinitions -> "Input"], 
+    StyleKeyMapping -> {">" -> "Music"}, ContextMenu -> {
+      MenuItem["Cut", "Cut"], 
+      MenuItem["Copy", "Copy"], 
+      MenuItem["Paste", 
+       FrontEnd`Paste[After]], Delimiter, 
+      MenuItem["Evaluate Cell", "EvaluateCells"]}, NumberMarks -> False], 
+   Cell[
+    StyleData["Title", StyleDefinitions -> "Title"], MenuSortingValue -> 0, 
+    MenuCommandKey -> None], 
+   Cell[
+    StyleData["Subtitle", StyleDefinitions -> "Subtitle"], MenuSortingValue -> 
+    0, MenuCommandKey -> None], 
+   Cell[
+    StyleData["Subsubtitle", StyleDefinitions -> "Subsubtitle"], 
+    MenuSortingValue -> 0, MenuCommandKey -> None], 
+   Cell[
+    StyleData["Chapter", StyleDefinitions -> "Chapter"], MenuSortingValue -> 
+    0, MenuCommandKey -> None], 
+   Cell[
+    StyleData["Subchapter", StyleDefinitions -> "Subchapter"], 
+    MenuSortingValue -> 0, MenuCommandKey -> None], 
+   Cell[
+    StyleData["Output", StyleDefinitions -> "Output"], MenuSortingValue -> 0, 
+    MenuCommandKey -> None], 
+   Cell[
+    StyleData["Section", StyleDefinitions -> "Section"], MenuSortingValue -> 
+    0, MenuCommandKey -> None], 
+   Cell[
+    StyleData["Subsection", StyleDefinitions -> "Subsection"], 
+    MenuSortingValue -> 0, MenuCommandKey -> None], 
+   Cell[
+    StyleData["Subsubsection", StyleDefinitions -> "Subsubsection"], 
+    MenuSortingValue -> 0, MenuCommandKey -> None], 
+   Cell[
+    StyleData["Item", StyleDefinitions -> "Item"], MenuSortingValue -> 0, 
+    MenuCommandKey -> None], 
+   Cell[
+    StyleData["Subitem", StyleDefinitions -> "Subitem"], MenuSortingValue -> 
+    0, MenuCommandKey -> None], 
+   Cell[
+    StyleData["Subsubitem", StyleDefinitions -> "Subsubitem"], 
+    MenuSortingValue -> 0, MenuCommandKey -> None], 
+   Cell[
+    StyleData["ItemNumbered", StyleDefinitions -> "ItemNumbered"], 
+    MenuSortingValue -> 0, MenuCommandKey -> None], 
+   Cell[
+    StyleData["SubitemNumbered", StyleDefinitions -> "SubitemNumbered"], 
+    MenuSortingValue -> 0, MenuCommandKey -> None], 
+   Cell[
+    StyleData["SubsubitemNumbered", StyleDefinitions -> "SubsubitemNumbered"],
+     MenuSortingValue -> 0, MenuCommandKey -> None], 
+   Cell[
+    StyleData["ItemParagraph", StyleDefinitions -> "ItemParagraph"], 
+    MenuSortingValue -> 0, MenuCommandKey -> None], 
+   Cell[
+    StyleData["SubitemParagraph", StyleDefinitions -> "SubitemParagraph"], 
+    MenuSortingValue -> 0, MenuCommandKey -> None], 
+   Cell[
+    StyleData[
+    "SubsubitemParagraph", StyleDefinitions -> "SubsubitemParagraph"], 
+    MenuSortingValue -> 0, MenuCommandKey -> None], 
+   Cell[
+    StyleData["InlineFormula", StyleDefinitions -> "InlineFormula"], 
+    MenuSortingValue -> 0, MenuCommandKey -> None], 
+   Cell[
+    StyleData["DisplayFormula", StyleDefinitions -> "DisplayFormula"], 
+    MenuSortingValue -> 0, MenuCommandKey -> None], 
+   Cell[
+    StyleData[
+    "DisplayFormulaNumbered", StyleDefinitions -> "DisplayFormulaNumbered"], 
+    MenuSortingValue -> 0, MenuCommandKey -> None], 
+   Cell[
+    StyleData["Code", StyleDefinitions -> "Code"], MenuSortingValue -> 0, 
+    MenuCommandKey -> None], 
+   Cell[
+    StyleData["CodeText", StyleDefinitions -> "CodeText"], MenuSortingValue -> 
+    0, MenuCommandKey -> None], 
+   Cell[
+    StyleData["ExternalLanguage", StyleDefinitions -> "ExternalLanguage"], 
+    MenuSortingValue -> 0, MenuCommandKey -> None], 
+   Cell[
+    StyleData["Program", StyleDefinitions -> "Program"], MenuSortingValue -> 
+    0, MenuCommandKey -> None]}, Visible -> False, FrontEndVersion -> 
+  "11.3 for Microsoft Windows (64-bit) (March 6, 2018)", StyleDefinitions -> 
+  "Default.nb"]
 ]
 (* End of Notebook Content *)
 
@@ -175,27 +294,32 @@ StyleDefinitions->Notebook[{
 (*CellTagsOutline
 CellTagsIndex->{
  "$title"->{
-  Cell[579, 21, 277, 8, 140, "$Title",ExpressionUUID->"4489a255-7d59-4d48-98e2-76743bf09da0",
+  Cell[600, 21, 274, 8, 140, "Title",ExpressionUUID->"44d20522-a436-4b77-bee8-b41e1d2657a2",
    CellTags->"$title"]},
  "$init"->{
-  Cell[1954, 63, 115, 1, 140, "$Initialization",ExpressionUUID->"23234145-3e41-4d3f-94a5-d0a451b0ba71",
-   CellTags->"$init"]}
+  Cell[2260, 69, 114, 1, 140, "Initialization",ExpressionUUID->"b21ccfbe-0933-4838-a661-d2c058e72a12",
+   CellTags->"$init"]},
+ "$msg:init"->{
+  Cell[2377, 72, 202, 4, 140, "Tip",ExpressionUUID->"f28bd4c8-6bdb-4911-bf8f-b7aaa207a6de",
+   CellTags->"$msg:init"]}
  }
 *)
 (*CellTagsIndex
 CellTagsIndex->{
- {"$title", 6907, 176},
- {"$init", 7038, 179}
+ {"$title", 11931, 295},
+ {"$init", 12061, 298},
+ {"$msg:init", 12204, 301}
  }
 *)
 (*NotebookFileOutline
 Notebook[{
-Cell[579, 21, 277, 8, 140, "$Title",ExpressionUUID->"4489a255-7d59-4d48-98e2-76743bf09da0",
+Cell[600, 21, 274, 8, 140, "Title",ExpressionUUID->"44d20522-a436-4b77-bee8-b41e1d2657a2",
  CellTags->"$title"],
-Cell[859, 31, 1092, 30, 140, "$Controls",ExpressionUUID->"d582e3a7-5094-44a9-acf6-0f8f2d845cde"],
-Cell[1954, 63, 115, 1, 140, "$Initialization",ExpressionUUID->"23234145-3e41-4d3f-94a5-d0a451b0ba71",
+Cell[877, 31, 1380, 36, 140, "Controls",ExpressionUUID->"f164289c-adb5-43e4-b79e-ea4beecd05c7"],
+Cell[2260, 69, 114, 1, 140, "Initialization",ExpressionUUID->"b21ccfbe-0933-4838-a661-d2c058e72a12",
  CellTags->"$init"],
-Cell[2072, 66, 130, 2, 140, "Input",ExpressionUUID->"50147879-3783-409b-97c7-52690567cb78"]
+Cell[2377, 72, 202, 4, 140, "Tip",ExpressionUUID->"f28bd4c8-6bdb-4911-bf8f-b7aaa207a6de",
+ CellTags->"$msg:init"]
 }
 ]
 *)

@@ -1,12 +1,15 @@
 (* ::Package:: *)
 
-(* ::Subsubsection::Closed:: *)
+(* ::Subsubsection:: *)
 (*Parser*)
 
 
 TempPath[]:=userPath<>"tmp$"<>ToString[Floor@SessionTime[]]<>".json";
 MIDIStop=Sound`StopMIDI;
 MIDIPlay=Sound`EmitMIDI;
+MusicStop[]:=(Sound`StopMIDI[]; AudioStop[]);
+MusicPlay[music_Audio]:=AudioPlay[music];
+MusicPlay[music_Sound`MIDISequence]:=MIDIPlay[music];
 
 Parse::usage = "\!\(\*RowBox[{\"Parse\",\"[\",RowBox[{
 StyleBox[\"filepath\",\"TI\"],\",\",StyleBox[\"partspec\",\"TI\"]
@@ -190,6 +193,12 @@ Adapt[rawData_,OptionsPattern[AdaptingOptions]]:=Switch[OptionValue["Format"],
 	_,Message[Adapt::format,OptionValue["Format"]];Return[];
 ];
 
+MusicPlay[rawData_,OptionsPattern[AdaptingOptions]]:=Switch[OptionValue["Format"],
+	"MIDI",Sound`EmitMIDI@MIDIAdapt[rawData,OptionValue[Keys@AdaptingOptions]],
+	"Audio",AudioPlay@AudioAdapt[rawData,OptionValue[Keys@AdaptingOptions]],
+	_,Message[Adapt::format,OptionValue["Format"]];Return[];
+];
+
 MIDIAdapt[rawData_,OptionsPattern[AdaptingOptions]]:=Block[
     {
 		duration=0,musicClip={}
@@ -320,7 +329,7 @@ AudioAdapt[rawData_,OptionsPattern[AdaptingOptions]]:=Block[
 (* ::Input:: *)
 (*MIDIStop[];MIDIPlay[#[[2]]]&@*)
 (*EchoFunction["time: ",#[[1]]&]@*)
-(*Timing[MIDIAdapt[Parse[localPath<>"Songs/Touhou/TH11-Chireiden/3rd_Eye.tm"],"Rate"->1.1]];*)
+(*Timing[MIDIAdapt[Parse[localPath<>"Songs/Touhou/TH11-Chireiden/3rd_Eye.tm"],Rate->1.1]];*)
 
 
 (* ::Input:: *)

@@ -70,7 +70,7 @@ orderTok=Union@@StringCases[#,{
 }]&;
 notationPadded=RE["[&\\|\\s\\^\\*]*"];
 notationPatt=Alternatives[
-	"+"|"ToCoda"|"Coda"|"s"|"Segno"|"DC"|"DaCapo"|"DS"|"DaSegno",
+	"!"|"+"|"ToCoda"|"Coda"|"s"|"Segno"|"DC"|"DaCapo"|"DS"|"DaSegno",
 	"||:"|":||"|("["~~orderListP~~"]")|Whitespace,
 	("\\"~~orderListC~~":")|"|"|"/"|"\\"|"^"|"&"|"*"
 ];
@@ -89,7 +89,8 @@ notationTok=StringCases[{
 	"+"|"ToCoda"|"Coda":><|"Type"->"Coda"|>,
 	"s"|"Segno":><|"Type"->"Segno"|>,
 	"DC"|"DaCapo":><|"Type"->"DaCapo"|>,
-	"DS"|"DaSegno":><|"Type"->"DaSegno"|>
+	"DS"|"DaSegno":><|"Type"->"DaSegno"|>,
+	"!":><|"Type"->"Local"|>
 }];
 
 

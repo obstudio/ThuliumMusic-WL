@@ -1,7 +1,7 @@
 const Loader = require('./LibLoader')
 const GlobalSetting = require('./GlobalSetting')
 const { TrackParser } = require('./TrackParser')
-const { DiffDurError } = require('./Error')
+const TmError = require('./Error')
 const EPSILON = 0.0000000001
 
 class Parser {

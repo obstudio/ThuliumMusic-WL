@@ -47,9 +47,7 @@ Tokenize[filepath_]:=Block[
 		typePatt,typeTok,
 		funcName,nonVoid,noteRule,
 		objectPatt,trackTok,
-		bracketRule,objectTok,
-		
-		StartingTime=SessionTime[]
+		bracketRule,objectTok
 	},
 	
 	If[FileExistsQ[filepath],
@@ -272,6 +270,7 @@ Tokenize[filepath_]:=Block[
 			(* new section *)
 			If[sectionData!={},
 				AppendTo[sections,<|
+					"Type"->"Section",
 					"Comments"->comments,
 					"Settings"->Flatten@blankTrack,
 					"Tracks"->sectionData
@@ -307,7 +306,15 @@ Tokenize[filepath_]:=Block[
 			AppendTo[trackData,"Content"->trackTok[line]];
 			If[ContainsNone[#Type&/@trackData[["Content"]],{"Note","Subtrack","Macrotrack"}],
 				If[ContainsNone[Select[trackData[["Content"]],#Type=="FUNCTION"&][[All,"Name"]],nonVoid],
-					AppendTo[blankTrack,trackData[["Content"]]],
+					If[ContainsAny[#Type&/@trackData[["Content"]],{"Local"}],
+						AppendTo[sections,Flatten@SequenceCases[trackData[["Content"]],
+							{global:Except[<|"Type"->"Local"|>]...,<|"Type"->"Local"|>,local___}:>{global}
+						]];
+						AppendTo[blankTrack,Flatten@SequenceCases[trackData[["Content"]],
+							{global:Except[<|"Type"->"Local"|>]...,<|"Type"->"Local"|>,local___}:>{local}
+						]],
+						AppendTo[sections,trackData[["Content"]]];
+					],
 					AppendTo[sectionData,trackData];
 				],
 				AppendTo[sectionData,trackData];
@@ -317,12 +324,13 @@ Tokenize[filepath_]:=Block[
 		lineCount++;
 	];
 	If[sectionData!={}||blankTrack!={},AppendTo[sections,<|
+		"Type"->"Section",
 		"Comments"->comments,
 		"Settings"->Flatten@blankTrack,
 		"Tracks"->sectionData
 	|>]];
 	
-	AppendTo[tokenizer,"Sections"->sections];
+	AppendTo[tokenizer,"Sections"->Flatten[sections,1]];
 	return[["Tokenizer"]]=tokenizer;
 	Return[return];
 	
@@ -331,7 +339,7 @@ Tokenize[filepath_]:=Block[
 
 
 (* ::Input:: *)
-(*Tokenize[NotebookDirectory[]<>"test.sml"][["Tokenizer","Sections",1,"Tracks"]]*)
+(*Tokenize[localPath<>"Songs/Touhou/TH11-Chireiden/3rd_Eye.tm"][["Tokenizer","Sections",6;;7]]*)
 
 
 (* ::Input:: *)

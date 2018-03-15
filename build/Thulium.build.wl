@@ -7,12 +7,10 @@ build`InitializeThulium := Hold[
 	Scan[Get, FileNames["*.wl", "package", Infinity]];
 	Scan[Get, FileNames["*.wl", "assets", Infinity]];
 	Get[localPath <> "Preload.wl"];
-	NotebookLocate["$msg:init"];
-	NotebookDelete[];
-	NotebookLocate["$init"];
-	SelectionMove[EvaluationNotebook[], After, Cell, AutoScroll -> False];
+	NotebookDelete[Cells[CellTags -> "$msg:init"]];
+	NotebookDelete[Cells[CellStyle -> {"Input", "Output", "Music"}]];
+	SelectionMove[First @ Cells[CellTags -> "$init"], After, Cell, AutoScroll -> False];
 	NotebookWrite[EvaluationNotebook[], ReleaseHold @ WorkBenchTemplate];
-	NotebookLocate["$title"];
 ];
 
 
@@ -27,31 +25,38 @@ With[{InitializeThulium = build`InitializeThulium},
 				}],
 				"Title", CellTags -> "$title"
 			],
-			Cell[BoxData @ RowBox[{
-				TemplateBox[{
+			Cell[BoxData @ GridBox[{
+				{TemplateBox[{
 					"Initialize Thulium",
 					"Click to initialize the kernel.",
 					InitializeThulium
 				}, "TextButton"],
-				TemplateBox[{4}, "Spacer1"],
 				TemplateBox[{
 					"Initialize Parser",
 					"Click to initialize the parser.",
 					Unevaluated @ InitializeParser
 				}, "TextButtonMonitored"],
-				TemplateBox[{4}, "Spacer1"],
 				TemplateBox[{
 					"Initialize Songs",
 					"Click to initialize the songs.",
 					Unevaluated @ update
-				}, "TextButtonMonitored"],
-				TemplateBox[{4}, "Spacer1"],
+				}, "TextButtonMonitored"]},
+				{TemplateBox[{
+					"Save WorkBench",
+					"Save current notebook.",
+					Unevaluated @ SaveWorkBench
+				}, "TextButton"],
+				TemplateBox[{
+					"Load WorkBench",
+					"Load your notebook.",
+					Unevaluated @ LoadWorkBench
+				}, "TextButton"],
 				TemplateBox[{
 					"Start Front End",
 					"Click to run the front end.",
 					Hold @ homepage
-				}, "TextButton"]
-			}], "Controls"],
+				}, "TextButton"]}
+			}, ColumnSpacings -> 1], "Controls"],
 			Cell[BoxData @ MakeBoxes @ Null, "Initialization", CellTags -> "$init"],
 			Cell[BoxData @ TemplateBox[{
 				"Please click on the \"Initialize\" buttons in sequence to get started."

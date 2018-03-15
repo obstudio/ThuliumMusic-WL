@@ -11,9 +11,13 @@ RenderText[line_String, style_String] := Block[{output},
 			BoxApply[RenderText[text, style], FontWeight -> Bold],
 		"*"~~text:RegularExpression["([^\\*\\\\]|\\\\.)+"]~~"*" :>
 			BoxApply[RenderText[text, style], FontSlant -> Italic],
+		"__"~~text:RegularExpression["([^_\\\\]|\\\\.)+"]~~"__" :>
+			BoxApply[RenderText[text, style], FontWeight -> Bold],
+		"_"~~text:RegularExpression["([^_\\\\]|\\\\.)+"]~~"_" :>
+			BoxApply[RenderText[text, style], FontSlant -> Italic],
 		"~~"~~text:RegularExpression["([^~\\\\]|\\\\.)+"]~~"~~" :>
 			BoxApply[RenderText[text, style], FontVariations -> {"StrikeThrough" -> True}],
-		"_"~~text:RegularExpression["([^_\\\\]|\\\\.)+"]~~"_" :>
+		"~"~~text:RegularExpression["([^~\\\\]|\\\\.)+"]~~"~" :>
 			BoxApply[RenderText[text, style], FontVariations -> {"Underline" -> True}],
 		"\\"~~text_ :> StyleBox[text, style],
 		text_ :> RowBox @ StringCases[text, {

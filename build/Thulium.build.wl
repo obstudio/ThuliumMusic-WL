@@ -63,14 +63,21 @@ With[{InitializeThulium = build`InitializeThulium},
 			}, "Tip"], "Tip", CellTags -> "$msg:init"]
 		},
 		StyleDefinitions -> StyleSheet["Thulium"],
+		ShowCellLabel -> False,
+		ShowCellTags -> False,
+		ShowCellBracket -> False,
 		CellGrouping -> Manual,
 		Background -> RGBColor["#FFFFFF"],
 		WindowTitle -> "Thulium Music Player",
-		WindowElements -> {"VerticalScrollBar"},
+		WindowElements -> {},
+		WindowFrameElements -> {"CloseBox", "MinimizeBox", "ZoomBox"},
+		ScrollingOptions -> {"VerticalScrollRange" -> Fit, "HorizontalScrollRange" -> Fit},
 		WindowSize -> {1440, 768},
 		WindowFrame -> "ModelessDialog",
 		Magnification -> 2,
-		Saveable -> False
+		Saveable -> False,
+		Evaluatable -> True,
+		Editable -> True
 	];
 	NotebookSave[build`TemporaryNotebook, localPath <> "Thulium.nb"];
 	NotebookClose[build`TemporaryNotebook];

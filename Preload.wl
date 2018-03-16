@@ -77,8 +77,9 @@ If[!DirectoryQ[userPath],
 		Export[userPath <> "Default.json", userInfo];
 	];
 ];
-If[!FileExistsQ[userPath <> "Favorite.json"], Export[userPath <> "Favorite.json",{}]];
+If[!FileExistsQ[userPath <> "Favorite.json"], Export[userPath <> "Favorite.json", {}]];
 favorite = Import[userPath <> "Favorite.json"];
+If[!FileExistsQ[userPath <> "WorkBench.nb"], Export[userPath <> "WorkBench.nb", WorkBenchTemplate]];
 
 
 (* Find Node.js as external evaluator *)

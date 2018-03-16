@@ -3,6 +3,8 @@
 StyleSheet["Thulium"] = Notebook[{
 	Cell[StyleData[StyleDefinitions -> "Default.nb"]],
 	
+	Sequence @@ First @ StyleSheet["WorkBench"],
+	
 	Cell[StyleData["TitleText"],
 		FontFamily -> "Source Sans Pro",
 		FontSize -> 32,
@@ -76,8 +78,6 @@ StyleSheet["Thulium"] = Notebook[{
 		CellFrameColor -> RGBColor["#999999"],
 		CellFrameMargins -> 0,
 		Background -> Inherited,
-		ShowCellBracket -> False,
-		ShowCellLabel -> False,
 		Evaluatable -> True,
 		CellGroupingRules -> "InputGrouping"
 	],
@@ -183,10 +183,15 @@ StyleSheet["Thulium"] = Notebook[{
 		TextAlignment -> Center
 	],
 	
-	(*Cell[StyleData["Music"],
+	Cell[StyleData["WorkBench"],
+		CellMargins -> {{0, 0}, {0, 0}},
+		Background -> RGBColor["#EEEEEE"]
+	],
+	
+	Cell[StyleData["Music"],
 		MenuSortingValue -> 500,
 		MenuCommandKey -> "M"
-	],*)
+	],
 	
 	Cell[StyleData["AdapterSong"],
 		FontColor -> RGBColor[0.5, 0.4, 0.3],
@@ -209,6 +214,8 @@ StyleSheet["Thulium"] = Notebook[{
 	
 	Cell[StyleData["Input", StyleDefinitions -> "Input"],
 		NumberMarks -> False,
+		Editable -> True,
+		Evaluatable -> True,
 		StyleKeyMapping -> {">" -> "Music"},
 		ContextMenu -> {
 			MenuItem["Cut", "Cut"],
@@ -237,4 +244,4 @@ StyleSheet["Thulium"] = Notebook[{
 
 
 (* ::Input:: *)
-(*CurrentValue[{StyleDefinitions, "FractionBox"}]*)
+(*CurrentValue[{StyleDefinitions, "Message"}]*)

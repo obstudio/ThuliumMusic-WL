@@ -159,7 +159,7 @@ class Parser {
     parseSection(section) {
         const settings = this.sectionContext.Settings.extend()
         section.Settings.filter((token) => token.Type === 'FUNCTION')
-            .forEach((token) => this.libraries.FunctionPackage.applyFunction({ settings, Context: {} }, token))
+            .forEach((token) => this.libraries.FunctionPackage.applyFunction({ Settings: settings, Context: {} }, token))
         const instrStatistic = {}
         const sec = {
             ID: section.ID,
@@ -195,7 +195,7 @@ class Parser {
         }
         if (fin && this.sectionContext.PrevFin === undefined) {
             this.sectionContext.PrevFin = maxBarFin
-        } else if (fin && ini && this.sectionContext.PrevFin + maxBarIni !== settings.Bar) {
+        } else if (fin && ini && maxBarIni !== settings.Bar && this.sectionContext.PrevFin + maxBarIni !== settings.Bar) {
             const expected = settings.Bar - this.sectionContext.PrevFin
             sec.Warnings.push(new TmError(TmError.Types.Section.Mismatch, [], { Expected: expected, Actual: sec.Tracks.map((l) => l.Meta.Incomplete[0]) }))
             this.sectionContext.PrevFin = maxBarFin

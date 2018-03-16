@@ -10,24 +10,19 @@
 NotebookFileLineBreakTest
 NotebookFileLineBreakTest
 NotebookDataPosition[       158,          7]
-NotebookDataLength[     15825,        389]
-NotebookOptionsPosition[      3111,         90]
-NotebookOutlinePosition[     15519,        385]
-CellTagsIndexPosition[     15398,        378]
+NotebookDataLength[     15804,        385]
+NotebookOptionsPosition[      3095,         88]
+NotebookOutlinePosition[     15498,        381]
+CellTagsIndexPosition[     15377,        374]
 WindowTitle->Thulium Music Player
 WindowFrame->ModelessDialog*)
 
 (* Beginning of Notebook Content *)
 Notebook[{
 Cell[BoxData[
- RowBox[{
-  StyleBox[
-   RowBox[{"Thulium", " ", "Music", " ", "Player"}], "TitleText"], 
-  TemplateBox[{1},
-   "Spacer1"], 
-  TemplateBox[{"\"v2.1\""},
-   "TitleVersion"]}]], "Title",
- CellTags->"$title",ExpressionUUID->"8c7cb0e1-1379-49f9-b71f-ad4d2f16771a"],
+ TemplateBox[{"Thulium Music Player","\"v2.1\""},
+  "Title"]], "Title",
+ CellTags->"$title",ExpressionUUID->"9fc019b1-3061-4e61-92a5-05342d02de64"],
 
 Cell[BoxData[GridBox[{
    {
@@ -41,12 +36,15 @@ Cell[BoxData[GridBox[{
          FileNames["*.wl", "assets", Infinity]]; Get[
          StringJoin[$CellContext`localPath, "Preload.wl"]]; NotebookDelete[
          Cells[CellTags -> "$msg:init"]]; NotebookDelete[
-         Cells[CellStyle -> {"Input", "Output", "Music"}]]; SelectionMove[
+         Cells[CellStyle -> {"Input", "Output", "Music"}]]; 
+       build`benchData = First[
+          Import[
+           StringJoin[$CellContext`userPath, "WorkBench.nb"], "Notebook"]]; 
+       SelectionMove[
          First[
           Cells[CellTags -> "$init"]], After, Cell, AutoScroll -> False]; 
        NotebookWrite[
-         EvaluationNotebook[], 
-         ReleaseHold[$CellContext`WorkBenchTemplate]]; Null]},
+         EvaluationNotebook[], build`benchData]; Null]},
      "TextButton"], 
     TemplateBox[{
      "Initialize Parser","Click to initialize the parser.",
@@ -77,16 +75,16 @@ Cell[BoxData[GridBox[{
       Offset[0.2], {
        Offset[0.4]}, 
       Offset[0.2]}, "RowsIndexed" -> {}}]], "Controls",ExpressionUUID->\
-"450bcf8f-ed7e-4526-8cae-194b66e00332"],
+"206989df-c607-4fbb-85c6-b6ac159cbe53"],
 
 Cell[BoxData["Null"], "Initialization",
- CellTags->"$init",ExpressionUUID->"963f4a91-9267-4f7b-8c3d-152cbb284e0c"],
+ CellTags->"$init",ExpressionUUID->"b97d0cf0-63c8-4b9c-a212-6f84624f50d3"],
 
 Cell[BoxData[
  TemplateBox[{
   "Please click on the \"Initialize\" buttons in sequence to get started."},
   "Tip"]], "Tip",
- CellTags->"$msg:init",ExpressionUUID->"91b41043-f1a6-4276-b38e-eae0908a4399"]
+ CellTags->"$msg:init",ExpressionUUID->"fb708452-248e-49ed-8084-633e9872ca0c"]
 },
 Editable->True,
 Saveable->False,
@@ -94,7 +92,7 @@ CellGrouping->Manual,
 WindowSize->{1440, 768},
 WindowMargins->{{229, Automatic}, {Automatic, 98}},
 WindowFrame->"ModelessDialog",
-WindowElements->{},
+WindowElements->{"VerticalScrollBar"},
 WindowFrameElements->{"CloseBox", "MinimizeBox", "ZoomBox"},
 WindowTitle->"Thulium Music Player",
 ScrollingOptions->{"HorizontalScrollRange"->Fit,
@@ -157,18 +155,16 @@ StyleDefinitions->Notebook[{
         Dynamic[
          CurrentValue["MouseOver"]]]& )}], 
    Cell[
-    StyleData["TitleText"], FontFamily -> "Source Sans Pro", FontSize -> 32, 
-    FontColor -> RGBColor[0.06666666666666667, 0.3333333333333333, 0.6]], 
-   Cell[
-    StyleData["TitleVersion"], 
-    TemplateBoxOptions -> {DisplayFunction -> (StyleBox[
-        FormBox[#, InputForm], FontFamily -> "Source Sans Pro", FontSize -> 
-        24, FontColor -> RGBColor[0.3, 0.5, 0.8]]& )}], 
-   Cell[
     StyleData["Title"], Editable -> False, Deletable -> False, 
     ShowCellBracket -> False, CellMargins -> {{40, 40}, {16, 32}}, 
     Evaluatable -> False, TextAlignment -> Center, ShowStringCharacters -> 
-    False], 
+    False, TemplateBoxOptions -> {DisplayFunction -> (RowBox[{
+         StyleBox[#, FontFamily -> "Source Sans Pro", FontSize -> 32, 
+          FontColor -> RGBColor[0.1, 0.4, 0.7]], 
+         TemplateBox[{1}, "Spacer1"], 
+         StyleBox[
+          FormBox[#2, InputForm], FontFamily -> "Source Sans Pro", FontSize -> 
+          24, FontColor -> RGBColor[0.3, 0.5, 0.8]]}]& )}], 
    Cell[
     StyleData["Controls"], Editable -> False, Deletable -> False, 
     ShowCellBracket -> False, CellMargins -> {{24, 24}, {8, 8}}, Deployed -> 
@@ -365,31 +361,31 @@ StyleDefinitions->Notebook[{
 (*CellTagsOutline
 CellTagsIndex->{
  "$title"->{
-  Cell[600, 21, 274, 8, 140, "Title",ExpressionUUID->"8c7cb0e1-1379-49f9-b71f-ad4d2f16771a",
+  Cell[600, 21, 161, 3, 140, "Title",ExpressionUUID->"9fc019b1-3061-4e61-92a5-05342d02de64",
    CellTags->"$title"]},
  "$init"->{
-  Cell[2788, 81, 114, 1, 140, "Initialization",ExpressionUUID->"963f4a91-9267-4f7b-8c3d-152cbb284e0c",
+  Cell[2772, 79, 114, 1, 140, "Initialization",ExpressionUUID->"b97d0cf0-63c8-4b9c-a212-6f84624f50d3",
    CellTags->"$init"]},
  "$msg:init"->{
-  Cell[2905, 84, 202, 4, 140, "Tip",ExpressionUUID->"91b41043-f1a6-4276-b38e-eae0908a4399",
+  Cell[2889, 82, 202, 4, 140, "Tip",ExpressionUUID->"fb708452-248e-49ed-8084-633e9872ca0c",
    CellTags->"$msg:init"]}
  }
 *)
 (*CellTagsIndex
 CellTagsIndex->{
- {"$title", 14982, 366},
- {"$init", 15112, 369},
- {"$msg:init", 15255, 372}
+ {"$title", 14961, 362},
+ {"$init", 15091, 365},
+ {"$msg:init", 15234, 368}
  }
 *)
 (*NotebookFileOutline
 Notebook[{
-Cell[600, 21, 274, 8, 140, "Title",ExpressionUUID->"8c7cb0e1-1379-49f9-b71f-ad4d2f16771a",
+Cell[600, 21, 161, 3, 140, "Title",ExpressionUUID->"9fc019b1-3061-4e61-92a5-05342d02de64",
  CellTags->"$title"],
-Cell[877, 31, 1908, 48, 140, "Controls",ExpressionUUID->"450bcf8f-ed7e-4526-8cae-194b66e00332"],
-Cell[2788, 81, 114, 1, 140, "Initialization",ExpressionUUID->"963f4a91-9267-4f7b-8c3d-152cbb284e0c",
+Cell[764, 26, 2005, 51, 140, "Controls",ExpressionUUID->"206989df-c607-4fbb-85c6-b6ac159cbe53"],
+Cell[2772, 79, 114, 1, 140, "Initialization",ExpressionUUID->"b97d0cf0-63c8-4b9c-a212-6f84624f50d3",
  CellTags->"$init"],
-Cell[2905, 84, 202, 4, 140, "Tip",ExpressionUUID->"91b41043-f1a6-4276-b38e-eae0908a4399",
+Cell[2889, 82, 202, 4, 140, "Tip",ExpressionUUID->"fb708452-248e-49ed-8084-633e9872ca0c",
  CellTags->"$msg:init"]
 }
 ]

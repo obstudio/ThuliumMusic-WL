@@ -9,8 +9,9 @@ build`InitializeThulium := Hold[
 	Get[localPath <> "Preload.wl"];
 	NotebookDelete[Cells[CellTags -> "$msg:init"]];
 	NotebookDelete[Cells[CellStyle -> {"Input", "Output", "Music"}]];
+	build`benchData = First @ Import[userPath <> "WorkBench.nb", "Notebook"];
 	SelectionMove[First @ Cells[CellTags -> "$init"], After, Cell, AutoScroll -> False];
-	NotebookWrite[EvaluationNotebook[], ReleaseHold @ WorkBenchTemplate];
+	NotebookWrite[EvaluationNotebook[], build`benchData];
 ];
 
 
@@ -18,11 +19,7 @@ With[{InitializeThulium = build`InitializeThulium},
 	build`TemporaryNotebook = CreateDocument[
 		{
 			Cell[
-				BoxData @ RowBox[{
-					StyleBox["Thulium Music Player", "TitleText"],
-					TemplateBox[{1}, "Spacer1"],
-					TemplateBox[{"\"v2.1\""}, "TitleVersion"]
-				}],
+				BoxData @ TemplateBox[{"Thulium Music Player", "\"v2.1\""}, "Title"],
 				"Title", CellTags -> "$title"
 			],
 			Cell[BoxData @ GridBox[{
@@ -69,7 +66,7 @@ With[{InitializeThulium = build`InitializeThulium},
 		CellGrouping -> Manual,
 		Background -> RGBColor["#FFFFFF"],
 		WindowTitle -> "Thulium Music Player",
-		WindowElements -> {},
+		WindowElements -> {"VerticalScrollBar"},
 		WindowFrameElements -> {"CloseBox", "MinimizeBox", "ZoomBox"},
 		ScrollingOptions -> {"VerticalScrollRange" -> Fit, "HorizontalScrollRange" -> Fit},
 		WindowSize -> {1440, 768},

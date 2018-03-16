@@ -5,23 +5,6 @@ StyleSheet["Thulium"] = Notebook[{
 	
 	Sequence @@ First @ StyleSheet["WorkBench"],
 	
-	Cell[StyleData["TitleText"],
-		FontFamily -> "Source Sans Pro",
-		FontSize -> 32,
-		FontColor -> RGBColor["#115599"]
-	],
-	
-	Cell[StyleData["TitleVersion"],
-		TemplateBoxOptions -> {DisplayFunction -> Function[
-			StyleBox[
-				FormBox[#1, InputForm],
-				FontFamily -> "Source Sans Pro",
-				FontSize -> 24,
-				FontColor -> RGBColor[0.3, 0.5, 0.8]
-			]
-		]}
-	],
-	
 	Cell[StyleData["Title"],
 		TextAlignment -> Center,
 		ShowStringCharacters -> False,
@@ -29,7 +12,22 @@ StyleSheet["Thulium"] = Notebook[{
 		ShowCellBracket -> False,
 		Evaluatable -> False,
 		Editable -> False,
-		Deletable -> False
+		Deletable -> False,
+		TemplateBoxOptions -> {DisplayFunction -> Function[
+			RowBox[{
+				StyleBox[#1,
+					FontFamily -> "Source Sans Pro",
+					FontSize -> 32,
+					FontColor -> RGBColor[0.1, 0.4, 0.7]
+				],
+				TemplateBox[{1}, "Spacer1"],
+				StyleBox[FormBox[#2, InputForm],
+					FontFamily -> "Source Sans Pro",
+					FontSize -> 24,
+					FontColor -> RGBColor[0.3, 0.5, 0.8]
+				]
+			}]
+		]}
 	],
 	
 	Cell[StyleData["Controls"],

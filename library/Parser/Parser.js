@@ -190,7 +190,7 @@ class Parser {
         if (!ini) {
             sec.Warnings.push(new TmError(TmError.Types.Section.InitiativeBar, [], { Expected: maxBarIni, Actual: sec.Tracks.map((l) => l.Meta.Incomplete[0]) }))
         }
-        if (!fin) {
+        if (!fin && !Number.isNaN(maxBarFin)) {
             sec.Warnings.push(new TmError(TmError.Types.Section.FinalBar, [], { Expected: maxBarFin, Actual: sec.Tracks.map((l) => l.Meta.Incomplete[1]) }))
         }
         if (fin && this.sectionContext.PrevFin === undefined) {

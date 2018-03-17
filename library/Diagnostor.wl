@@ -1,7 +1,7 @@
 (* ::Package:: *)
 
 Diagnose[filepath_String]:=Diagnose[Parse[filepath]];
-Diagnose[rawData_Association]:=Block[
+Diagnose[rawData_List]:=Block[
 	{
 		output={},sectionOutput
 	},
@@ -12,7 +12,7 @@ Diagnose[rawData_Association]:=Block[
 				AppendTo[sectionOutput,OpenerView[{
 					"Track: "<>trackData[["ID"]],
 					Column[Row[{
-						#ErrID,": ",#Args
+						#Err,": ",#Arg
 					}]&/@trackData[["Meta","Warnings"]]]
 				},True,Method->"Active"]]
 			],

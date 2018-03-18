@@ -38,22 +38,44 @@ BoxSimplify[boxes_List] := If[Length[boxes] == 1, boxes[[1]],
 
 (* Spacer Cell *)
 Options[SpacerCell] = {
-	CellFrameColor -> Automatic,
-	Background -> Inherited,
+	FrameStyle -> Automatic,
 	CellTags -> None
 };
 SpacerCell[t_Integer, op:OptionsPattern[]] := SpacerCell[{0, 0}, t, op];
 SpacerCell[{w_Integer:0, h_Integer}, t_Integer:0, OptionsPattern[]] := Cell["", "Text",
+	FontSize -> 1,
+	FontColor -> RGBColor[0, 0, 0, 0],
 	CellSize -> {Inherited, 1},
 	CellMargins -> {{w, w}, {h, h}},
 	CellElementSpacings -> {"CellMinHeight" -> 1},
 	CellFrame -> If[t >= 0, {{0, 0}, {0, t}}, {{0, 0}, {-t, 0}}],
-	CellFrameColor -> OptionValue[CellFrameColor],
+	System`CellFrameStyle -> OptionValue[FrameStyle],
 	CellFrameMargins -> 0, 
 	CellTags -> OptionValue[CellTags],
-	Background -> OptionValue[Background],
+	Background -> Inherited,
 	ShowCellBracket -> False,
-	Selectable -> False
+	Selectable -> False,
+	Deployed -> True
+];
+
+
+(* ::Input:: *)
+(*CellPrint@SpacerCell[{60,0},2,FrameStyle->Dashing[2StringToDashing["-- -- --"]]]*)
+
+
+StringToDashing[str_] := With[
+	{
+		dash = StringLength @ First @ StringCases[str, ("-"|"=")..],
+		sep = StringLength @ First @ StringCases[str, ("."|" ")..]
+	},
+	Switch[str,
+		_?(StringContainsQ[" "]),
+			Return @ {dash * 6, sep * 6},
+		_?(StringContainsQ["."]),
+			Return @ {dash * 6, Sequence @@ ConstantArray[2, 2 * sep + 1]},
+		_,
+			Return @ {}
+	];
 ];
 
 

@@ -16,7 +16,7 @@ StyleSheet["Documemt"] = Notebook[{
 		FontSize -> 24
 	],
 	Cell[StyleData["Usage-chs"],
-		FontFamily -> "\:534e\:6587\:65b0\:9b4f",
+		FontFamily -> "\:534e\:6587\:7ec6\:9ed1",
 		FontSize -> 24
 	],
 	
@@ -148,6 +148,3 @@ StyleSheet["Documemt"] = Notebook[{
 
 (* ::Input:: *)
 (*RenderTMD[localPath<>"docs/test.tmd"];*)
-
-
-

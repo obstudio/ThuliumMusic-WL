@@ -11,13 +11,9 @@ RenderText[line_String, style_String] := Block[{output},
 			BoxApply[RenderText[text, style], FontWeight -> Bold],
 		"*"~~text:RegularExpression["([^\\*\\\\]|\\\\.)+"]~~"*" :>
 			BoxApply[RenderText[text, style], FontSlant -> Italic],
-		"__"~~text:RegularExpression["([^_\\\\]|\\\\.)+"]~~"__" :>
-			BoxApply[RenderText[text, style], FontWeight -> Bold],
-		"_"~~text:RegularExpression["([^_\\\\]|\\\\.)+"]~~"_" :>
-			BoxApply[RenderText[text, style], FontSlant -> Italic],
-		"~~"~~text:RegularExpression["([^~\\\\]|\\\\.)+"]~~"~~" :>
+		"--"~~text:RegularExpression["([^~\\\\]|\\\\.)+"]~~"--" :>
 			BoxApply[RenderText[text, style], FontVariations -> {"StrikeThrough" -> True}],
-		"~"~~text:RegularExpression["([^~\\\\]|\\\\.)+"]~~"~" :>
+		"__"~~text:RegularExpression["([^~\\\\]|\\\\.)+"]~~"__" :>
 			BoxApply[RenderText[text, style], FontVariations -> {"Underline" -> True}],
 		"\\"~~text_ :> StyleBox[text, style],
 		text_ :> RowBox @ StringCases[text, {
@@ -32,23 +28,28 @@ RenderContent[rawData_List, id_Integer] := Block[
 	{
 		line, lineCount, lineNext,
 		markCount, markCount1,
-		$tmpID, $tmpTag, tmData
+		$tmpID, $tmpTag, tmData,
+		output, meta = <||>
 	},
 	
 	$tmpTag := "tmpCell" <> ToString[$tmpID];
 	lineCount = 1;
 	
-	Return @ Flatten[Last @ Reap[
+	output = Flatten[Last @ Reap[
 		While[lineCount <= Length[rawData],
 			line = rawData[[lineCount]];
 			lineCount += 1;
 			Which[
 				
 				(* Separator *)
-				StringMatchQ[line, RegularExpression["\\-{3,} *"]],
-					Sow[SpacerCell[{40, 1}, 2, CellFrameColor -> RGBColor["#777777"]], "Cell"],
-				StringMatchQ[line, RegularExpression["={3,} *"]],
-					Sow[SpacerCell[{40, 2}, 4, CellFrameColor -> RGBColor["#999999"]], "Cell"],
+				StringMatchQ[line, RegularExpression["(-[ .]*){2,}- *"]],
+					Sow[SpacerCell[{40, 1}, 2,
+						FrameStyle -> Directive[RGBColor["#777777"], Dashing[2 StringToDashing[line]]]
+					], "Cell"],
+				StringMatchQ[line, RegularExpression["(=[ .]*){2,}= *"]],
+					Sow[SpacerCell[{40, 2}, 4,
+						FrameStyle -> Directive[RGBColor["#999999"], Dashing[4 StringToDashing[line]]]
+					], "Cell"],
 					
 				(* Title *)
 				StringStartsQ[line, RegularExpression["#"]],
@@ -64,7 +65,7 @@ RenderContent[rawData_List, id_Integer] := Block[
 				(* Usage *)
 				StringStartsQ[line, "-"...~~"?"],
 					Sow[Cell[CellGroupData[{
-						SpacerCell[-1, CellFrameColor -> RGBColor["#77BBFF"]],
+						SpacerCell[-1, FrameStyle -> RGBColor["#77BBFF"]],
 						Sequence @@ (Cell[BoxData[RowBox[#]],
 							CellMargins -> {{0, 0}, {0, 0}},
 							CellFrame -> {{0, 0}, {0, 1}},
@@ -83,7 +84,7 @@ RenderContent[rawData_List, id_Integer] := Block[
 								line = rawData[[lineCount]];
 							];
 						]),
-						SpacerCell[2, CellFrameColor -> RGBColor["#77BBFF"]]
+						SpacerCell[2, FrameStyle -> RGBColor["#77BBFF"]]
 					}]], "Cell"],
 				
 				(* Section *)
@@ -105,7 +106,7 @@ RenderContent[rawData_List, id_Integer] := Block[
 							CellMargins -> {{48, 48} + markCount * 18, {20, 40} / markCount},
 							FontSize -> 40 - (markCount - markCount1) * 6
 						],
-						Sequence @@ RenderContent[rawData[[lineCount ;; lineNext - 1]], id]
+						Sequence @@ RenderContent[rawData[[lineCount ;; lineNext - 1]], id]["Output"]
 					}]], "Cell"];
 					lineCount = lineNext,
 				
@@ -125,7 +126,7 @@ RenderContent[rawData_List, id_Integer] := Block[
 							CellDingbat -> TemplateBox[{DingBatList[[markCount + 1]]}, "DingBat"],
 							CellMargins -> {{72 + markCount * 16, 48}, {4, 4}}
 						],
-						Sequence @@ RenderContent[rawData[[lineCount ;; lineNext - 1]], id]
+						Sequence @@ RenderContent[rawData[[lineCount ;; lineNext - 1]], id]["Output"]
 					}]], "Cell"];
 					lineCount = lineNext,
 				
@@ -172,6 +173,11 @@ RenderContent[rawData_List, id_Integer] := Block[
 			];
 		],
 	"Cell"], 1];
+	
+	Return[<|
+		"Output" -> output,
+		"Meta" -> meta
+	|>];
 ];
 
 (* API *)
@@ -189,11 +195,11 @@ RenderTMD[filepath_String] := Block[{rawData, output},
 	];
 	
 	output = CreateDialog[
-		RenderContent[rawData, Length[$GeneratedList] + 1],
+		RenderContent[rawData, Length[$GeneratedList] + 1]["Output"],
 		WindowTitle -> StringSplit[filepath,"/"|"\\"][[-1]],
 		WindowMargins -> {{80, Automatic}, {Automatic, 60}},
 		WindowElements -> {"VerticalScrollBar"},
-		Background -> RGBColor["#F7F7F7"],
+		Background -> RGBColor["#FBFBFB"],
 		WindowSize -> {1024, 768},
 		StyleDefinitions -> StyleSheet["Documemt"],
 		ShowCellBracket -> False,

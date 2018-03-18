@@ -12,7 +12,7 @@ funcNamePack["Standard"]=Alternatives[
 	"GraceNote","Appoggiatura","Arpeggio",
 	
 	(* assignment functions *)
-	"Key","Oct","KeyOct","ConOct","Vol",
+	"Key","Oct","KeyOct","Con","Vol",
 	"Spd","Bar","Beat","BarBeat","Dur",
 	"Acct","Light","Trace","Stac",
 	"FadeIn","FadeOut","Rev",

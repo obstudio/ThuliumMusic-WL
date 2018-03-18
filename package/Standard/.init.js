@@ -243,7 +243,7 @@ module.exports = {
         return Object.assign(t, { Content: result })
     },
 
-    ConOct(octave, scale = 1) {
+    Con(octave, scale = 1) {
         if (octave === 0) {
             this.Settings.Key = [this.Settings.Key[0]]
             this.Settings.Volume = [this.Settings.Volume[0]]

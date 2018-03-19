@@ -1,6 +1,6 @@
 const TmError = require('./Error')
-const instrDict = require('../Data/Instrument.json')
-const drumDict = require('../Data/Percussion.json')
+const instrDict = require('../Config/Instrument.json')
+const drumDict = require('../Config/Percussion.json')
 
 let currentType = 0
 const instr = Object.keys(instrDict)

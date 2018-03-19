@@ -1,4 +1,6 @@
 *.tm linguist-language=Textualized Music
 *.tml linguist-language=Textualized Music Library
+*.tmd linguist-language=Textualized Music Document
 songs/* linguist-detectable=false
 meta/* linguist-detectable=false
+docs/* linguist-detectable=false

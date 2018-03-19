@@ -3,7 +3,7 @@
 
 # Function
 
-ConOct(octave, volumeScale = 1) {
+Con(octave, volumeScale = 1) {
     if (octave === 0) {
         this.Settings.Key = [this.Settings.Key[0]]
     } else {

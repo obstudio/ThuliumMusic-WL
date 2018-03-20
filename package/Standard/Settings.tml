@@ -14,7 +14,7 @@ Con(octave, volumeScale = 1) {
 }
 
 Vol(volume) {
-    /**** (!1\%) ****/
+    /**** (^!1\%) ****/
     const delta = volume / this.Settings.Volume[0]
     for (var i = 0, length = this.Settings.Volume.length; i < length; i++) {
         this.Settings.Volume[i] *= delta
@@ -22,7 +22,7 @@ Vol(volume) {
     // this.Settings.assignSetting('Volume', volume / 100, (volume) => volume >= 0)}
 
 Spd(speed) {
-    /**** (!1) ****/
+    /**** (^!1) ****/
     this.Settings.assignSetting('Speed', speed, (speed) => speed > 0)
 }
 
@@ -32,6 +32,11 @@ Key(key) {
         this.Settings.Key[i] += delta
     }
     // this.Settings.assignSetting('Key', key, (key) => Number.isInteger(key))
+}
+
+KeyShift(delta) {
+    /**** (!1) ****/
+    this.Settings.Key = this.Settings.Key.map((key) => key + delta)
 }
 
 Oct(oct) {
@@ -72,7 +77,7 @@ Bar(bar) {
 }
 
 BarBeat(bar, beat) {
-    /**** (!1/!2) ****/
+    /**** (^!1/^!2) ****/
     this.Settings.assignSetting('Bar', bar, (bar) => bar > 0 && Number.isInteger(bar))
     this.Settings.assignSetting('Beat', beat, (beat) => beat > 0 && Number.isInteger(Math.log2(beat)))
 }

@@ -9,7 +9,7 @@ join[pat__]:=RE[StringJoin[#[[1]]&/@{pat}]];
 unsigned=RE["\\d+"];
 signed=RE["[\\+\\-]\\d+"];
 integer=RE["[\\+\\-]?\\d+"];
-word=LetterCharacter~~WordCharacter...;
+word=RE["[a-zA-Z]\\w*"];
 
 tokenize::chord = "`1` is not a invalid chord code.";
 tokenize::function = "`1` is not a invalid function code.";
@@ -56,7 +56,10 @@ functionCodeTok[str_]:=If[StringMatchQ[str,functionCode],
 ];
 
 number=integer~~""|("."~~unsigned);
+numsigned="+"|"-"~~numunsigned;
+numunsigned=unsigned~~""|("."~~unsigned);
 expression=RE["[+\\-]?\\d+([\\./]\\d*)?|Log2\\(\\d+\\)([+\\-]\\d+)?"];
+expunsigned=RE["\\d+([\\./]\\d*)?|Log2\\(\\d+\\)([+\\-]\\d+)?"];
 string=Except["\""|"("|")"|"{"|"}"|"["|"]"|"<"|">"]..;
 subtrack=Nest[(("{"~~#~~"}")|Except["{"|"}"])...&,Except["{"|"}"]...,4];
 argument=expression|("\""~~string~~"\"")|("{"~~subtrack~~"}");

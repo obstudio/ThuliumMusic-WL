@@ -2,7 +2,7 @@
 
 Tokenize::nfound = "Cannot find file `1`.";
 
-typeHead="$"|"%"|"&"|"!"|"@";
+typeHead="$"|"%"|"&"|"!"|"^$"|"^!"|"^%"|"^&";
 contextList={"End","Chord","Function","Track"};
 settingList={
 	"MaxRecursion","StaffDisplay","ForcedSpace",
@@ -164,13 +164,21 @@ Tokenize[filepath_]:=Block[
 		"@"~~mcr:Alternatives@@syntax[["Macro"]]:><|"Type"->"Macrotrack","Name"->mcr|>,
 		nota:notationPatt:>notationTok[nota][[1]]
 	}];
-	typePatt=<|"$"->string,"%"->expression,"&"->objectPatt,"!"->number,"@"->notePatt..|>;
+	typePatt=<|
+		"$"->string,"^$"->word,
+		"%"->expression,"^%"->expunsigned,
+		"&"->objectPatt,"^&"->notePatt..,
+		"!"->numsigned,"^!"->numunsigned
+	|>;
 	typeTok[type_,str_]:=Switch[type,
 		"$",<|"Type"->"String","Content"->str|>,
+		"^$",<|"Type"->"String","Content"->str|>,
 		"%",<|"Type"->"Expression","Content"->str|>,
-		"!",<|"Type"->"Number","Content"->ToExpression[str]|>,
+		"^%",<|"Type"->"Expression","Content"->str|>,
+		"!",<|"Type"->"Number","Content"->Internal`StringToDouble[str]|>,
+		"^!",<|"Type"->"Number","Content"->Internal`StringToDouble[str]|>,
 		"&",<|"Type"->"Subtrack","Content"->objectTok[str],"Repeat"->-1|>,
-		"@",<|"Type"->"Subtrack","Content"->StringCases[str,noteRule],"Repeat"->-1|>
+		"^&",<|"Type"->"Subtrack","Content"->StringCases[str,noteRule],"Repeat"->-1|>
 	];
 	Do[
 		argData=syntax[["Function",funcCount]];

@@ -255,9 +255,13 @@ module.exports = {
         // this.Settings.assignSetting('ConOctVolume', volumeScale, (volume) => volume >= 0)
     },
     Vol(volume) {
-        const delta = (volume / 100) / this.Settings.Volume[0]
-        for (var i = 0, length = this.Settings.Volume.length; i < length; i++) {
-            this.Settings.Volume[i] *= delta
+        if (!(volume instanceof Array)) {
+            this.Settings.Volume = volume
+        } else {
+            const delta = (volume / 100) / this.Settings.Volume[0]
+            for (var i = 0, length = this.Settings.Volume.length; i < length; i++) {
+                this.Settings.Volume[i] *= delta
+            }
         }
         // this.Settings.assignSetting('Volume', volume / 100, (volume) => volume >= 0)
     },
@@ -286,6 +290,12 @@ module.exports = {
             this.Settings.Key[i] += delta
         }
         // this.Settings.assignSetting('Key', key, (key) => Number.isInteger(key))
+    },
+    KeyShift(delta) {
+        /**** (!1) ****/
+        for (var i = 0, length = this.Settings.Key.length; i < length; i++) {
+            this.Settings.Key[i] += delta
+        }
     },
     Oct() {
         if (arguments.length === 0) return

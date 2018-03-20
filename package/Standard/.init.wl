@@ -12,7 +12,7 @@ funcNamePack["Standard"]=Alternatives[
 	"GraceNote","Appoggiatura","Arpeggio",
 	
 	(* assignment functions *)
-	"Key","Oct","KeyOct","Con","Vol",
+	"Key","Oct","Con","Vol","KeyShift",
 	"Spd","Bar","Beat","BarBeat","Dur",
 	"Acct","Light","Trace","Stac",
 	"FadeIn","FadeOut","Rev",
@@ -29,7 +29,7 @@ nonVoidPack["Standard"]={
 (* function simplified *)
 funcSimpPack["Standard"]:=Sequence[
 	
-	arg2:objectPatt~~"("~~arg1:expression~~"=)"~~arg3:objectPatt:><|
+	arg2:objectPatt~~"("~~arg1:expunsigned~~"=)"~~arg3:objectPatt:><|
 		"Type"->"FUNCTION",
 		"Name"->"Tremolo2",
 		"Simplified"->True,
@@ -57,7 +57,7 @@ funcSimpPack["Standard"]:=Sequence[
 			<|"Type"->"Subtrack","Content"->StringCases[arg2,noteRule],"Repeat"->-1|>
 		}
 	|>,
-	"("~~arg1:number~~"~)"~~arg2:objectPatt:><|
+	"("~~arg1:numunsigned~~"~)"~~arg2:objectPatt:><|
 		"Type"->"FUNCTION",
 		"Name"->"Tuplet",
 		"Simplified"->True,
@@ -75,7 +75,7 @@ funcSimpPack["Standard"]:=Sequence[
 			<|"Type"->"Subtrack","Content"->objectTok[arg2],"Repeat"->-1|>
 		}
 	|>,
-	"("~~arg1:expression~~"-)"~~arg2:objectPatt:><|
+	"("~~arg1:expunsigned~~"-)"~~arg2:objectPatt:><|
 		"Type"->"FUNCTION",
 		"Name"->"Tremolo1",
 		"Simplified"->True,
@@ -100,7 +100,7 @@ funcSimpPack["Standard"]:=Sequence[
 			<|"Type"->"Subtrack","Content"->objectTok[arg1],"Repeat"->-1|>
 		}
 	|>,
-	"("~~arg1:number~~"/"~~arg2:number~~")":><|
+	"("~~arg1:numunsigned~~"/"~~arg2:numunsigned~~")":><|
 		"Type"->"FUNCTION",
 		"Name"->"BarBeat",
 		"Simplified"->True,
@@ -111,13 +111,13 @@ funcSimpPack["Standard"]:=Sequence[
 	|>,
 	"(1="~~arg1:string~~")":><|
 		"Type"->"FUNCTION",
-		"Name"->"KeyOct",
+		"Name"->"Key",
 		"Simplified"->True,
 		"Argument"->{
 			<|"Type"->"String","Content"->arg1|>
 		}
 	|>,
-	"("~~arg1:number~~"%)":><|
+	"("~~arg1:numunsigned~~"%)":><|
 		"Type"->"FUNCTION",
 		"Name"->"Vol",
 		"Simplified"->True,
@@ -125,9 +125,17 @@ funcSimpPack["Standard"]:=Sequence[
 			<|"Type"->"Number","Content"->ToExpression[arg1]|>
 		}
 	|>,
-	"("~~arg1:number~~")":><|
+	"("~~arg1:numunsigned~~")":><|
 		"Type"->"FUNCTION",
 		"Name"->"Spd",
+		"Simplified"->True,
+		"Argument"->{
+			<|"Type"->"Number","Content"->ToExpression[arg1]|>
+		}
+	|>,
+	"("~~arg1:numsigned~~")":><|
+		"Type"->"FUNCTION",
+		"Name"->"KeyShift",
 		"Simplified"->True,
 		"Argument"->{
 			<|"Type"->"Number","Content"->ToExpression[arg1]|>

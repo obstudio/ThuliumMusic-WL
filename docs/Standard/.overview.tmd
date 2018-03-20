@@ -1,0 +1,33 @@
+# 标准库函数
+
+- 音高与调性
+
++ [$Key] + [$Oct] + [$Con] + [$KeyShift] + [$OctShift]
+
+- 速度与节拍
+
++ [$Spd] + [$Dur] + [$Stac] + [$BarBeat] + [$SpdShift]
+
+- 音量控制
+
++ [$Vol] + [$Acct] + [$Light]
+
+- 音符控制
+
++ [$Trace]
+
+- 改变时值
+
++ [$Tuplet] + [$Fermata] + [$Ferm]
+
+- 演奏技巧
+
++ [$Tremolo1] + [$Tremolo2] + [$Portamento] + [$Port]
+
+- 修饰音
+
++ [$GraceNote] + [$Appoggiatura] + [$Arpeggio] + [$Seg]
+
+- 播放效果
+
++ [$FadeIn] + [$FadeOut] + [$Rev]

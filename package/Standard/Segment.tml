@@ -8,7 +8,7 @@ Seg(r) {
 }
 
 GraceNote(subtrack1, subtrack2) {
-    /**** (@1^)&2 ****/
+    /**** (^&1\^)&2 ****/
     const t1 = new SubtrackParser(subtrack1, this.Settings, this.Libraries, this.pitchQueue).parseTrack()
     const t2 = new SubtrackParser(subtrack2, this.Settings, this.Libraries, this.pitchQueue).parseTrack()
     const num = subtrack1.Content.length
@@ -36,7 +36,7 @@ GraceNote(subtrack1, subtrack2) {
 }
 
 Appoggiatura(subtrack1, subtrack2) {
-    /**** &1(^@2) ****/
+    /**** &1(\^^&2) ****/
     const t1 = new SubtrackParser(subtrack1, this.Settings, this.Libraries, this.pitchQueue).parseTrack()
     const t2 = new SubtrackParser(subtrack2, this.Settings, this.Libraries, this.pitchQueue).parseTrack()
     const num = subtrack2.Content.length

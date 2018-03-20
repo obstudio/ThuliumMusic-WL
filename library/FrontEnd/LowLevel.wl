@@ -4,6 +4,9 @@ $GeneratedList = {};
 DingBatList = {"\[FilledDiamond]", "\[EmptyDiamond]", "\[FilledCircle]", "\[EmptyCircle]", "\[FilledSquare]", "\[EmptySquare]", "\[FilledUpTriangle]", "\[EmptyUpTriangle]"};
 
 
+ListSow[list_List, tag_String] := Scan[Sow[#, tag]&, list];
+
+
 (* some functions *)
 completeText[raw_,arg_]:=StringReplace[raw,{
 	"&"~~i:DigitCharacter:>ToString[arg[[ToExpression@i]],FormatType->InputForm],
@@ -17,6 +20,12 @@ caption[string_String,style_String,argument_List]:=Style[completeText[Which[
 	StringLength@string>0&&StringPart[string,1]=="_",text[[StringDrop[string,1]]],
 	True,string
 ],argument],styleDict[[style]]];
+
+
+RenderLanguage[text_String, style_String] := RowBox @ StringCases[text, {
+	text$$__?(First @ ToCharacterCode[#, "Unicode"] < 8000&) :> StyleBox[text$$, style],
+	text$$__?(First @ ToCharacterCode[#, "Unicode"] >= 8000&) :> StyleBox[text$$, style <> "-chs"]
+}];
 
 
 (* Box Tools *)
@@ -35,6 +44,9 @@ BoxSimplify[boxes_List] := If[Length[boxes] == 1, boxes[[1]],
 	}]
 ];
 
+
+SpacerBox[arg_] := MakeBoxes @ Spacer[arg];
+SpacerBox[arg_, args__] := MakeBoxes @ Spacer[{arg, args}];
 
 (* Spacer Cell *)
 Options[SpacerCell] = {

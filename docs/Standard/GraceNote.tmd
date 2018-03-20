@@ -1,9 +1,9 @@
 # GraceNote ((前倚音))
 
-? GraceNote(*subtrack*, *note*)
--? 将*subtrack*作为*note*的前倚音。
-? (*subtrack*^)*note*
--? GraceNote函数的简记形式。
+? GraceNote(subtrack, note)
+  将*subtrack*作为*note*的前倚音。
+? (subtrack^)note
+  GraceNote函数的简记形式。
 
 ^ 具体信息
 

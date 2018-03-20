@@ -4,7 +4,11 @@ StyleSheet["Documemt"] = Notebook[{
 	
 	Cell[StyleData["Title"],
 		FontFamily -> "Source Sans Pro Semibold",
-		FontWeight -> "DemiBold"
+		FontWeight -> "DemiBold",
+		CellMargins -> {{64, 64}, {30, 60}},
+		FontColor -> RGBColor["#111111"],
+		FontSize -> 60,
+		TextAlignment -> Left
 	],
 	Cell[StyleData["Title-chs"],
 		FontFamily -> "\:9ed1\:4f53",
@@ -13,11 +17,20 @@ StyleSheet["Documemt"] = Notebook[{
 	
 	Cell[StyleData["Usage"],
 		FontFamily -> "Cambria",
+		FontSize -> 22,
+		CellMargins -> {{0, 0}, {0, 0}},
+		CellFrame -> {{0, 0}, {0, 1}},
+		CellFrameColor -> RGBColor["#99CCFF"],
+		Background -> RGBColor["#EFF7FF"],
+		LineSpacing -> {1.5, 0}
+	],
+	Cell[StyleData["Usage-Illust"],
+		FontFamily -> "Cambria",
 		FontSize -> 24
 	],
 	Cell[StyleData["Usage-chs"],
 		FontFamily -> "\:534e\:6587\:7ec6\:9ed1",
-		FontSize -> 24
+		FontSize -> 22
 	],
 	
 	Cell[StyleData["Text"],
@@ -148,3 +161,7 @@ StyleSheet["Documemt"] = Notebook[{
 
 (* ::Input:: *)
 (*RenderTMD[localPath<>"docs/test.tmd"];*)
+
+
+(* ::Input:: *)
+(*CurrentValue[{StyleDefinitions,"Usage"}]*)

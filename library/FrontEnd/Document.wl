@@ -1,6 +1,5 @@
 (* ::Package:: *)
 
-(* Render Syntax *)
 RenderText[line_String, style_String] := Block[{output},
 	output = StringCases[line, {
 		"`"~~text:RegularExpression["([^`\\\\]|\\\\.)+"]~~"`" :>
@@ -11,80 +10,75 @@ RenderText[line_String, style_String] := Block[{output},
 			BoxApply[RenderText[text, style], FontWeight -> Bold],
 		"*"~~text:RegularExpression["([^\\*\\\\]|\\\\.)+"]~~"*" :>
 			BoxApply[RenderText[text, style], FontSlant -> Italic],
-		"--"~~text:RegularExpression["([^~\\\\]|\\\\.)+"]~~"--" :>
+		"--"~~text:RegularExpression["([^\\-\\\\]|\\\\.)+"]~~"--" :>
 			BoxApply[RenderText[text, style], FontVariations -> {"StrikeThrough" -> True}],
-		"__"~~text:RegularExpression["([^~\\\\]|\\\\.)+"]~~"__" :>
+		"__"~~text:RegularExpression["([^_\\\\]|\\\\.)+"]~~"__" :>
 			BoxApply[RenderText[text, style], FontVariations -> {"Underline" -> True}],
 		"\\"~~text_ :> StyleBox[text, style],
-		text_ :> RowBox @ StringCases[text, {
-			text1__?(PrintableASCIIQ) :> StyleBox[text1, style],
-			text1__?(Not@*PrintableASCIIQ) :> StyleBox[text1, style <> "-chs"]
-		}]
+		text_ :> RenderLanguage[text, style]
 	}];
 	Return[BoxSimplify @ RowBox @ output];
 ];
+
 
 RenderContent[rawData_List, id_Integer] := Block[
 	{
 		line, lineCount, lineNext,
 		markCount, markCount1,
-		$tmpID, $tmpTag, tmData,
-		output, meta = <||>
+		$tmpID, $tmpTag, tmData
 	},
 	
 	$tmpTag := "tmpCell" <> ToString[$tmpID];
 	lineCount = 1;
 	
-	output = Flatten[Last @ Reap[
+	Return @ Flatten[Last @ Reap[
 		While[lineCount <= Length[rawData],
 			line = rawData[[lineCount]];
 			lineCount += 1;
 			Which[
 				
 				(* Separator *)
-				StringMatchQ[line, RegularExpression["(-[ .]*){2,}- *"]],
+				StringMatchQ[line, RegularExpression["(-[ .]*)\\1+- *"]],
 					Sow[SpacerCell[{40, 1}, 2,
 						FrameStyle -> Directive[RGBColor["#777777"], Dashing[2 StringToDashing[line]]]
 					], "Cell"],
-				StringMatchQ[line, RegularExpression["(=[ .]*){2,}= *"]],
+				StringMatchQ[line, RegularExpression["(=[ .]*)\\1+= *"]],
 					Sow[SpacerCell[{40, 2}, 4,
 						FrameStyle -> Directive[RGBColor["#999999"], Dashing[4 StringToDashing[line]]]
 					], "Cell"],
 					
 				(* Title *)
-				StringStartsQ[line, RegularExpression["#"]],
+				StringStartsQ[line, "#"],
 					markCount = StringLength @ StringCases[line, RegularExpression["^#+"]][[1]];
 					Sow[Cell[
 						BoxData @ RenderText[StringDelete[line, RegularExpression["^#+ *| *#*$"]], "Title"],
-						CellMargins -> {{64, 64}, {30, 60}},
+						"Title",
 						FontSize -> 72 - markCount * 12,
-						FontColor -> RGBColor["#111111"],
 						TextAlignment -> If[StringEndsQ[line, RegularExpression["# *"]], Center, Left]
 					], "Cell"],
 				
 				(* Usage *)
-				StringStartsQ[line, "-"...~~"?"],
+				StringStartsQ[line, "?"],
 					Sow[Cell[CellGroupData[{
-						SpacerCell[-1, FrameStyle -> RGBColor["#77BBFF"]],
-						Sequence @@ (Cell[BoxData[RowBox[#]],
-							CellMargins -> {{0, 0}, {0, 0}},
-							CellFrame -> {{0, 0}, {0, 1}},
-							CellFrameColor -> RGBColor["#77BBFF"],
-							Background -> RGBColor["#DDEEFF"],
-							LineSpacing -> {1.5, 0}
-						]&/@ Last @ Reap[
+						SpacerCell[-1, FrameStyle -> RGBColor["#99CCFF"]],
+						Sequence @@ (Cell[BoxData[RowBox[#]], "Usage"]&/@ Last @ Reap[
 							$tmpID = 0;
 							lineCount -= 1;
-							While[lineCount <= Length[rawData] && StringStartsQ[line, RegularExpression["\\-*\\?"]],
-								markCount = StringLength @ StringCases[line, RegularExpression["^\\-*"]][[1]];
-								If[markCount == 0, $tmpID += 1, Sow["\n", $tmpTag]];
-								Sow[TemplateBox[{48 + markCount * 24}, "Spacer1"], $tmpTag];
-								Sow[RenderText[StringDelete[line, RegularExpression["^-*\\? *"]], "Usage"], $tmpTag];
+							While[lineCount <= Length[rawData] && StringStartsQ[line, RegularExpression["[ \\?]"]],
+								If[StringStartsQ[line, "?"],
+									$tmpID += 1;
+									ListSow[{SpacerBox[48],
+										RenderText[StringDelete[line, StartOfString~~"?"], "Usage-Illust"]
+									}, $tmpTag],
+									ListSow[{"\n", SpacerBox[72],
+										RenderText[StringDelete[line, StartOfString~~" "..], "Usage"]
+									}, $tmpTag];
+								];
 								lineCount += 1;
 								line = rawData[[lineCount]];
 							];
 						]),
-						SpacerCell[2, FrameStyle -> RGBColor["#77BBFF"]]
+						SpacerCell[2, FrameStyle -> RGBColor["#99CCFF"]]
 					}]], "Cell"],
 				
 				(* Section *)
@@ -106,7 +100,7 @@ RenderContent[rawData_List, id_Integer] := Block[
 							CellMargins -> {{48, 48} + markCount * 18, {20, 40} / markCount},
 							FontSize -> 40 - (markCount - markCount1) * 6
 						],
-						Sequence @@ RenderContent[rawData[[lineCount ;; lineNext - 1]], id]["Output"]
+						Sequence @@ RenderContent[rawData[[lineCount ;; lineNext - 1]], id]
 					}]], "Cell"];
 					lineCount = lineNext,
 				
@@ -126,7 +120,7 @@ RenderContent[rawData_List, id_Integer] := Block[
 							CellDingbat -> TemplateBox[{DingBatList[[markCount + 1]]}, "DingBat"],
 							CellMargins -> {{72 + markCount * 16, 48}, {4, 4}}
 						],
-						Sequence @@ RenderContent[rawData[[lineCount ;; lineNext - 1]], id]["Output"]
+						Sequence @@ RenderContent[rawData[[lineCount ;; lineNext - 1]], id]
 					}]], "Cell"];
 					lineCount = lineNext,
 				
@@ -173,12 +167,12 @@ RenderContent[rawData_List, id_Integer] := Block[
 			];
 		],
 	"Cell"], 1];
-	
-	Return[<|
-		"Output" -> output,
-		"Meta" -> meta
-	|>];
 ];
+
+
+(* ::Input:: *)
+(*RenderTMD[localPath<>"docs/Standard/GraceNote.tmd"];*)
+
 
 (* API *)
 RenderTMD::nfound = "Cannot find file `1`.";
@@ -195,7 +189,7 @@ RenderTMD[filepath_String] := Block[{rawData, output},
 	];
 	
 	output = CreateDialog[
-		RenderContent[rawData, Length[$GeneratedList] + 1]["Output"],
+		RenderContent[rawData, Length[$GeneratedList] + 1],
 		WindowTitle -> StringSplit[filepath,"/"|"\\"][[-1]],
 		WindowMargins -> {{80, Automatic}, {Automatic, 60}},
 		WindowElements -> {"VerticalScrollBar"},
@@ -213,7 +207,3 @@ RenderTMD[filepath_String] := Block[{rawData, output},
 	Return[output];
 ];
 
-
-
-(* ::Input:: *)
-(*RenderTMD[localPath<>"docs/Standard/GraceNote.tmd"];*)

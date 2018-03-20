@@ -29,7 +29,6 @@ class TrackParser {
                 press -= 1
             }
             const final = content[release].StartTime
-            const dur = content[release].StartTime - content[press].StartTime
             content.splice(release, 1)
             content.splice(press, 1)
             content.slice(press, release).forEach((tok) => {
@@ -306,7 +305,7 @@ class TrackParser {
                 const queue = this.Context.pitchQueue[this.Context.pitchQueue.length - this.Settings.Trace]
                 pitchQueue.push(...queue)
                 pitches.push(...[].concat(...queue.map((pitch) => this.Settings.Key.map((key) => key - this.Settings.Key[0] + pitch + delta))))
-                volumes.push(...[].concat(...new Array(queue.length).fill(this.getVolume(note.VolOp))))
+                volumes.push(...[].concat(...new Array(queue.length).fill(this.getVolume(note.VolOp + note.Pitches[0].VolOp))))
             } else {
                 this.pushError(TmError.Types.Note.NoPrevious, { Expected: this.Settings.Trace, Actual: this.Context.pitchQueue.length })
             }
@@ -404,7 +403,6 @@ class TrackParser {
                 }
                 res.push(...pitches.slice(head - 1, tail).map((pitch) => pitch + delta))
             })
-            this.pushError(TmError.Types.Note.ChordOverride, {})
             if (!all.every((e) => e === 0)) this.pushError(TmError.Types.Note.ChordOverride, {})
             return res
         }, [0])

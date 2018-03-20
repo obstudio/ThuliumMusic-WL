@@ -24,11 +24,12 @@ RenderText[line_String, style_String] := Block[{output},
 RenderContent[rawData_List, id_Integer] := Block[
 	{
 		line, lineCount, lineNext,
-		markCount, markCount1,
-		$tmpID, $tmpTag, tmData
+		markCount, markCount1, markLevel,
+		$tmpID, $tmpTag, $stack, $depth
 	},
 	
 	$tmpTag := "tmpCell" <> ToString[$tmpID];
+	$depth := Length @ $stack;
 	lineCount = 1;
 	
 	Return @ Flatten[Last @ Reap[
@@ -105,24 +106,29 @@ RenderContent[rawData_List, id_Integer] := Block[
 					lineCount = lineNext,
 				
 				(* Unordered List *)
-				StringStartsQ[line, "-"...~~"+"],
-					markCount = StringLength @ StringCases[line, RegularExpression["^\\-*"]][[1]];
-					lineNext = lineCount + LengthWhile[rawData[[lineCount ;; ]], And[
-						StringStartsQ[#, "-"...~~"+"],
-						StringLength @ StringCases[#, StartOfLine~~"-"...][[1]] > markCount
-					]&];
-					Sow[Cell[CellGroupData[{
-						Cell[
-							BoxData @ RowBox[{
-								TemplateBox[{4}, "Spacer1"],
-								RenderText[StringDelete[line, RegularExpression["^\\-*\\+ *"]], "Text"]
-							}],
-							CellDingbat -> TemplateBox[{DingBatList[[markCount + 1]]}, "DingBat"],
-							CellMargins -> {{72 + markCount * 16, 48}, {4, 4}}
+				StringStartsQ[line, " "...~~"+"],
+					Sow[Cell[CellGroupData @ Flatten[Last @ Reap[
+						$stack = {};
+						lineCount -= 1;
+						While[lineCount <= Length[rawData] && StringStartsQ[line, " "...~~"+"],
+							markCount = StringLength @ StringCases[line, " "...][[1]];
+							markLevel = LengthWhile[$stack, # <= markCount&];
+							If[markLevel == 0 || $stack[[markLevel]] < markCount,
+								AppendTo[$stack, markCount],
+								$stack = Take[$stack, markLevel];
+							];
+							Sow[Cell[
+								BoxData @ RowBox[{
+									SpacerBox[4],
+									RenderText[StringDelete[line, RegularExpression["^ *\\+ *"]], "Text"]
+								}],
+								CellDingbat -> TemplateBox[{DingBatList[[$depth]]}, "DingBat"],
+								CellMargins -> {{48 + $depth * 16, 48}, {4, 4}}
+							], "Subcell"];
+							lineCount += 1;
+							line = rawData[[lineCount]];
 						],
-						Sequence @@ RenderContent[rawData[[lineCount ;; lineNext - 1]], id]
-					}]], "Cell"];
-					lineCount = lineNext,
+					"Subcell"], 1]], "Cell"],
 				
 				(* Comment *)
 				StringStartsQ[line, ">"~~Except[">"]],

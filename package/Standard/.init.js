@@ -255,7 +255,7 @@ module.exports = {
         // this.Settings.assignSetting('ConOctVolume', volumeScale, (volume) => volume >= 0)
     },
     Vol(volume) {
-        if (!(volume instanceof Array)) {
+        if (volume instanceof Array) {
             this.Settings.Volume = volume
         } else {
             const delta = (volume / 100) / this.Settings.Volume[0]

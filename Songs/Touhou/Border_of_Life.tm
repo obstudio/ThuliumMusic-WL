@@ -98,7 +98,7 @@ Oct(0) @chorus2 Oct(1) @chorus2
 36,7,5,36,7,5,6,7,4#,5,6,3,3,2,|4#7,6,7,4#7,6,7,4#4#56654#5|
 537,537,57,64#264#262|5673'5674#'5675'5'4#'3'2'}
 
-<BrightPiano> ConOct(-1,0.8) Stac(0)
+<BrightPiano> Con(-1,0.8) Stac(0)
 @theme1 @theme1 @theme1 @theme1
 
 <Clavi(80%)>

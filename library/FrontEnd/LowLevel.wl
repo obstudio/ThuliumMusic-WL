@@ -45,20 +45,22 @@ BoxSimplify[boxes_List] := If[Length[boxes] == 1, boxes[[1]],
 ];
 
 
+TemplateCell[name_String, style_String, args_List] := Cell[StyleData[name],
+	TemplateBoxOptions -> {DisplayFunction -> Function[TemplateBox[args, style]]}
+];
+
 SpacerBox[arg_] := MakeBoxes @ Spacer[arg];
 SpacerBox[arg_, args__] := MakeBoxes @ Spacer[{arg, args}];
 
 (* Spacer Cell *)
-Options[SpacerCell] = {
-	FrameStyle -> Automatic,
-	CellTags -> None
-};
-SpacerCell[t_Integer, op:OptionsPattern[]] := SpacerCell[{0, 0}, t, op];
-SpacerCell[{w_Integer:0, h_Integer}, t_Integer:0, OptionsPattern[]] := Cell["", "Text",
+Options[SpacerCell] = {FrameStyle -> Automatic, CellTags -> None};
+SpacerCell[t_Integer, op:OptionsPattern[]] := SpacerCell[{0, {0, 0}}, t, op];
+SpacerCell[{w_Integer:0, top_Integer}, t_Integer:0, op:OptionsPattern[]] := SpacerCell[{w, {0, top}}, t, op];
+SpacerCell[{w_Integer:0, {bottom_Integer, top_Integer}}, t_Integer:0, OptionsPattern[]] := Cell["", "Text",
 	FontSize -> 1,
 	FontColor -> RGBColor[0, 0, 0, 0],
 	CellSize -> {Inherited, 1},
-	CellMargins -> {{w, w}, {h, h}},
+	CellMargins -> {{w, w}, {bottom, top}},
 	CellElementSpacings -> {"CellMinHeight" -> 1},
 	CellFrame -> If[t >= 0, {{0, 0}, {0, t}}, {{0, 0}, {-t, 0}}],
 	System`CellFrameStyle -> OptionValue[FrameStyle],

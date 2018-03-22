@@ -40,11 +40,11 @@ RenderContent[rawData_List, id_Integer] := Block[
 				
 				(* Separator *)
 				StringMatchQ[line, RegularExpression["(-[ .]*)\\1+- *"]],
-					Sow[SpacerCell[{40, 1}, 2,
+					Sow[SpacerCell[{40, 12}, 2,
 						FrameStyle -> Directive[RGBColor["#777777"], Dashing[2 StringToDashing[line]]]
 					], "Cell"],
 				StringMatchQ[line, RegularExpression["(=[ .]*)\\1+= *"]],
-					Sow[SpacerCell[{40, 2}, 4,
+					Sow[SpacerCell[{40, 24}, 4,
 						FrameStyle -> Directive[RGBColor["#999999"], Dashing[4 StringToDashing[line]]]
 					], "Cell"],
 					
@@ -105,12 +105,12 @@ RenderContent[rawData_List, id_Integer] := Block[
 					}]], "Cell"];
 					lineCount = lineNext,
 				
-				(* Unordered List *)
-				StringStartsQ[line, " "...~~"+"],
+				(* List *)
+				StringStartsQ[line, RegularExpression[" *(\\+|\\d+\\.)"]],
 					Sow[Cell[CellGroupData @ Flatten[Last @ Reap[
 						$stack = {};
 						lineCount -= 1;
-						While[lineCount <= Length[rawData] && StringStartsQ[line, " "...~~"+"],
+						While[lineCount <= Length[rawData] && StringStartsQ[line, RegularExpression[" *(\\+|\\d+\\.)"]],
 							markCount = StringLength @ StringCases[line, " "...][[1]];
 							markLevel = LengthWhile[$stack, # <= markCount&];
 							If[markLevel == 0 || $stack[[markLevel]] < markCount,
@@ -120,9 +120,12 @@ RenderContent[rawData_List, id_Integer] := Block[
 							Sow[Cell[
 								BoxData @ RowBox[{
 									SpacerBox[4],
-									RenderText[StringDelete[line, RegularExpression["^ *\\+ *"]], "Text"]
+									RenderText[StringDelete[line, RegularExpression["^ *(\\+|\\d+\\.) *"]], "Text"]
 								}],
-								CellDingbat -> TemplateBox[{DingBatList[[$depth]]}, "DingBat"],
+								CellDingbat -> If[StringStartsQ[line, " "...~~"+"],
+									TemplateBox[{DingBatList[[$depth]]}, "DingBat"],
+									TemplateBox[{StringCases[line, DigitCharacter..~~"."][[1]]}, "Order"]
+								],
 								CellMargins -> {{48 + $depth * 16, 48}, {4, 4}}
 							], "Subcell"];
 							lineCount += 1;
@@ -131,21 +134,15 @@ RenderContent[rawData_List, id_Integer] := Block[
 					"Subcell"], 1]], "Cell"],
 				
 				(* Comment *)
-				StringStartsQ[line, ">"~~Except[">"]],
+				StringStartsQ[line, ">"],
 					lineNext = lineCount + LengthWhile[rawData[[lineCount ;; ]], StringStartsQ[#, ">"]&];
-					Sow[Cell[
-						BoxData @ RowBox[Riffle[Riffle[
+					Sow[Cell[BoxData @ RowBox[Riffle[Riffle[
 							Map[
 								RenderText[StringDelete[#, RegularExpression["^> *"]], "Comment"]&,
 								rawData[[lineCount - 1 ;; lineNext - 1]]
 							],
-							TemplateBox[{4}, "Spacer1"], {1, -2, 2}
-						], "\n", 3]],
-						LineSpacing -> {1, 12},
-						CellMargins -> {{54, 15}, {12, 12}},
-						CellFrame -> {{8, 0}, {0, 0}},
-						CellFrameColor -> RGBColor["#CCCCCC"]
-					], "Cell"];
+						"\n"], SpacerBox[4], {1, -2, 3}]],
+					"Comment"], "Cell"];
 					lineCount = lineNext,
 					
 				(* CodeBlock *)

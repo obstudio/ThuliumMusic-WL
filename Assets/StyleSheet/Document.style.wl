@@ -38,7 +38,7 @@ StyleSheet["Documemt"] = Notebook[{
 		FontSize -> 24
 	],
 	Cell[StyleData["Text-chs"],
-		FontFamily -> "\:534e\:6587\:7ec6\:9ed1",
+		FontFamily -> "\:7b49\:7ebf",
 		FontSize -> 24
 	],
 	
@@ -56,10 +56,14 @@ StyleSheet["Documemt"] = Notebook[{
 	Cell[StyleData["Comment"],
 		FontFamily -> "Calibri",
 		FontSize -> 24,
-		FontColor -> RGBColor["#777777"]
+		FontColor -> RGBColor["#777777"],
+		LineSpacing -> {1, 12},
+		CellMargins -> {{54, 15}, {8, 12}},
+		CellFrame -> {{8, 0}, {0, 0}},
+		CellFrameColor -> RGBColor["#CCCCCC"]
 	],
 	Cell[StyleData["Comment-chs"],
-		FontFamily -> "\:534e\:6587\:7ec6\:9ed1",
+		FontFamily -> "\:5fae\:8f6f\:96c5\:9ed1",
 		FontSize -> 24,
 		FontColor -> RGBColor["#777777"]
 	],
@@ -75,18 +79,20 @@ StyleSheet["Documemt"] = Notebook[{
 		FontColor -> RGBColor["#772200"]
 	],
 	
-	Cell[StyleData["DingBat"],
+	Cell[StyleData["DingBatTemplate"],
 		TemplateBoxOptions -> {DisplayFunction -> Function[
 			AdjustmentBox[
-				StyleBox[#,
+				StyleBox[#1,
 					FontFamily -> "Source Sans Pro",
-					FontSize -> 20,
-					FontColor -> RGBColor["#777777"]
+					FontSize -> #2,
+					FontColor -> RGBColor[#3]
 				],
-				BoxBaselineShift -> -0.3
+				BoxBaselineShift -> #4
 			]
 		]}
 	],
+	TemplateCell["DingBat", "DingBatTemplate", {Slot[1], 20, "#777777", -0.3}],
+	TemplateCell["Order", "DingBatTemplate", {Slot[1], 24, "#777777", -0.1}],
 	
 	Cell[StyleData["CodeBox"],
 		TemplateBoxOptions -> {DisplayFunction -> Function[
@@ -101,7 +107,7 @@ StyleSheet["Documemt"] = Notebook[{
 				ImageSize -> {Automatic, 32},
 				BoxFrame -> {{0, 0}, {0, 0}},
 				RoundingRadius -> {8, 8},
-				ContentPadding -> True,
+				ContentPadding -> False,
 				BaselinePosition -> 1
 			]
 		]}

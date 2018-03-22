@@ -329,7 +329,7 @@ AudioAdapt[rawData_,OptionsPattern[AdaptingOptions]]:=Block[
 (* ::Input:: *)
 (*MIDIStop[];MIDIPlay[#[[2]]]&@*)
 (*EchoFunction["time: ",#[[1]]&]@*)
-(*Timing[MIDIAdapt[Parse[localPath<>"Songs/Touhou/TH11-Chireiden/3rd_Eye.tm"],Rate->1.1]];*)
+(*Timing[MIDIAdapt[Parse[localPath<>"Songs/Hovering_Strange_Melody.tm", {3,3}],Rate->1]];*)
 
 
 (* ::Input:: *)

@@ -94,6 +94,18 @@ StyleSheet["Documemt"] = Notebook[{
 	TemplateCell["DingBat", "DingBatTemplate", {Slot[1], 20, "#777777", -0.3}],
 	TemplateCell["Order", "DingBatTemplate", {Slot[1], 24, "#777777", -0.1}],
 	
+	Cell[StyleData["Table"],
+		FontFamily -> "Calibri",
+		FontSize -> 28,
+		TextAlignment -> Center,
+		CellMargins -> {{40, 40}, {16, 16}}
+	],
+	
+	Cell[StyleData["Table-chs"],
+		FontFamily -> "\:7b49\:7ebf",
+		FontSize -> 28
+	],
+	
 	Cell[StyleData["CodeBox"],
 		TemplateBoxOptions -> {DisplayFunction -> Function[
 			FrameBox[
@@ -170,4 +182,22 @@ StyleSheet["Documemt"] = Notebook[{
 
 
 (* ::Input:: *)
-(*CurrentValue[{StyleDefinitions,"Usage"}]*)
+(*CurrentValue[{StyleDefinitions,"Grid"}]*)
+
+
+(* ::Input:: *)
+(*CreateDialog[{*)
+(*Cell[BoxData@GridBox[*)
+(*{{"1",SpanFromLeft},{"3","4"}},*)
+(*GridFrameMargins->{{0,0},{0,0}},*)
+(*BaselinePosition->Automatic,*)
+(*RowAlignments->Center*)
+(*],"Table"]*)
+(*},*)
+(*StyleDefinitions->StyleSheet["Document"],*)
+(*WindowElements->{},*)
+(*Magnification->2];*)
+
+
+(* ::Input:: *)
+(*GridBox//Options*)

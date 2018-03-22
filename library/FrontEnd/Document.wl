@@ -21,10 +21,32 @@ RenderText[line_String, style_String] := Block[{output},
 ];
 
 
+Options[RenderItem] = {FontWeight -> Automatic, Alignment -> Automatic, Background -> None};
+RenderItem[spec:OptionsPattern[]] := Function[RenderItem[#1, spec]];
+RenderItem[string_String, OptionsPattern[]] := Block[
+	{alignment, text},
+	If[string == "-", Return["\[SpanFromLeft]"]];
+	If[string == "|", Return["\[SpanFromAbove]"]];
+	If[string == "+", Return["\[SpanFromBoth]"]];
+	If[StringStartsQ[string, "<"|"="|">"],
+		text = StringDelete[string, StartOfString~~("<"|"="|">")];
+		alignment = Switch[StringPart[string, 1], "<", Left, "=", Center, ">", Right],
+		text = string;
+		alignment = OptionValue[Alignment]
+	];
+	Return @ ItemBox[
+		BoxApply[RenderText[text, "Table"], FontWeight -> OptionValue[FontWeight]],
+		Alignment -> alignment,
+		Background -> RGBColor @ OptionValue[Background]
+	];
+];
+
+
 RenderContent[rawData_List, id_Integer] := Block[
 	{
 		line, lineCount, lineNext,
 		markCount, markCount1, markLevel,
+		alignment, gridData, emphasize,
 		$tmpID, $tmpTag, $stack, $depth
 	},
 	
@@ -133,18 +155,56 @@ RenderContent[rawData_List, id_Integer] := Block[
 						],
 					"Subcell"], 1]], "Cell"],
 				
+				(* Table *)
+				StringMatchQ[line, RegularExpression["[<=>]\\*?(\\t+[<=>]\\*?)*"]],
+					alignment = StringCases[line, {"<" -> Left, "=" -> Center, ">" -> Right}];
+					emphasize = StringContainsQ["*"] /@ StringSplit[line, "\t"..];
+					line = rawData[[lineCount]];
+					Sow[Cell[BoxData @ GridBox[
+						Flatten[Last @ Reap[
+							While[lineCount <= Length[rawData] && !StringMatchQ[line, " "...],
+								Block[{innerAlign = alignment, innerEmph = emphasize},
+									Scan[If[StringStartsQ[line, Keys[#]] && StringEndsQ[line, Keys[#]],
+										innerAlign = ConstantArray[Values[#], Length[alignment]];
+										line = StringDelete[line, {StartOfString~~Keys[#], Keys[#]~~EndOfString}];
+									]&, {"<<" -> Left, "==" -> Center, ">>" -> Right}];
+									If[StringStartsQ[line, "**"] && StringEndsQ[line, "**"],
+										innerEmph = ConstantArray[True, Length[alignment]];
+										line = StringDelete[line, {StartOfString~~"**", "**"~~EndOfString}];
+									];
+									Sow[PadRight[MapIndexed[
+										RenderItem[#1,
+											Alignment -> innerAlign[[First[#2]]],
+											FontWeight -> If[innerEmph[[First[#2]]], Bold, Automatic],
+											Background -> If[innerEmph[[First[#2]]], "#EEEEFF", Automatic]
+										]&,
+										StringSplit[line, "\t"..]
+									], Length[alignment], "\[SpanFromLeft]"], "Row"];
+								];
+								lineCount += 1;
+								line = rawData[[lineCount]];
+							],
+						"Row"], 1],
+						ColumnWidths -> Automatic,
+						ColumnSpacings -> 2,
+						RowHeights -> Automatic,
+						RowSpacings -> 1.2,
+						GridFrameMargins -> {{0, 0}, {0, 0}},
+						BaselinePosition -> Automatic,
+						RowAlignments -> Center
+					], "Table"], "Cell"],
+				
 				(* Comment *)
 				StringStartsQ[line, ">"],
 					lineNext = lineCount + LengthWhile[rawData[[lineCount ;; ]], StringStartsQ[#, ">"]&];
-					Sow[Cell[BoxData @ RowBox[Riffle[Riffle[
-							Map[
-								RenderText[StringDelete[#, RegularExpression["^> *"]], "Comment"]&,
-								rawData[[lineCount - 1 ;; lineNext - 1]]
-							],
-						"\n"], SpacerBox[4], {1, -2, 3}]],
-					"Comment"], "Cell"];
+					Sow[Cell[BoxData @ RowBox[
+						Riffle[Riffle[Map[
+							RenderText[StringDelete[#, RegularExpression["^> *"]], "Comment"]&,
+							rawData[[lineCount - 1 ;; lineNext - 1]]
+						], "\n"], SpacerBox[4], {1, -2, 3}]
+					], "Comment"], "Cell"];
 					lineCount = lineNext,
-					
+				
 				(* CodeBlock *)
 				StringStartsQ[line, "```"],
 					lineNext = lineCount + LengthWhile[rawData[[lineCount ;; ]], !StringStartsQ[#, "```"]&];

@@ -40,11 +40,11 @@
 <ElectricBass> @eb
 
 
-:|| [2.] (1=G) FadeOut(2)
+:|| [2.] (1=G)
 
 <ElectricPiano2> @ep
 
 <ElectricBass> @eb
 
-
+!FadeOut(2)
 

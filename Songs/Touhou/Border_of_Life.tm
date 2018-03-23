@@ -90,7 +90,7 @@ Oct(0) @chorus2 Oct(1) @chorus2
 5,5#,6,7,11#3b34#55#7b61'2'3b'|
 
 //-------------------- Section C --------------------
-(1=#A) FadeOut(8)
+(1=#A)
 
 <GuitarDistorted(80%)> Dur(2) {4*
 75'64#'53'64#'75'64#'53'64#'|75'64#'53'64#'75'64#'53'64#'|
@@ -119,4 +119,4 @@ Oct(-1) @chorus2 Oct(0) @chorus2
 Oct(0) @chorus2 Oct(1) @chorus2
 Oct(0) @chorus2 Oct(1) @chorus2
 
-
+!FadeOut(8)

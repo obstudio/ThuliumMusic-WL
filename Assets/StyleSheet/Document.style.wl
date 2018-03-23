@@ -1,6 +1,12 @@
 (* ::Package:: *)
 
-StyleSheet["Documemt"] = Notebook[{
+$Width = Dynamic[Divide[
+	AbsoluteCurrentValue[EvaluationNotebook[], WindowSize][[1]],
+	AbsoluteCurrentValue[EvaluationNotebook[], Magnification]
+]];
+
+StyleSheet["Documemt"] = With[{$Width = $Width}, 
+Notebook[{
 	
 	Cell[StyleData["Title"],
 		FontFamily -> "Source Sans Pro Semibold",
@@ -46,11 +52,13 @@ StyleSheet["Documemt"] = Notebook[{
 	Cell[StyleData["Code"],
 		FontFamily -> "Consolas",
 		FontSize -> 20,
+		FontWeight -> Bold,
 		FontColor -> RGBColor["#000000"]
 	],
 	Cell[StyleData["Code-chs"],
 		FontFamily -> "\:534e\:6587\:4eff\:5b8b",
 		FontSize -> 20,
+		FontWeight -> Bold,
 		FontColor -> RGBColor["#000000"]
 	],
 	
@@ -115,9 +123,17 @@ StyleSheet["Documemt"] = Notebook[{
 		FontFamily -> "Calibri",
 		FontSize -> 28,
 		TextAlignment -> Center,
-		CellMargins -> {{40, 40}, {16, 16}}
+		CellMargins -> {{40, 40}, {16, 16}},
+		GridBoxOptions -> {
+			ColumnWidths -> Automatic,
+			ColumnSpacings -> 2,
+			RowHeights -> Automatic,
+			RowSpacings -> 1.2,
+			GridFrameMargins -> {{0, 0}, {0, 0}},
+			BaselinePosition -> Automatic,
+			RowAlignments -> Center
+		}
 	],
-	
 	Cell[StyleData["Table-chs"],
 		FontFamily -> "\:7b49\:7ebf",
 		FontSize -> 28
@@ -143,21 +159,31 @@ StyleSheet["Documemt"] = Notebook[{
 	],
 	
 	Cell[StyleData["CodeBlock"],
+		TextAlignment -> Center,
+		Selectable -> False,
+		CellMargins -> {{40, 40}, {12, 12}},
 		TemplateBoxOptions -> {DisplayFunction -> Function[
-			GraphicsBox[
-				{
-					GraphicsGroupBox[{
-						RGBColor[0.92, 0.92, 0.92],
-						RectangleBox[{0, 0}, {#2, #3}, RoundingRadius -> 16]
-					}, ContentSelectable -> False],
-					InsetBox[AdjustmentBox[#1,
-						LineSpacing -> {1, 4},
-						BoxBaselineShift -> 0.5
-					], {20, Center}, {Left, Center}, ContentSelectable -> True, Alignment->Left]
-				},
-				PlotRange -> {{0, #2}, {0, #3}},
-				ContentSelectable -> True,
-				ImageSize -> {#2, Automatic}
+			FrameBox[
+				AdjustmentBox[
+					PaneBox[
+						StyleBox[#1,
+							LineSpacing -> {1, 8},
+							LineBreakWithin -> False,
+							TextAlignment -> Left,
+							Selectable -> True
+						],
+						Alignment -> {Left, Center},
+						AppearanceElements -> {},
+						ContentPadding -> True,
+						Enabled -> True,
+						ImageSize -> $Width - 200
+					],
+					BoxMargins -> {{1.6, 1.6}, {2, 2}}
+				],
+				Background -> RGBColor[0.92, 0.92, 0.92],
+				BoxFrame -> {{0, 0}, {0, 0}},
+				RoundingRadius -> {8, 8},
+				ContentPadding -> True
 			]
 		]}
 	],
@@ -191,7 +217,7 @@ StyleSheet["Documemt"] = Notebook[{
 		]}
 	]
 	
-}];
+}]];
 
 
 (* ::Input:: *)
@@ -199,17 +225,16 @@ StyleSheet["Documemt"] = Notebook[{
 
 
 (* ::Input:: *)
-(*CurrentValue[{StyleDefinitions,"Grid"}]*)
+(*CurrentValue[{StyleDefinitions,"Pane"}]*)
 
 
 (* ::Input:: *)
 (*CreateDialog[{*)
-(*Cell[BoxData@GridBox[*)
-(*{{"1",SpanFromLeft},{"3","4"}},*)
-(*GridFrameMargins->{{0,0},{0,0}},*)
-(*BaselinePosition->Automatic,*)
-(*RowAlignments->Center*)
-(*],"Table"]*)
+(*Cell[*)
+(*BoxData[TemplateBox[{*)
+(*RowBox[{StyleBox[FormBox["\"GraceNote({13}, {5-})\"",InputForm],"Code"],"\n",StyleBox[FormBox["\"(13^)5-\"",InputForm],"Code"]}]*)
+(*},"CodeBlock"]],*)
+(*"CodeBlock"]*)
 (*},*)
 (*StyleDefinitions->StyleSheet["Document"],*)
 (*WindowElements->{},*)
@@ -217,4 +242,4 @@ StyleSheet["Documemt"] = Notebook[{
 
 
 (* ::Input:: *)
-(*GridBox//Options*)
+(*PaneBox//Options*)

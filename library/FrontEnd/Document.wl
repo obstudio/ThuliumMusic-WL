@@ -43,6 +43,13 @@ RenderItem[string_String, OptionsPattern[]] := Block[
 ];
 
 
+RenderCode[code_String] := Block[
+	{output},
+	output = StyleBox[FormBox["\"" <> code <> "\"", InputForm], "Code"];
+	Return @ output;
+];
+
+
 RenderContent[rawData_List, id_Integer] := Block[
 	{
 		line, lineCount, lineNext, items,
@@ -195,14 +202,7 @@ RenderContent[rawData_List, id_Integer] := Block[
 								lineCount += 1;
 								line = rawData[[lineCount]];
 							],
-						"Row"], 1],
-						ColumnWidths -> Automatic,
-						ColumnSpacings -> 2,
-						RowHeights -> Automatic,
-						RowSpacings -> 1.2,
-						GridFrameMargins -> {{0, 0}, {0, 0}},
-						BaselinePosition -> Automatic,
-						RowAlignments -> Center
+						"Row"], 1]
 					], "Table"], "Cell"],
 				
 				(* Comment *)
@@ -222,13 +222,10 @@ RenderContent[rawData_List, id_Integer] := Block[
 					Sow[Cell[
 						BoxData @ TemplateBox[{
 							RowBox[Riffle[
-								StyleBox[FormBox["\""<>#<>"\"", InputForm], "Code"]&/@ rawData[[lineCount ;; lineNext - 1]],
-							"\n"]],
-							Dynamic @ CurrentValue[$GeneratedList[[id]], WindowSize][[1]] - 120,
-							(lineNext - lineCount) * 24 + 32
+								RenderCode /@ rawData[[lineCount ;; lineNext - 1]],
+							"\n"]]
 						}, "CodeBlock"],
-						CellMargins -> {{48, 48}, {18, 18}}
-					], "Cell"];
+					"CodeBlock"], "Cell"];
 					lineCount = lineNext + 1,
 					
 				(* Text *)

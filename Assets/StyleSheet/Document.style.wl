@@ -35,7 +35,8 @@ StyleSheet["Documemt"] = Notebook[{
 	
 	Cell[StyleData["Text"],
 		FontFamily -> "Calibri",
-		FontSize -> 24
+		FontSize -> 24,
+		CellMargins -> {{48, 15}, {12, 6}}
 	],
 	Cell[StyleData["Text-chs"],
 		FontFamily -> "\:7b49\:7ebf",
@@ -81,18 +82,34 @@ StyleSheet["Documemt"] = Notebook[{
 	
 	Cell[StyleData["DingBatTemplate"],
 		TemplateBoxOptions -> {DisplayFunction -> Function[
-			AdjustmentBox[
-				StyleBox[#1,
-					FontFamily -> "Source Sans Pro",
-					FontSize -> #2,
-					FontColor -> RGBColor[#3]
+			TagBox[RowBox[{
+				TemplateBox[{#5}, "Spacer1"],
+				AdjustmentBox[
+					StyleBox[#1,
+						FontFamily -> "Source Sans Pro",
+						FontSize -> #2,
+						FontColor -> RGBColor[#3]
+					],
+					BoxBaselineShift -> #4
 				],
-				BoxBaselineShift -> #4
-			]
+				TemplateBox[{#5}, "Spacer1"]
+			}], Deploy, DefaultBaseStyle -> "Deployed"]
 		]}
 	],
-	TemplateCell["DingBat", "DingBatTemplate", {Slot[1], 20, "#777777", -0.3}],
-	TemplateCell["Order", "DingBatTemplate", {Slot[1], 24, "#777777", -0.1}],
+	TemplateCell["DingBat", "DingBatTemplate", {Slot[1], 20, "#777777", -0.3, 0}],
+	TemplateCell["Order", "DingBatTemplate", {Slot[1], 24, "#777777", -0.1, 0}],
+	TemplateCell["Separator", "DingBatTemplate", {Slot[1], 24, "#777777", 0, 4}],
+	
+	Cell[StyleData["InlineList"],
+		FontFamily -> "Source Sans Pro",
+		FontSize -> 24,
+		TextAlignment -> Center,
+		CellMargins -> {{40, 40}, {16, 16}}
+	],
+	Cell[StyleData["InlineList-chs"],
+		FontFamily -> "\:9ed1\:4f53",
+		FontSize -> 24
+	],
 	
 	Cell[StyleData["Table"],
 		FontFamily -> "Calibri",

@@ -1,5 +1,6 @@
 (* ::Package:: *)
 
+RenderText[style_String] := Function[RenderText[#1, style]];
 RenderText[line_String, style_String] := Block[{output},
 	output = StringCases[line, {
 		"`"~~text:RegularExpression["([^`\\\\]|\\\\.)+"]~~"`" :>
@@ -44,7 +45,7 @@ RenderItem[string_String, OptionsPattern[]] := Block[
 
 RenderContent[rawData_List, id_Integer] := Block[
 	{
-		line, lineCount, lineNext,
+		line, lineCount, lineNext, items,
 		markCount, markCount1, markLevel,
 		alignment, gridData, emphasize,
 		$tmpID, $tmpTag, $stack, $depth
@@ -127,7 +128,17 @@ RenderContent[rawData_List, id_Integer] := Block[
 					}]], "Cell"];
 					lineCount = lineNext,
 				
-				(* List *)
+				(* Inline list *)
+				StringMatchQ[line, "+ "~~__~~" +"],
+					items = StringSplit[line, RegularExpression["^\\+ +| +\\+ +| +\\+$"]];
+					Sow[Cell[
+						BoxData @ RowBox[Riffle[
+							RenderText["InlineList"] /@ items,
+							TemplateBox[{"\[FilledSquare]"}, "Separator"]
+						]],
+					"InlineList"], "Cell"],
+				
+				(* Multiline List *)
 				StringStartsQ[line, RegularExpression[" *(\\+|\\d+\\.)"]],
 					Sow[Cell[CellGroupData @ Flatten[Last @ Reap[
 						$stack = {};
@@ -222,10 +233,20 @@ RenderContent[rawData_List, id_Integer] := Block[
 					
 				(* Text *)
 				!StringMatchQ[line, RegularExpression["\\s*"]],
+					lineNext = lineCount + LengthWhile[rawData[[lineCount ;; ]], Nor[
+						StringMatchQ[#, " "...],
+						StringMatchQ[#, RegularExpression["([=\\-][ .]*)\\1+[=\\-] *"]],
+						StringMatchQ[#, RegularExpression["[<=>]\\*?(\\t+[<=>]\\*?)*"]],
+						StringStartsQ[#, RegularExpression[" *(\\+|\\d+\\.)"]],
+						StringStartsQ[#, RegularExpression["\\-*\\^+"]],
+						StringStartsQ[#, "#"|"?"|">"|"```"]
+					]&];
 					Sow[Cell[
-						BoxData[RenderText[line, "Text"]], 
-						CellMargins -> {{48, 15}, {6, 6}}
-					], "Cell"];
+						BoxData[RowBox @ Riffle[
+							RenderText[#, "Text"]& /@ rawData[[lineCount - 1 ;; lineNext - 1]],
+						"\n"]], 
+					"Text"], "Cell"];
+					lineCount = lineNext;
 				
 			];
 		],

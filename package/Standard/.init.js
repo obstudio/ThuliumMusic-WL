@@ -310,12 +310,6 @@ module.exports = {
             if (arguments.length >= 2) this.Settings.Volume = arguments[1]
         }
     },
-    Beat(beat) {
-        this.Settings.assignSetting('Beat', beat, (beat) => beat > 0 && Number.isInteger(Math.log2(beat)))
-    },
-    Bar(bar) {
-        this.Settings.assignSetting('Bar', bar, (bar) => bar > 0 && Number.isInteger(bar))
-    },
     BarBeat(bar, beat) {
         this.Settings.assignSetting('Bar', bar, (bar) => bar > 0 && Number.isInteger(bar))
         this.Settings.assignSetting('Beat', beat, (beat) => beat > 0 && Number.isInteger(Math.log2(beat)))

@@ -18,6 +18,13 @@
 + 倚音部分各个音符的时值之比将与*subtrack*中的时值之比保持一致。
 + 上述`seg`可以利用Seg函数来设置。
 
+! Message
+! Message
+
+!! Message
+
+!!! Message
+
 + emmmmm + djia+ dajid + lalala +
 
 >这是一行毫无存在感的注释。

@@ -7,6 +7,9 @@ DingBatList = {"\[FilledDiamond]", "\[EmptyDiamond]", "\[FilledCircle]", "\[Empt
 ListSow[list_List, tag_String] := Scan[Sow[#, tag]&, list];
 
 
+ExternSheet[sheet_String] := Sequence @@ First @ StyleSheet[sheet];
+
+
 (* some functions *)
 completeText[raw_,arg_]:=StringReplace[raw,{
 	"&"~~i:DigitCharacter:>ToString[arg[[ToExpression@i]],FormatType->InputForm],

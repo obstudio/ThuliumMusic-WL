@@ -1,56 +1,6 @@
 (* ::Package:: *)
 
-RenderText[style_String] := Function[RenderText[#1, style]];
-RenderText[line_String, style_String] := Block[{output},
-	output = StringCases[line, {
-		"`"~~text:RegularExpression["([^`\\\\]|\\\\.)+"]~~"`" :>
-			TemplateBox[{StyleBox[text, "Code"]}, "CodeBox"],
-		"(("~~text:RegularExpression["([^\\)\\\\]|\\\\.)+"]~~"))" :>
-			BoxApply[RenderText[text, style], FontSize -> Inherited * 0.7, FontColor -> RGBColor["#555555"]],
-		"**"~~text:RegularExpression["([^\\*\\\\]|\\\\.)+"]~~"**" :>
-			BoxApply[RenderText[text, style], FontWeight -> Bold],
-		"*"~~text:RegularExpression["([^\\*\\\\]|\\\\.)+"]~~"*" :>
-			BoxApply[RenderText[text, style], FontSlant -> Italic],
-		"--"~~text:RegularExpression["([^\\-\\\\]|\\\\.)+"]~~"--" :>
-			BoxApply[RenderText[text, style], FontVariations -> {"StrikeThrough" -> True}],
-		"__"~~text:RegularExpression["([^_\\\\]|\\\\.)+"]~~"__" :>
-			BoxApply[RenderText[text, style], FontVariations -> {"Underline" -> True}],
-		"\\"~~text_ :> StyleBox[text, style],
-		text_ :> RenderLanguage[text, style]
-	}];
-	Return[BoxSimplify @ RowBox @ output];
-];
-
-
-Options[RenderItem] = {FontWeight -> Automatic, Alignment -> Automatic, Background -> None};
-RenderItem[spec:OptionsPattern[]] := Function[RenderItem[#1, spec]];
-RenderItem[string_String, OptionsPattern[]] := Block[
-	{alignment, text},
-	If[string == "-", Return["\[SpanFromLeft]"]];
-	If[string == "|", Return["\[SpanFromAbove]"]];
-	If[string == "+", Return["\[SpanFromBoth]"]];
-	If[StringStartsQ[string, "<"|"="|">"],
-		text = StringDelete[string, StartOfString~~("<"|"="|">")];
-		alignment = Switch[StringPart[string, 1], "<", Left, "=", Center, ">", Right],
-		text = string;
-		alignment = OptionValue[Alignment]
-	];
-	Return @ ItemBox[
-		BoxApply[RenderText[text, "Table"], FontWeight -> OptionValue[FontWeight]],
-		Alignment -> alignment,
-		Background -> RGBColor @ OptionValue[Background]
-	];
-];
-
-
-RenderCode[code_String] := Block[
-	{output},
-	output = StyleBox[FormBox["\"" <> code <> "\"", InputForm], "Code"];
-	Return @ output;
-];
-
-
-RenderContent[rawData_List, id_Integer] := Block[
+RenderContent[rawData_List] := Block[
 	{
 		line, lineCount, lineNext, items,
 		markCount, markCount1, markLevel,
@@ -85,7 +35,8 @@ RenderContent[rawData_List, id_Integer] := Block[
 						BoxData @ RenderText[StringDelete[line, RegularExpression["^#+ *| *#*$"]], "Title"],
 						"Title",
 						FontSize -> 72 - markCount * 12,
-						TextAlignment -> If[StringEndsQ[line, RegularExpression["# *"]], Center, Left]
+						TextAlignment -> If[StringEndsQ[line, RegularExpression["# *"]], Center, Left],
+						CellMargins -> {{64, 64}, {24 / markCount, 60 / markCount}}
 					], "Cell"],
 				
 				(* Usage *)
@@ -131,7 +82,7 @@ RenderContent[rawData_List, id_Integer] := Block[
 							CellMargins -> {{48, 48} + markCount * 18, {20, 40} / markCount},
 							FontSize -> 40 - (markCount - markCount1) * 6
 						],
-						Sequence @@ RenderContent[rawData[[lineCount ;; lineNext - 1]], id]
+						Sequence @@ RenderContent[rawData[[lineCount ;; lineNext - 1]]]
 					}]], "Cell"];
 					lineCount = lineNext,
 				
@@ -141,7 +92,7 @@ RenderContent[rawData_List, id_Integer] := Block[
 					Sow[Cell[
 						BoxData @ RowBox[Riffle[
 							RenderText["InlineList"] /@ items,
-							TemplateBox[{"\[FilledSquare]"}, "Separator"]
+							LocBox[FontBox["\[FilledSquare]", 16, RGBColor["#555555"]], -0.2, {4, 4}]
 						]],
 					"InlineList"], "Cell"],
 				
@@ -191,11 +142,11 @@ RenderContent[rawData_List, id_Integer] := Block[
 										line = StringDelete[line, {StartOfString~~"**", "**"~~EndOfString}];
 									];
 									Sow[PadRight[MapIndexed[
-										RenderItem[#1,
-											Alignment -> innerAlign[[First[#2]]],
-											FontWeight -> If[innerEmph[[First[#2]]], Bold, Automatic],
-											Background -> If[innerEmph[[First[#2]]], "#EEEEFF", Automatic]
-										]&,
+										With[{id = First[#2]}, RenderItem[#1,
+											Alignment -> innerAlign[[id]],
+											FontWeight -> If[innerEmph[[id]], Bold, Automatic],
+											Background -> If[innerEmph[[id]], "#EEEEFF", Automatic]
+										]]&,
 										StringSplit[line, "\t"..]
 									], Length[alignment], "\[SpanFromLeft]"], "Row"];
 								];
@@ -214,6 +165,20 @@ RenderContent[rawData_List, id_Integer] := Block[
 							rawData[[lineCount - 1 ;; lineNext - 1]]
 						], "\n"], SpacerBox[4], {1, -2, 3}]
 					], "Comment"], "Cell"];
+					lineCount = lineNext,
+				
+				(* Tip *)
+				StringStartsQ[line, "!"],
+					With[{maxMatch = StringCases[line, Repeated["!", 3]][[1]]},
+						lineNext = lineCount + LengthWhile[rawData[[lineCount ;; ]], StringStartsQ[#, maxMatch]&];
+						Sow[Cell[BoxData @ TemplateBox[
+							{BoxSimplify[Riffle[Map[
+								RenderText[StringDelete[#, StartOfString~~maxMatch~~" "...], "Tip"]&,
+								rawData[[lineCount - 1 ;; lineNext - 1]]
+							], "\n"]]},
+							"Tip" <> ToString[StringLength[maxMatch]]
+						], "Tip"], "Cell"];
+					];
 					lineCount = lineNext,
 				
 				(* CodeBlock *)
@@ -236,7 +201,7 @@ RenderContent[rawData_List, id_Integer] := Block[
 						StringMatchQ[#, RegularExpression["[<=>]\\*?(\\t+[<=>]\\*?)*"]],
 						StringStartsQ[#, RegularExpression[" *(\\+|\\d+\\.)"]],
 						StringStartsQ[#, RegularExpression["\\-*\\^+"]],
-						StringStartsQ[#, "#"|"?"|">"|"```"]
+						StringStartsQ[#, "#"|"?"|"!"|">"|"```"]
 					]&];
 					Sow[Cell[
 						BoxData[RowBox @ Riffle[
@@ -258,8 +223,8 @@ RenderContent[rawData_List, id_Integer] := Block[
 (* API *)
 RenderTMD::nfound = "Cannot find file `1`.";
 RenderTMD::usage = "\
-\!\(\*RowBox[{\"RenderTMD\",\"[\",RowBox[{StyleBox[\"filepath\",\"TI\"]}],\"]\"}]\)
-generate a document notebook for \!\(\*StyleBox[\"filepath\",\"TI\"]\).";
+\!\(\*RowBox[{\"RenderTMD\",\"[\",RowBox[{StyleBox[\"filepath\",\"TI\"]}],\"]\"}]\)\
+ generate a document notebook for \!\(\*StyleBox[\"filepath\",\"TI\"]\).";
 
 RenderTMD[filepath_String] := Block[{rawData, output},
 	
@@ -270,7 +235,7 @@ RenderTMD[filepath_String] := Block[{rawData, output},
 	];
 	
 	output = CreateDialog[
-		RenderContent[rawData, Length[$GeneratedList] + 1],
+		RenderContent[rawData],
 		WindowTitle -> StringSplit[filepath,"/"|"\\"][[-1]],
 		WindowMargins -> {{80, Automatic}, {Automatic, 60}},
 		WindowElements -> {"VerticalScrollBar"},

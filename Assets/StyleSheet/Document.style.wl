@@ -1,24 +1,34 @@
 (* ::Package:: *)
 
-$Width = Dynamic[Divide[
-	AbsoluteCurrentValue[EvaluationNotebook[], WindowSize][[1]],
-	AbsoluteCurrentValue[EvaluationNotebook[], Magnification]
-]];
+$EnvArg = AbsoluteCurrentValue[EvaluationNotebook[], #]&;
+$Width = Dynamic[$EnvArg[WindowSize][[1]] / $EnvArg[Magnification]];
 
-StyleSheet["Documemt"] = With[{$Width = $Width}, 
-Notebook[{
+StyleSheet["Documemt"] = With[
+	{$Width = $Width},
+	Notebook[{
+	
+	ExternSheet["Core"],
 	
 	Cell[StyleData["Title"],
 		FontFamily -> "Source Sans Pro Semibold",
 		FontWeight -> "DemiBold",
-		CellMargins -> {{64, 64}, {30, 60}},
 		FontColor -> RGBColor["#111111"],
-		FontSize -> 60,
 		TextAlignment -> Left
 	],
 	Cell[StyleData["Title-chs"],
 		FontFamily -> "\:9ed1\:4f53",
 		FontWeight -> Plain
+	],
+	
+	Cell[StyleData["Section"],
+		FontFamily -> "Corbel",
+		FontSize -> 32,
+		FontColor -> RGBColor["#772200"]
+	],
+	Cell[StyleData["Section-chs"],
+		FontFamily -> "\:5e7c\:5706",
+		FontSize -> 32,
+		FontColor -> RGBColor["#772200"]
 	],
 	
 	Cell[StyleData["Usage"],
@@ -77,36 +87,34 @@ Notebook[{
 		FontColor -> RGBColor["#777777"]
 	],
 	
-	Cell[StyleData["Section"],
-		FontFamily -> "Corbel",
-		FontSize -> 32,
-		FontColor -> RGBColor["#772200"]
+	Cell[StyleData["Tip"],
+		FontFamily -> "Calibri",
+		FontSize -> 24,
+		Deployed -> True,
+		TextAlignment -> Center,
+		CellMargins -> {{60, 60}, {4, 4}}
 	],
-	Cell[StyleData["Section-chs"],
-		FontFamily -> "\:5e7c\:5706",
-		FontSize -> 32,
-		FontColor -> RGBColor["#772200"]
-	],
+	TemplateCell["Tip1", "<Tip>", {
+		StyleBox["\[LightBulb]", FontSize -> 28],
+		0, {0, 12}, Slot[1], RGBColor["#FFEEDD"]
+	}],
+	TemplateCell["Tip2", "<Tip>", {
+		StyleBox["\[FivePointedStar]", FontSize -> 28],
+		0, {0, 12}, Slot[1], RGBColor["#FFDDB7"]
+	}],
+	TemplateCell["Tip3", "<Tip>", {
+		StyleBox["\[WarningSign]", FontSize -> 28],
+		0, {0, 12}, Slot[1], RGBColor["#FFCCAA"]
+	}],
 	
-	Cell[StyleData["DingBatTemplate"],
-		TemplateBoxOptions -> {DisplayFunction -> Function[
-			TagBox[RowBox[{
-				TemplateBox[{#5}, "Spacer1"],
-				AdjustmentBox[
-					StyleBox[#1,
-						FontFamily -> "Source Sans Pro",
-						FontSize -> #2,
-						FontColor -> RGBColor[#3]
-					],
-					BoxBaselineShift -> #4
-				],
-				TemplateBox[{#5}, "Spacer1"]
-			}], Deploy, DefaultBaseStyle -> "Deployed"]
-		]}
-	],
-	TemplateCell["DingBat", "DingBatTemplate", {Slot[1], 20, "#777777", -0.3, 0}],
-	TemplateCell["Order", "DingBatTemplate", {Slot[1], 24, "#777777", -0.1, 0}],
-	TemplateCell["Separator", "DingBatTemplate", {Slot[1], 24, "#777777", 0, 4}],
+	TemplateCell["DingBat", "<Locator>", {
+		FontBox[Slot[1], 20, RGBColor["#555555"]],
+		-0.3, {0, 0}
+	}],
+	TemplateCell["Order", "<Locator>", {
+		FontBox[Slot[1], 24, RGBColor["#333333"]],
+		-0.1, {0, 0}
+	}],
 	
 	Cell[StyleData["InlineList"],
 		FontFamily -> "Source Sans Pro",
@@ -178,7 +186,7 @@ Notebook[{
 						Enabled -> True,
 						ImageSize -> $Width - 200
 					],
-					BoxMargins -> {{1.6, 1.6}, {2, 2}}
+					BoxMargins -> {{1.6, 1.6}, {2.4, 2.4}}
 				],
 				Background -> RGBColor[0.92, 0.92, 0.92],
 				BoxFrame -> {{0, 0}, {0, 0}},
@@ -217,7 +225,8 @@ Notebook[{
 		]}
 	]
 	
-}]];
+	}]
+];
 
 
 (* ::Input:: *)

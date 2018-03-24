@@ -4,7 +4,7 @@ RenderText[style_String] := Function[RenderText[#1, style]];
 RenderText[line_String, style_String] := Block[{output},
 	output = StringCases[line, {
 		"`"~~text:RegularExpression["([^`\\\\]|\\\\.)+"]~~"`" :>
-			TemplateBox[{StyleBox[text, "Code"]}, "CodeBox"],
+			TemplateBox[{StyleBox[text, style <> "-code"]}, "CodeBox"],
 		"(("~~text:RegularExpression["([^\\)\\\\]|\\\\.)+"]~~"))" :>
 			BoxApply[RenderText[text, style], FontSize -> Inherited * 0.7, FontColor -> RGBColor["#555555"]],
 		"**"~~text:RegularExpression["([^\\*\\\\]|\\\\.)+"]~~"**" :>

@@ -1,7 +1,7 @@
 (* ::Package:: *)
 
-$EnvArg = AbsoluteCurrentValue[EvaluationNotebook[], #]&;
-$Width = Dynamic[$EnvArg[WindowSize][[1]] / $EnvArg[Magnification]];
+$ENArg = AbsoluteCurrentValue[EvaluationNotebook[], #]&;
+$Width = Dynamic[$ENArg[WindowSize][[1]] / $ENArg[Magnification]];
 
 StyleSheet["Documemt"] = With[
 	{$Width = $Width},
@@ -57,6 +57,15 @@ StyleSheet["Documemt"] = With[
 	Cell[StyleData["Text-chs"],
 		FontFamily -> "\:7b49\:7ebf",
 		FontSize -> 24
+	],
+	
+	Cell[StyleData["Text-code"],
+		FontFamily -> "Consolas",
+		FontSize -> 20
+	],
+	Cell[StyleData["Text-code-chs"],
+		FontFamily -> "\:534e\:6587\:4eff\:5b8b",
+		FontSize -> 20
 	],
 	
 	Cell[StyleData["Code"],
@@ -150,18 +159,13 @@ StyleSheet["Documemt"] = With[
 	Cell[StyleData["CodeBox"],
 		TemplateBoxOptions -> {DisplayFunction -> Function[
 			FrameBox[
-				RowBox[{
-					TemplateBox[{1}, "Spacer1"],
-					#,
-					TemplateBox[{1}, "Spacer1"]
-				}],
+				TemplateBox[{#, 0, {1, 1}}, "<Locator>"],
 				Background -> RGBColor[0.92, 0.92, 0.92],
 				ImageMargins -> {{1, 1}, {0, 0}},
-				ImageSize -> {Automatic, 32},
-				BoxFrame -> {{0, 0}, {0, 0}},
+				ImageSize -> {Automatic, Automatic},
+				FrameStyle -> None,
 				RoundingRadius -> {8, 8},
-				ContentPadding -> False,
-				BaselinePosition -> 1
+				ContentPadding -> False
 			]
 		]}
 	],
@@ -251,4 +255,4 @@ StyleSheet["Documemt"] = With[
 
 
 (* ::Input:: *)
-(*PaneBox//Options*)
+(*FrameBox//Options*)

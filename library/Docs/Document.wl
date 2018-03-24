@@ -117,7 +117,7 @@ RenderContent[rawData_List] := Block[
 									TemplateBox[{DingBatList[[$depth]]}, "DingBat"],
 									TemplateBox[{StringCases[line, DigitCharacter..~~"."][[1]]}, "Order"]
 								],
-								CellMargins -> {{48 + $depth * 16, 48}, {4, 4}}
+								CellMargins -> {{48 + $depth * 16, 48}, {4, 8}}
 							], "Subcell"];
 							lineCount += 1;
 							line = rawData[[lineCount]];
@@ -195,14 +195,14 @@ RenderContent[rawData_List] := Block[
 					
 				(* Text *)
 				!StringMatchQ[line, RegularExpression["\\s*"]],
-					lineNext = lineCount + LengthWhile[rawData[[lineCount ;; ]], Nor[
-						StringMatchQ[#, " "...],
-						StringMatchQ[#, RegularExpression["([=\\-][ .]*)\\1+[=\\-] *"]],
-						StringMatchQ[#, RegularExpression["[<=>]\\*?(\\t+[<=>]\\*?)*"]],
-						StringStartsQ[#, RegularExpression[" *(\\+|\\d+\\.)"]],
-						StringStartsQ[#, RegularExpression["\\-*\\^+"]],
-						StringStartsQ[#, "#"|"?"|"!"|">"|"```"]
-					]&];
+					lineNext = lineCount + LengthWhile[rawData[[lineCount ;; ]], Through[Nor[
+						StringMatchQ[" "...],
+						StringMatchQ[RegularExpression["([=\\-][ .]*)\\1+[=\\-] *"]],
+						StringMatchQ[RegularExpression["[<=>]\\*?(\\t+[<=>]\\*?)*"]],
+						StringStartsQ[RegularExpression[" *(\\+|\\d+\\.)"]],
+						StringStartsQ[RegularExpression["\\-*\\^+"]],
+						StringStartsQ["#"|"?"|"!"|">"|"```"]
+					]]];
 					Sow[Cell[
 						BoxData[RowBox @ Riffle[
 							RenderText[#, "Text"]& /@ rawData[[lineCount - 1 ;; lineNext - 1]],

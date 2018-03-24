@@ -2,6 +2,7 @@ const { SubtrackParser } = require('../../library/Parser/TrackParser')
 
 module.exports = {
     Tremolo1(expr, subtrack) {
+        /**** (^%1-)&2 ****/
         const t = new SubtrackParser(subtrack, this.Settings, this.Libraries, this.pitchQueue).parseTrack()
         const pow = Math.pow(2, -(expr)) * 60 / this.Settings.Speed
         const num = Math.round(t.Meta.Duration / pow)
@@ -21,6 +22,7 @@ module.exports = {
     },
 
     Tremolo2(expr, subtrack1, subtrack2) {
+        /**** &2(^%1=)&3 ****/
         const ts = [new SubtrackParser(subtrack1, this.Settings, this.Libraries, this.pitchQueue).parseTrack(), new SubtrackParser(subtrack2, this.Settings, this.Libraries, this.pitchQueue).parseTrack()]
         const pow = Math.pow(2, -(expr)) * 60 / this.Settings.Speed
         const num = Math.round(ts[1].Meta.Duration / pow)
@@ -65,6 +67,7 @@ module.exports = {
     },
 
     Tuplet(expr, subtrack) {
+        /**** (^!1~)&2 ****/
         const scale = Math.pow(2, Math.floor(Math.log2(expr))) / expr
         const t = new SubtrackParser(subtrack, this.Settings.extend({ Bar: this.Settings.Bar / scale }), this.Libraries, this.pitchQueue).parseTrack()
         t.Content.forEach((note) => {
@@ -83,6 +86,7 @@ module.exports = {
     },
 
     Portamento(subtrack1, subtrack2) {
+        /**** &1~&2 ****/
         const t1 = new SubtrackParser(subtrack1, this.Settings, this.Libraries, this.pitchQueue).parseTrack()
         const t2 = new SubtrackParser(subtrack2, this.Settings, this.Libraries, this.pitchQueue).parseTrack()
 
@@ -139,6 +143,7 @@ module.exports = {
     },
 
     GraceNote(subtrack1, subtrack2) {
+        /**** (^&1\^)&2 ****/
         const t1 = new SubtrackParser(subtrack1, this.Settings, this.Libraries, this.pitchQueue).parseTrack()
         const t2 = new SubtrackParser(subtrack2, this.Settings, this.Libraries, this.pitchQueue).parseTrack()
         const num = subtrack1.Content.length
@@ -168,6 +173,7 @@ module.exports = {
     },
 
     Appoggiatura(subtrack1, subtrack2) {
+        /**** &1(\^^&2) ****/
         const t1 = new SubtrackParser(subtrack1, this.Settings, this.Libraries, this.pitchQueue).parseTrack()
         const t2 = new SubtrackParser(subtrack2, this.Settings, this.Libraries, this.pitchQueue).parseTrack()
         const num = subtrack2.Content.length
@@ -198,6 +204,7 @@ module.exports = {
     },
 
     Fermata(subtrack) {
+        /**** (.)&1 ****/
         const t = new SubtrackParser(subtrack, this.Settings, this.Libraries, this.pitchQueue).parseTrack()
         const ferm = this.Settings.getOrSetDefault('Ferm', 2)
         t.Content.forEach((note) => {
@@ -210,6 +217,7 @@ module.exports = {
     },
 
     Arpeggio(subtrack) {
+        /**** \$&1 ****/
         const t = new SubtrackParser(subtrack, this.Settings, this.Libraries, this.pitchQueue).parseTrack()
         const num = t.Content.length - 1
         let dur
@@ -254,7 +262,9 @@ module.exports = {
         // this.Settings.assignSetting('ConOct', octave, (octave) => Number.isInteger(octave))
         // this.Settings.assignSetting('ConOctVolume', volumeScale, (volume) => volume >= 0)
     },
+
     Vol(volume) {
+        /**** (^!1\%) ****/
         if (volume instanceof Array) {
             this.Settings.Volume = volume
         } else {
@@ -265,10 +275,14 @@ module.exports = {
         }
         // this.Settings.assignSetting('Volume', volume / 100, (volume) => volume >= 0)
     },
+
     Spd(speed) {
+        /**** (^!1) ****/
         this.Settings.assignSetting('Speed', speed, (speed) => speed > 0)
     },
+
     Key(key) {
+        /**** (1=$1) ****/
         let delta
         if (typeof key === 'string') {
             const match = arguments[0].match(/^((#|b)\2*)?([A-G])(('|,)\5*)?/)
@@ -291,12 +305,14 @@ module.exports = {
         }
         // this.Settings.assignSetting('Key', key, (key) => Number.isInteger(key))
     },
+    
     KeyShift(delta) {
         /**** (!1) ****/
         for (var i = 0, length = this.Settings.Key.length; i < length; i++) {
             this.Settings.Key[i] += delta
         }
     },
+
     Oct() {
         if (arguments.length === 0) return
         if (!(arguments[0] instanceof Array)) {
@@ -310,40 +326,53 @@ module.exports = {
             if (arguments.length >= 2) this.Settings.Volume = arguments[1]
         }
     },
+
     BarBeat(bar, beat) {
+        /**** (^!1/^!2) ****/
         this.Settings.assignSetting('Bar', bar, (bar) => bar > 0 && Number.isInteger(bar))
         this.Settings.assignSetting('Beat', beat, (beat) => beat > 0 && Number.isInteger(Math.log2(beat)))
     },
+
     Dur(scale) {
         this.Settings.assignSetting('Duration', scale, () => true)
     },
+
     Acct(scale) {
         this.Settings.assignSetting('Accent', scale, (scale) => scale > 1)
     },
+
     Light(scale) {
         this.Settings.assignSetting('Light', scale, (scale) => scale < 1 && scale > 0)
     },
+
     Seg(r) {
         this.Settings.assignSetting('Seg', r, (r) => r > 0)
     },
+
     Port(r) {
         this.Settings.assignSetting('Port', r, (r) => r > 0)
     },
+
     Trace(count) {
         this.Settings.assignSetting('Trace', count, (count) => count > 0 && count <= 4 && Number.isInteger(count))
     },
+
     FadeIn(time) {
         this.Settings.assignSetting('FadeIn', time, (time) => time >= 0)
     },
+
     FadeOut(time) {
         this.Settings.assignSetting('FadeOut', time, (time) => time >= 0)
     },
+
     Rev(r) {
         this.Settings.assignSetting('Rev', r, () => true)
     },
+
     Ferm(ferm) {
         this.Settings.assignSetting('Ferm', ferm, (ferm) => ferm > 1)
     },
+
     Stac(restProportion, index = 1) {
         if (typeof restProportion !== 'number') throw new TypeError('Non-numeric value passed in as Stac')
         if (!((restProportion) => restProportion >= 0 && restProportion <= 1)(restProportion)) throw new RangeError('Stac out of range')

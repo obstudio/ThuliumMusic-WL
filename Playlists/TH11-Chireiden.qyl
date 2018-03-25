@@ -5,6 +5,7 @@
 	"Path": "Touhou/TH11-Chireiden/",
 	"SongList": [
 		{"Index": "一面道中曲", "Song": "Kurayami_no_Kazaana"},
+		{"Index": "一面BOSS曲", "Song": "Fuujirareta_Youkai"},
 		{"Index": "二面道中曲", "Song": "Taeta_Hashi"},
 		{"Index": "二面BOSS曲", "Song": "Ryokugann_No_Jealousy"},
 		{"Index": "三面道中曲", "Song": "Kyuujigoku_Kaidou"},

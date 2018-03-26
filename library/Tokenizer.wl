@@ -110,7 +110,7 @@ Tokenize[filepath_]:=Block[
 						While[lineCount<=Length@rawData&&!blankLineQ[rawData[[lineCount]]],
 							line=line<>"\n"<>rawData[[lineCount]];lineCount++;
 						];
-						trackData=StringCases[line,"<*"~~name:word~~"*>"~~score__:>Sequence[name,score]];
+						trackData=StringCases[line,"<:"~~name:word~~":>"~~score__:>Sequence[name,score]];
 						If[trackData=={},
 							AppendTo[messages,<|"Type"->"InvalidDef","Arguments"->line|>],
 							AppendTo[syntax[["Macro"]],trackData[[1]]];

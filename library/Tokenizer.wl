@@ -202,7 +202,7 @@ Tokenize[filepath_]:=Block[
 			AppendTo[functionTokList,With[
 				{tmpData=argData,tmpTok=typeTok,tmpType=argType,tmpRule=argRule},
 				Function[str,<|
-					"Type"->"FUNCTION",
+					"Type"->"Function",
 					"Name"->tmpData[["Name"]],
 					"Simplified"->True,
 					"Argument"->MapThread[tmpTok,{tmpType,StringCases[str,tmpRule][[1]]}]
@@ -239,7 +239,7 @@ Tokenize[filepath_]:=Block[
 		"@"~~mcr:Alternatives@@syntax[["Macro"]]:><|"Type"->"Macrotrack","Name"->mcr|>,
 		nota:notationPatt:>notationTok[nota][[1]],
 		name:funcName~~"("~~arglist:rep[argument]~~")":><|
-			"Type"->"FUNCTION",
+			"Type"->"Function",
 			"Name"->name,
 			"Simplified"->False,
 			"Argument"->StringCases[arglist,{
@@ -249,7 +249,7 @@ Tokenize[filepath_]:=Block[
 			}]
 		|>,
 		"("~~name:funcName~~":"~~arglist:rep[argument]~~")":><|
-			"Type"->"FUNCTION",
+			"Type"->"Function",
 			"Name"->name,
 			"Simplified"->False,
 			"Argument"->StringCases[arglist,{
@@ -313,7 +313,7 @@ Tokenize[filepath_]:=Block[
 			]];
 			AppendTo[trackData,"Content"->trackTok[line]];
 			If[ContainsNone[#Type&/@trackData[["Content"]],{"Note","Subtrack","Macrotrack"}],
-				If[ContainsNone[Select[trackData[["Content"]],#Type=="FUNCTION"&][[All,"Name"]],nonVoid],
+				If[ContainsNone[Select[trackData[["Content"]],#Type=="Function"&][[All,"Name"]],nonVoid],
 					If[ContainsAny[#Type&/@trackData[["Content"]],{"Local"}],
 						AppendTo[sections,Flatten@SequenceCases[trackData[["Content"]],
 							{global:Except[<|"Type"->"Local"|>]...,<|"Type"->"Local"|>,local___}:>{global}

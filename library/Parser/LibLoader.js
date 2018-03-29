@@ -1,5 +1,5 @@
-// eslint-disable-next-line no-unused-vars
 const { SubtrackParser } = require('./TrackParser')
+const { parse } = require('acorn')
 
 class LibLoader {
     /**
@@ -32,45 +32,47 @@ class LibLoader {
 
     /**
      * load internal lib
-     * @param {Tm.InternalLibrary} lib 
+     * @param {Tm.InternalLibrary} lib
      */
     loadLibrary(lib) {
         switch (lib.Type) {
-        case LibLoader.libType.Chord:
-            lib.Data.forEach((operator) => {
-                this.result.Chord[operator.Notation] = operator.Pitches
-            })
-            break
-        case LibLoader.libType.Track:
-            for (const track of lib.Data) {
-                this.result.Track[track.Name] = track.Content
-            }
-            break
-        case LibLoader.libType.MetaInformation:
-            break
-        case LibLoader.libType.FunctionPackage:
-            this.loadCode(lib.Data)
-            break
-        case LibLoader.libType.MIDIEventList:
-            break
-        case LibLoader.libType.Library:
-            this.loadSubPackage(lib.Content)
+            case LibLoader.libType.Chord:
+                lib.Data.forEach((operator) => {
+                    this.result.Chord[operator.Notation] = operator.Pitches
+                })
+                break
+            case LibLoader.libType.Track:
+                for (const track of lib.Data) {
+                    this.result.Track[track.Name] = track.Content
+                }
+                break
+            case LibLoader.libType.MetaInformation:
+                break
+            case LibLoader.libType.FunctionPackage:
+                this.loadCode(lib.Data)
+                break
+            case LibLoader.libType.MIDIEventList:
+                break
+            case LibLoader.libType.Library:
+                this.loadSubPackage(lib.Content)
         }
     }
 
     loadCode(data) {
-        const code = 'this.result.FunctionPackage.Custom = {' + data.map((func) => func.Code).join(',') + '}'
+        const result = parse(data)
+        if (!result.body.every((stmt) => stmt.type === 'FunctionDeclaration')) return
+        const code = data + '\nreturn {' + result.body.map((stmt) => stmt.id.name).join(',') + '}'
         try {
-            /* eslint-disable-next-line no-eval */
-            eval(code) // FIXME: change to other methods
+            /* eslint-disable-next-line no-new-func */
+            Object.assign(this.result.FunctionPackage.Custom, new Function(code)()) // FIXME: change to other methods
         } catch (e) {
             console.log('Script grammar error')
         }
     }
 
     /**
-     * 
-     * @param {Tm.Library[]} content 
+     *
+     * @param {Tm.Library[]} content
      */
     loadSubPackage(content) {
         const sub = new LibLoader(content, false).load()
@@ -118,9 +120,11 @@ LibLoader.Default = {
         Custom: {},
         applyFunction(parser, token) {
             return this.locateFunction(token.Name).apply({
+                ParseTrack(track, protocol, settings = parser.Settings) {
+                    return new SubtrackParser(track, settings, parser.Libraries, parser.Meta).parseTrack()
+                },
                 Settings: parser.Settings,
-                Libraries: parser.Libraries,
-                pitchQueue: parser.Context.pitchQueue
+                Meta: parser.Meta
             }, token.Argument.map((arg) => {
                 switch (arg.Type) {
                     case 'Number':

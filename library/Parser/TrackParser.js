@@ -37,6 +37,19 @@ class TrackParser {
         }
     }
 
+    static isDup(arr) {
+        const length = arr.length
+        let i = -1
+        while (i++ < length) {
+            for (let j = i + 1; j < length; ++j) {
+                if (arr[i] === arr[j]) {
+                    return true
+                }
+            }
+        }
+        return false
+    }
+
     constructor(track, sectionSettings, libraries, isSubtrack = false) {
         this.isSubtrack = isSubtrack
         this.ID = track.ID
@@ -44,25 +57,30 @@ class TrackParser {
         this.Libraries = libraries
         this.Content = track.Content
         this.Settings = sectionSettings.extend()
-        this.Context = {
-            afterTie: false,
-            locator: {
-                index: -1,
-                bar: 0
-            },
-            notesBeforeTie: [],
-            startTime: 0,
-            pitchQueue: [],
-            warnings: []
+        this.Meta = {
+            Index: -1,
+            NotesBeforeTie: [],
+            PitchQueue: [],
+            // pitchFirst: 第一个音符,
+            // pitchLast: 最后一个音符,
+            FadeIn: this.Settings.FadeIn, // FIXME: seems buggy
+            FadeOut: this.Settings.FadeOut, // FIXME: seems buggy
+            BarFirst: 0,
+            BarLast: 0,
+            Duration: 0,
+            BarCount: 0, // 总小节线数
+            TieLeft: false,
+            TieRight: false
         }
+        this.Result = []
+        this.Warnings = []
     }
 
     pushError(errorType, args, useLocator = true) {
-        let location = []
-        if (useLocator) {
-            location.push(Object.assign({}, this.Context.locator))
-        }
-        this.Context.warnings.push(new TmError(errorType, location, args))
+        this.Warnings.push(new TmError(errorType, useLocator ? {
+            Bar: this.Meta.BarCount,
+            Index: this.Meta.Index
+        } : null, args))
     }
 
     parseTrack() {
@@ -94,21 +112,19 @@ class TrackParser {
                 this.pushError(TmError.Types.Track.Instrument, { Actual: this.Instruments }, false)
             }
             return this.Instruments.map((instrument) => {
-                const meta = Object.assign({}, trackResult.Meta, { Warnings: trackResult.Meta.Warnings.slice() })
+                const warnings = trackResult.Warnings.slice()
                 if (instrument.Proportion === null) {
                     instrument.Proportion = 1
-                }
-                if (instrument.Instrument === '') {
-                    instrument.Instrument = 'Piano'
                 }
                 return {
                     Instrument: instrument.Instrument,
                     ID: this.ID ? `${this.ID}#${instrument.Instrument}` : instrument.Instrument,
-                    Meta: meta,
+                    Warnings: warnings,
+                    Meta: trackResult.Meta,
                     Content: trackResult.Content.map((note) => {
                         let vol = note.Volume * instrument.Proportion
                         if (vol > 1) {
-                            meta.Warnings.push(new TmError(TmError.Types.Note.VolumeLimit, [], { Expected: 1, Actual: vol })) // FIXME: index
+                            warnings.push(new TmError(TmError.Types.Note.VolumeLimit, null, { Expected: 1, Actual: vol })) // FIXME: index
                             vol = 1
                         }
                         delete note.__oriDur
@@ -153,14 +169,9 @@ class TrackParser {
     }
 
     parseTrackContent() {
-        const result = []
         let subtrack
-        let rightIncomplete
-        let leftIncomplete = 0
-        let leftFirst = true
-
         for (const token of this.Content) {
-            this.Context.locator.index += 1
+            this.Meta.Index += 1
             switch (token.Type) {
                 case 'Function':
                 case 'Subtrack':
@@ -170,108 +181,113 @@ class TrackParser {
                             break
                         }
                     } else {
-                        subtrack = new SubtrackParser(token, this.Settings, this.Libraries, this.Context.pitchQueue).parseTrack()
+                        subtrack = new SubtrackParser(token, this.Settings, this.Libraries, this.Meta.PitchQueue).parseTrack()
                     }
                     subtrack.Content.forEach((tok) => {
                         if (tok.Type === 'Note') {
-                            tok.StartTime += this.Context.startTime
+                            tok.StartTime += this.Meta.Duration
                         }
                     })
-                    this.Context.pitchQueue.push(...subtrack.Meta.PitchQueue)
-                    this.Context.startTime += subtrack.Meta.Duration
-                    this.Context.notesBeforeTie = subtrack.Meta.NotesBeforeTie
-                    this.Context.afterTie = subtrack.Meta.AfterTie
-                    this.Context.warnings.push(...subtrack.Meta.Warnings.map((warning) => {
-                        warning.pos.unshift(Object.assign({}, this.Context.locator))
+                    this.Meta.PitchQueue.push(...subtrack.Meta.PitchQueue)
+                    this.Meta.Duration += subtrack.Meta.Duration
+                    this.Meta.NotesBeforeTie = subtrack.Meta.NotesBeforeTie
+                    this.Meta.TieLeft = subtrack.Meta.TieLeft
+                    this.Warnings.push(...subtrack.Warnings.map((warning) => {
+                        warning.pos.unshift(Object.assign({}, {
+                            Bar: this.Meta.BarCount,
+                            Index: this.Meta.Index
+                        }))
                         return warning
                     }))
-                    if (subtrack.Meta.Single) {
-                        if (leftFirst) {
-                            leftIncomplete += subtrack.Meta.Incomplete[0]
-                            if (this.isLegalBar(leftIncomplete)) {
-                                leftFirst = false
-                                rightIncomplete = 0
+                    if (subtrack.Meta.BarCount === 0) {
+                        if (this.Meta.BarCount === 0) {
+                            this.Meta.BarFirst += subtrack.Meta.BarFirst
+                            if (this.isLegalBar(this.Meta.BarFirst)) {
+                                this.Meta.BarCount += 1
                             }
                         } else {
-                            rightIncomplete += subtrack.Meta.Incomplete[0]
-                            if (this.isLegalBar(rightIncomplete)) {
-                                rightIncomplete = 0
+                            this.Meta.BarFirst += subtrack.Meta.BarFirst
+                            if (this.isLegalBar(this.Meta.BarFirst)) {
+                                this.Meta.BarFirst = 0
                             }
                         }
                     } else {
-                        if (leftFirst) {
-                            leftIncomplete += subtrack.Meta.Incomplete[0]
-                            leftFirst = false
-                            rightIncomplete = subtrack.Meta.Incomplete[1]
-                            if (this.isLegalBar(rightIncomplete)) {
-                                rightIncomplete = 0
+                        if (this.Meta.BarCount === 0) {
+                            this.Meta.BarFirst += subtrack.Meta.BarFirst
+                            this.Meta.BarCount += 1
+                            this.Meta.BarFirst = subtrack.Meta.BarLast
+                            if (this.isLegalBar(this.Meta.BarFirst)) {
+                                this.Meta.BarFirst = 0
                             }
                         } else {
-                            rightIncomplete += subtrack.Meta.Incomplete[0]
-                            if (!this.isLegalBar(rightIncomplete)) {
-                                this.pushError(TmError.Types.Track.BarLength, { Expected: this.Settings.Bar, Actual: rightIncomplete })
+                            this.Meta.BarFirst += subtrack.Meta.BarFirst
+                            if (!this.isLegalBar(this.Meta.BarFirst)) {
+                                this.pushError(TmError.Types.Track.BarLength, { Expected: this.Settings.Bar, Actual: this.Meta.BarFirst })
                             }
-                            rightIncomplete = subtrack.Meta.Incomplete[1]
-                            if (this.isLegalBar(rightIncomplete)) {
-                                rightIncomplete = 0
+                            this.Meta.BarFirst = subtrack.Meta.BarLast
+                            if (this.isLegalBar(this.Meta.BarFirst)) {
+                                this.Meta.BarFirst = 0
                             }
                         }
                     }
-                    result.push(...subtrack.Content)
+                    this.Result.push(...subtrack.Content)
                     break
                 case 'Note':
-                    this.Context.notesBeforeTie = this.parseNote(token)
-                    if (leftFirst) {
-                        leftIncomplete += this.parseBeat(token)
+                    this.Meta.NotesBeforeTie = this.parseNote(token)
+                    if (this.Meta.BarCount === 0) {
+                        this.Meta.BarFirst += this.parseBeat(token)
                     } else {
-                        rightIncomplete += this.parseBeat(token)
+                        this.Meta.BarFirst += this.parseBeat(token)
                     }
-                    result.push(...this.Context.notesBeforeTie.filter((note) => result.indexOf(note) === -1))
+                    this.Result.push(...this.Meta.NotesBeforeTie.filter((note) => this.Result.indexOf(note) === -1))
                     break
                 case 'Tie':
-                    this.Context.afterTie = true
+                    this.Meta.TieLeft = true
                     break
                 case 'BarLine':
-                    leftFirst = false
+                    this.Meta.BarCount += 1
                     if (token.Terminal !== true) {
-                        if (!this.isLegalBar(rightIncomplete)) {
-                            this.pushError(TmError.Types.Track.BarLength, { Expected: this.Settings.Bar, Actual: rightIncomplete })
+                        if (!this.isLegalBar(this.Meta.BarFirst)) {
+                            this.pushError(TmError.Types.Track.BarLength, { Expected: this.Settings.Bar, Actual: this.Meta.BarFirst })
                         }
-                        rightIncomplete = 0
+                        this.Meta.BarFirst = 0
                     }
                     if (token.Overlay) {
-                        this.Context.startTime = 0
+                        this.Meta.Duration = 0
                     }
-                    this.Context.locator.bar += 1
+                    this.Meta.BarCount += 1
                     break
                 case 'PedalPress':
                 case 'PedalRelease':
-                    result.push({
+                    this.Result.push({
                         Type: token.Type,
-                        StartTime: this.Context.startTime
+                        StartTime: this.Meta.Duration
                     })
                     break
                 case 'Undefined':
-                    this.pushError(TmError.Types.Track.Undefined, { Actual: token })
-                    break
+                case 'Sfunc':
+                    throw new Error()
+                // this.pushError(TmError.Types.Track.Undefined, { Actual: token })
+                // break
                 case 'Clef':
                 case 'Whitespace':
                     break
             }
         }
         const returnObj = {
-            Content: result,
-            Meta: {
-                Warnings: this.Context.warnings,
-                PitchQueue: this.isSubtrack ? this.Context.pitchQueue.slice(this.oriPitchQueueLength) : this.Context.pitchQueue,
-                FadeIn: this.Settings.FadeIn,
-                FadeOut: this.Settings.FadeOut,
-                Duration: this.Context.startTime,
-                Single: leftFirst,
-                Incomplete: [leftIncomplete, rightIncomplete],
-                NotesBeforeTie: this.Context.notesBeforeTie,
-                AfterTie: this.Context.afterTie
-            }
+            Content: this.Result,
+            Warnings: this.Warnings,
+            Meta: this.Meta/* {
+            PitchQueue: this.isSubtrack ? this.Meta.PitchQueue.slice(this.oriPitchQueueLength) : this.Meta.PitchQueue,
+            FadeIn: this.Settings.FadeIn,
+            FadeOut: this.Settings.FadeOut,
+            Duration: this.Meta.Duration,
+            BarCount: this.Meta.BarCount,
+            BarFirst: this.Meta.BarFirst,
+            BarLast: this.Meta.BarLast,
+            NotesBeforeTie: this.Meta.NotesBeforeTie,
+            TieLeft: this.Meta.TieLeft
+          } */
         }
         if (!this.isSubtrack) {
             returnObj.Meta.toJSON = function toJson() {
@@ -300,14 +316,14 @@ class TrackParser {
 
         // calculate pitch array and record it for further trace
         if (note.Pitches.length === 1 && note.Pitches[0].Degree === '%') {
-            if (this.Context.pitchQueue.length >= this.Settings.Trace) {
+            if (this.Meta.PitchQueue.length >= this.Settings.Trace) {
                 const delta = this.parseDeltaPitch(note.PitOp)
-                const queue = this.Context.pitchQueue[this.Context.pitchQueue.length - this.Settings.Trace]
+                const queue = this.Meta.PitchQueue[this.Meta.PitchQueue.length - this.Settings.Trace]
                 pitchQueue.push(...queue)
                 pitches.push(...[].concat(...queue.map((pitch) => this.Settings.Key.map((key) => key - this.Settings.Key[0] + pitch + delta))))
                 volumes.push(...[].concat(...new Array(queue.length).fill(this.getVolume(note.VolOp + note.Pitches[0].VolOp))))
             } else {
-                this.pushError(TmError.Types.Note.NoPrevious, { Expected: this.Settings.Trace, Actual: this.Context.pitchQueue.length })
+                this.pushError(TmError.Types.Note.NoPrevious, { Expected: this.Settings.Trace, Actual: this.Meta.PitchQueue.length })
             }
         } else {
             for (const pitch of note.Pitches) {
@@ -332,18 +348,18 @@ class TrackParser {
                 }
             }
         }
-        if (new Set(pitches).size !== pitches.length) {
+        if (TrackParser.isDup(pitches)) {
             this.pushError(TmError.Types.Note.Reduplicate, { Actual: pitches })
         }
         if (pitchQueue.length > 0) {
-            this.Context.pitchQueue.push(pitchQueue.slice(0))
+            this.Meta.PitchQueue.push(pitchQueue.slice(0))
         }
 
         const result = []
         // merge pitches with previous ones if tie exists
-        if (this.Context.afterTie) {
-            this.Context.afterTie = false
-            this.Context.notesBeforeTie.forEach((prevNote) => {
+        if (this.Meta.TieLeft) {
+            this.Meta.TieLeft = false
+            this.Meta.NotesBeforeTie.forEach((prevNote) => {
                 const index = pitches.indexOf(prevNote.Pitch)
                 if (index === -1 || prevNote.Volume !== volumes[index]) return
                 result.push(prevNote)
@@ -361,10 +377,10 @@ class TrackParser {
                 Volume: volumes[index],
                 Duration: actualDuration,
                 __oriDur: duration,
-                StartTime: this.Context.startTime
+                StartTime: this.Meta.Duration
             })
         }
-        this.Context.startTime += duration
+        this.Meta.Duration += duration
         return result
     }
 
@@ -455,14 +471,14 @@ TrackParser.pitchDict = { 1: 0, 2: 2, 3: 4, 4: 5, 5: 7, 6: 9, 7: 11 }
 TrackParser.pitchOperatorDict = { '#': 1, 'b': -1, '\'': 12, ',': -12 }
 
 class SubtrackParser extends TrackParser {
-    constructor(track, sectionSettings, libraries, pitchQueue) {
-        super(track, sectionSettings, libraries, true)
+    constructor(track, settings, libraries, { PitchQueue: pitchQueue }) {
+        super(track, settings, libraries, true)
         this.Repeat = track.Repeat
         if (pitchQueue === undefined) {
-            this.Context.pitchQueue = []
+            this.Meta.PitchQueue = []
             this.oriPitchQueueLength = 0
         } else {
-            this.Context.pitchQueue = pitchQueue.slice()
+            this.Meta.PitchQueue = pitchQueue.slice()
             this.oriPitchQueueLength = pitchQueue.length
         }
     }
@@ -478,7 +494,7 @@ class SubtrackParser extends TrackParser {
         if (this.Repeat > 0) {
             this.Content.forEach((token, index) => {
                 if (token.Skip === true) {
-                    this.Context.warnings.push(new TmError(TmError.Types.Track.UnexpCoda, [{ index }], { Actual: token }))
+                    this.Warnings.push(new TmError(TmError.Types.Track.UnexpCoda, { index }, { Actual: token }))
                 }
             })
             const temp = []
@@ -514,7 +530,7 @@ class SubtrackParser extends TrackParser {
         } else {
             this.Content.forEach((token, index) => {
                 if (token.Order instanceof Array && (token.Order.length !== 1 || token.Order[0] !== 0)) {
-                    this.Context.warnings.push(new TmError(TmError.Types.Track.UnexpVolta, [{ index }], { Actual: token }))
+                    this.Warnings.push(new TmError(TmError.Types.Track.UnexpVolta, { index }, { Actual: token }))
                 }
             })
             if (this.Repeat !== -1 && this.Content.length >= 1) {
@@ -530,7 +546,7 @@ class SubtrackParser extends TrackParser {
             const skip = this.Content.findIndex((tok) => tok.Skip === true)
             for (let index = skip + 1, length = this.Content.length; index < length; index++) {
                 if (this.Content[index].Skip === true) {
-                    this.Context.warnings.push(new TmError(TmError.Types.Track.MultiCoda, [{ index }], {}))
+                    this.Warnings.push(new TmError(TmError.Types.Track.MultiCoda, { index }, {}))
                 }
             }
             let temp

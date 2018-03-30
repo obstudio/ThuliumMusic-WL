@@ -169,19 +169,19 @@ class TrackParser {
     }
 
     parseTrackContent() {
-        let subtrack
         for (const token of this.Content) {
             this.Meta.Index += 1
             switch (token.Type) {
                 case 'Function':
-                case 'Subtrack':
+                case 'Subtrack': {
+                    let subtrack
                     if (token.Type === 'Function') {
                         subtrack = this.Libraries.FunctionPackage.applyFunction(this, token)
                         if (subtrack === undefined) {
                             break
                         }
                     } else {
-                        subtrack = new SubtrackParser(token, this.Settings, this.Libraries, this.Meta.PitchQueue).parseTrack()
+                        subtrack = new SubtrackParser(token, this.Settings, this.Libraries, this.Meta).parseTrack()
                     }
                     subtrack.Content.forEach((tok) => {
                         if (tok.Type === 'Note') {
@@ -232,15 +232,18 @@ class TrackParser {
                     }
                     this.Result.push(...subtrack.Content)
                     break
-                case 'Note':
-                    this.Meta.NotesBeforeTie = this.parseNote(token)
+                }
+                case 'Note': {
+                    const notes = this.parseNote(token)
+                    const beat = this.parseBeat(token)
                     if (this.Meta.BarCount === 0) {
-                        this.Meta.BarFirst += this.parseBeat(token)
+                        this.Meta.BarFirst += beat
                     } else {
-                        this.Meta.BarFirst += this.parseBeat(token)
+                        this.Meta.BarLast += beat
                     }
-                    this.Result.push(...this.Meta.NotesBeforeTie.filter((note) => this.Result.indexOf(note) === -1))
+                    this.Result.push(...notes.filter((note) => this.Result.indexOf(note) === -1))
                     break
+                }
                 case 'Tie':
                     this.Meta.TieLeft = true
                     break
@@ -277,7 +280,7 @@ class TrackParser {
         const returnObj = {
             Content: this.Result,
             Warnings: this.Warnings,
-            Meta: Object.assign(this.Meta, { PitchQueue: this.isSubtrack ? this.Meta.PitchQueue.slice(this.oriPitchQueueLength) : this.Meta.PitchQueue }) /* {
+            Meta: Object.assign(this.Meta, { PitchQueue: this.isSubtrack ? this.Meta.PitchQueue.slice(this.oriPitchQueueLength) : this.Meta.PitchQueue })/* {
             PitchQueue: this.isSubtrack ? this.Meta.PitchQueue.slice(this.oriPitchQueueLength) : this.Meta.PitchQueue,
             FadeIn: this.Settings.FadeIn,
             FadeOut: this.Settings.FadeOut,
@@ -356,20 +359,20 @@ class TrackParser {
         }
 
         const result = []
+        const notesBeforeTie = []
         // merge pitches with previous ones if tie exists
         if (this.Meta.TieLeft) {
             this.Meta.TieLeft = false
             this.Meta.NotesBeforeTie.forEach((prevNote) => {
                 const index = pitches.indexOf(prevNote.Pitch)
                 if (index === -1 || prevNote.Volume !== volumes[index]) return
-                result.push(prevNote)
+                notesBeforeTie.push(prevNote)
                 prevNote.__oriDur += actualDuration
                 prevNote.Duration = prevNote.__oriDur
                 pitches.splice(index, 1)
                 volumes.splice(index, 1)
             })
         }
-
         for (var index = 0, length = pitches.length; index < length; index++) {
             result.push({
                 Type: 'Note',
@@ -380,6 +383,7 @@ class TrackParser {
                 StartTime: this.Meta.Duration
             })
         }
+        this.Meta.NotesBeforeTie = notesBeforeTie.concat(result)
         this.Meta.Duration += duration
         return result
     }
@@ -471,7 +475,7 @@ TrackParser.pitchDict = { 1: 0, 2: 2, 3: 4, 4: 5, 5: 7, 6: 9, 7: 11 }
 TrackParser.pitchOperatorDict = { '#': 1, 'b': -1, '\'': 12, ',': -12 }
 
 class SubtrackParser extends TrackParser {
-    constructor(track, settings, libraries, { PitchQueue: pitchQueue }) {
+    constructor(track, settings, libraries, { PitchQueue: pitchQueue, NotesBeforeTie: notesBeforeTie, TieLeft: tieLeft }) {
         super(track, settings, libraries, true)
         this.Repeat = track.Repeat
         if (pitchQueue === undefined) {
@@ -480,6 +484,12 @@ class SubtrackParser extends TrackParser {
         } else {
             this.Meta.PitchQueue = pitchQueue.slice()
             this.oriPitchQueueLength = pitchQueue.length
+        }
+        if (notesBeforeTie !== null) {
+            this.Meta.NotesBeforeTie = notesBeforeTie
+        }
+        if (tieLeft !== null) {
+            this.Meta.TieLeft = tieLeft
         }
     }
 

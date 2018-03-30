@@ -120,8 +120,8 @@ LibLoader.Default = {
         Custom: {},
         applyFunction(parser, token) {
             return this.locateFunction(token.Name).apply({
-                ParseTrack(track, protocol, settings = parser.Settings) {
-                    return new SubtrackParser(track, settings, parser.Libraries, parser.Meta).parseTrack()
+                ParseTrack(track, protocol = 'Default', settings = parser.Settings) {
+                    return new SubtrackParser(track, settings, parser.Libraries, wrap(parser.Meta, protocol)).parseTrack()
                 },
                 Settings: parser.Settings,
                 Meta: parser.Meta
@@ -146,6 +146,30 @@ LibLoader.Default = {
     },
     MIDIEventList: {},
     Track: {}
+}
+
+const Protocols = {
+    Default: {
+        Read: ['PitchQueue'],
+        Write: ['PitchQueue']
+    }
+}
+
+function wrap(meta, protocol) {
+    const protocolList = Protocols[protocol]
+    return new Proxy(meta, {
+        get(obj, prop) {
+            if (protocolList.Read.includes(prop)) {
+                return obj[prop]
+            }
+            return null
+        },
+        set(obj, prop, val) {
+            if (protocolList.Write.includes(prop)) {
+                obj[prop] = val
+            }
+        }
+    })
 }
 
 module.exports = LibLoader

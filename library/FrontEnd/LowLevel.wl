@@ -66,7 +66,7 @@ SpacerCell[{w_Integer:0, {bottom_Integer, top_Integer}}, t_Integer:0, OptionsPat
 	CellMargins -> {{w, w}, {bottom, top}},
 	CellElementSpacings -> {"CellMinHeight" -> 1},
 	CellFrame -> If[t >= 0, {{0, 0}, {0, t}}, {{0, 0}, {-t, 0}}],
-	System`CellFrameStyle -> OptionValue[FrameStyle],
+	CellFrameStyle -> OptionValue[FrameStyle],
 	CellFrameMargins -> 0, 
 	CellTags -> OptionValue[CellTags],
 	Background -> Inherited,

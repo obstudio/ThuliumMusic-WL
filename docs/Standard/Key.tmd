@@ -2,6 +2,10 @@
 
 ? Key(*key*)
   将当前的基准调性更改为与中央C相差*key*个半音。
+? Key("*tonality*")
+  按照*tonespec*来改变基准调性。
+? (1=*tonality*)
+  Key 函数的简记形式。
 
 ^ 具体信息 ^
 

@@ -23,7 +23,8 @@ StyleSheet["Documemt"] = With[
 	Cell[StyleData["Section"],
 		FontFamily -> "Corbel",
 		FontSize -> 32,
-		FontColor -> RGBColor["#772200"]
+		FontColor -> RGBColor["#772200"],
+		ShowGroupOpener -> True
 	],
 	Cell[StyleData["Section-chs"],
 		FontFamily -> "\:5e7c\:5706",

@@ -2,11 +2,11 @@
 
 - 音高与调性
 
-+ [$Key] + [$Oct] + [$Con] + [$KeyShift] + [$OctShift]
++ [$Key] + [$Oct] + [$Con] + [$KeyShift]
 
 - 速度与节拍
 
-+ [$Spd] + [$Dur] + [$Stac] + [$BarBeat] + [$SpdShift]
++ [$Spd] + [$Dur] + [$Stac] + [$BarBeat]
 
 - 音量控制
 

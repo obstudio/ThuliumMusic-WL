@@ -81,7 +81,7 @@ Detoken[json_] :=
        "\n# Track\n\n" <> 
         StringRiffle[EachData /@ ("Data" /. track), "\n\n"]]],
     
-    "FUNCTION" -> Function[{function},
+    "Function" -> Function[{function},
       If["Simplified" /. function,
        Evaluate@Quiet@StringReplace[Syntax["Name" /. function],
             {"\\!" -> "!",

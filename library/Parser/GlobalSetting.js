@@ -49,16 +49,41 @@ class GlobalSetting {
     }
 
     /**
-     * 
-     * @param {Tm.GlobalSetting} globalSetting 
-     * @param {string} key 
-     * @param {number} value 
-     * @param {function} criterion 
+     *
+     * @param {Tm.GlobalSetting} globalSetting
+     * @param {string} key
+     * @param {number} value
+     * @param {function} criterion
      */
     assignSetting(key, value, criterion) {
-        if (typeof value !== 'number') throw new TypeError(`Non-numeric value passed in as ${key}`)
-        if (!criterion(value)) throw new RangeError(`${key} out of range`)
-        this[key] = value
+        if (this[key] instanceof Array) {
+            if (value instanceof Array) {
+                if (!value.every((v) => typeof value === 'number')) {
+                    throw new TypeError(`Non-numeric value passed in as ${key} element`)
+                }
+                if (!value.every((v) => criterion(v))) {
+                    throw new RangeError(`${key} out of range`)
+                }
+                this[key] = value
+            } else {
+                throw new TypeError(`Non-array value passed in as ${key}`)
+            }
+        } else {
+            if (typeof value !== 'number') throw new TypeError(`Non-numeric value passed in as ${key}`)
+            if (!criterion(value)) throw new RangeError(`${key} out of range`)
+            this[key] = value
+        }
+    }
+
+    assignSettingAtIndex(key, index, value, criterion) {
+        if (this[key] instanceof Array) {
+            if (typeof value !== 'number') throw new TypeError(`Non-numeric value passed in as ${key}`)
+            if (typeof index !== 'number' || index < 0 || !Number.isInteger(index)) throw new TypeError(`Non-numeric index passed in as ${key} index`)
+            if (!criterion(value)) throw new RangeError(`${key} out of range`)
+            this[key][index] = value
+        } else {
+            throw new TypeError(`Non-array value passed in as ${key}`)
+        }
     }
 }
 

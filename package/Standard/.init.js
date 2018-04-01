@@ -1,19 +1,28 @@
 module.exports = {
+
+    _fill_(src, dest) {
+        const result = [];
+        const duration = dest.Meta.Duration;
+        for (let i = 0; i < duration; i += src.Meta.Duration) {
+            src.Content.forEach(note => {
+                if (note.StartTime + i < duration) {
+                    result.push(Object.assign({}, note, {StartTime: note.StartTime + i}))
+                }
+            })
+        }
+        return Object.assign(dest, {Content: result});
+    },
+
     Tremolo1(expr, subtrack) {
         /**** (^%1-)&2 ****/
-        const t = this.ParseTrack(subtrack)
-        const pow = Math.pow(2, -(expr)) * 60 / this.Settings.Speed
-        const num = Math.round(t.Meta.Duration / pow)
-        const result = []
-        const length = t.Content.length
-        for (let i = 0; i < num; i++) {
-            const startTime = i * pow
-            for (let j = 0; j < length; j++) {
-                result.push(Object.assign({}, t.Content[j], { StartTime: startTime, Duration: pow }))
-            }
-        }
-        t.Content = result
-        return t
+        const dest = this.ParseTrack(subtrack);
+        const time = Math.pow(2, -expr) * 60 / this.Settings.Speed;
+        const scale = time / dest.Meta.Duration;
+        const srcContent = data.Content.map(note => Object.assign({}, note, {
+            StartTime: note.StartTime * scale,
+            Duration: note.Duration * scale
+        }));
+        return this.GetFunction('_fill_')({Meta: {Duration: time}, Content: srcContent}, dest);
     },
 
     Tremolo2(expr, subtrack1, subtrack2) {
@@ -30,22 +39,22 @@ module.exports = {
                 result.push(Object.assign({}, ts[index].Content[j], { StartTime: startTime, Duration: pow }))
             }
         }
-        let incomplete = []
+        let BarFirst, BarLast
         let single
-        if (ts[0].Meta.Single && ts[1].Meta.Single) {
-            incomplete[0] = ts[1].Meta.Incomplete[0]
+        if (ts[0].Meta.BarCount == 1 && ts[1].Meta.BarCount == 1) {
+            BarFirst = ts[1].Meta.BarFirst
             single = true
-        } else if (ts[0].Meta.Single) {
-            incomplete[0] = ts[1].Meta.Incomplete[0]
-            incomplete[1] = ts[1].Meta.Incomplete[1]
+        } else if (ts[0].Meta.BarCount == 1) {
+            BarFirst = ts[1].Meta.BarFirst
+            BarLast = ts[1].Meta.BarLast
             single = false
-        } else if (ts[1].Meta.Single) {
-            incomplete[0] = ts[0].Meta.Incomplete[0]
-            incomplete[1] = ts[1].Meta.Incomplete[0]
+        } else if (ts[1].Meta.BarCount == 1) {
+            BarFirst = ts[0].Meta.BarFirst
+            BarLast = ts[1].Meta.BarFirst
             single = false
         } else {
-            incomplete[0] = ts[0].Meta.Incomplete[0]
-            incomplete[1] = ts[1].Meta.Incomplete[1]
+            BarFirst = ts[0].Meta.BarFirst
+            BarLast = ts[1].Meta.BarLast
             single = false
         }
         return {
@@ -53,7 +62,8 @@ module.exports = {
             Warnings: [],
             Meta: {
                 Duration: ts[1].Meta.Duration,
-                Incomplete: incomplete,
+                BarFirst: BarFirst,
+                BarLast: BarLast,
                 Single: single,
                 PitchQueue: [...ts[0].Meta.PitchQueue, ...ts[1].Meta.PitchQueue],
                 NotesBeforeTie: ts[(num - 1) % 2].Meta.NotesBeforeTie
@@ -71,11 +81,11 @@ module.exports = {
             note.StartTime *= scale
         })
         t.Meta.Duration *= scale
-        if (t.Meta.Single) {
-            t.Meta.Incomplete[0] *= scale
+        if (t.Meta.BarCount == 1) {
+            t.Meta.BarFirst *= scale
         } else {
-            t.Meta.Incomplete[0] *= scale
-            t.Meta.Incomplete[1] *= scale
+            t.Meta.BarFirst *= scale
+            t.Meta.BarLast *= scale
         }
         return t
     },
@@ -85,7 +95,7 @@ module.exports = {
         const t1 = this.ParseTrack(subtrack1)
         const t2 = this.ParseTrack(subtrack2)
 
-        const pitch1 = t1.Content[0].Pitch
+        const pitch1 = t1.Content[t1.Content.length - 1].Pitch
         const pitch2 = t2.Content[0].Pitch
         const duration = t1.Meta.Duration
         const port = this.Settings.getOrSetDefault('Port', 6)
@@ -109,19 +119,19 @@ module.exports = {
             note.StartTime += duration
             return note
         }))
-        const single = t1.Meta.Single && t2.Meta.Single
-        let incomplete = []
+        const single = t1.Meta.BarCount == 1 && t2.Meta.BarCount == 1
+        let BarFirst, BarLast
         if (single) {
-            incomplete[0] = t1.Meta.Incomplete[0] + t2.Meta.Incomplete[0]
-        } else if (t1.Meta.Single) {
-            incomplete[0] = t1.Meta.Incomplete[0] + t2.Meta.Incomplete[0]
-            incomplete[1] = t2.Meta.Incomplete[1]
-        } else if (t2.Meta.Single) {
-            incomplete[0] = t1.Meta.Incomplete[0]
-            incomplete[1] = t1.Meta.Incomplete[1] + t2.Meta.Incomplete[0]
+            BarFirst = t1.Meta.BarFirst + t2.Meta.BarFirst
+        } else if (t1.Meta.BarCount == 1) {
+            BarFirst = t1.Meta.BarFirst + t2.Meta.BarFirst
+            BarLast = t2.Meta.BarLast
+        } else if (t2.Meta.BarCount == 1) {
+            BarFirst = t1.Meta.BarFirst
+            BarLast = t1.Meta.BarLast + t2.Meta.BarFirst
         } else {
-            incomplete[0] = t1.Meta.Incomplete[0]
-            incomplete[1] = t2.Meta.Incomplete[1]
+            BarFirst = t1.Meta.BarFirst
+            BarLast = t2.Meta.BarLast
         }
 
         return {
@@ -129,7 +139,8 @@ module.exports = {
             Warnings: [],
             Meta: {
                 Duration: duration,
-                Incomplete: incomplete,
+                BarFirst: BarFirst,
+                BarLast: BarLast,
                 Single: single,
                 PitchQueue: [...t1.Meta.PitchQueue, ...t2.Meta.PitchQueue],
                 NotesBeforeTie: [result[result.length - 1]]
@@ -247,6 +258,7 @@ module.exports = {
         }, [])
         return Object.assign(t, { Content: result })
     },
+
     Con(octave, scale = 1) {
         if (octave === 0) {
             this.Settings.Key = [this.Settings.Key[0]]
@@ -258,6 +270,7 @@ module.exports = {
         // this.Settings.assignSetting('ConOct', octave, (octave) => Number.isInteger(octave))
         // this.Settings.assignSetting('ConOctVolume', volumeScale, (volume) => volume >= 0)
     },
+
     Vol(volume) {
         /**** (^!1\%) ****/
         if (volume instanceof Array) {
@@ -270,6 +283,7 @@ module.exports = {
         }
         // this.Settings.assignSetting('Volume', volume / 100, (volume) => volume >= 0)
     },
+
     Key(key) {
         /**** (1=$1) ****/
         let delta
@@ -294,12 +308,14 @@ module.exports = {
         }
         // this.Settings.assignSetting('Key', key, (key) => Number.isInteger(key))
     },
+
     KeyShift(delta) {
         /**** (!1) ****/
         for (var i = 0, length = this.Settings.Key.length; i < length; i++) {
             this.Settings.Key[i] += delta
         }
     },
+
     Oct() {
         if (arguments.length === 0) return
         if (!(arguments[0] instanceof Array)) {
@@ -313,45 +329,58 @@ module.exports = {
             if (arguments.length >= 2) this.Settings.Volume = arguments[1]
         }
     },
+
     Spd(speed) {
         /**** (^!1) ****/
         this.Settings.assignSetting('Speed', speed, (speed) => speed > 0)
     },
+
     BarBeat(bar, beat) {
         /**** (^!1/^!2) ****/
         this.Settings.assignSetting('Bar', bar, (bar) => bar > 0 && Number.isInteger(bar))
         this.Settings.assignSetting('Beat', beat, (beat) => beat > 0 && Number.isInteger(Math.log2(beat)))
     },
+
     Dur(scale) {
         this.Settings.assignSetting('Duration', scale, () => true)
     },
+
     Acct(scale) {
         this.Settings.assignSetting('Accent', scale, (scale) => scale > 1)
     },
+
     Light(scale) {
         this.Settings.assignSetting('Light', scale, (scale) => scale < 1 && scale > 0)
     },
+
     Seg(r) {
         this.Settings.assignSetting('Seg', r, (r) => r > 0)
     },
+
     Port(r) {
         this.Settings.assignSetting('Port', r, (r) => r > 0)
     },
+
     Trace(count) {
         this.Settings.assignSetting('Trace', count, (count) => count > 0 && count <= 4 && Number.isInteger(count))
     },
+
     FadeIn(time) {
         this.Settings.assignSetting('FadeIn', time, (time) => time >= 0)
     },
+
     FadeOut(time) {
         this.Settings.assignSetting('FadeOut', time, (time) => time >= 0)
     },
+
     Rev(r) {
         this.Settings.assignSetting('Rev', r, () => true)
     },
+
     Ferm(ferm) {
         this.Settings.assignSetting('Ferm', ferm, (ferm) => ferm > 1)
     },
+
     Stac(rest, index = 1) {
         this.Settings.assignSettingAtIndex('Stac', index, rest, (rest) => rest >= 0 && rest <= 1)
     }

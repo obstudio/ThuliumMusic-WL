@@ -123,6 +123,7 @@ LibLoader.Default = {
                 ParseTrack(track, protocol = 'Default', settings = parser.Settings) {
                     return new SubtrackParser(track, settings, parser.Libraries, wrap(parser.Meta, protocol)).parseTrack()
                 },
+                GetFunction: (name) => this.locateFunction(name),
                 Settings: parser.Settings,
                 Meta: parser.Meta
             }, token.Argument.map((arg) => {

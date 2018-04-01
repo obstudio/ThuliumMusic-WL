@@ -15,7 +15,7 @@ module.exports = {
     _drop_(data, time) {
         const ectype = data
         if (time > 0) {
-            ectype.Content = data.Content.filter((note) => note.StartTime < time)
+            data.Content = data.Content.filter((note) => note.StartTime < time)
             ectype.Meta.duration -= time
         } else if (time < 0) {
             ectype.Content = data.Content.filter((note) => note.StartTime >= data.Meta.duration + time)

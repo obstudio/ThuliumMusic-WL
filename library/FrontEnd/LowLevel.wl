@@ -77,7 +77,7 @@ SpacerCell[{w_Integer:0, {bottom_Integer, top_Integer}}, t_Integer:0, OptionsPat
 
 
 (* ::Input:: *)
-(*CellPrint@SpacerCell[{60,0},2,FrameStyle->Dashing[2StringToDashing["-- -- --"]]]*)
+(*CellPrint@SpacerCell[{60,0},2,FrameStyle->Directive[Red,Dashing[2StringToDashing["-- -- --"]]]]*)
 
 
 StringToDashing[str_] := With[

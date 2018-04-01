@@ -15,10 +15,33 @@ RenderText[line_String, style_String] := Block[{output},
 			BoxApply[RenderText[text, style], FontVariations -> {"StrikeThrough" -> True}],
 		"__"~~text:RegularExpression["([^_\\\\]|\\\\.)+"]~~"__" :>
 			BoxApply[RenderText[text, style], FontVariations -> {"Underline" -> True}],
+		"["~~text:RegularExpression["([^\\]\\\\]|\\\\.)+"]~~"]":>
+			HyperlinkBox[text, style],
 		"\\"~~text_ :> StyleBox[text, style],
 		text_ :> RenderLanguage[text, style]
 	}];
 	Return[BoxSimplify @ RowBox @ output];
+];
+
+
+HyperlinkBox[text_String, style_String] := If[StringContainsQ[text, "|"],
+	HyperlinkBox[StringSplit[text, "|"], style],
+	HyperlinkBox[{StringDelete[text, StartOfString~~"#"|"$"], text}, style]
+];
+HyperlinkBox[spec_List, style_String] := Block[
+	{output},
+	Switch[StringPart[spec[[2]], 1],
+		"$",
+			output = TemplateBox[{
+				RenderText[spec[[1]], style],
+				spec[[2]],
+				Hold[With[
+					{filepath = localPath<>"Docs/Standard/"<>StringDrop[spec[[2]], 1]<>".tmd"},
+					If[FileExistsQ[filepath], DialogReturn[]; RenderTMD[filepath]];
+				]]
+			}, "Hyperlink"]
+	];
+	Return[output];
 ];
 
 

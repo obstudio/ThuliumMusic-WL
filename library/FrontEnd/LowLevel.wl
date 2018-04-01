@@ -66,7 +66,7 @@ SpacerCell[{w_Integer:0, {bottom_Integer, top_Integer}}, t_Integer:0, OptionsPat
 	CellMargins -> {{w, w}, {bottom, top}},
 	CellElementSpacings -> {"CellMinHeight" -> 1},
 	CellFrame -> If[t >= 0, {{0, 0}, {0, t}}, {{0, 0}, {-t, 0}}],
-	CellFrameStyle -> OptionValue[FrameStyle],
+	System`CellFrameStyle -> OptionValue[FrameStyle],
 	CellFrameMargins -> 0, 
 	CellTags -> OptionValue[CellTags],
 	Background -> Inherited,
@@ -77,7 +77,7 @@ SpacerCell[{w_Integer:0, {bottom_Integer, top_Integer}}, t_Integer:0, OptionsPat
 
 
 (* ::Input:: *)
-(*CellPrint@SpacerCell[{60,0},2,FrameStyle->Dashing[2StringToDashing["-- -- --"]]]*)
+(*CellPrint@SpacerCell[{60,0},2,FrameStyle->Directive[Red,Dashing[2StringToDashing["-- -- --"]]]]*)
 
 
 StringToDashing[str_] := With[

@@ -97,7 +97,7 @@ StyleSheet["Documemt"] = With[
 		FontColor -> RGBColor["#777777"]
 	],
 	
-	Cell[StyleData["Tip"],
+	Cell[StyleData["<Tip>"],
 		FontFamily -> "Calibri",
 		FontSize -> 24,
 		Deployed -> True,
@@ -129,6 +129,7 @@ StyleSheet["Documemt"] = With[
 	Cell[StyleData["InlineList"],
 		FontFamily -> "Source Sans Pro",
 		FontSize -> 24,
+		Deployed -> True,
 		TextAlignment -> Center,
 		CellMargins -> {{40, 40}, {16, 16}}
 	],
@@ -201,6 +202,21 @@ StyleSheet["Documemt"] = With[
 		]}
 	],
 	
+	TemplateCell["Hyperlink", "<Hyperlink>", {
+		StyleBox[Slot[1], FontColor -> RGBColor[0.2, 0.3, 0.6]],
+		StyleBox[Slot[1], FontColor -> RGBColor[0.4, 0.6, 1]],
+		StyleBox[
+			Slot[2], FontColor -> RGBColor[0, 0, 0],
+			FontFamily -> "Courier", FontWeight -> Bold
+		],
+		ReleaseHold @ Slot[3],
+		TooltipDelay -> 0.3,
+		TooltipStyle -> {
+			CellFrameColor -> RGBColor[0.7, 0.7, 0.6, 0.5],
+			Background -> RGBColor[1, 1, 0.9, 0.7]
+		}
+	}],
+		
 	Cell[StyleData["Miniplayer"],
 		TemplateBoxOptions -> {DisplayFunction -> Function[
 			GraphicsBox[
@@ -239,7 +255,14 @@ StyleSheet["Documemt"] = With[
 
 
 (* ::Input:: *)
-(*CurrentValue[{StyleDefinitions,"Pane"}]*)
+(*Hyperlink[11, 22] // ToBoxes*)
+
+
+(* ::Input:: *)
+(*CurrentValue[{StyleDefinitions,"Hyperlink"}]*)
+
+
+CurrentValue["HyperlinkModifierKey"]
 
 
 (* ::Input:: *)

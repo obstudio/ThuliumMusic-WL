@@ -122,7 +122,7 @@ RenderContent[rawData_List] := Block[
 								}
 							], "Subcell"];
 							lineCount += 1;
-							line = rawData[[lineCount]];
+							If[lineCount <= Length[rawData], line = rawData[[lineCount]]];
 						],
 					"Subcell"], 1]], "Cell"],
 				
@@ -219,7 +219,7 @@ RenderContent[rawData_List] := Block[
 
 
 (* ::Input:: *)
-(*RenderTMD[localPath<>"docs/Standard/GraceNote.tmd"];*)
+(*RenderTMD[localPath<>"docs/Standard/.overview.tmd"];*)
 
 
 (* API *)
@@ -238,7 +238,7 @@ RenderTMD[filepath_String] := Block[{rawData, output},
 	
 	output = CreateDialog[
 		RenderContent[rawData],
-		WindowTitle -> StringSplit[filepath,"/"|"\\"][[-1]],
+		WindowTitle -> FileBaseName[filepath],
 		WindowMargins -> {{80, Automatic}, {Automatic, 60}},
 		WindowElements -> {"VerticalScrollBar"},
 		Background -> RGBColor["#FBFBFB"],

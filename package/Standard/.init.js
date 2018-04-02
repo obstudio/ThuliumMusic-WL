@@ -6,11 +6,18 @@ module.exports = {
         for (let i = 0; i < duration; i += src.Meta.Duration) {
             src.Content.forEach(note => {
                 if (note.StartTime + i < duration) {
-                    result.push(Object.assign({}, note, {StartTime: note.StartTime + i}));
+                    result.push(Object.assign({}, note, { StartTime: note.StartTime + i }));
                 }
-            })
+            });
         }
-        return Object.assign(dest, {Content: result});
+        return Object.assign(dest, { Content: result });
+    },
+
+    _zoom_(origin, scale) {
+        return origin.map(note => Object.assign({}, note, {
+            StartTime: note.StartTime * scale,
+            Duration: note.Duration * scale
+        }));
     },
 
     Tremolo1(expr, subtrack) {
@@ -18,11 +25,8 @@ module.exports = {
         const src = this.ParseTrack(subtrack);
         const time = Math.pow(2, -expr) * 60 / this.Settings.Speed;
         const scale = time / src.Meta.Duration;
-        const content = src.Content.map(note => Object.assign({}, note, {
-            StartTime: note.StartTime * scale,
-            Duration: note.Duration * scale
-        }));
-        return this.GetFunction('_fill_')({
+        const content = this.Library._zoom_(src.Content, scale);
+        return this.Library._fill_({
             Content: content, 
             Meta: { Duration: time }
         }, src);
@@ -34,12 +38,9 @@ module.exports = {
         const time = Math.pow(2, -expr) * 60 / this.Settings.Speed;
         const content = [].concat(...src.map(data => {
             const scale = time / data.Meta.Duration;
-            return data.Content.map(note => Object.assign({}, note, {
-                StartTime: note.StartTime * scale,
-                Duration: note.Duration * scale
-            }));
+            return this.Library._zoom_(data.Content, scale);
         }));
-        return this.GetFunction('_fill_')({
+        return this.Library._fill_({
             Content: content,
             Meta: { Duration: 2 * time }
         }, src[1]);
@@ -51,10 +52,7 @@ module.exports = {
         const src = this.ParseTrack(subtrack, {
             Settings: { Bar: this.Settings.Bar / scale }
         });
-        src.Content.forEach((note) => {
-            note.Duration *= scale;
-            note.StartTime *= scale;
-        })
+        src.Content = this.Library._zoom_(src.Content, scale);
         src.Meta.Duration *= scale;
         src.Meta.BarFirst *= scale;
         src.Meta.BarLast *= scale;
@@ -88,33 +86,27 @@ module.exports = {
 
     GraceNote(subtrack1, subtrack2) {
         /**** (^&1\^)&2 ****/
-        const t1 = this.ParseTrack(subtrack1)
-        const t2 = this.ParseTrack(subtrack2)
-        const num = subtrack1.Content.length
-        let dur
+        const src1 = this.ParseTrack(subtrack1);
+        const src2 = this.ParseTrack(subtrack2);
         const appo = this.Settings.getOrSetDefault('Seg', 1 / 4)
-        if (num <= 4) {
-            dur = appo / 4
-        } else {
-            dur = appo / num
-        }
-        const actualDur = dur * Math.pow(2, -this.Settings.Duration) * 60 / this.Settings.Speed
-        t1.Content.forEach((note) => {
-            note.Duration = actualDur
-            note.StartTime *= dur
-            note.__oriDur = actualDur
-        })
-        const total = actualDur * num
-        t2.Content.forEach((note) => {
-            note.StartTime += total
-            note.Duration -= total
-            note.__oriDur -= total
-        })
-        return {
-            Content: [...t1.Content, ...t2.Content],
-            Warnings: [],
-            Meta: t2.Meta
-        }
+        const scale = appo / Math.max(src1.Content.length, 4);
+        const duration = src1.Meta.Duration * scale;
+        const content = this.Library._zoom_(src1.Content, scale);
+
+        src2.Content.forEach(note => {
+            if (note.StartTime < duration) {
+                if (note.Duration + note.StartTime > duration) {
+                    content.push(Object.assign({}, note, {
+                        StartTime: duration,
+                        Duration: note.Duration + note.StartTime - duration
+                    }));
+                }
+            } else {
+                content.push(note);
+            }
+        });
+
+        return Object.assign(src2, { Content: content });
     },
 
     Appoggiatura(subtrack1, subtrack2) {
@@ -270,7 +262,8 @@ module.exports = {
 
     Spd(speed) {
         /**** (^!1) ****/
-        this.Settings.assignSetting('Speed', speed, (speed) => speed > 0)
+        this.Settings.assignSetting('Speed', speed, (speed) => speed > 0);
+        throw new Error();
     },
 
     BarBeat(bar, beat) {

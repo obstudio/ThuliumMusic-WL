@@ -127,7 +127,22 @@ LibLoader.Default = {
                     return new SubtrackParser(track, settings === null ? parser.Settings : parser.Settings.extend(settings), parser.Libraries, wrap(parser.Meta, protocol)).parseTrack()
                 },
                 JoinTrack(src1, ...rest) {
-
+                    const result = {
+                        Meta: Object.assign(src1.Meta),
+                        Content: src1.Content.slice(),
+                        Warnings: src1.Warnings.slice(),
+                        pushError: parser.pushError,
+                        isLegalBar: parser.isLegalBar
+                    };
+                    for (let src of rest) {
+                        result.Content.push(...src.Content.map(note => {
+                            return Object.assign({}, note, {
+                                StartTime: note.StartTime + result.Meta.Duration
+                            });
+                        }));
+                        parser.mergeMeta(result, src);
+                    };
+                    return result;
                 },
                 Library: this.implicitLibCall,
                 Settings: parser.Settings,

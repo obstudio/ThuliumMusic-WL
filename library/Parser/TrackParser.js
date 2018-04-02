@@ -167,6 +167,54 @@ class TrackParser {
         }
     }
 
+    mergeMeta(dest, src) {
+        dest.Meta.PitchQueue.push(...src.Meta.PitchQueue)
+        dest.Meta.Duration += src.Meta.Duration
+        dest.Meta.NotesBeforeTie = src.Meta.NotesBeforeTie
+        dest.Meta.TieLeft = src.Meta.TieLeft
+        dest.Warnings.push(...src.Warnings.map((warning) => {
+            warning.pos.unshift(Object.assign({}, {
+                Bar: dest.Meta.BarCount,
+                Index: dest.Meta.Index
+            }))
+            return warning
+        }))
+        if (src.Meta.BarCount === 0) {
+            if (dest.Meta.BarCount === 0) {
+                dest.Meta.BarFirst += src.Meta.BarFirst
+                if (this.isLegalBar(dest.Meta.BarFirst)) {
+                    dest.Meta.BarCount += 1
+                }
+            } else {
+                dest.Meta.BarFirst += src.Meta.BarFirst
+                if (this.isLegalBar(dest.Meta.BarFirst)) {
+                    dest.Meta.BarFirst = 0
+                }
+            }
+        } else {
+            if (dest.Meta.BarCount === 0) {
+                dest.Meta.BarFirst += src.Meta.BarFirst
+                dest.Meta.BarCount += 1
+                dest.Meta.BarFirst = src.Meta.BarLast
+                if (dest.isLegalBar(dest.Meta.BarFirst)) {
+                    dest.Meta.BarFirst = 0
+                }
+            } else {
+                dest.Meta.BarFirst += src.Meta.BarFirst
+                if (!dest.isLegalBar(dest.Meta.BarFirst)) {
+                    dest.pushError(TmError.Types.Track.BarLength, {
+                        Expected: dest.Settings.Bar,
+                        Actual: dest.Meta.BarFirst
+                    })
+                }
+                dest.Meta.BarFirst = src.Meta.BarLast
+                if (dest.isLegalBar(dest.Meta.BarFirst)) {
+                    dest.Meta.BarFirst = 0
+                }
+            }
+        }
+    }
+
     parseTrackContent() {
         for (const token of this.Content) {
             this.Meta.Index += 1
@@ -187,48 +235,7 @@ class TrackParser {
                             tok.StartTime += this.Meta.Duration
                         }
                     })
-                    this.Meta.PitchQueue.push(...subtrack.Meta.PitchQueue)
-                    this.Meta.Duration += subtrack.Meta.Duration
-                    this.Meta.NotesBeforeTie = subtrack.Meta.NotesBeforeTie
-                    this.Meta.TieLeft = subtrack.Meta.TieLeft
-                    this.Warnings.push(...subtrack.Warnings.map((warning) => {
-                        warning.pos.unshift(Object.assign({}, {
-                            Bar: this.Meta.BarCount,
-                            Index: this.Meta.Index
-                        }))
-                        return warning
-                    }))
-                    if (subtrack.Meta.BarCount === 0) {
-                        if (this.Meta.BarCount === 0) {
-                            this.Meta.BarFirst += subtrack.Meta.BarFirst
-                            if (this.isLegalBar(this.Meta.BarFirst)) {
-                                this.Meta.BarCount += 1
-                            }
-                        } else {
-                            this.Meta.BarFirst += subtrack.Meta.BarFirst
-                            if (this.isLegalBar(this.Meta.BarFirst)) {
-                                this.Meta.BarFirst = 0
-                            }
-                        }
-                    } else {
-                        if (this.Meta.BarCount === 0) {
-                            this.Meta.BarFirst += subtrack.Meta.BarFirst
-                            this.Meta.BarCount += 1
-                            this.Meta.BarFirst = subtrack.Meta.BarLast
-                            if (this.isLegalBar(this.Meta.BarFirst)) {
-                                this.Meta.BarFirst = 0
-                            }
-                        } else {
-                            this.Meta.BarFirst += subtrack.Meta.BarFirst
-                            if (!this.isLegalBar(this.Meta.BarFirst)) {
-                                this.pushError(TmError.Types.Track.BarLength, { Expected: this.Settings.Bar, Actual: this.Meta.BarFirst })
-                            }
-                            this.Meta.BarFirst = subtrack.Meta.BarLast
-                            if (this.isLegalBar(this.Meta.BarFirst)) {
-                                this.Meta.BarFirst = 0
-                            }
-                        }
-                    }
+                    this.mergeMeta(this, subtrack)
                     this.Result.push(...subtrack.Content)
                     break
                 }

@@ -126,6 +126,9 @@ LibLoader.Default = {
                 } = {}) {
                     return new SubtrackParser(track, settings === null ? parser.Settings : parser.Settings.extend(settings), parser.Libraries, wrap(parser.Meta, protocol)).parseTrack()
                 },
+                JoinTrack(src1, ...rest) {
+
+                },
                 Library: this.implicitLibCall,
                 Settings: parser.Settings,
                 Meta: parser.Meta

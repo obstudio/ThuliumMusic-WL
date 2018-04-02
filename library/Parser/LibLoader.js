@@ -120,12 +120,13 @@ LibLoader.Default = {
         Custom: {},
         applyFunction(parser, token) {
             return this.locateFunction(token.Name).apply({
-                ParseTrack(track, specs) {
-                    const protocol = specs.Protocol || 'default';
-                    const settings = Object.assign(specs.Settings || {}, parser.Settings)
-                    return new SubtrackParser(track, settings, parser.Libraries, wrap(parser.Meta, protocol)).parseTrack()
+                ParseTrack(track, {
+                    protocol = 'Default',
+                    settings = null
+                } = {}) {
+                    return new SubtrackParser(track, settings === null ? parser.Settings : parser.Settings.extend(settings), parser.Libraries, wrap(parser.Meta, protocol)).parseTrack()
                 },
-                GetFunction: (name) => this.locateFunction(name),
+                Library: this.implicitLibCall,
                 Settings: parser.Settings,
                 Meta: parser.Meta
             }, token.Argument.map((arg) => {
@@ -140,6 +141,13 @@ LibLoader.Default = {
                         return arg
                 }
             }))
+        },
+        get implicitLibCall() {
+            delete this.implicitLibCall
+            this.implicitLibCall = new Proxy({}, {
+                get: (_, name) => this.locateFunction(name)
+            })
+            return this.implicitLibCall
         },
         locateFunction(name) {
             if (name in this.STD) return this.STD[name]

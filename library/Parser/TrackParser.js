@@ -127,7 +127,6 @@ class TrackParser {
                             warnings.push(new TmError(TmError.Types.Note.VolumeLimit, null, { Expected: 1, Actual: vol })) // FIXME: index
                             vol = 1
                         }
-                        delete note.__oriDur
                         return Object.assign({}, note, { Volume: vol })
                     })
                 }
@@ -367,8 +366,7 @@ class TrackParser {
                 const index = pitches.indexOf(prevNote.Pitch)
                 if (index === -1 || prevNote.Volume !== volumes[index]) return
                 notesBeforeTie.push(prevNote)
-                prevNote.__oriDur += actualDuration
-                prevNote.Duration = prevNote.__oriDur
+                prevNote.Duration = this.Meta.Duration - prevNote.StartTime + actualDuration
                 pitches.splice(index, 1)
                 volumes.splice(index, 1)
             })
@@ -379,7 +377,6 @@ class TrackParser {
                 Pitch: pitches[index],
                 Volume: volumes[index],
                 Duration: actualDuration,
-                __oriDur: duration,
                 StartTime: this.Meta.Duration
             })
         }

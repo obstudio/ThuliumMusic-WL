@@ -124,7 +124,18 @@ LibLoader.Default = {
                     protocol = 'Default',
                     settings = null
                 } = {}) {
-                    return new SubtrackParser(track, settings === null ? parser.Settings : parser.Settings.extend(settings), parser.Libraries, wrap(parser.Meta, protocol)).parseTrack()
+                    return new SubtrackParser(
+                        track,
+                        settings === null ? parser.Settings : parser.Settings.extend(settings),
+                        parser.Libraries,
+                        wrap(parser.Meta, protocol)
+                    ).parseTrack();
+                },
+                ReportError(name, args) {
+                    if (!name.includes('::')) {
+                        name = 'Func::' + token.Name + '::' + name;
+                    }
+                    parser.pushError(name, args);
                 },
                 JoinTrack(src1, ...rest) {
                     const result = {

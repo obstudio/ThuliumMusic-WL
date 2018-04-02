@@ -1,23 +1,24 @@
 module.exports = {
 
-    _fill_(src, dest) {
-        const result = [];
-        const duration = dest.Meta.Duration;
-        for (let i = 0; i < duration; i += src.Meta.Duration) {
-            src.Content.forEach(note => {
-                if (note.StartTime + i < duration) {
-                    result.push(Object.assign({}, note, { StartTime: note.StartTime + i }));
-                }
-            });
-        }
-        return Object.assign(dest, { Content: result });
-    },
-
     _zoom_(origin, scale, start = 0) {
         return origin.map(note => Object.assign({}, note, {
             StartTime: note.StartTime * scale + start,
             Duration: note.Duration * scale
         }));
+    },
+
+    _take_(origin, start, end) {
+        return this.Library._zoom_(origin.filter(note => {
+            note.StartTime >= start && note.StartTime + note.Duration < end
+        }), 1, -start);
+    },
+
+    _fill_(origin, duration, total) {
+        const result = [];
+        for (i = 0; i < total; i += duration) {
+            result.push(...this.Library._zoom_(origin, 1, i));
+        }
+        return this.Library._take_(result, 0, total);
     },
 
     Tremolo1(expr, subtrack) {
@@ -26,10 +27,9 @@ module.exports = {
         const time = Math.pow(2, -expr) * 60 / this.Settings.Speed;
         const scale = time / src.Meta.Duration;
         const content = this.Library._zoom_(src.Content, scale);
-        return this.Library._fill_({
-            Content: content, 
-            Meta: { Duration: time }
-        }, src);
+        return Object.assign(src, {
+            Content: this.Library._fill_(content, time, src.Meta.Duration)
+        });
     },
 
     Tremolo2(expr, subtrack1, subtrack2) {
@@ -43,11 +43,9 @@ module.exports = {
             this.Library._zoom_(src1.Content, scale1),
             this.Library._zoom_(src2.Content, scale2, time)
         );
-
-        return this.Library._fill_({
-            Content: content,
-            Meta: { Duration: 2 * time }
-        }, src2);
+        return Object.assign(src2, {
+            Content: this.Library._fill_(content, 2 * time, src.Meta.Duration)
+        });
     },
 
     Tuplet(expr, subtrack) {
@@ -74,6 +72,14 @@ module.exports = {
         const num = duration * port * this.Settings.Speed / 60;
         const pitchStep = (note2.Pitch - note1.Pitch) / (num - 1);
         const volumeStep = (note2.Volume - note1.Volume) / (num - 1);
+
+        if (Math.abs(pitchStep) < 1) {
+            this.ReportError('Undersize', {
+                StartPitch: note1.Pitch,
+                EndPitch: note2.Pitch,
+                PitchCount: num
+            });
+        }
 
         for (let i = 0; i < num; i++) {
             src1.Content.push({
@@ -104,6 +110,11 @@ module.exports = {
                         StartTime: duration,
                         Duration: note.Duration + note.StartTime - duration
                     }));
+                } else {
+                    this.ReportError('Overlong', {
+                        Duration: duration,
+                        Encounter: note
+                    });
                 }
             } else {
                 content.push(note);
@@ -128,6 +139,11 @@ module.exports = {
                     content.push(Object.assign({}, note, {
                         Duration: start - note.StartTime
                     }));
+                } else {
+                    this.ReportError('Overlong', {
+                        Duration: duration,
+                        Encounter: note
+                    });
                 }
             } else {
                 content.push(note);

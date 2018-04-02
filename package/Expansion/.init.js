@@ -2,6 +2,26 @@ const { SubtrackParser } = require('../../library/Parser/TrackParser')
 
 module.exports = {
     
+    _adjust_(src, beats) {
+        if (this.Meta.BarCount === 0) {
+            beats += this.Meta.BarFirst;
+            src.Meta.BarCount = Math.floor(beats / this.Settings.Bar);
+            src.Meta.BarLast = beats % this.Settings.Bar;
+            src.Meta.BarFirst = this.Settings.Bar - this.Meta.BarFirst;
+        } else {
+
+        }
+        return src;
+    },
+
+    Fill(subtrack, beats) {
+        const src = ParseTrack(subtrack);
+        const time = beats * 60 / this.Settings.Speed;
+        const content = this.Library._fill_(src.Content, src.Meta.Duration, time);
+
+        return this.Library._push_(Object.assign(src, ))
+    },
+
     OctShift(delta) {
         for (var i = 0, length = this.Settings.Key.length; i < length; i++) {
             this.Settings.Key[i] += delta * 12
@@ -20,38 +40,34 @@ module.exports = {
         this.Settings.assignSetting('Beat', beat, (beat) => beat > 0 && Number.isInteger(Math.log2(beat)))
     },
 
-    _drop_(data, time) {
-        const ectype = data
-        if (time > 0) {
-            data.Content = data.Content.filter((note) => note.StartTime < time)
-            ectype.Meta.duration -= time
-        } else if (time < 0) {
-            ectype.Content = data.Content.filter((note) => note.StartTime >= data.Meta.duration + time)
-            ectype.Meta.duration += time
-        }
-        return ectype
-    },
-
     Drop(subtrack, beats) {
-        const data = ParseTrack(subtrack, "default")
-        if (data.Meta.beatCount < Math.abs(beats)) {
-            // error
-        } else {
-            return this._drop_(data, beats * 60 / this.Settings.Speed)
-        }
-    },
+        const src = ParseTrack(subtrack);
+        const result = [];
+        let time;
 
-    Fill(subtrack, beats) {
-        const result = []
-        const data = ParseTrack(subtrack, "single")
-        //if Math.isInteger()
-        this.Settings.Beat
-        return {
-            Content: result,
-            Settings: this.Settings,
-            Meta: Object.defineProperties(data.meta, {
-            })
+        if (beats > 0) {
+            time = beats * 60 / this.Settings.Speed;
+            src.Content.forEach(note => {
+                if (note.StartTime >= time) {
+                    result.push(Object.assign({}, note, { StartTime: note.StartTime - time }));
+                }
+            });
+        } else if (beat < 0) {
+            time = -beats * 60 / src.Settings.Speed;
+            src.Content.forEach(note => {
+                if (note.StartTime < src.Meta.Duration - time) {
+                    result.push(Object.assign({}, note));
+                }
+            });
+        } else {
+            result.push(...src.Content);
         }
+
+        if (time >= src.Meta.Duration) {
+            this.ReportError('TooShort', { Required: time, Actual: arc.Meta.Duration });
+        }
+
+        return result;
     },
 
     Prod(template, track) {

@@ -120,7 +120,9 @@ LibLoader.Default = {
         Custom: {},
         applyFunction(parser, token) {
             return this.locateFunction(token.Name).apply({
-                ParseTrack(track, protocol = 'Default', settings = parser.Settings) {
+                ParseTrack(track, specs) {
+                    const protocol = specs.Protocol || 'default';
+                    const settings = Object.assign(specs.Settings || {}, parser.Settings)
                     return new SubtrackParser(track, settings, parser.Libraries, wrap(parser.Meta, protocol)).parseTrack()
                 },
                 GetFunction: (name) => this.locateFunction(name),

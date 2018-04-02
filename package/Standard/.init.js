@@ -6,7 +6,7 @@ module.exports = {
         for (let i = 0; i < duration; i += src.Meta.Duration) {
             src.Content.forEach(note => {
                 if (note.StartTime + i < duration) {
-                    result.push(Object.assign({}, note, {StartTime: note.StartTime + i}))
+                    result.push(Object.assign({}, note, {StartTime: note.StartTime + i}));
                 }
             })
         }
@@ -15,137 +15,75 @@ module.exports = {
 
     Tremolo1(expr, subtrack) {
         /**** (^%1-)&2 ****/
-        const dest = this.ParseTrack(subtrack);
+        const src = this.ParseTrack(subtrack);
         const time = Math.pow(2, -expr) * 60 / this.Settings.Speed;
-        const scale = time / dest.Meta.Duration;
-        const srcContent = data.Content.map(note => Object.assign({}, note, {
+        const scale = time / src.Meta.Duration;
+        const content = src.Content.map(note => Object.assign({}, note, {
             StartTime: note.StartTime * scale,
             Duration: note.Duration * scale
         }));
-        return this.GetFunction('_fill_')({Meta: {Duration: time}, Content: srcContent}, dest);
+        return this.GetFunction('_fill_')({
+            Content: content, 
+            Meta: { Duration: time }
+        }, src);
     },
 
     Tremolo2(expr, subtrack1, subtrack2) {
         /**** &2(^%1=)&3 ****/
-        const ts = [this.ParseTrack(subtrack1), this.ParseTrack(subtrack2)]
-        const pow = Math.pow(2, -(expr)) * 60 / this.Settings.Speed
-        const num = Math.round(ts[1].Meta.Duration / pow)
-        const lengths = ts.map((t) => t.Content.length)
-        const result = []
-        for (let i = 0; i < num; i++) {
-            const startTime = i * pow
-            const index = i % 2
-            for (let j = 0; j < lengths[index]; j++) {
-                result.push(Object.assign({}, ts[index].Content[j], { StartTime: startTime, Duration: pow }))
-            }
-        }
-        let BarFirst, BarLast
-        let single
-        if (ts[0].Meta.BarCount == 1 && ts[1].Meta.BarCount == 1) {
-            BarFirst = ts[1].Meta.BarFirst
-            single = true
-        } else if (ts[0].Meta.BarCount == 1) {
-            BarFirst = ts[1].Meta.BarFirst
-            BarLast = ts[1].Meta.BarLast
-            single = false
-        } else if (ts[1].Meta.BarCount == 1) {
-            BarFirst = ts[0].Meta.BarFirst
-            BarLast = ts[1].Meta.BarFirst
-            single = false
-        } else {
-            BarFirst = ts[0].Meta.BarFirst
-            BarLast = ts[1].Meta.BarLast
-            single = false
-        }
-        return {
-            Content: result,
-            Warnings: [],
-            Meta: {
-                Duration: ts[1].Meta.Duration,
-                BarFirst: BarFirst,
-                BarLast: BarLast,
-                Single: single,
-                PitchQueue: [...ts[0].Meta.PitchQueue, ...ts[1].Meta.PitchQueue],
-                NotesBeforeTie: ts[(num - 1) % 2].Meta.NotesBeforeTie
-            }
-        }
+        const src = [this.ParseTrack(subtrack1), this.ParseTrack(subtrack2)];
+        const time = Math.pow(2, -expr) * 60 / this.Settings.Speed;
+        const content = [].concat(...src.map(data => {
+            const scale = time / data.Meta.Duration;
+            return data.Content.map(note => Object.assign({}, note, {
+                StartTime: note.StartTime * scale,
+                Duration: note.Duration * scale
+            }));
+        }));
+        return this.GetFunction('_fill_')({
+            Content: content,
+            Meta: { Duration: 2 * time }
+        }, src[1]);
     },
 
     Tuplet(expr, subtrack) {
         /**** (^!1~)&2 ****/
-        const scale = Math.pow(2, Math.floor(Math.log2(expr))) / expr
-        const t = this.ParseTrack(subtrack, this.Settings.extend({ Bar: this.Settings.Bar / scale }))
-        t.Content.forEach((note) => {
-            note.__oriDur *= scale
-            note.Duration *= scale
-            note.StartTime *= scale
+        const scale = Math.pow(2, Math.floor(Math.log2(expr))) / expr;
+        const src = this.ParseTrack(subtrack, {
+            Settings: { Bar: this.Settings.Bar / scale }
+        });
+        src.Content.forEach((note) => {
+            note.Duration *= scale;
+            note.StartTime *= scale;
         })
-        t.Meta.Duration *= scale
-        if (t.Meta.BarCount == 1) {
-            t.Meta.BarFirst *= scale
-        } else {
-            t.Meta.BarFirst *= scale
-            t.Meta.BarLast *= scale
-        }
-        return t
+        src.Meta.Duration *= scale;
+        src.Meta.BarFirst *= scale;
+        src.Meta.BarLast *= scale;
+        return src;
     },
 
     Portamento(subtrack1, subtrack2) {
         /**** &1~&2 ****/
-        const t1 = this.ParseTrack(subtrack1)
-        const t2 = this.ParseTrack(subtrack2)
+        const src1 = this.ParseTrack(subtrack1);
+        const src2 = this.ParseTrack(subtrack2);
+        const note1 = src1.Content.pop();
+        const note2 = src2.Content[0];
+        const duration = src1.Meta.Duration - note1.StartTime;
+        const port = this.Settings.getOrSetDefault('Port', 6);
+        const num = duration * port * this.Settings.Speed / 60;
+        const pitchStep = (note2.Pitch - note1.Pitch) / (num - 1);
+        const volumeStep = (note2.Volume - note1.Volume) / (num - 1);
 
-        const pitch1 = t1.Content[t1.Content.length - 1].Pitch
-        const pitch2 = t2.Content[0].Pitch
-        const duration = t1.Meta.Duration
-        const port = this.Settings.getOrSetDefault('Port', 6)
-        const num = duration * port * this.Settings.Speed / 60
-        const step = (pitch2 - pitch1) / (num - 1)
-        const pitches = []
         for (let i = 0; i < num; i++) {
-            pitches.push(Math.round(pitch1 + step * i))
-        }
-        const result = pitches.map((pitch, index) => {
-            return {
+            src1.push({
                 Type: 'Note',
-                Pitch: pitch,
-                Volume: t2.Content[0].Volume,
-                Duration: 1 / port * 60 / this.Settings.Speed,
-                StartTime: index / port * 60 / this.Settings.Speed,
-                __oriDur: 1 / port * 60 / this.Settings.Speed
-            }
-        })
-        result.push(...t2.Content.map((note) => {
-            note.StartTime += duration
-            return note
-        }))
-        const single = t1.Meta.BarCount == 1 && t2.Meta.BarCount == 1
-        let BarFirst, BarLast
-        if (single) {
-            BarFirst = t1.Meta.BarFirst + t2.Meta.BarFirst
-        } else if (t1.Meta.BarCount == 1) {
-            BarFirst = t1.Meta.BarFirst + t2.Meta.BarFirst
-            BarLast = t2.Meta.BarLast
-        } else if (t2.Meta.BarCount == 1) {
-            BarFirst = t1.Meta.BarFirst
-            BarLast = t1.Meta.BarLast + t2.Meta.BarFirst
-        } else {
-            BarFirst = t1.Meta.BarFirst
-            BarLast = t2.Meta.BarLast
+                Pitch: Math.round(note1.Pitch + pitchStep * i),
+                Volume: note1.Volume + volumeStep * i,
+                Duration: 60 / this.Settings.Speed / port,
+                StartTime: 60 / this.Settings.Speed / port * i
+            });
         }
 
-        return {
-            Content: result,
-            Warnings: [],
-            Meta: {
-                Duration: duration,
-                BarFirst: BarFirst,
-                BarLast: BarLast,
-                Single: single,
-                PitchQueue: [...t1.Meta.PitchQueue, ...t2.Meta.PitchQueue],
-                NotesBeforeTie: [result[result.length - 1]]
-            }
-        }
+        return this.JoinTrack(src1, src2);
     },
 
     GraceNote(subtrack1, subtrack2) {

@@ -120,10 +120,32 @@ LibLoader.Default = {
         Custom: {},
         applyFunction(parser, token) {
             return this.locateFunction(token.Name).apply({
-                ParseTrack(track, protocol = 'Default', settings = parser.Settings) {
-                    return new SubtrackParser(track, settings, parser.Libraries, wrap(parser.Meta, protocol)).parseTrack()
+                ParseTrack(track, {
+                    protocol = 'Default',
+                    settings = null
+                } = {}) {
+                    return new SubtrackParser(track, settings === null ? parser.Settings : parser.Settings.extend(settings), parser.Libraries, wrap(parser.Meta, protocol)).parseTrack()
                 },
-                GetFunction: (name) => this.locateFunction(name),
+                JoinTrack(src1, ...rest) {
+                    const result = {
+                        Meta: Object.assign(src1.Meta),
+                        Content: src1.Content.slice(),
+                        Warnings: src1.Warnings.slice(),
+                        Settings: parser.Settings,
+                        pushError: parser.pushError,
+                        isLegalBar: parser.isLegalBar
+                    };
+                    for (let src of rest) {
+                        result.Content.push(...src.Content.map(note => {
+                            return Object.assign({}, note, {
+                                StartTime: note.StartTime + result.Meta.Duration
+                            });
+                        }));
+                        parser.mergeMeta(result, src);
+                    };
+                    return result;
+                },
+                Library: this.implicitLibCall,
                 Settings: parser.Settings,
                 Meta: parser.Meta
             }, token.Argument.map((arg) => {
@@ -138,6 +160,13 @@ LibLoader.Default = {
                         return arg
                 }
             }))
+        },
+        get implicitLibCall() {
+            delete this.implicitLibCall
+            this.implicitLibCall = new Proxy({}, {
+                get: (_, name) => this.locateFunction(name)
+            })
+            return this.implicitLibCall
         },
         locateFunction(name) {
             if (name in this.STD) return this.STD[name]

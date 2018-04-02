@@ -6,257 +6,160 @@ module.exports = {
         for (let i = 0; i < duration; i += src.Meta.Duration) {
             src.Content.forEach(note => {
                 if (note.StartTime + i < duration) {
-                    result.push(Object.assign({}, note, {StartTime: note.StartTime + i}))
+                    result.push(Object.assign({}, note, { StartTime: note.StartTime + i }));
                 }
-            })
+            });
         }
-        return Object.assign(dest, {Content: result});
+        return Object.assign(dest, { Content: result });
+    },
+
+    _zoom_(origin, scale, start = 0) {
+        return origin.map(note => Object.assign({}, note, {
+            StartTime: note.StartTime * scale + start,
+            Duration: note.Duration * scale
+        }));
     },
 
     Tremolo1(expr, subtrack) {
         /**** (^%1-)&2 ****/
-        const dest = this.ParseTrack(subtrack);
+        const src = this.ParseTrack(subtrack);
         const time = Math.pow(2, -expr) * 60 / this.Settings.Speed;
-        const scale = time / dest.Meta.Duration;
-        const srcContent = data.Content.map(note => Object.assign({}, note, {
-            StartTime: note.StartTime * scale,
-            Duration: note.Duration * scale
-        }));
-        return this.GetFunction('_fill_')({Meta: {Duration: time}, Content: srcContent}, dest);
+        const scale = time / src.Meta.Duration;
+        const content = this.Library._zoom_(src.Content, scale);
+        return this.Library._fill_({
+            Content: content, 
+            Meta: { Duration: time }
+        }, src);
     },
 
     Tremolo2(expr, subtrack1, subtrack2) {
         /**** &2(^%1=)&3 ****/
-        const ts = [this.ParseTrack(subtrack1), this.ParseTrack(subtrack2)]
-        const pow = Math.pow(2, -(expr)) * 60 / this.Settings.Speed
-        const num = Math.round(ts[1].Meta.Duration / pow)
-        const lengths = ts.map((t) => t.Content.length)
-        const result = []
-        for (let i = 0; i < num; i++) {
-            const startTime = i * pow
-            const index = i % 2
-            for (let j = 0; j < lengths[index]; j++) {
-                result.push(Object.assign({}, ts[index].Content[j], { StartTime: startTime, Duration: pow }))
-            }
-        }
-        let BarFirst, BarLast
-        let single
-        if (ts[0].Meta.BarCount == 1 && ts[1].Meta.BarCount == 1) {
-            BarFirst = ts[1].Meta.BarFirst
-            single = true
-        } else if (ts[0].Meta.BarCount == 1) {
-            BarFirst = ts[1].Meta.BarFirst
-            BarLast = ts[1].Meta.BarLast
-            single = false
-        } else if (ts[1].Meta.BarCount == 1) {
-            BarFirst = ts[0].Meta.BarFirst
-            BarLast = ts[1].Meta.BarFirst
-            single = false
-        } else {
-            BarFirst = ts[0].Meta.BarFirst
-            BarLast = ts[1].Meta.BarLast
-            single = false
-        }
-        return {
-            Content: result,
-            Warnings: [],
-            Meta: {
-                Duration: ts[1].Meta.Duration,
-                BarFirst: BarFirst,
-                BarLast: BarLast,
-                Single: single,
-                PitchQueue: [...ts[0].Meta.PitchQueue, ...ts[1].Meta.PitchQueue],
-                NotesBeforeTie: ts[(num - 1) % 2].Meta.NotesBeforeTie
-            }
-        }
+        const src1 = this.ParseTrack(subtrack1);
+        const src2 = this.ParseTrack(subtrack2);
+        const time = Math.pow(2, -expr) * 60 / this.Settings.Speed;
+        const scale1 = time / src1.Meta.Duration;
+        const scale2 = time / src2.Meta.Duration;
+        const content = [].concat(
+            this.Library._zoom_(src1.Content, scale1),
+            this.Library._zoom_(src2.Content, scale2, time)
+        );
+
+        return this.Library._fill_({
+            Content: content,
+            Meta: { Duration: 2 * time }
+        }, src2);
     },
 
     Tuplet(expr, subtrack) {
         /**** (^!1~)&2 ****/
-        const scale = Math.pow(2, Math.floor(Math.log2(expr))) / expr
-        const t = this.ParseTrack(subtrack, this.Settings.extend({ Bar: this.Settings.Bar / scale }))
-        t.Content.forEach((note) => {
-            note.__oriDur *= scale
-            note.Duration *= scale
-            note.StartTime *= scale
-        })
-        t.Meta.Duration *= scale
-        if (t.Meta.BarCount == 1) {
-            t.Meta.BarFirst *= scale
-        } else {
-            t.Meta.BarFirst *= scale
-            t.Meta.BarLast *= scale
-        }
-        return t
+        const scale = Math.pow(2, Math.floor(Math.log2(expr))) / expr;
+        const src = this.ParseTrack(subtrack, {
+            Settings: { Bar: this.Settings.Bar / scale }
+        });
+        src.Content = this.Library._zoom_(src.Content, scale);
+        src.Meta.Duration *= scale;
+        src.Meta.BarFirst *= scale;
+        src.Meta.BarLast *= scale;
+        return src;
     },
 
     Portamento(subtrack1, subtrack2) {
         /**** &1~&2 ****/
-        const t1 = this.ParseTrack(subtrack1)
-        const t2 = this.ParseTrack(subtrack2)
+        const src1 = this.ParseTrack(subtrack1);
+        const src2 = this.ParseTrack(subtrack2);
+        const note1 = src1.Content.pop();
+        const note2 = src2.Content[0];
+        const duration = src1.Meta.Duration - note1.StartTime;
+        const port = this.Settings.getOrSetDefault('Port', 6);
+        const num = duration * port * this.Settings.Speed / 60;
+        const pitchStep = (note2.Pitch - note1.Pitch) / (num - 1);
+        const volumeStep = (note2.Volume - note1.Volume) / (num - 1);
 
-        const pitch1 = t1.Content[t1.Content.length - 1].Pitch
-        const pitch2 = t2.Content[0].Pitch
-        const duration = t1.Meta.Duration
-        const port = this.Settings.getOrSetDefault('Port', 6)
-        const num = duration * port * this.Settings.Speed / 60
-        const step = (pitch2 - pitch1) / (num - 1)
-        const pitches = []
         for (let i = 0; i < num; i++) {
-            pitches.push(Math.round(pitch1 + step * i))
-        }
-        const result = pitches.map((pitch, index) => {
-            return {
+            src1.Content.push({
                 Type: 'Note',
-                Pitch: pitch,
-                Volume: t2.Content[0].Volume,
-                Duration: 1 / port * 60 / this.Settings.Speed,
-                StartTime: index / port * 60 / this.Settings.Speed,
-                __oriDur: 1 / port * 60 / this.Settings.Speed
-            }
-        })
-        result.push(...t2.Content.map((note) => {
-            note.StartTime += duration
-            return note
-        }))
-        const single = t1.Meta.BarCount == 1 && t2.Meta.BarCount == 1
-        let BarFirst, BarLast
-        if (single) {
-            BarFirst = t1.Meta.BarFirst + t2.Meta.BarFirst
-        } else if (t1.Meta.BarCount == 1) {
-            BarFirst = t1.Meta.BarFirst + t2.Meta.BarFirst
-            BarLast = t2.Meta.BarLast
-        } else if (t2.Meta.BarCount == 1) {
-            BarFirst = t1.Meta.BarFirst
-            BarLast = t1.Meta.BarLast + t2.Meta.BarFirst
-        } else {
-            BarFirst = t1.Meta.BarFirst
-            BarLast = t2.Meta.BarLast
+                Pitch: Math.round(note1.Pitch + pitchStep * i),
+                Volume: note1.Volume + volumeStep * i,
+                Duration: 60 / this.Settings.Speed / port,
+                StartTime: 60 / this.Settings.Speed / port * i
+            });
         }
 
-        return {
-            Content: result,
-            Warnings: [],
-            Meta: {
-                Duration: duration,
-                BarFirst: BarFirst,
-                BarLast: BarLast,
-                Single: single,
-                PitchQueue: [...t1.Meta.PitchQueue, ...t2.Meta.PitchQueue],
-                NotesBeforeTie: [result[result.length - 1]]
-            }
-        }
+        return this.JoinTrack(src1, src2);
     },
 
     GraceNote(subtrack1, subtrack2) {
         /**** (^&1\^)&2 ****/
-        const t1 = this.ParseTrack(subtrack1)
-        const t2 = this.ParseTrack(subtrack2)
-        const num = subtrack1.Content.length
-        let dur
-        const appo = this.Settings.getOrSetDefault('Seg', 1 / 4)
-        if (num <= 4) {
-            dur = appo / 4
-        } else {
-            dur = appo / num
-        }
-        const actualDur = dur * Math.pow(2, -this.Settings.Duration) * 60 / this.Settings.Speed
-        t1.Content.forEach((note) => {
-            note.Duration = actualDur
-            note.StartTime *= dur
-            note.__oriDur = actualDur
-        })
-        const total = actualDur * num
-        t2.Content.forEach((note) => {
-            note.StartTime += total
-            note.Duration -= total
-            note.__oriDur -= total
-        })
-        return {
-            Content: [...t1.Content, ...t2.Content],
-            Warnings: [],
-            Meta: t2.Meta
-        }
+        const src1 = this.ParseTrack(subtrack1);
+        const src2 = this.ParseTrack(subtrack2);
+        const seg = this.Settings.getOrSetDefault('Seg', 1 / 4)
+        const scale = seg / Math.max(src1.Content.length, 4);
+        const duration = src1.Meta.Duration * scale;
+        const content = this.Library._zoom_(src1.Content, scale);
+
+        src2.Content.forEach(note => {
+            if (note.StartTime < duration) {
+                if (note.Duration + note.StartTime > duration) {
+                    content.push(Object.assign({}, note, {
+                        StartTime: duration,
+                        Duration: note.Duration + note.StartTime - duration
+                    }));
+                }
+            } else {
+                content.push(note);
+            }
+        });
+
+        return Object.assign(src2, { Content: content });
     },
 
     Appoggiatura(subtrack1, subtrack2) {
         /**** &1(\^^&2) ****/
-        const t1 = this.ParseTrack(subtrack1)
-        const t2 = this.ParseTrack(subtrack2)
-        const num = subtrack2.Content.length
-        let dur
-        const appo = this.Settings.getOrSetDefault('Seg', 1 / 4)
-        if (num <= 4) {
-            dur = appo / 4
-        } else {
-            dur = appo / num
-        }
-        const actualDur = dur * Math.pow(2, -this.Settings.Duration) * 60 / this.Settings.Speed
-        const total = actualDur * num
-        t1.Content.forEach((note) => {
-            note.Duration -= total
-            note.__oriDur -= total
-        })
-        t2.Content.forEach((note) => {
-            note.Duration = actualDur
-            note.__oriDur = actualDur
-            note.StartTime *= dur
-            note.StartTime += t1.Meta.Duration - total
-        })
-        t1.Meta.NotesBeforeTie = t2.Meta.NotesBeforeTie
-        return {
-            Content: [...t1.Content, ...t2.Content],
-            Warnings: [],
-            Meta: t1.Meta
-        }
+        const src1 = this.ParseTrack(subtrack1);
+        const src2 = this.ParseTrack(subtrack2);
+        const seg = this.Settings.getOrSetDefault('Seg', 1 / 4)
+        const scale = seg / Math.max(src2.Content.length, 4);
+        const start = src1.Meta.Duration - src2.Meta.Duration * scale;
+        const content = this.Library._zoom_(src2.Content, scale, start);
+
+        src1.Content.forEach(note => {
+            if (note.StartTime + note.Duration > start) {
+                if (note.StartTime < start) {
+                    content.push(Object.assign({}, note, {
+                        Duration: start - note.StartTime
+                    }));
+                }
+            } else {
+                content.push(note);
+            }
+        });
+
+        return Object.assign(src1, { Content: content });
     },
 
     Fermata(subtrack) {
         /**** (.)&1 ****/
-        const t = this.ParseTrack(subtrack)
-        const ferm = this.Settings.getOrSetDefault('Ferm', 2)
-        t.Content.forEach((note) => {
-            note.Duration *= ferm
-            note.__oriDur *= ferm
-            note.StartTime *= ferm
-        })
-        t.Meta.Duration *= ferm
-        return t
+        const src = this.ParseTrack(subtrack);
+        const ferm = this.Settings.getOrSetDefault('Ferm', 2);
+        src.Content = this.Library._zoom_(src.Content, ferm);
+        src.Meta.Duration *= ferm;
+        return src;
     },
 
     Arpeggio(subtrack) {
         /**** \$&1 ****/
-        const t = this.ParseTrack(subtrack)
-        const num = t.Content.length - 1
-        let dur
-        const appo = this.Settings.getOrSetDefault('Seg', 1 / 4)
-        if (num <= 4) {
-            dur = appo / 4
-        } else {
-            dur = appo / num
-        }
-        const actualDur = dur * Math.pow(2, -this.Settings.Duration) * 60 / this.Settings.Speed
-        const result = []
-        t.Content.reduce((sum, cur, index) => {
-            if (index < num) {
-                const temp = Object.assign({}, cur)
-                sum.push(temp)
-                temp.Duration = actualDur
-                temp.__oriDur = actualDur
-                for (const note of sum) {
-                    result.push(Object.assign({}, note, { StartTime: actualDur * index }))
-                }
-            } else {
-                t.Content.forEach((note) => {
-                    note.StartTime += actualDur * index
-                    note.Duration -= actualDur * index
-                    note.__oriDur -= actualDur * index
-                })
-                result.push(...t.Content)
+        const src = this.ParseTrack(subtrack);
+        const seg = this.Settings.getOrSetDefault('Seg', 1 / 4)
+        const scale = seg / Math.max(src.Content.length, 4);
+        src.Content.forEach((note, index) => {
+            if (note.StartTime == 0) {
+                note.StartTime = scale * index;
+                note.Duration -= scale * index;
             }
-            return sum
-        }, [])
-        return Object.assign(t, { Content: result })
+        });
+        src.Content.unshift({ Type: 'PedalPress', StartTime: 0 });
+        src.Content.push({ Type: 'PedalRelease', StartTime: src.Meta.Duration });
+        return src;
     },
 
     Con(octave, scale = 1) {
@@ -332,7 +235,7 @@ module.exports = {
 
     Spd(speed) {
         /**** (^!1) ****/
-        this.Settings.assignSetting('Speed', speed, (speed) => speed > 0)
+        this.Settings.assignSetting('Speed', speed, (speed) => speed > 0);
     },
 
     BarBeat(bar, beat) {

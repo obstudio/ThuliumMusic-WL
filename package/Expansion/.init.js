@@ -12,6 +12,14 @@ module.exports = {
         this.Settings.Speed *= delta
     },
     
+    Bar(bar) {
+        this.Settings.assignSetting('Bar', bar, (bar) => bar > 0 && Number.isInteger(bar))
+    },
+
+    Beat(beat) {
+        this.Settings.assignSetting('Beat', beat, (beat) => beat > 0 && Number.isInteger(Math.log2(beat)))
+    },
+
     _drop_(data, time) {
         const ectype = data
         if (time > 0) {
@@ -51,3 +59,4 @@ module.exports = {
     }
 
 }
+

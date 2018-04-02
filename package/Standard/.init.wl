@@ -30,7 +30,7 @@ nonVoidPack["Standard"]={
 funcSimpPack["Standard"]:=Sequence[
 	
 	arg2:objectPatt~~"("~~arg1:expunsigned~~"=)"~~arg3:objectPatt:><|
-		"Type"->"FUNCTION",
+		"Type"->"Function",
 		"Name"->"Tremolo2",
 		"Simplified"->True,
 		"Argument"->{
@@ -40,7 +40,7 @@ funcSimpPack["Standard"]:=Sequence[
 		}
 	|>,
 	arg1:objectPatt~~"~"~~arg2:objectPatt:><|
-		"Type"->"FUNCTION",
+		"Type"->"Function",
 		"Name"->"Portamento",
 		"Simplified"->True,
 		"Argument"->{
@@ -49,7 +49,7 @@ funcSimpPack["Standard"]:=Sequence[
 		}
 	|>,
 	arg1:objectPatt~~"(^"~~arg2:notePatt..~~")":><|
-		"Type"->"FUNCTION",
+		"Type"->"Function",
 		"Name"->"Appoggiatura",
 		"Simplified"->True,
 		"Argument"->{
@@ -58,7 +58,7 @@ funcSimpPack["Standard"]:=Sequence[
 		}
 	|>,
 	"("~~arg1:numunsigned~~"~)"~~arg2:objectPatt:><|
-		"Type"->"FUNCTION",
+		"Type"->"Function",
 		"Name"->"Tuplet",
 		"Simplified"->True,
 		"Argument"->{
@@ -67,7 +67,7 @@ funcSimpPack["Standard"]:=Sequence[
 		}
 	|>,
 	"("~~arg1:notePatt..~~"^)"~~arg2:objectPatt:><|
-		"Type"->"FUNCTION",
+		"Type"->"Function",
 		"Name"->"GraceNote",
 		"Simplified"->True,
 		"Argument"->{
@@ -76,7 +76,7 @@ funcSimpPack["Standard"]:=Sequence[
 		}
 	|>,
 	"("~~arg1:expunsigned~~"-)"~~arg2:objectPatt:><|
-		"Type"->"FUNCTION",
+		"Type"->"Function",
 		"Name"->"Tremolo1",
 		"Simplified"->True,
 		"Argument"->{
@@ -85,7 +85,7 @@ funcSimpPack["Standard"]:=Sequence[
 		}
 	|>,
 	"$"~~arg1:objectPatt:><|
-		"Type"->"FUNCTION",
+		"Type"->"Function",
 		"Name"->"Arpeggio",
 		"Simplified"->True,
 		"Argument"->{
@@ -93,7 +93,7 @@ funcSimpPack["Standard"]:=Sequence[
 		}
 	|>,
 	"(.)"~~arg1:objectPatt:><|
-		"Type"->"FUNCTION",
+		"Type"->"Function",
 		"Name"->"Fermata",
 		"Simplified"->True,
 		"Argument"->{
@@ -101,7 +101,7 @@ funcSimpPack["Standard"]:=Sequence[
 		}
 	|>,
 	"("~~arg1:numunsigned~~"/"~~arg2:numunsigned~~")":><|
-		"Type"->"FUNCTION",
+		"Type"->"Function",
 		"Name"->"BarBeat",
 		"Simplified"->True,
 		"Argument"->{
@@ -110,7 +110,7 @@ funcSimpPack["Standard"]:=Sequence[
 		}
 	|>,
 	"(1="~~arg1:string~~")":><|
-		"Type"->"FUNCTION",
+		"Type"->"Function",
 		"Name"->"Key",
 		"Simplified"->True,
 		"Argument"->{
@@ -118,7 +118,7 @@ funcSimpPack["Standard"]:=Sequence[
 		}
 	|>,
 	"("~~arg1:numunsigned~~"%)":><|
-		"Type"->"FUNCTION",
+		"Type"->"Function",
 		"Name"->"Vol",
 		"Simplified"->True,
 		"Argument"->{
@@ -126,7 +126,7 @@ funcSimpPack["Standard"]:=Sequence[
 		}
 	|>,
 	"("~~arg1:numunsigned~~")":><|
-		"Type"->"FUNCTION",
+		"Type"->"Function",
 		"Name"->"Spd",
 		"Simplified"->True,
 		"Argument"->{
@@ -134,7 +134,7 @@ funcSimpPack["Standard"]:=Sequence[
 		}
 	|>,
 	"("~~arg1:numsigned~~")":><|
-		"Type"->"FUNCTION",
+		"Type"->"Function",
 		"Name"->"KeyShift",
 		"Simplified"->True,
 		"Argument"->{
@@ -146,7 +146,7 @@ funcSimpPack["Standard"]:=Sequence[
 (*************************************************
 
     "(Seg:"~~arg1:expression~~")":><|
-        "Type"->"FUNCTION",
+        "Type"->"Function",
         "Name"->"Seg",
         "Simplified"->True,
         "Argument"->{
@@ -154,7 +154,7 @@ funcSimpPack["Standard"]:=Sequence[
         }
     |>,
     "(Port:"~~arg1:expression~~")":><|
-        "Type"->"FUNCTION",
+        "Type"->"Function",
         "Name"->"Port",
         "Simplified"->True,
         "Argument"->{
@@ -162,7 +162,7 @@ funcSimpPack["Standard"]:=Sequence[
         }
     |>,
     "(Ferm:"~~arg1:expression~~")":><|
-        "Type"->"FUNCTION",
+        "Type"->"Function",
         "Name"->"Ferm",
         "Simplified"->True,
         "Argument"->{
@@ -170,7 +170,7 @@ funcSimpPack["Standard"]:=Sequence[
         }
     |>,
     "(Stac:"~~arg1:expression~~")":><|
-        "Type"->"FUNCTION",
+        "Type"->"Function",
         "Name"->"Stac",
         "Simplified"->True,
         "Argument"->{
@@ -178,7 +178,7 @@ funcSimpPack["Standard"]:=Sequence[
         }
     |>,
     "(Trace:"~~arg1:number~~")":><|
-        "Type"->"FUNCTION",
+        "Type"->"Function",
         "Name"->"Trace",
         "Simplified"->True,
         "Argument"->{
@@ -186,7 +186,7 @@ funcSimpPack["Standard"]:=Sequence[
         }
     |>,
     "(Dur:"~~arg1:expression~~")":><|
-        "Type"->"FUNCTION",
+        "Type"->"Function",
         "Name"->"Dur",
         "Simplified"->True,
         "Argument"->{
@@ -194,7 +194,7 @@ funcSimpPack["Standard"]:=Sequence[
         }
     |>,
     "(Oct:"~~arg1:number~~")":><|
-        "Type"->"FUNCTION",
+        "Type"->"Function",
         "Name"->"Oct",
         "Simplified"->True,
         "Argument"->{

@@ -335,7 +335,7 @@ AudioAdapt[rawData_,OptionsPattern[AdaptingOptions]]:=Block[
 (* ::Input:: *)
 (*MIDIStop[];MIDIPlay[#[[2]]]&@*)
 (*EchoFunction["time: ",#[[1]]&]@*)
-(*Timing[MIDIAdapt[Parse[localPath<>"Research/test.tm"]]];*)
+(*Timing[MIDIAdapt[Parse[localPath<>"Songs/test.tm"]]];*)
 
 
 (* ::Subsubsection:: *)

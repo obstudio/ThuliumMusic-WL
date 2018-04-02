@@ -131,6 +131,7 @@ LibLoader.Default = {
                         Meta: Object.assign(src1.Meta),
                         Content: src1.Content.slice(),
                         Warnings: src1.Warnings.slice(),
+                        Settings: parser.Settings,
                         pushError: parser.pushError,
                         isLegalBar: parser.isLegalBar
                     };

@@ -182,12 +182,12 @@ class TrackParser {
         if (src.Meta.BarCount === 0) {
             if (dest.Meta.BarCount === 0) {
                 dest.Meta.BarFirst += src.Meta.BarFirst
-                if (this.isLegalBar(dest.Meta.BarFirst)) {
+                if (dest.isLegalBar(dest.Meta.BarFirst)) {
                     dest.Meta.BarCount += 1
                 }
             } else {
                 dest.Meta.BarFirst += src.Meta.BarFirst
-                if (this.isLegalBar(dest.Meta.BarFirst)) {
+                if (dest.isLegalBar(dest.Meta.BarFirst)) {
                     dest.Meta.BarFirst = 0
                 }
             }

@@ -13,9 +13,9 @@ module.exports = {
         return Object.assign(dest, { Content: result });
     },
 
-    _zoom_(origin, scale) {
+    _zoom_(origin, scale, start = 0) {
         return origin.map(note => Object.assign({}, note, {
-            StartTime: note.StartTime * scale,
+            StartTime: note.StartTime * scale + start,
             Duration: note.Duration * scale
         }));
     },
@@ -34,16 +34,20 @@ module.exports = {
 
     Tremolo2(expr, subtrack1, subtrack2) {
         /**** &2(^%1=)&3 ****/
-        const src = [this.ParseTrack(subtrack1), this.ParseTrack(subtrack2)];
+        const src1 = this.ParseTrack(subtrack1);
+        const src2 = this.ParseTrack(subtrack2);
         const time = Math.pow(2, -expr) * 60 / this.Settings.Speed;
-        const content = [].concat(...src.map(data => {
-            const scale = time / data.Meta.Duration;
-            return this.Library._zoom_(data.Content, scale);
-        }));
+        const scale1 = time / src1.Meta.Duration;
+        const scale2 = time / src2.Meta.Duration;
+        const content = [].concat(
+            this.Library._zoom_(src1.Content, scale1),
+            this.Library._zoom_(src2.Content, scale2, time)
+        );
+
         return this.Library._fill_({
             Content: content,
             Meta: { Duration: 2 * time }
-        }, src[1]);
+        }, src2);
     },
 
     Tuplet(expr, subtrack) {
@@ -72,7 +76,7 @@ module.exports = {
         const volumeStep = (note2.Volume - note1.Volume) / (num - 1);
 
         for (let i = 0; i < num; i++) {
-            src1.push({
+            src1.Content.push({
                 Type: 'Note',
                 Pitch: Math.round(note1.Pitch + pitchStep * i),
                 Volume: note1.Volume + volumeStep * i,
@@ -88,8 +92,8 @@ module.exports = {
         /**** (^&1\^)&2 ****/
         const src1 = this.ParseTrack(subtrack1);
         const src2 = this.ParseTrack(subtrack2);
-        const appo = this.Settings.getOrSetDefault('Seg', 1 / 4)
-        const scale = appo / Math.max(src1.Content.length, 4);
+        const seg = this.Settings.getOrSetDefault('Seg', 1 / 4)
+        const scale = seg / Math.max(src1.Content.length, 4);
         const duration = src1.Meta.Duration * scale;
         const content = this.Library._zoom_(src1.Content, scale);
 
@@ -111,82 +115,51 @@ module.exports = {
 
     Appoggiatura(subtrack1, subtrack2) {
         /**** &1(\^^&2) ****/
-        const t1 = this.ParseTrack(subtrack1)
-        const t2 = this.ParseTrack(subtrack2)
-        const num = subtrack2.Content.length
-        let dur
-        const appo = this.Settings.getOrSetDefault('Seg', 1 / 4)
-        if (num <= 4) {
-            dur = appo / 4
-        } else {
-            dur = appo / num
-        }
-        const actualDur = dur * Math.pow(2, -this.Settings.Duration) * 60 / this.Settings.Speed
-        const total = actualDur * num
-        t1.Content.forEach((note) => {
-            note.Duration -= total
-            note.__oriDur -= total
-        })
-        t2.Content.forEach((note) => {
-            note.Duration = actualDur
-            note.__oriDur = actualDur
-            note.StartTime *= dur
-            note.StartTime += t1.Meta.Duration - total
-        })
-        t1.Meta.NotesBeforeTie = t2.Meta.NotesBeforeTie
-        return {
-            Content: [...t1.Content, ...t2.Content],
-            Warnings: [],
-            Meta: t1.Meta
-        }
+        const src1 = this.ParseTrack(subtrack1);
+        const src2 = this.ParseTrack(subtrack2);
+        const seg = this.Settings.getOrSetDefault('Seg', 1 / 4)
+        const scale = seg / Math.max(src2.Content.length, 4);
+        const start = src1.Meta.Duration - src2.Meta.Duration * scale;
+        const content = this.Library._zoom_(src2.Content, scale, start);
+
+        src1.Content.forEach(note => {
+            if (note.StartTime + note.Duration > start) {
+                if (note.StartTime < start) {
+                    content.push(Object.assign({}, note, {
+                        Duration: start - note.StartTime
+                    }));
+                }
+            } else {
+                content.push(note);
+            }
+        });
+
+        return Object.assign(src1, { Content: content });
     },
 
     Fermata(subtrack) {
         /**** (.)&1 ****/
-        const t = this.ParseTrack(subtrack)
-        const ferm = this.Settings.getOrSetDefault('Ferm', 2)
-        t.Content.forEach((note) => {
-            note.Duration *= ferm
-            note.__oriDur *= ferm
-            note.StartTime *= ferm
-        })
-        t.Meta.Duration *= ferm
-        return t
+        const src = this.ParseTrack(subtrack);
+        const ferm = this.Settings.getOrSetDefault('Ferm', 2);
+        src.Content = this.Library._zoom_(src.Content, ferm);
+        src.Meta.Duration *= ferm;
+        return src;
     },
 
     Arpeggio(subtrack) {
         /**** \$&1 ****/
-        const t = this.ParseTrack(subtrack)
-        const num = t.Content.length - 1
-        let dur
-        const appo = this.Settings.getOrSetDefault('Seg', 1 / 4)
-        if (num <= 4) {
-            dur = appo / 4
-        } else {
-            dur = appo / num
-        }
-        const actualDur = dur * Math.pow(2, -this.Settings.Duration) * 60 / this.Settings.Speed
-        const result = []
-        t.Content.reduce((sum, cur, index) => {
-            if (index < num) {
-                const temp = Object.assign({}, cur)
-                sum.push(temp)
-                temp.Duration = actualDur
-                temp.__oriDur = actualDur
-                for (const note of sum) {
-                    result.push(Object.assign({}, note, { StartTime: actualDur * index }))
-                }
-            } else {
-                t.Content.forEach((note) => {
-                    note.StartTime += actualDur * index
-                    note.Duration -= actualDur * index
-                    note.__oriDur -= actualDur * index
-                })
-                result.push(...t.Content)
+        const src = this.ParseTrack(subtrack);
+        const seg = this.Settings.getOrSetDefault('Seg', 1 / 4)
+        const scale = seg / Math.max(src.Content.length, 4);
+        src.Content.forEach((note, index) => {
+            if (note.StartTime == 0) {
+                note.StartTime = scale * index;
+                note.Duration -= scale * index;
             }
-            return sum
-        }, [])
-        return Object.assign(t, { Content: result })
+        });
+        src.Content.unshift({ Type: 'PedalPress', StartTime: 0 });
+        src.Content.push({ Type: 'PedalRelease', StartTime: src.Meta.Duration });
+        return src;
     },
 
     Con(octave, scale = 1) {
@@ -263,7 +236,6 @@ module.exports = {
     Spd(speed) {
         /**** (^!1) ****/
         this.Settings.assignSetting('Speed', speed, (speed) => speed > 0);
-        throw new Error();
     },
 
     BarBeat(bar, beat) {

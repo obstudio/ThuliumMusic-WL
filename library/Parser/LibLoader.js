@@ -161,7 +161,12 @@ LibLoader.Default = {
                 },
                 Library: this.implicitLibCall,
                 Settings: parser.Settings,
-                Meta: parser.Meta
+                Meta: parser.Meta,
+                EmptyTrack: {
+                    Type: 'Subtrack',
+                    Content: [],
+                    Repeat: -1
+                }
             }, token.Argument.map((arg) => {
                 switch (arg.Type) {
                     case 'Number':

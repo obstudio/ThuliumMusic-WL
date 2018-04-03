@@ -41,7 +41,7 @@ chordCodeTok[str_]:=If[StringMatchQ[str,chordCode],
 ];
 
 jsCode=Nest[(("{"~~#~~"}")|Except["{"|"}"])...&,Except["{"|"}"]...,8];
-functionCode=RE["\\s*[a-zA-Z]\\w*\\s*\\([^\\{\\}]*\\)\\s*\\{"]~~jsCode~~RE["\\}\\s*"];
+functionCode=RE["\\s*function *[a-zA-Z]\\w*\\s*\\([^\\{\\}]*\\)\\s*\\{"]~~jsCode~~RE["\\}\\s*"];
 functionCodeTok[str_]:=If[StringMatchQ[str,functionCode],
 	StringCases[str,
 		name:RE["[a-zA-Z]\\w*"]~~RE["\\s*\\([^\\{\\}]*\\)\\s*\\{"]~~js:jsCode~~RE["\\}"]:><|

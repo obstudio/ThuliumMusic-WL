@@ -36,7 +36,7 @@ Tokenize[filepath_]:=Block[
 		blankTrack={},messages={},
 		context="End",contextData={},
 		source,depth,command,value,
-		macroData={},
+		macroData={},codelines,
 		
 		syntax=syntaxTemplate,
 		chordPatt,macroPatt,
@@ -72,7 +72,7 @@ Tokenize[filepath_]:=Block[
 				][line];
 				If[contextData!={},
 					syntax[[context]]=Union[syntax[[context]],contextData[[All,syntaxTags[[context]]]]];
-					AppendTo[library,<|"Type"->context,"Data"->contextData|>];
+					AppendTo[library,<|"Type"->context,"Data"->If[context=="Function",codelines,contextData]|>];
 					contextData={};
 				];
 				Switch[command,
@@ -121,6 +121,7 @@ Tokenize[filepath_]:=Block[
 						While[lineCount<=Length@rawData&&!StringMatchQ[line,functionCode],
 							line=line<>"\n"<>rawData[[lineCount]];lineCount++;
 						];
+						codelines = line;
 						AppendTo[contextData,functionCodeTok[line]],
 					"End",
 						Break[];

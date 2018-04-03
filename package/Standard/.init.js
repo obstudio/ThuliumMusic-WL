@@ -1,5 +1,6 @@
 module.exports = {
 
+    // Internal Functions
     _zoom_(origin, scale, start = 0) {
         return origin.map(note => Object.assign({}, note, {
             StartTime: note.StartTime * scale + start,
@@ -7,20 +8,15 @@ module.exports = {
         }));
     },
 
-    _take_(origin, start, end) {
-        return this.Library._zoom_(origin.filter(note => {
-            note.StartTime >= start && note.StartTime + note.Duration < end
-        }), 1, -start);
-    },
-
     _fill_(origin, duration, total) {
         const result = [];
         for (i = 0; i < total; i += duration) {
-            result.push(...this.Library._zoom_(origin, 1, i));
+            result.push(...this._zoom_(origin, 1, i));
         }
-        return this.Library._take_(result, 0, total);
+        return result.filter(note => note.StartTime + note.Duration <= total);
     },
 
+    // Standard Package
     Tremolo1(expr, subtrack) {
         /**** (^%1-)&2 ****/
         const src = this.ParseTrack(subtrack);
@@ -44,7 +40,7 @@ module.exports = {
             this.Library._zoom_(src2.Content, scale2, time)
         );
         return Object.assign(src2, {
-            Content: this.Library._fill_(content, 2 * time, src.Meta.Duration)
+            Content: this.Library._fill_(content, 2 * time, src2.Meta.Duration)
         });
     },
 
@@ -303,4 +299,5 @@ module.exports = {
     Stac(rest, index = 1) {
         this.Settings.assignSettingAtIndex('Stac', index, rest, (rest) => rest >= 0 && rest <= 1)
     }
+
 }

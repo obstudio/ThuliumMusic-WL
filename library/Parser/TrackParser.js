@@ -69,6 +69,7 @@ class TrackParser {
             BarLast: 0,
             Duration: 0,
             BarCount: 0, // 总小节线数
+            BeatCount: 0,
             TieLeft: false,
             TieRight: false
         }
@@ -200,7 +201,7 @@ class TrackParser {
                     dest.Meta.BarFirst = 0
                 }
             } else {
-                dest.Meta.BarFirst += src.Meta.BarFirst
+                dest.Meta.BarFirst += src.Meta.BarFirst // problematic
                 if (!dest.isLegalBar(dest.Meta.BarFirst)) {
                     dest.pushError(TmError.Types.Track.BarLength, {
                         Expected: dest.Settings.Bar,
@@ -385,11 +386,14 @@ class TrackParser {
                 Pitch: pitches[index],
                 Volume: volumes[index],
                 Duration: actualDuration,
-                StartTime: this.Meta.Duration
+                Beat: beat,
+                StartTime: this.Meta.Duration,
+                StartBeat: this.Meta.BeatCount
             })
         }
         this.Meta.NotesBeforeTie = notesBeforeTie.concat(result)
         this.Meta.Duration += duration
+        this.Meta.BeatCount += beat
         return result
     }
 

@@ -7,6 +7,11 @@ module.exports = {
         }), 1, -start);
     },
 
+    _normalize_(matrix, origin, meta) {
+        const meta = {};
+        return;
+    },
+
     _adjust_(matrix, source) {
         const mLast = matrix.Meta.BarLast;
         const mBar = matrix.Settings.bar;

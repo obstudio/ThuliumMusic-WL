@@ -1,6 +1,9 @@
 const { SubtrackParser } = require('./TrackParser')
 const { parse } = require('acorn')
 
+const packagePath = '../../package/'
+const packageInfo = require(packagePath + 'index.json')
+
 class LibLoader {
     /**
      *
@@ -116,7 +119,7 @@ LibLoader.Default = {
     },
     MetaInformation: {},
     FunctionPackage: {
-        STD: require('../../package/Standard/.init'),
+        STD: require(packagePath + packageInfo.AutoLoad + '/.init'),
         Custom: {},
         applyFunction(parser, token) {
             return this.locateFunction(token.Name).apply({
@@ -182,7 +185,7 @@ LibLoader.Default = {
         locateFunction(name) {
             if (name in this.STD) return this.STD[name]
             if (name in this.Custom) return this.Custom[name]
-            return () => { }
+            return () => {}
         }
     },
     MIDIEventList: {},

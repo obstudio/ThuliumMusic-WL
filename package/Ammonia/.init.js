@@ -8,6 +8,14 @@ module.exports = {
         }));
     },
 
+    _rebeat_(origin, scale, start = 0) {
+        return origin.map(note => Object.assign({}, note, {
+            Beat: note.Beat * scale,
+            StartTime: note.StartTime * scale + start,
+            Duration: note.Duration * scale
+        }));
+    },
+
     _fill_(origin, duration, total) {
         const result = [];
         for (i = 0; i < total; i += duration) {
@@ -22,7 +30,7 @@ module.exports = {
         const src = this.ParseTrack(subtrack);
         const time = Math.pow(2, -expr) * 60 / this.Settings.Speed;
         const scale = time / src.Meta.Duration;
-        const content = this.Library._zoom_(src.Content, scale);
+        const content = this.Library._rebeat_(src.Content, scale);
         return Object.assign(src, {
             Content: this.Library._fill_(content, time, src.Meta.Duration)
         });
@@ -36,8 +44,8 @@ module.exports = {
         const scale1 = time / src1.Meta.Duration;
         const scale2 = time / src2.Meta.Duration;
         const content = [].concat(
-            this.Library._zoom_(src1.Content, scale1),
-            this.Library._zoom_(src2.Content, scale2, time)
+            this.Library._rebeat_(src1.Content, scale1),
+            this.Library._rebeat_(src2.Content, scale2, time)
         );
         return Object.assign(src2, {
             Content: this.Library._fill_(content, 2 * time, src2.Meta.Duration)
@@ -50,7 +58,7 @@ module.exports = {
         const src = this.ParseTrack(subtrack, {
             Settings: { Bar: this.Settings.Bar / scale }
         });
-        src.Content = this.Library._zoom_(src.Content, scale);
+        src.Content = this.Library._rebeat_(src.Content, scale);
         src.Meta.Duration *= scale;
         src.Meta.BarFirst *= scale;
         src.Meta.BarLast *= scale;
@@ -97,7 +105,7 @@ module.exports = {
         const seg = this.Settings.getOrSetDefault('Seg', 1 / 4)
         const scale = seg / Math.max(src1.Content.length, 4);
         const duration = src1.Meta.Duration * scale;
-        const content = this.Library._zoom_(src1.Content, scale);
+        const content = this.Library._rebeat_(src1.Content, scale);
 
         src2.Content.forEach(note => {
             if (note.StartTime < duration) {
@@ -127,7 +135,7 @@ module.exports = {
         const seg = this.Settings.getOrSetDefault('Seg', 1 / 4)
         const scale = seg / Math.max(src2.Content.length, 4);
         const start = src1.Meta.Duration - src2.Meta.Duration * scale;
-        const content = this.Library._zoom_(src2.Content, scale, start);
+        const content = this.Library._rebeat_(src2.Content, scale, start);
 
         src1.Content.forEach(note => {
             if (note.StartTime + note.Duration > start) {
@@ -153,7 +161,7 @@ module.exports = {
         /**** (.)&1 ****/
         const src = this.ParseTrack(subtrack);
         const ferm = this.Settings.getOrSetDefault('Ferm', 2);
-        src.Content = this.Library._zoom_(src.Content, ferm);
+        src.Content = this.Library._rebeat_(src.Content, ferm);
         src.Meta.Duration *= ferm;
         return src;
     },

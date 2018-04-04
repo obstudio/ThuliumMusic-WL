@@ -162,9 +162,9 @@ class TrackParser {
         for (const token of this.Content) {
             this.Context.locator.index += 1
             switch (token.Type) {
-                case 'Function':
+                case 'FUNCTION':
                 case 'Subtrack':
-                    if (token.Type === 'Function') {
+                    if (token.Type === 'FUNCTION') {
                         subtrack = this.Libraries.FunctionPackage.applyFunction(this, token)
                         if (subtrack === undefined) {
                             break

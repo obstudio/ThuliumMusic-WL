@@ -36,7 +36,7 @@ Tokenize[filepath_]:=Block[
 		blankTrack={},messages={},
 		context="End",contextData={},
 		source,depth,command,value,
-		macroData={},
+		macroData={},codelines,
 		
 		syntax=syntaxTemplate,
 		chordPatt,macroPatt,
@@ -72,7 +72,7 @@ Tokenize[filepath_]:=Block[
 				][line];
 				If[contextData!={},
 					syntax[[context]]=Union[syntax[[context]],contextData[[All,syntaxTags[[context]]]]];
-					AppendTo[library,<|"Type"->context,"Data"->contextData|>];
+					AppendTo[library,<|"Type"->context,"Data"->If[context=="Function",codelines,contextData]|>];
 					contextData={};
 				];
 				Switch[command,
@@ -121,6 +121,7 @@ Tokenize[filepath_]:=Block[
 						While[lineCount<=Length@rawData&&!StringMatchQ[line,functionCode],
 							line=line<>"\n"<>rawData[[lineCount]];lineCount++;
 						];
+						codelines = line;
 						AppendTo[contextData,functionCodeTok[line]],
 					"End",
 						Break[];
@@ -202,7 +203,7 @@ Tokenize[filepath_]:=Block[
 			AppendTo[functionTokList,With[
 				{tmpData=argData,tmpTok=typeTok,tmpType=argType,tmpRule=argRule},
 				Function[str,<|
-					"Type"->"FUNCTION",
+					"Type"->"Function",
 					"Name"->tmpData[["Name"]],
 					"Simplified"->True,
 					"Argument"->MapThread[tmpTok,{tmpType,StringCases[str,tmpRule][[1]]}]
@@ -239,7 +240,7 @@ Tokenize[filepath_]:=Block[
 		"@"~~mcr:Alternatives@@syntax[["Macro"]]:><|"Type"->"Macrotrack","Name"->mcr|>,
 		nota:notationPatt:>notationTok[nota][[1]],
 		name:funcName~~"("~~arglist:rep[argument]~~")":><|
-			"Type"->"FUNCTION",
+			"Type"->"Function",
 			"Name"->name,
 			"Simplified"->False,
 			"Argument"->StringCases[arglist,{
@@ -249,7 +250,7 @@ Tokenize[filepath_]:=Block[
 			}]
 		|>,
 		"("~~name:funcName~~":"~~arglist:rep[argument]~~")":><|
-			"Type"->"FUNCTION",
+			"Type"->"Function",
 			"Name"->name,
 			"Simplified"->False,
 			"Argument"->StringCases[arglist,{
@@ -313,7 +314,7 @@ Tokenize[filepath_]:=Block[
 			]];
 			AppendTo[trackData,"Content"->trackTok[line]];
 			If[ContainsNone[#Type&/@trackData[["Content"]],{"Note","Subtrack","Macrotrack"}],
-				If[ContainsNone[Select[trackData[["Content"]],#Type=="FUNCTION"&][[All,"Name"]],nonVoid],
+				If[ContainsNone[Select[trackData[["Content"]],#Type=="Function"&][[All,"Name"]],nonVoid],
 					If[ContainsAny[#Type&/@trackData[["Content"]],{"Local"}],
 						AppendTo[sections,Flatten@SequenceCases[trackData[["Content"]],
 							{global:Except[<|"Type"->"Local"|>]...,<|"Type"->"Local"|>,local___}:>{global}

@@ -318,6 +318,10 @@ AudioAdapt[rawData_,OptionsPattern[AdaptingOptions]]:=Block[
 (*EmitSound@Sound@SoundNote["VoiceAahs",1]*)
 
 
+(* ::Input:: *)
+(*InitializeParser;*)
+
+
 (* ::Subsubsection:: *)
 (*MIDI*)
 
@@ -335,7 +339,11 @@ AudioAdapt[rawData_,OptionsPattern[AdaptingOptions]]:=Block[
 (* ::Input:: *)
 (*MIDIStop[];MIDIPlay[#[[2]]]&@*)
 (*EchoFunction["time: ",#[[1]]&]@*)
-(*Timing[MIDIAdapt[Parse[localPath<>"Research/test.tm"]]];*)
+(*Timing[MIDIAdapt[Parse[localPath<>"Songs/Touhou/test.tm"]]];*)
+
+
+(* ::Input:: *)
+(*Parse[localPath<>"Songs/test.tm"][[1,"Tracks",1,"Content"]]*)
 
 
 (* ::Subsubsection:: *)
@@ -349,7 +357,7 @@ AudioAdapt[rawData_,OptionsPattern[AdaptingOptions]]:=Block[
 (* ::Input:: *)
 (*AudioStop[];AudioPlay[#[[2]]]&@*)
 (*EchoFunction["time: ",#[[1]]&]@*)
-(*Timing[AudioAdapt[Parse[localPath<>"Songs/Touhou/TH11-Chireiden/3rd_Eye.tm",{5,6}],"Rate"->1.1]];*)
+(*Timing[AudioAdapt[Parse[localPath<>"Songs/Touhou/test.tm",{2,3}],"Rate"->1.2]];*)
 
 
 (* ::Input:: *)

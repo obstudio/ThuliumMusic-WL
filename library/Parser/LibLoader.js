@@ -1,5 +1,8 @@
-// eslint-disable-next-line no-unused-vars
 const { SubtrackParser } = require('./TrackParser')
+const { parse } = require('acorn')
+
+const packagePath = '../../package/'
+const packageInfo = require(packagePath + 'index.json')
 
 class LibLoader {
     /**
@@ -32,45 +35,47 @@ class LibLoader {
 
     /**
      * load internal lib
-     * @param {Tm.InternalLibrary} lib 
+     * @param {Tm.InternalLibrary} lib
      */
     loadLibrary(lib) {
         switch (lib.Type) {
-        case LibLoader.libType.Chord:
-            lib.Data.forEach((operator) => {
-                this.result.Chord[operator.Notation] = operator.Pitches
-            })
-            break
-        case LibLoader.libType.Track:
-            for (const track of lib.Data) {
-                this.result.Track[track.Name] = track.Content
-            }
-            break
-        case LibLoader.libType.MetaInformation:
-            break
-        case LibLoader.libType.FunctionPackage:
-            this.loadCode(lib.Data)
-            break
-        case LibLoader.libType.MIDIEventList:
-            break
-        case LibLoader.libType.Library:
-            this.loadSubPackage(lib.Content)
+            case LibLoader.libType.Chord:
+                lib.Data.forEach((operator) => {
+                    this.result.Chord[operator.Notation] = operator.Pitches
+                })
+                break
+            case LibLoader.libType.Track:
+                for (const track of lib.Data) {
+                    this.result.Track[track.Name] = track.Content
+                }
+                break
+            case LibLoader.libType.MetaInformation:
+                break
+            case LibLoader.libType.FunctionPackage:
+                this.loadCode(lib.Data)
+                break
+            case LibLoader.libType.MIDIEventList:
+                break
+            case LibLoader.libType.Library:
+                this.loadSubPackage(lib.Content)
         }
     }
 
     loadCode(data) {
-        const code = 'this.result.FunctionPackage.Custom = {' + data.map((func) => func.Code).join(',') + '}'
+        const result = parse(data)
+        if (!result.body.every((stmt) => stmt.type === 'FunctionDeclaration')) return
+        const code = data + '\nreturn {' + result.body.map((stmt) => stmt.id.name).join(',') + '}'
         try {
-            /* eslint-disable-next-line no-eval */
-            eval(code) // FIXME: change to other methods
+            /* eslint-disable-next-line no-new-func */
+            Object.assign(this.result.FunctionPackage.Custom, new Function(code)()) // FIXME: change to other methods
         } catch (e) {
             console.log('Script grammar error')
         }
     }
 
     /**
-     * 
-     * @param {Tm.Library[]} content 
+     *
+     * @param {Tm.Library[]} content
      */
     loadSubPackage(content) {
         const sub = new LibLoader(content, false).load()
@@ -114,13 +119,54 @@ LibLoader.Default = {
     },
     MetaInformation: {},
     FunctionPackage: {
-        STD: require('../../package/Standard/.init'),
+        STD: require(packagePath + packageInfo.AutoLoad + '/.init'),
         Custom: {},
         applyFunction(parser, token) {
             return this.locateFunction(token.Name).apply({
+                ParseTrack(track, {
+                    protocol = 'Default',
+                    settings = null
+                } = {}) {
+                    return new SubtrackParser(
+                        track,
+                        settings === null ? parser.Settings : parser.Settings.extend(settings),
+                        parser.Libraries,
+                        wrap(parser.Meta, protocol)
+                    ).parseTrack();
+                },
+                ReportError(name, args) {
+                    if (!name.includes('::')) {
+                        name = 'Func::' + token.Name + '::' + name;
+                    }
+                    parser.pushError(name, args);
+                },
+                JoinTrack(src1, ...rest) {
+                    const result = {
+                        Meta: Object.assign(src1.Meta),
+                        Content: src1.Content.slice(),
+                        Warnings: src1.Warnings.slice(),
+                        Settings: parser.Settings,
+                        pushError: parser.pushError,
+                        isLegalBar: parser.isLegalBar
+                    };
+                    for (let src of rest) {
+                        result.Content.push(...src.Content.map(note => {
+                            return Object.assign({}, note, {
+                                StartTime: note.StartTime + result.Meta.Duration
+                            });
+                        }));
+                        parser.mergeMeta(result, src);
+                    };
+                    return result;
+                },
+                Library: this.implicitLibCall,
                 Settings: parser.Settings,
-                Libraries: parser.Libraries,
-                pitchQueue: parser.Context.pitchQueue
+                Meta: parser.Meta,
+                EmptyTrack: {
+                    Type: 'Subtrack',
+                    Content: [],
+                    Repeat: -1
+                }
             }, token.Argument.map((arg) => {
                 switch (arg.Type) {
                     case 'Number':
@@ -134,14 +180,45 @@ LibLoader.Default = {
                 }
             }))
         },
+        get implicitLibCall() {
+            delete this.implicitLibCall
+            this.implicitLibCall = new Proxy({}, {
+                get: (_, name) => this.locateFunction(name)
+            })
+            return this.implicitLibCall
+        },
         locateFunction(name) {
             if (name in this.STD) return this.STD[name]
             if (name in this.Custom) return this.Custom[name]
-            return () => { }
+            return () => {}
         }
     },
     MIDIEventList: {},
     Track: {}
+}
+
+const Protocols = {
+    Default: {
+        Read: ['PitchQueue'],
+        Write: ['PitchQueue']
+    }
+}
+
+function wrap(meta, protocol) {
+    const protocolList = Protocols[protocol]
+    return new Proxy(meta, {
+        get(obj, prop) {
+            if (protocolList.Read.includes(prop)) {
+                return obj[prop]
+            }
+            return null
+        },
+        set(obj, prop, val) {
+            if (protocolList.Write.includes(prop)) {
+                obj[prop] = val
+            }
+        }
+    })
 }
 
 module.exports = LibLoader

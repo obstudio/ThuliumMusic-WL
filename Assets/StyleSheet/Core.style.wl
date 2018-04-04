@@ -45,6 +45,21 @@ StyleSheet["Core"] = Notebook[{
 				TemplateBox[{#3[[2]]}, "Spacer1"]
 			}]
 		]}
+	],
+	
+	Cell[StyleData["<Hyperlink>"],
+		TemplateBoxOptions -> {DisplayFunction -> Function[
+			PaneSelectorBox[{
+				True -> TagBox[
+					TagBox[
+						TooltipBox[#2, #3, ##5],
+						EventHandlerTag[{"MouseClicked" :> ReleaseHold @ #4}]
+					],
+					MouseAppearanceTag @ "LinkHand"
+				],
+				False -> #1
+			}, Dynamic @ CurrentValue["MouseOver"]]
+		]}
 	]
 
 }];

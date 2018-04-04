@@ -1,9 +1,9 @@
-# GraceNote ((前倚音))
+# Appoggiatura ((后倚音))
 
-? GraceNote(subtrack, note)
+? Appoggiatura(subtrack, note)
   将*subtrack*作为*note*的前倚音。
-? (subtrack^)note
-  GraceNote函数的简记形式。
+? note(^subtrack)
+  Appoggiatura函数的简记形式。
 
 ^ 具体信息 ^
 
@@ -19,8 +19,8 @@
 
 生成一个简单的前倚音，以及利用简记法的等价表示：
 ```
-GraceNote({13}, {5-})
-(13^)5-
+Appoggiatura({5,}, {13})
+5,(^13)
 ```
 
   ^ 使用实例
@@ -38,7 +38,7 @@ GraceNote({13}, {5-})
 
 ^ 参见 ^
 
-+ [$Appoggiatura] + [$Arpeggio] + [$Seg] +
++ [$GraceNote] + [$Arpeggio] + [$Seg] +
 
 ^ 相关指南
 

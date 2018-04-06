@@ -1,26 +1,25 @@
-class NoteSyntax {
-  constructor(stx) {
-    const InnerOp = this.SyntaxJoin(stx.PitOp, stx.Chord, stx.VolOp);
-    const OuterOp = this.SyntaxJoin(stx.DurOp, stx.Epilog);
-    const patt1 = stx.Degree + InnerOp + OuterOp;
-    const patt2 = '\\[(' + stx.Degree + InnerOp + ')+\\]' + OuterOp;
-    this.patt = new RegExp('^(' + patt1 + '|' + patt2 + ')');
-  }
-  SyntaxJoin() {
-    return Array.from(arguments).map(str => {
-      if (str === '') {
-        return ''
-      } else {
-        return '[' + str + ']'
-      }
-    }).join('');
-  }
+
+function SyntaxJoin(...arr) {
+  return arr.map(arr => {
+    if (arr.length === 0) {
+      return ''
+    } else {
+      return '[' + arr.join('') + ']'
+    }
+  }).join('');
 }
 
-class Syntax {
+function NotePattern(stx) {
+  const InnerOp = SyntaxJoin(stx.PitOp, stx.Chord, stx.VolOp);
+  const OuterOp = SyntaxJoin(stx.DurOp, stx.Epilog);
+  const patt1 = stx.Degree + InnerOp + OuterOp;
+  const patt2 = '\\[(' + stx.Degree + InnerOp + ')+\\]' + OuterOp;
+  return new RegExp('^(' + patt1 + '|' + patt2 + ')');
+}
+
+class TrackSyntax {
   constructor(funcStx, noteStx) {
-    const NotePatt = new NoteSyntax(noteStx).patt;
-    
+    this.funcStx = funcStx;
     this.contexts = {
 
       // Subtrack & Macrotrack & PlainFunction
@@ -56,8 +55,15 @@ class Syntax {
               };
             }
           },
-          this.item('Comment', /<\*(([^*]|\*[^>])*)\*>/),
-          this.item('Macrotrack', /^@([a-zA-Z]\w*)/)
+          {
+            patt: /^@([a-zA-Z]\w*)/,
+            token(match) {
+              return {
+                Type: 'Macrotrack',
+                Name: match[1]
+              };
+            }
+          }
         ]
       },
 
@@ -81,10 +87,10 @@ class Syntax {
               };
             }
           },
+          this.item('Note', NotePattern(noteStx)),
           this.item('RepeatEndBegin', /^:\|\|:/),
           this.item('RepeatBegin', /^\|\|:/),
           this.item('RepeatEnd', /^:\|\|/),
-          this.item('Note', NotePatt),
           this.item('@Local', /^!/),
           {
             patt: /^\[(?=(\d+(~\d+)\. *)+\])/,
@@ -173,7 +179,7 @@ class Syntax {
           },
           {
             patt: /\d+/,
-            token: (match) => parseInt(match[0])
+            token: match => parseInt(match[0])
           },
           {
             patt: /^, */
@@ -185,7 +191,6 @@ class Syntax {
       }
 
     };
-    this.funcStx = funcStx;
   }
 
   item(name, regexp) {
@@ -248,16 +253,13 @@ class Syntax {
             content = subtoken.Content;
           }
           if (stx.pop) pop = true;
-          if (stx.token) result.push(Object.assign(
-            stx.token(match, content),
-            {Pos: index}
-          ));
+          if (stx.token) result.push(Object.assign(stx.token(match, content), {Pos: index}));
           break;
         }
       }
       if (pop) break;
       if (i === syntax.length) {
-        if (valid === true) {
+        if (valid) {
           valid = false;
           warnings.push({
             Err: 'Undefined',
@@ -282,6 +284,7 @@ class Syntax {
 
   getContext(state) {
     if (typeof state === 'string') state = this.contexts[state];
+    if (!('syntax' in state)) throw new Error();
     const result = state.syntax;
     if (state.include) {
       state.include.forEach(state => {
@@ -293,6 +296,7 @@ class Syntax {
 
 }
 
-module.exports = Syntax;
+module.exports = TrackSyntax;
 
-console.log(new Syntax({}, {}).tokenize('foo(1uv,[2],"3")sx||:'))
+
+

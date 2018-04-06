@@ -26,7 +26,7 @@ module.exports = {
 
     // Standard Package
     Tremolo1(expr, subtrack) {
-        /**** (^%1-)&2 ****/
+        // alias: (^%1-)&2
         const src = this.ParseTrack(subtrack);
         const time = Math.pow(2, -expr) * 60 / this.Settings.Speed;
         const scale = time / src.Meta.Duration;
@@ -37,7 +37,7 @@ module.exports = {
     },
 
     Tremolo2(expr, subtrack1, subtrack2) {
-        /**** &2(^%1=)&3 ****/
+        // alias: &2(^%1=)&3
         const src1 = this.ParseTrack(subtrack1);
         const src2 = this.ParseTrack(subtrack2);
         const time = Math.pow(2, -expr) * 60 / this.Settings.Speed;
@@ -53,7 +53,7 @@ module.exports = {
     },
 
     Tuplet(expr, subtrack) {
-        /**** (^!1~)&2 ****/
+        // alias: (^!1~)&2
         const scale = Math.pow(2, Math.floor(Math.log2(expr))) / expr;
         const src = this.ParseTrack(subtrack, {
             Settings: { Bar: this.Settings.Bar / scale }
@@ -66,7 +66,7 @@ module.exports = {
     },
 
     Portamento(subtrack1, subtrack2) {
-        /**** &1~&2 ****/
+        // alias: &1~&2
         const src1 = this.ParseTrack(subtrack1);
         const src2 = this.ParseTrack(subtrack2);
         const note1 = src1.Content.pop();
@@ -99,7 +99,7 @@ module.exports = {
     },
 
     GraceNote(subtrack1, subtrack2) {
-        /**** (^&1\^)&2 ****/
+        // alias: (^&1\^)&2
         const src1 = this.ParseTrack(subtrack1);
         const src2 = this.ParseTrack(subtrack2);
         const seg = this.Settings.getOrSetDefault('Seg', 1 / 4)
@@ -129,7 +129,7 @@ module.exports = {
     },
 
     Appoggiatura(subtrack1, subtrack2) {
-        /**** &1(\^^&2) ****/
+        // alias: &1(\^^&2)
         const src1 = this.ParseTrack(subtrack1);
         const src2 = this.ParseTrack(subtrack2);
         const seg = this.Settings.getOrSetDefault('Seg', 1 / 4)
@@ -158,7 +158,7 @@ module.exports = {
     },
 
     Fermata(subtrack) {
-        /**** (.)&1 ****/
+        // alias: (.)&1
         const src = this.ParseTrack(subtrack);
         const ferm = this.Settings.getOrSetDefault('Ferm', 2);
         src.Content = this.Library._rebeat_(src.Content, ferm);
@@ -167,7 +167,7 @@ module.exports = {
     },
 
     Arpeggio(subtrack) {
-        /**** \$&1 ****/
+        // alias: \$&1
         const src = this.ParseTrack(subtrack);
         const seg = this.Settings.getOrSetDefault('Seg', 1 / 4)
         const scale = seg / Math.max(src.Content.length, 4);
@@ -195,7 +195,7 @@ module.exports = {
     },
 
     Vol(volume) {
-        /**** (^!1\%) ****/
+        // alias: (^!1\%)
         if (volume instanceof Array) {
             this.Settings.Volume = volume
         } else {
@@ -208,7 +208,7 @@ module.exports = {
     },
 
     Key(key) {
-        /**** (1=$1) ****/
+        // alias: (1=$1)
         let delta
         if (typeof key === 'string') {
             const match = arguments[0].match(/^((#|b)\2*)?([A-G])(('|,)\5*)?/)
@@ -233,7 +233,7 @@ module.exports = {
     },
 
     KeyShift(delta) {
-        /**** (!1) ****/
+        // alias: (!1)
         for (var i = 0, length = this.Settings.Key.length; i < length; i++) {
             this.Settings.Key[i] += delta
         }
@@ -254,12 +254,12 @@ module.exports = {
     },
 
     Spd(speed) {
-        /**** (^!1) ****/
+        // alias: (^!1)
         this.Settings.assignSetting('Speed', speed, (speed) => speed > 0);
     },
 
     BarBeat(bar, beat) {
-        /**** (^!1/^!2) ****/
+        // alias: (^!1/^!2)
         this.Settings.assignSetting('Bar', bar, (bar) => bar > 0 && Number.isInteger(bar))
         this.Settings.assignSetting('Beat', beat, (beat) => beat > 0 && Number.isInteger(Math.log2(beat)))
     },

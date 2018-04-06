@@ -29,13 +29,6 @@ class Tokenizer {
     }
   }
 
-  tokenize1() {
-    this.regularize()
-    this.extractHeader()
-    this.split()
-    return this
-  }
-
   tokenize() {
     this.extractHeader()
     this.split()

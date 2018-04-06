@@ -6,8 +6,8 @@ class NoteSyntax {
     const patt2 = '\\[(' + stx.Degree + InnerOp + ')+\\]' + OuterOp;
     this.patt = new RegExp('^(' + patt1 + '|' + patt2 + ')');
   }
-  syntaxJoin() {
-    return arguments.map(str => {
+  SyntaxJoin() {
+    return Array.from(arguments).map(str => {
       if (str === '') {
         return ''
       } else {
@@ -28,7 +28,7 @@ class Syntax {
         syntax: [
           {
             patt: /^\{(?:(\d+)\*)?/,
-            push: this.Next('Default', /^\}/),
+            push: 'Default',
             token(match, content) {
               let repeat;
               if (match[1] != undefined) {
@@ -46,7 +46,7 @@ class Syntax {
           },
           {
             patt: /^([a-zA-Z][a-zA-Z\d]*)\(/,
-            push: this.Next('Argument', /^\)/),
+            push: 'Argument',
             token(match, content) {
               return {
                 Type: 'Function',
@@ -56,7 +56,8 @@ class Syntax {
               };
             }
           },
-          this.Item('Macrotrack', /^@([a-zA-Z]\w*)/)
+          this.item('Comment', /<\*(([^*]|\*[^>])*)\*>/),
+          this.item('Macrotrack', /^@([a-zA-Z]\w*)/)
         ]
       },
 
@@ -70,7 +71,7 @@ class Syntax {
           },
           {
             patt: /^\(([a-zA-Z][a-zA-Z\d]*):/,
-            push: this.Next('Argument', /^\)/),
+            push: 'Argument',
             token(match, content) {
               return {
                 Type: 'Function',
@@ -80,15 +81,14 @@ class Syntax {
               };
             }
           },
-          this.Item('Comment', /<\*(([^*]|\*[^>])*)\*>/),
-          this.Item('RepeatEndBegin', /:\|\|:/),
-          this.Item('RepeatBegin', /\|\|:/),
-          this.Item('RepeatEnd', /:\|\|/),
-          this.Item('Note', NotePatt),
-          this.Item('@Local', /!/),
+          this.item('RepeatEndBegin', /^:\|\|:/),
+          this.item('RepeatBegin', /^\|\|:/),
+          this.item('RepeatEnd', /^:\|\|/),
+          this.item('Note', NotePatt),
+          this.item('@Local', /^!/),
           {
             patt: /^\[(?=(\d+(~\d+)\. *)+\])/,
-            push: this.Next('Volta', /\]/),
+            push: this.next('Volta', /\]/),
             token(match, content) {
               return {
                 Type: 'Volta',
@@ -98,7 +98,7 @@ class Syntax {
           },
           {
             patt: /^\\(?=(\d+(~\d+))(, *(\d+(~\d+)))*:)/,
-            push: this.Next('Volta', /:/),
+            push: this.next('Volta', /:/),
             token(match, content) {
               return {
                 Type: 'BarLine',
@@ -109,7 +109,7 @@ class Syntax {
             }
           },
           {
-            patt: /^\/|\||\\/,
+            patt: /^(\/|\||\\)/,
             token(match) {
               return {
                 Type: 'BarLine',
@@ -119,16 +119,16 @@ class Syntax {
               };
             }
           },
-          this.Item('PedalPress', /&/),
-          this.Item('PedalRelease', /\*/),
-          this.Item('Coda', /\+/),
-          this.Item('Coda', /Coda/),
-          this.Item('Coda', /ToCoda/),
-          this.Item('Segno', /s/),
-          this.Item('Segno', /Segno/),
-          this.Item('DaCapo', /DC/),
-          this.Item('DaSegno', /DS/),
-          this.Item('Fine', /Fine/)
+          this.item('PedalPress', /^&/),
+          this.item('PedalRelease', /^\*/),
+          this.item('Coda', /^\+/),
+          this.item('Coda', /^Coda/),
+          this.item('Coda', /^ToCoda/),
+          this.item('Segno', /^s/),
+          this.item('Segno', /^Segno/),
+          this.item('DaCapo', /^DC/),
+          this.item('DaSegno', /^DS/),
+          this.item('Fine', /^Fine/)
         ]
       },
 
@@ -137,8 +137,12 @@ class Syntax {
         include: ['Prototype'],
         syntax: [
           {
+            patt: /^\)/,
+            pop: true
+          },
+          {
             patt: /^\[/,
-            push: this.Next('Argument', /^\]/),
+            push: this.next('Argument', /^\]/),
             token(match, content) {
               return {
                 Type: 'Array',
@@ -146,10 +150,10 @@ class Syntax {
               };
             }
           },
-          this.Item('Number', /^([+\-]?\d+([./]\d+)|Log2\(\d+\)([+\-]\d+)?)/),
-          this.Item('String', /^"(([^"]|\\.)*)"/),
+          this.item('Number', /^([+\-]?\d+([./]\d+)?|Log2\(\d+\)([+\-]\d+)?)/),
+          this.item('String', /^"(([^"]|\\.)*)"/),
           {
-            patt: /^,\s*/
+            patt: /^, */
           }
         ]
       },
@@ -172,7 +176,7 @@ class Syntax {
             token: (match) => parseInt(match[0])
           },
           {
-            patt: /, */
+            patt: /^, */
           },
           {
             patt: /^\. */
@@ -184,12 +188,12 @@ class Syntax {
     this.funcStx = funcStx;
   }
 
-  Item(name, regexp) {
+  item(name, regexp) {
     return {
       patt: regexp,
       token(match) {
         const result = { Type: name };
-        if (match[1] != undefined) {
+        if (match[1]) {
           Object.assign(result, { Content: match[1] });
         }
         return result;
@@ -197,15 +201,15 @@ class Syntax {
     };
   }
 
-  Next(name, event) {
+  next(name, ...event) {
     return {
       include: [name],
-      syntax: [
-        {
-          patt: event,
+      syntax: event.map(regex => {
+        return {
+          patt: regex,
           pop: true
-        }
-      ]
+        };
+      })
     };
   }
 
@@ -216,11 +220,79 @@ class Syntax {
   //   pop: true
   //   token: callback
 
-  tokenize(string) {
+  tokenize(string, state = 'Default') {
+    let valid = true, index = 0;
+    const result = [], warnings = [];
+    const syntax = this.getContext(state);
 
+    while (string.length > 0) {
+      let i, pop = false;
+      for (i = 0; i < syntax.length; i++) {
+        const stx = syntax[i];
+        const match = string.match(stx.patt);
+        if (match) {
+          let content = [];
+          index += match[0].length;
+          string = string.slice(match[0].length);
+          if (stx.push) {
+            const subtoken = this.tokenize(string, stx.push);
+            warnings.push(...subtoken.Warnings.map(msg => {
+              return {
+                Err: msg.Err,
+                Args: msg.Args,
+                Pos: msg.Pos + index
+              };
+            }));
+            index += subtoken.Index;
+            string = string.slice(subtoken.Index);
+            content = subtoken.Content;
+          }
+          if (stx.pop) pop = true;
+          if (stx.token) result.push(Object.assign(
+            stx.token(match, content),
+            {Pos: index}
+          ));
+          break;
+        }
+      }
+      if (pop) break;
+      if (i === syntax.length) {
+        if (valid === true) {
+          valid = false;
+          warnings.push({
+            Err: 'Undefined',
+            Args: '',
+            Pos: index
+          });
+        }
+        warnings[warnings.length - 1].Args += string.charAt(0);
+        string = string.slice(1);
+        index += 1;
+      } else {
+        valid = true;
+      }
+    }
+
+    return {
+      Index: index,
+      Content: result,
+      Warnings: warnings
+    };
+  }
+
+  getContext(state) {
+    if (typeof state === 'string') state = this.contexts[state];
+    const result = state.syntax;
+    if (state.include) {
+      state.include.forEach(state => {
+        result.unshift(...this.contexts[state].syntax);
+      });
+    }
+    return result;
   }
 
 }
 
 module.exports = Syntax;
 
+console.log(new Syntax({}, {}).tokenize('foo(1uv,[2],"3")sx||:'))

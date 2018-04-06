@@ -18,9 +18,9 @@ H		sex+			[], 10
 s		septem			[], 11
 o		octo			[], 12
 u		octo (Under)	[-1]-12, []
-i		1st inversion	12, [2;]
-j		2nd inversion	[;2]+12, [3;]
-k		3rd inversion	[;3]+12, [4;]
+i		1st inversion	[:0]+12, [1:]
+j		2nd inversion	[:1]+12, [2:]
+k		3rd inversion	[:2]+12, [3:]
 
 # Function
 
@@ -48,7 +48,7 @@ function _fill_(origin, duration, total) {
 }
 
 function Tremolo1(expr, subtrack) {
-    // alias: (^%1-)&2
+    // prec: 100; alias: (^%1-)&2
     const src = this.ParseTrack(subtrack);
     const time = Math.pow(2, -expr) * 60 / this.Settings.Speed;
     const scale = time / src.Meta.Duration;

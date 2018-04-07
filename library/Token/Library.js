@@ -9,7 +9,13 @@ const ChordPatt = new RegExp(`^${def}${exp}$`);
 
 const AliasPatt = /^(?: *prec(?:edence)?:(\d+);) *alias:(.+)$/i;
 
-const funcTypes = ['FunctionExpression', 'ArrowFunctionExpression', 'FunctionDeclaration', 'ClassDeclaration', 'ClassExpression']
+const funcTypes = [
+  'FunctionExpression', 
+  'ArrowFunctionExpression', 
+  'FunctionDeclaration', 
+  'ClassDeclaration', 
+  'ClassExpression'
+]
 
 class LibTokenizer {
   /**
@@ -41,7 +47,9 @@ class LibTokenizer {
         case 'ThrowStatement':
           throw new Error('With throw')
         case 'TryStatement':
-          return walk(node.block) && (!node.handler || walk(node.handler.body)) && (!node.finalizer || walk(node.finalizer))
+          return walk(node.block) 
+              && (!node.handler || walk(node.handler.body)) 
+              && (!node.finalizer || walk(node.finalizer))
         default:
           return true
       }
@@ -88,59 +96,102 @@ class LibTokenizer {
   }
 
   static FunctionTokenize(code) {
-    const alias = [], data = [], warnings = [];
-    const result = acorn.parse(code, {
-      ecmaVersion: 8,
-      onComment(isBlock, text, start, end) {
-        const result = AliasPatt.exec(text);
-        if (!isBlock && result) {
-          let prec = result[1];
-          if (!prec) {
-            // Set default precedence
-            prec = 100;
-          } else {
-            prec = parseInt(prec.trim());
+    const data = [], errors = [], warnings = [];
+    let result, alias = [];
+    try {
+      result = acorn.parse(code, {
+        ecmaVersion: 8,
+        onComment(isBlock, text, start, end) {
+          const result = AliasPatt.exec(text);
+          if (!isBlock && result) {
+            let prec = result[1];
+            if (prec) prec = parseInt(prec.trim());
+            alias.push({
+              prec: prec,
+              stx: result[2].trim(),
+              start: start,
+              end: end
+            });
           }
-          alias.push({
-            prec: prec,
-            stx: result[2].trim(),
-            start: start,
-            end: end
+        }
+      });
+      result.body.forEach((tok) => {
+        if (tok.type === 'FunctionDeclaration') {
+          let i = alias.length;
+          while (i--) {
+            if (tok.body.start < alias[i].start && tok.body.end > alias[i].end) {
+              let prec = alias[i].prec;
+              const voidQ = LibTokenizer.isVoid(tok);
+              const syntax = LibTokenizer.parseAlias(alias[i]);
+              if (syntax.warnings.length > 0) {
+                warnings.push({
+                  Type: 'AliasError',
+                  Src: alias[i],
+                  Msg: syntax.warnings
+                });
+                continue;
+              }
+              if (prec <= 0 || prec > 10000) {
+                warnings.push({
+                  Type: 'InvalidPrec',
+                  Prec: prec
+                });
+                continue;
+              }
+              if (!prec) {
+                if (syntax.Syntax.ArgCount === 0) {
+                  prec = 100;
+                } else if (syntax.Syntax.ArgCount === 1) {
+                  prec = 200;
+                } else {
+                  prec = 300;
+                }
+              }
+              data.push({
+                Name: tok.id.name,
+                Syntax: alias[i].stx,
+                VoidQ: voidQ,
+                Prec: prec
+              });
+              alias.splice(i, 1);
+            }
+          }
+        } else {
+          errors.push({
+            Err: 'NotFuncDecl',
+            Type: tok.type,
+            Start: tok.start,
+            End: tok.end
           });
         }
-      }
-    });
-    result.body.forEach((tok) => {
-      if (tok.type === 'FunctionDeclaration') {
-        const info = {
-          Name: tok.id.name,
-          Alias: []
-        };
-        let i = alias.length;
-        while (i--) {
-          if (tok.body.start < alias[i].start && tok.body.end > alias[i].end) {
-            info.Alias.push({
-              Prec: alias[i].prec,
-              Syntax: alias[i].stx
-            });
-            alias.splice(i, 1);
-          }
-        }
-        data.push(info);
-      } else {
-        warnings.push({
-          Err: 'NotFuncDecl',
-          Type: tok.type,
-          Start: tok.start,
-          End: tok.end
-        });
-      }
-    });
+      });
+    } catch (err) {
+      errors.push({
+        Err: 'SyntaxError',
+        Info: err
+      });
+    }
+        
     return {
       Data: data,
+      Errors: errors,
       Warnings: warnings
     };
   }
+
+  parseAlias(alias) {
+    let leftArg = rightArg = false;
+    let argCount = 0;
+    const warnings = [];
+    return {
+      Syntax: {
+        Left: leftArg,
+        Right: rightArg
+      },
+      Warnings: warnings
+    };
+  }
+
 }
 
 module.exports = LibTokenizer;

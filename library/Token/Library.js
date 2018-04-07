@@ -105,7 +105,7 @@ class LibTokenizer {
           if (!isBlock && result) {
             const alias = new Alias(text);
             if (alias.analyze()) {
-              dict.push(alias.build());
+              dict.push({ start, end, alias });
             } else {
               warnings.push(...alias.Warnings);
             }
@@ -117,7 +117,7 @@ class LibTokenizer {
           let i = dict.length;
           while (i--) {
             if (tok.body.start < dict[i].start && tok.body.end > dict[i].end) {
-              data.push(Object.assign(dict[i], {Name: tok.id.name}));
+              data.push(Object.assign(dict[i].alias, {Name: tok.id.name}));
               dict.splice(i, 1);
               break;
             }

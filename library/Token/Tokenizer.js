@@ -6,7 +6,6 @@ const packagePath = '../../package/';
 const packageInfo = require(packagePath + 'index.json');
 
 class Tokenizer {
-
   static startsTrue(src, ptr, match, blank = true) {
     return ptr < src.length && (
       src[ptr].startsWith(match) || 
@@ -26,10 +25,8 @@ class Tokenizer {
     this.Library = [];
     this.Warnings = [];
     this.Settings = [];
-    this.Syntax = {
-      Function: [],
-      Chord: []
-    };
+    this.Function = [];
+    this.Chord = [];
 
     let source;
     if (spec === 'URL') {
@@ -60,9 +57,10 @@ class Tokenizer {
 
         case 'include':
           const name = origin.slice(command.index + command[0].length).trim();
-          if (name in packageInfo.Packages) {
-            const packageData = new Tokenizer(packagePath + name + '/main.tml', 'URL');
-            this.FuncStx.push(...packageData.FuncStx);
+          if (packageInfo.Packages.includes(name)) {
+            const path = packagePath + name + '/main.tml';
+            const packageData = new Tokenizer(path, 'URL').getLibrary();
+            this.Function.push(...packageData.Function);
             this.Chord.push(...packageData.Chord);
             this.Library.push({
               Type: 'Package',
@@ -104,6 +102,14 @@ class Tokenizer {
     this.Score = src.slice(ptr);
   }
 
+  getLibrary() {
+    this.initialize();
+    return {
+      Function: this.Function,
+      Chord: this.Chord
+    };
+  }
+
   tokenize() {
     this.initialize();
 
@@ -117,7 +123,7 @@ class Tokenizer {
       if (Tokenizer.startsTrue(src, ptr, '//')) {
         blank += 1;
         if (blank >= 2 && tracks.length != 0) {
-          sections.push(this.organize(tracks, comments));
+          sections.push(this.tokenizeSection(tracks, comments));
           comments = [];
           tracks = [];
         }
@@ -138,7 +144,7 @@ class Tokenizer {
     }
 
     if (tracks.length != 0) {
-      sections.push(this.organize(tracks, comments));
+      sections.push(this.tokenizeSection(tracks, comments));
     }
 
     return {
@@ -149,11 +155,16 @@ class Tokenizer {
     };
   }
 
-  buildSyntax() {
-    return new TrackSyntax({}, {});
+  tokenizeTrack(track) {
+    let name, inst = [];
+    const aliases = this.Function;
+    const chords = this.Chord.map(chord => chord.Notation);
+    return new TrackSyntax(aliases, ['1', '2', '3', '4', '5', '6', '7'], chords);
   }
 
-  organize(tracks, comments) {
+  tokenizeSection(tracks, comments) {
+    console.log(111);
+    const src = tracks.map(this.tokenizeTrack);
     return {
       Tracks: tracks,
       Comments: comments
@@ -162,7 +173,7 @@ class Tokenizer {
 
   mergeLibrary(head, source, type) {
     const data = LibTokenizer[type + 'Tokenize'](source);
-    this.Syntax[type].push(...data.Data);
+    this[type].push(...data.Data);
     this.Warnings.push(...data.Warnings);
     this.Library.push({
       Type: type,
@@ -170,8 +181,15 @@ class Tokenizer {
       Head: head
     });
   }
-
 }
 
 module.exports = Tokenizer
+
+//throw 0;
+
+// const test = new Tokenizer('../../Songs/test.tm', 'URL');
+const test = new Tokenizer('../../package/Ammonia/main.tml', 'URL');
+test.initialize();
+
+console.log(test.tokenize().Sections);
 

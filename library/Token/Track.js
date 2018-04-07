@@ -252,13 +252,11 @@ class TrackSyntax extends FSM {
 
     });
 
-    this.Contexts.alias = aliases.map(alias => alias.build());
+    this.Contexts.alias = aliases.map(alias => alias.build(dict));
   }
 }
 
 module.exports = TrackSyntax;
 
-console.log(new TrackSyntax([],
-  ['1', '2', '3', '4', '5', '6', '7', '0', 'x', '%'],
-[]).tokenize('foo(Log2(3)-4,"2")2#','default').Content);
+
 

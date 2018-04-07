@@ -7,41 +7,37 @@ const SpecialCharacters = [
 ];
 
 const AliasContexts = {
-  default: {
-    syntax: [
-      {
-        patt: /^\$\{([1-9]\d*):/,
-        push: FSM.next('class', /^\}/),
-        token(match, content) {
-          if (content.length === 1 && content[0].Type != '@und') {
-            return {
-              Type: '@arg',
-              Class: content[0].Type,
-              Id: parseInt(match[1])
-            };
-          } else {
-            return {
-              Type: '@inv'
-            };
-          }
+  default: [
+    {
+      patt: /^\$\{([1-9]\d*):/,
+      push: FSM.next('class', /^\}/),
+      token(match, content) {
+        if (content.length === 1 && content[0].Type != '@und') {
+          return {
+            Type: '@arg',
+            Class: content[0].Type,
+            Id: parseInt(match[1])
+          };
+        } else {
+          return {
+            Type: '@inv'
+          };
         }
-      },
-      FSM.item('@lit', /^([^\{\}\[\]"])/)
-    ]
-  },
-  class: {
-    syntax: [
-      FSM.item('sub', /^sub(?:track)?/),
-      FSM.item('exp', /^exp(?:ression)?/),
-      FSM.item('int', /^int(?:eger)?/),
-      FSM.item('sig', /^sig(?:ned)?/),
-      FSM.item('uns', /^uns(?:igned)?/),
-      FSM.item('not', /^notes/),
-      FSM.item('nam', /^name/),
-      FSM.item('str', /^str(?:ing)?/),
-      FSM.item('und', /^[^\}]/)
-    ]
-  }
+      }
+    },
+    FSM.item('@lit', /^([^\{\}\[\]"])/)
+  ],
+  class: [
+    FSM.item('sub', /^sub(?:track)?/),
+    FSM.item('exp', /^exp(?:ression)?/),
+    FSM.item('int', /^int(?:eger)?/),
+    FSM.item('sig', /^sig(?:ned)?/),
+    FSM.item('uns', /^uns(?:igned)?/),
+    FSM.item('not', /^notes/),
+    FSM.item('nam', /^name/),
+    FSM.item('str', /^str(?:ing)?/),
+    FSM.item('und', /^[^\}]/)
+  ]
 }
 
 class Alias extends FSM {

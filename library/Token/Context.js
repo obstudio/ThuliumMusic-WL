@@ -48,6 +48,7 @@ class FSM {
         const match = string.match(stx.patt);
         if (match) {
           let content = [];
+          const position = index;
           index += match[0].length;
           string = string.slice(match[0].length);
           if (stx.push) {
@@ -55,7 +56,7 @@ class FSM {
             warnings.push(...subtoken.Warnings.map(msg => {
               return {
                 Err: msg.Err,
-                Args: msg.Args,
+                Src: msg.Src,
                 Pos: msg.Pos + index
               };
             }));
@@ -65,7 +66,7 @@ class FSM {
           }
           if (stx.pop) pop = true;
           if (stx.token) {
-            result.push(Object.assign(stx.token(match, content), {Pos: index}));
+            result.push(Object.assign(stx.token(match, content), {Pos: position}));
           }
           break;
         }
@@ -76,11 +77,11 @@ class FSM {
           valid = false;
           warnings.push({
             Err: 'Undefined',
-            Args: '',
+            Src: '',
             Pos: index
           });
         }
-        warnings[warnings.length - 1].Args += string.charAt(0);
+        warnings[warnings.length - 1].Src += string.charAt(0);
         string = string.slice(1);
         index += 1;
       } else {
@@ -100,9 +101,11 @@ class FSM {
     if (!('syntax' in state)) throw new Error();
     const result = state.syntax;
     if (state.include) {
+      const includes = [];
       state.include.forEach(state => {
-        result.unshift(...this.Contexts[state].syntax);
+        includes.push(...this.Contexts[state].syntax);
       });
+      result.unshift(...includes);
     }
     return result;
   }

@@ -1,35 +1,42 @@
 const FSM = require('./Context');
 
-const GeneralNoteSyntax = {
-  Degree: ['1', '2', '3', '4', '5', '6', '7', '0', 'x', '%'],
-  PitOp: ["'", ',', '#', 'b'],
-  Chord: [],
-  VolOp: [':', '>'],
-  DurOp: ['-', '=', '_', '.'],
-  Epilog: ['`']
-};
+class NoteSyntax {
+  constructor(degrees, chords) {
+    this.Degree = NoteSyntax.ArrayToRegex(degrees, false);
+    this.Chord = NoteSyntax.ArrayToRegex(chords, true);
+    this.PitOp = "[#b',]*";
+    this.DurOp = '[._=-]*'
+    this.VolOp = '[>:]*';
+    this.Epilog = '[`]*';
+  }
 
-function SyntaxJoin(...arr) {
-  return arr.map(arr => {
-    if (arr.length === 0) {
-      return ''
-    } else {
-      return '[' + arr.join('') + ']'
-    }
-  }).join('');
-}
+  pattern() {
+    const inner = this.Degree + this.PitOp + this.Chord + this.VolOp;
+    const outer = this.DurOp + this.Epilog;
+    return '((?:\\[(?:' + inner + ')+\\]|'+ inner + ')' + outer + ')';
+  }
 
-function NotePattern(stx) {
-  const InnerOp = SyntaxJoin(stx.PitOp, stx.Chord, stx.VolOp);
-  const OuterOp = SyntaxJoin(stx.DurOp, stx.Epilog);
-  const patt1 = stx.Degree + InnerOp + OuterOp;
-  const patt2 = '\\[(' + stx.Degree + InnerOp + ')+\\]' + OuterOp;
-  return new RegExp('^(' + patt1 + '|' + patt2 + ')');
+  static ArrayToRegex(array, multi = true) {
+    let charset = '', quantifier = '';
+    if (array.length > 0) charset = '[' + array.join('') + ']';
+    if (multi && array.length > 0) quantifier = '*';
+    return charset + quantifier;
+  }
 }
 
 class TrackSyntax extends FSM {
-  constructor(funcStx, noteStx) {
+  constructor(aliases, degrees, chords) {
+    const dict = {
+      uns: '(\\d+)',
+      sig: '([+\\-]\\d+)',
+      int: '([+\\-]?\\d+)',
+      exp: '([+\\-]?\\d+(?:[./]\\d+)?|Log2\\(\\d+\\)(?:[+\\-]\\d+)?)',
+      str: '((?:[^\\{\\}\\(\\)\\[\\]\\"\\,]|\\\\.)*)',
+      nam: '([a-zA-Z][a-zA-Z\\d]*)',
+      not: new NoteSyntax(degrees, chords).pattern()
+    };
     super({
+
       // Subtrack & Macrotrack & PlainFunction
       prototype: {
         syntax: [
@@ -125,7 +132,7 @@ class TrackSyntax extends FSM {
 
       // Track Contents
       default: {
-        include: ['prototype'],
+        include: ['prototype', 'alias'],
         syntax: [
           {
             patt: /^\}/,
@@ -143,7 +150,7 @@ class TrackSyntax extends FSM {
               };
             }
           },
-          FSM.item('Note', NotePattern(noteStx)),
+          FSM.item('Note', new RegExp('^' + dict.not)),
           FSM.item('RepeatEndBegin', /^:\|\|:/),
           FSM.item('RepeatBegin', /^\|\|:/),
           FSM.item('RepeatEnd', /^:\|\|/),
@@ -203,6 +210,9 @@ class TrackSyntax extends FSM {
             pop: true
           },
           {
+            patt: /^, */
+          },
+          {
             patt: /^\[/,
             push: FSM.next('argument', /^\]/),
             token(match, content) {
@@ -212,10 +222,15 @@ class TrackSyntax extends FSM {
               };
             }
           },
-          FSM.item('Number', /^([+\-]?\d+([./]\d+)?|Log2\(\d+\)([+\-]\d+)?)/),
-          FSM.item('String', /^"(([^"]|\\.)*)"/),
+          FSM.item('Expression', new RegExp('^' + dict.exp)),
           {
-            patt: /^, */
+            patt: new RegExp('^"' + dict.str + '"'),
+            token(match) {
+              return {
+                Type: 'String',
+                Content: match[1].replace(/\\(?=.)/, '')
+              }
+            }
           }
         ]
       },
@@ -247,11 +262,16 @@ class TrackSyntax extends FSM {
       }
 
     });
-  }
 
+    this.Contexts.alias = {
+      syntax: aliases.map(alias => alias.build())
+    };
+  }
 }
 
 module.exports = TrackSyntax;
 
-console.log(new TrackSyntax({},GeneralNoteSyntax).tokenize('{dd}','default'));
+console.log(new TrackSyntax([],
+  ['1', '2', '3', '4', '5', '6', '7', '0', 'x', '%'],
+[]).tokenize('foo(Log2(3),"2")','default').Content[0]);
 

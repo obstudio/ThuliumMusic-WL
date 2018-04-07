@@ -4,6 +4,10 @@ class FSM {
     this.Contexts = source;
   }
 
+  static include(name) {
+    return name;
+  }
+
   static item(name, regexp) {
     return {
       patt: regexp,
@@ -18,18 +22,16 @@ class FSM {
   }
 
   static next(name, ...event) {
-    return {
-      include: [name],
-      syntax: event.map(regex => {
+    return [name,
+      ...event.map(regex => {
         return {
           patt: regex,
           pop: true
         };
       })
-    };
+    ];
   }
 
-  // include: state names
   // syntax:
   //   patt: regex
   //   push: sub-state
@@ -98,16 +100,13 @@ class FSM {
 
   getContext(state) {
     if (typeof state === 'string') state = this.Contexts[state];
-    if (!('syntax' in state)) throw new Error();
-    const result = state.syntax;
-    if (state.include) {
-      const includes = [];
-      state.include.forEach(state => {
-        includes.push(...this.Contexts[state].syntax);
-      });
-      result.unshift(...includes);
+    let i = state.length;
+    while (i--) {
+      if (typeof state[i] === 'string') {
+        state.splice(i, 1, ...this.Contexts[state[i]]);
+      }
     }
-    return result;
+    return state;
   }
 
 }

@@ -1,3 +1,13 @@
+const FSM = require('./Context');
+
+const GeneralNoteSyntax = {
+  Degree: ['1', '2', '3', '4', '5', '6', '7', '0', 'x', '%'],
+  PitOp: ["'", ',', '#', 'b'],
+  Chord: [],
+  VolOp: [':', '>'],
+  DurOp: ['-', '=', '_', '.'],
+  Epilog: ['`']
+};
 
 function SyntaxJoin(...arr) {
   return arr.map(arr => {
@@ -17,17 +27,15 @@ function NotePattern(stx) {
   return new RegExp('^(' + patt1 + '|' + patt2 + ')');
 }
 
-class TrackSyntax {
+class TrackSyntax extends FSM {
   constructor(funcStx, noteStx) {
-    this.funcStx = funcStx;
-    this.contexts = {
-
+    super({
       // Subtrack & Macrotrack & PlainFunction
-      Prototype: {
+      prototype: {
         syntax: [
           {
             patt: /^\{(?:(\d+)\*)?/,
-            push: 'Default',
+            push: 'default',
             token(match, content) {
               let repeat;
               if (match[1] != undefined) {
@@ -45,7 +53,7 @@ class TrackSyntax {
           },
           {
             patt: /^([a-zA-Z][a-zA-Z\d]*)\(/,
-            push: 'Argument',
+            push: 'argument',
             token(match, content) {
               return {
                 Type: 'Function',
@@ -67,9 +75,57 @@ class TrackSyntax {
         ]
       },
 
+      init: {
+        syntax: [
+          {
+            patt: /^</,
+            push: {
+              syntax: [
+                {
+                  patt: /^>/,
+                  pop: true
+                },
+                {
+                  patt: /^(:)(?:([a-zA-Z][a-zA-Z\d]*):)/,
+                  token(match) {
+                    return {
+                      Type: '@name',
+                      name: match[2],
+                      macro: Boolean(match[1])
+                    };
+                  }
+                },
+                {
+                  patt: /[a-zA-Z][a-zA-Z\d]*/,
+                  push: FSM.next('default', /^, */, /^(?=>)/),
+                  token(match, content) {
+                    return {
+                      Type: '@inst',
+                      name: match[0],
+                      spec: content
+                    };
+                  }
+                },
+                {
+                  patt: /, */
+                }
+              ]
+            },
+            token(match, content) {
+              return {
+                Type: '@meta',
+                Name: '',
+                Instruments: []
+              };
+            }
+          },
+          'default'
+        ]
+      },
+
       // Track Contents
-      Default: {
-        include: ['Prototype'],
+      default: {
+        include: ['prototype'],
         syntax: [
           {
             patt: /^\}/,
@@ -77,7 +133,7 @@ class TrackSyntax {
           },
           {
             patt: /^\(([a-zA-Z][a-zA-Z\d]*):/,
-            push: 'Argument',
+            push: 'argument',
             token(match, content) {
               return {
                 Type: 'Function',
@@ -87,24 +143,24 @@ class TrackSyntax {
               };
             }
           },
-          this.item('Note', NotePattern(noteStx)),
-          this.item('RepeatEndBegin', /^:\|\|:/),
-          this.item('RepeatBegin', /^\|\|:/),
-          this.item('RepeatEnd', /^:\|\|/),
-          this.item('@Local', /^!/),
+          FSM.item('Note', NotePattern(noteStx)),
+          FSM.item('RepeatEndBegin', /^:\|\|:/),
+          FSM.item('RepeatBegin', /^\|\|:/),
+          FSM.item('RepeatEnd', /^:\|\|/),
+          FSM.item('LocalIndicator', /^!/),
           {
             patt: /^\[(?=(\d+(~\d+)\. *)+\])/,
-            push: this.next('Volta', /\]/),
+            push: FSM.next('volta', /\]/),
             token(match, content) {
               return {
-                Type: 'Volta',
+                Type: 'volta',
                 Order: [].concat(...content)
               };
             }
           },
           {
             patt: /^\\(?=(\d+(~\d+))(, *(\d+(~\d+)))*:)/,
-            push: this.next('Volta', /:/),
+            push: FSM.next('volta', /:/),
             token(match, content) {
               return {
                 Type: 'BarLine',
@@ -125,22 +181,22 @@ class TrackSyntax {
               };
             }
           },
-          this.item('PedalPress', /^&/),
-          this.item('PedalRelease', /^\*/),
-          this.item('Coda', /^\+/),
-          this.item('Coda', /^Coda/),
-          this.item('Coda', /^ToCoda/),
-          this.item('Segno', /^s/),
-          this.item('Segno', /^Segno/),
-          this.item('DaCapo', /^DC/),
-          this.item('DaSegno', /^DS/),
-          this.item('Fine', /^Fine/)
+          FSM.item('PedalPress', /^&/),
+          FSM.item('PedalRelease', /^\*/),
+          FSM.item('Coda', /^\+/),
+          FSM.item('Coda', /^Coda/),
+          FSM.item('Coda', /^ToCoda/),
+          FSM.item('Segno', /^s/),
+          FSM.item('Segno', /^Segno/),
+          FSM.item('DaCapo', /^DC/),
+          FSM.item('DaSegno', /^DS/),
+          FSM.item('Fine', /^Fine/)
         ]
       },
 
       // Plain Function Arguments
-      Argument: {
-        include: ['Prototype'],
+      argument: {
+        include: ['prototype'],
         syntax: [
           {
             patt: /^\)/,
@@ -148,7 +204,7 @@ class TrackSyntax {
           },
           {
             patt: /^\[/,
-            push: this.next('Argument', /^\]/),
+            push: FSM.next('argument', /^\]/),
             token(match, content) {
               return {
                 Type: 'Array',
@@ -156,8 +212,8 @@ class TrackSyntax {
               };
             }
           },
-          this.item('Number', /^([+\-]?\d+([./]\d+)?|Log2\(\d+\)([+\-]\d+)?)/),
-          this.item('String', /^"(([^"]|\\.)*)"/),
+          FSM.item('Number', /^([+\-]?\d+([./]\d+)?|Log2\(\d+\)([+\-]\d+)?)/),
+          FSM.item('String', /^"(([^"]|\\.)*)"/),
           {
             patt: /^, */
           }
@@ -165,7 +221,7 @@ class TrackSyntax {
       },
 
       // Volta Numbers
-      Volta: {
+      volta: {
         syntax: [
           {
             patt: /(\d+)~(\d+)/,
@@ -190,113 +246,12 @@ class TrackSyntax {
         ]
       }
 
-    };
-  }
-
-  item(name, regexp) {
-    return {
-      patt: regexp,
-      token(match) {
-        const result = { Type: name };
-        if (match[1]) {
-          Object.assign(result, { Content: match[1] });
-        }
-        return result;
-      }
-    };
-  }
-
-  next(name, ...event) {
-    return {
-      include: [name],
-      syntax: event.map(regex => {
-        return {
-          patt: regex,
-          pop: true
-        };
-      })
-    };
-  }
-
-  // include: state names
-  // syntax:
-  //   patt: regex
-  //   push: sub-state
-  //   pop: true
-  //   token: callback
-
-  tokenize(string, state = 'Default') {
-    let valid = true, index = 0;
-    const result = [], warnings = [];
-    const syntax = this.getContext(state);
-
-    while (string.length > 0) {
-      let i, pop = false;
-      for (i = 0; i < syntax.length; i++) {
-        const stx = syntax[i];
-        const match = string.match(stx.patt);
-        if (match) {
-          let content = [];
-          index += match[0].length;
-          string = string.slice(match[0].length);
-          if (stx.push) {
-            const subtoken = this.tokenize(string, stx.push);
-            warnings.push(...subtoken.Warnings.map(msg => {
-              return {
-                Err: msg.Err,
-                Args: msg.Args,
-                Pos: msg.Pos + index
-              };
-            }));
-            index += subtoken.Index;
-            string = string.slice(subtoken.Index);
-            content = subtoken.Content;
-          }
-          if (stx.pop) pop = true;
-          if (stx.token) result.push(Object.assign(stx.token(match, content), {Pos: index}));
-          break;
-        }
-      }
-      if (pop) break;
-      if (i === syntax.length) {
-        if (valid) {
-          valid = false;
-          warnings.push({
-            Err: 'Undefined',
-            Args: '',
-            Pos: index
-          });
-        }
-        warnings[warnings.length - 1].Args += string.charAt(0);
-        string = string.slice(1);
-        index += 1;
-      } else {
-        valid = true;
-      }
-    }
-
-    return {
-      Index: index,
-      Content: result,
-      Warnings: warnings
-    };
-  }
-
-  getContext(state) {
-    if (typeof state === 'string') state = this.contexts[state];
-    if (!('syntax' in state)) throw new Error();
-    const result = state.syntax;
-    if (state.include) {
-      state.include.forEach(state => {
-        result.unshift(...this.contexts[state].syntax);
-      });
-    }
-    return result;
+    });
   }
 
 }
 
 module.exports = TrackSyntax;
 
-
+console.log(new TrackSyntax({},GeneralNoteSyntax).tokenize('{dd}','default'));
 

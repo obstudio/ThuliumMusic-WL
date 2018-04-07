@@ -1,4 +1,5 @@
 const acorn = require('acorn');
+const Alias = require('./Alias');
 
 const int = '([+\\-]?\\d+)';
 const item = `(\\[${int}?(:${int}?)?\\])?${int}?`;
@@ -27,7 +28,7 @@ class LibTokenizer {
   static isVoid(funcAST) {
     function walk(node) {
       if (node.type === 'ReturnStatement') {
-        return false
+        return !node.argument
       }
       if (funcTypes.includes(node.type)) {
         return true

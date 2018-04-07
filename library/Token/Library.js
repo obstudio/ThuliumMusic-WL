@@ -9,7 +9,45 @@ const ChordPatt = new RegExp(`^${def}${exp}$`);
 
 const AliasPatt = /^(?: *prec(?:edence)?:(\d+);) *alias:(.+)$/i;
 
+const funcTypes = ['FunctionExpression', 'ArrowFunctionExpression', 'FunctionDeclaration', 'ClassDeclaration', 'ClassExpression']
+
 class LibTokenizer {
+  /**
+   * 判断函数是否无返回值
+   * @param {ESTree.FunctionDeclaration} funcAST 函数声明节点
+   * @returns {boolean} 当至少有一个支路上包含return语句时返回false，否则返回true
+   * @throws 如果ast包含throw语句，isVoid将丢出一个错误
+   */
+  static isVoid(funcAST) {
+    function walk(node) {
+      if (node.type === 'ReturnStatement') {
+        return false
+      }
+      if (funcTypes.includes(node.type)) {
+        return true
+      }
+      if ('body' in node) {
+        if (node.body instanceof Array) {
+          return node.body.every(walk)
+        } else {
+          return walk(node)
+        }
+      }
+      switch (node.type) {
+        case 'IfStatement':
+          return walk(node.consequent) && (!node.alternate || walk(node.alternate))
+        case 'SwitchStatement':
+          return node.cases.every((sub) => sub.consequent.every(walk))
+        case 'ThrowStatement':
+          throw new Error('With throw')
+        case 'TryStatement':
+          return walk(node.block) && (!node.handler || walk(node.handler.body)) && (!node.finalizer || walk(node.finalizer))
+        default:
+          return true
+      }
+    }
+    return walk(funcAST.body)
+  }
 
   static ChordTokenize(lines) {
     const data = [], warnings = [];
@@ -23,9 +61,9 @@ class LibTokenizer {
           return [
             data[2] ? parseInt(data[2]) : 0,
             data[4] ? parseInt(data[4]) :
-            data[3] ? -1 :
-            data[2] ? parseInt(data[2]) : 
-            data[1] ? -1 : 0,
+              data[3] ? -1 :
+                data[2] ? parseInt(data[2]) :
+                  data[1] ? -1 : 0,
             data[5] ? parseInt(data[5]) : 0
           ];
         });
@@ -48,7 +86,7 @@ class LibTokenizer {
       Warnings: warnings
     };
   }
-  
+
   static FunctionTokenize(code) {
     const alias = [], data = [], warnings = [];
     const result = acorn.parse(code, {
@@ -64,10 +102,10 @@ class LibTokenizer {
             prec = parseInt(prec.trim());
           }
           alias.push({
-            prec: prec, 
-            stx: result[2].trim(), 
-            start: start, 
-            end: end 
+            prec: prec,
+            stx: result[2].trim(),
+            start: start,
+            end: end
           });
         }
       }
@@ -103,8 +141,6 @@ class LibTokenizer {
       Warnings: warnings
     };
   }
-
 }
 
 module.exports = LibTokenizer;
-

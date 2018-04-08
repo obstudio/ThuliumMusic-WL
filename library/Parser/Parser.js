@@ -45,7 +45,7 @@ class Parser {
             delete section.Prolog
             delete section.Epilog
         }
-        this.tokenizedData = result
+        this.tokenizedData.Sections = result
     }
 
     generateOrder() {

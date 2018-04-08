@@ -1,3 +1,9 @@
+const SubtrackTypes = [
+  'Subtrack',
+  'Macrotrack',
+  'Note'
+];
+
 class FSM {
 
   constructor(source) {
@@ -107,7 +113,7 @@ class FSM {
 
     return {
       Index: index,
-      Content: result,
+      Content: FSM.arrange(result),
       Warnings: warnings
     };
   }
@@ -128,7 +134,73 @@ class FSM {
     return result;
   }
 
+  static isSubtrack(token) {
+    if (SubtrackTypes.includes(token.Type)) {
+      return true;
+    } else if (token.Type === 'Function' && !token.VoidQ) {
+      return true;
+    } else {
+      return false;
+    }
+  }
+
+  static arrange(content) {
+    let prior = FSM.findPrior(content);
+    while (prior.Prec < FSM.MaxPrec) {
+      let left = prior.Id, right = prior.Id;
+      if (prior.LID) {
+        left = prior.Id - 1;
+        while (left >= 0 && !FSM.isSubtrack(content[left])) {
+          left -= 1;
+        }
+        if (left < 0) {
+          throw new Error();
+        } else {
+          prior.Args[prior.LID - 1] = {
+            Type: 'Subtrack',
+            Content: content.slice(left, prior.Id)
+          };
+        }
+      }
+      if (prior.RID) {
+        right = prior.Id + 1;
+        while (right < content.length && !FSM.isSubtrack(content[right])) {
+          right += 1;
+        }
+        if (right === content.length) {
+          throw new Error();
+        } else {
+          prior.Args[prior.RID - 1] = {
+            Type: 'Subtrack',
+            Content: content.slice(prior.Id + 1, right + 1)
+          };
+        }
+      }
+      content.splice(left, right - left + 1, {
+        Type: 'Function',
+        Name: prior.Name,
+        Args: prior.Args,
+        Pos: prior.Pos,
+        Alias: prior.Index,
+        VoidQ: prior.VoidQ
+      });
+      prior = FSM.findPrior(content);
+    }
+    return content;
+  }
+
+  static findPrior(content) {
+    let prior = { Prec: FSM.MaxPrec };
+    content.forEach((tok, index) => {
+      if (tok.Type === '@alias' && tok.Prec < prior.Prec) {
+        prior = Object.assign(tok, {Id: index});
+      }
+    });
+    return prior;
+  }
 }
+
+FSM.MaxPrec = 10000;
 
 module.exports = FSM;
 

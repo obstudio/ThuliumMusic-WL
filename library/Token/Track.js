@@ -28,7 +28,7 @@ const ArgumentPatterns = {
 };
 
 class NoteSyntax {
-  constructor(degrees, chords) {
+  constructor(chords, degrees) {
     const degree = NoteSyntax.ArrayToRegex(degrees, false);
     const chord = NoteSyntax.ArrayToRegex(chords, true);
     const pitOp = "[#b',]*";
@@ -39,7 +39,7 @@ class NoteSyntax {
     const outer = `(?:${durOp}${epilog})`;
     this.Inner = `(${degree})(${pitOp})(${chord})(${volOp})`,
     this.Outer = `(${durOp})(${epilog})`;
-    this.Square = `(\\[(${inner}+)\\])`;
+    this.Square = `\\[(${inner}+)\\]`;
     this.Patt = `((?:\\[${inner}+\\]|${inner})${outer})`;
   }
 
@@ -54,13 +54,14 @@ class NoteSyntax {
 }
 
 class TrackSyntax extends FSM {
-  constructor(aliases, degrees, chords) {
-    const note = new NoteSyntax(degrees, chords);
+  constructor(functions, aliases, chords, degrees) {
+    const name = functions.map(func => func.Name).join('|');
+    const note = new NoteSyntax(chords, degrees);
     const dict = Object.assign({
       not: {
         patt: note.Patt,
         meta: 'Subtrack',
-        epilog: (arg) => this.tokenize(arg, 'note')
+        epilog: (arg) => this.tokenize(arg, 'note').Content
       }
     }, ArgumentPatterns);
 
@@ -87,14 +88,15 @@ class TrackSyntax extends FSM {
           }
         },
         {
-          patt: /^([a-zA-Z][a-zA-Z\d]*)\(/,
+          patt: new RegExp(`^(${name})\\(`),
           push: 'argument',
           token(match, content) {
             return {
               Type: 'Function',
               Name: match[1],
               Alias: -1,
-              Args: content
+              Args: content,
+              VoidQ: functions.find(func => func.Name === match[1]).VoidQ
             };
           }
         },
@@ -111,7 +113,7 @@ class TrackSyntax extends FSM {
 
       note: [
         {
-          patt: new RegExp(note.Inner + note.Outer),
+          patt: new RegExp('^' + note.Inner + note.Outer),
           token(match) {
             return {
               Type: 'Note',
@@ -124,18 +126,28 @@ class TrackSyntax extends FSM {
                 }
               ],
               DurOp: match[5],
-              Stac: match[6].length()
+              Stac: match[6].length
             };
           }
         },
         {
-          patt: new RegExp(note.Square + note.Outer),
+          patt: new RegExp('^' + note.Square + note.Outer),
           token(match) {
+            const inner = new RegExp(note.Inner);
+            const match1 = match[1].match(new RegExp(inner, 'g'));
             return {
               Type: 'Note',
-              Pitches: match[1],
+              Pitches: match1.map(str => {
+                const match = inner.exec(str);
+                return {
+                  Degree: match[1],
+                  PitOp: match[2],
+                  Chord: match[3],
+                  VolOp: match[4]
+                };
+              }),
               DurOp: match[2],
-              Stac: match[3]
+              Stac: match[3].length
             };
           }
         }
@@ -169,7 +181,7 @@ class TrackSyntax extends FSM {
           pop: true
         },
         {
-          patt: /^\(([a-zA-Z][a-zA-Z\d]*):/,
+          patt: new RegExp(`^\\((${name}):`),
           push: 'argument',
           token(match, content) {
             return {

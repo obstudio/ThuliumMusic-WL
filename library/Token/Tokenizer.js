@@ -1,7 +1,6 @@
 const fs = require('fs');
 const LibTokenizer = require('./Library');
 const TrackSyntax = require('./Track');
-const FSM = require('./Context');
 
 const instrDict = require('../Config/Instrument.json');
 const drumDict = require('../Config/Percussion.json');
@@ -31,9 +30,13 @@ class Tokenizer {
     this.Comment = [];
     this.Library = [];
     this.Warnings = [];
+    this.Errors = [];
     this.Settings = [];
-    this.Function = [];
-    this.Chord = [];
+
+    this.Dict = [];       // Function Attributes
+    this.Alias = [];      // Function Aliases
+    this.Chord = [];      // Chord Operators
+
     this.$init = false;
 
     let source;
@@ -68,10 +71,7 @@ class Tokenizer {
         case 'include':
           const name = origin.slice(command.index + command[0].length).trim();
           if (packageInfo.Packages.includes(name)) {
-            const path = packagePath + name + '/main.tml';
-            const packageData = new Tokenizer(path, 'URL').getLibrary();
-            this.Function.push(...packageData.Function);
-            this.Chord.push(...packageData.Chord);
+            this.loadLibrary(name);
             this.Library.push({
               Type: 'Package',
               Path: name,
@@ -113,16 +113,9 @@ class Tokenizer {
     this.$init = true;
   }
 
-  getLibrary() {
-    this.initialize();
-    return {
-      Function: this.Function,
-      Chord: this.Chord
-    };
-  }
-
   tokenize() {
     this.initialize();
+    this.loadLibrary(packageInfo.AutoLoad);
 
     const sections = [];
     const src = this.Score;
@@ -167,16 +160,17 @@ class Tokenizer {
   }
 
   tokenizeTrack(track) {
-    let name, play, inst = [], degrees = ['0', '%'];
+    let name, play = true, inst = [], degrees = ['0', '%'];
     const instrDegrees = ['1', '2', '3', '4', '5', '6', '7'];
     const drumDegrees = ['x'];
-    const aliases = this.Function;
+    const functions = this.Dict;
+    const aliases = this.Alias;
     const chords = this.Chord.map(chord => chord.Notation);
     const meta = track.match(/^<(?:(:)?([a-zA-Z][a-zA-Z\d]*):)?/);
     if (meta) {
       play = meta[1];
       name = meta[2];
-      const syntax = new TrackSyntax(aliases, degrees, chords);
+      const syntax = new TrackSyntax(functions, aliases, chords, degrees);
       track = track.slice(meta[0].length);
       const data = syntax.tokenize(track, 'meta');
       data.Content.forEach(tok => {
@@ -188,7 +182,7 @@ class Tokenizer {
           instrDegrees.forEach(deg => {
             if (!degrees.includes(deg)) degrees.push(deg);
           });
-        } else if (instrList.includes(tok.name)) {
+        } else if (drumList.includes(tok.name)) {
           drumDegrees.forEach(deg => {
             if (!degrees.includes(deg)) degrees.push(deg);
           });
@@ -202,10 +196,10 @@ class Tokenizer {
     } else {
       degrees = ['1', '2', '3', '4', '5', '6', '7', '0', '%'];
     }
-    const syntax = new TrackSyntax(aliases, degrees, chords);
+    const syntax = new TrackSyntax(functions, aliases, chords, degrees);
     const result = syntax.tokenize(track, 'default');
     return {
-      Play: Boolean(play),
+      Play: !!play,
       Name: name,
       Instruments: inst,
       Content: result.Content
@@ -220,9 +214,30 @@ class Tokenizer {
     };
   }
 
+  getLibrary() {
+    this.initialize();
+    if (this.Errors.length > 0) {
+      throw new Error();
+    }
+    return {
+      Dict: this.Dict,
+      Chord: this.Chord,
+      Alias: this.Alias
+    };
+  }
+
+  loadLibrary(name) {
+    const path = packagePath + name + '/main.tml';
+    const packageData = new Tokenizer(path, 'URL').getLibrary();
+    this.Dict.push(...packageData.Dict);
+    this.Chord.push(...packageData.Chord);
+    this.Alias.push(...packageData.Alias);
+  }
+
   mergeLibrary(head, source, type) {
     const data = LibTokenizer[type + 'Tokenize'](source);
-    this[type].push(...data.Data);
+    Object.assign(this, data.Data);
+    this.Errors.push(...data.Errors);
     this.Warnings.push(...data.Warnings);
     this.Library.push({
       Type: type,
@@ -234,10 +249,9 @@ class Tokenizer {
 
 module.exports = Tokenizer
 
-// throw 0;
-
+// const test = new Tokenizer('../../package/Ammonia/main.tml', 'URL');
+// test.initialize()
+// console.log(test.Alias)
 const test = new Tokenizer('../../Songs/test.tm', 'URL');
 
-//test.tokenize()
-
-console.log(test.tokenize().Sections[0].Tracks[0]);
+console.log(test.tokenize().Sections[0].Tracks[0].Content);

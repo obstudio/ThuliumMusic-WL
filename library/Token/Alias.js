@@ -128,6 +128,14 @@ class Alias extends FSM {
       this.Syntax.pop();
     }
 
+    if (this.Prec === 0 || this.Prec >= FSM.MaxPrec) {
+      this.Warnings.push({ 
+        Err: 'PrecedenceRange',
+        Prec: this.Prec
+      });
+      this.Prec = undefined;
+    }
+
     if (!this.Prec) {
       if (this.LeftId && this.RightId) {
         this.Prec = 400;
@@ -143,7 +151,7 @@ class Alias extends FSM {
     return this.Warnings.length === 0;
   }
 
-  build(pattdict) {
+  build(dict) {
     let pattern = '^';
     const index = [];
     const _this_ = this;
@@ -155,7 +163,7 @@ class Alias extends FSM {
         }
         pattern += tok.Content;
       } else {
-        pattern += pattdict[tok.Class].patt;
+        pattern += dict[tok.Class].patt;
         index.push(tok);
       }
     });
@@ -165,14 +173,19 @@ class Alias extends FSM {
       token(match) {
         const args = [];
         index.forEach((tok, index) => {
+          let result = match[index + 1];
+          if (dict[tok.Class].epilog) {
+            result = dict[tok.Class].epilog(result);
+          }
           args[tok.Id - 1] = {
-            Type: pattdict[tok.Class].meta,
-            Content: match[index + 1]
+            Type: dict[tok.Class].meta,
+            Content: result
           };
         });
         return {
           Type: '@alias',
           Args: args,
+          VoidQ: _this_.VoidQ,
           Name: _this_.Name,
           LID: _this_.LeftId,
           RID: _this_.RightId,

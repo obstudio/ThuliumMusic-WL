@@ -26,34 +26,34 @@ class LibTokenizer {
   static isVoid(funcAST) {
     function walk(node) {
       if (node.type === 'ReturnStatement') {
-        return !node.argument
+        return !node.argument;
       }
       if (funcTypes.includes(node.type)) {
-        return true
+        return true;
       }
       if ('body' in node) {
         if (node.body instanceof Array) {
-          return node.body.every(walk)
+          return node.body.every(walk);
         } else {
-          return walk(node)
+          return walk(node.body);
         }
       }
       switch (node.type) {
         case 'IfStatement':
-          return walk(node.consequent) && (!node.alternate || walk(node.alternate))
+          return walk(node.consequent) && (!node.alternate || walk(node.alternate));
         case 'SwitchStatement':
-          return node.cases.every((sub) => sub.consequent.every(walk))
+          return node.cases.every((sub) => sub.consequent.every(walk));
         case 'ThrowStatement':
-          throw new Error('With throw')
+          throw new Error('With throw');
         case 'TryStatement':
           return walk(node.block) 
               && (!node.handler || walk(node.handler.body)) 
-              && (!node.finalizer || walk(node.finalizer))
+              && (!node.finalizer || walk(node.finalizer));
         default:
-          return true
+          return true;
       }
     }
-    return walk(funcAST.body)
+    return walk(funcAST.body);
   }
 
   static ChordTokenize(lines) {
@@ -89,23 +89,24 @@ class LibTokenizer {
       }
     });
     return {
-      Data: data,
+      Data: { Chord: data },
+      Errors: [],
       Warnings: warnings
     };
   }
 
   static FunctionTokenize(code) {
-    const data = [], errors = [], warnings = [];
-    let result, dict = [];
+    const aliases = [], errors = [], warnings = [];
+    const dict = [], syntax = [];
     try {
-      result = acorn.parse(code, {
+      const result = acorn.parse(code, {
         ecmaVersion: 8,
         onComment(isBlock, text, start, end) {
           const result = Alias.Pattern.exec(text);
           if (!isBlock && result) {
             const alias = new Alias(text);
             if (alias.analyze()) {
-              dict.push({ start, end, alias });
+              syntax.push({ start, end, alias });
             } else {
               warnings.push(...alias.Warnings);
             }
@@ -114,12 +115,23 @@ class LibTokenizer {
       });
       result.body.forEach((tok) => {
         if (tok.type === 'FunctionDeclaration') {
-          let i = dict.length;
-          while (i--) {
-            if (tok.body.start < dict[i].start && tok.body.end > dict[i].end) {
-              data.push(Object.assign(dict[i].alias, {Name: tok.id.name}));
-              dict.splice(i, 1);
-              break;
+          const name = tok.id.name;
+          if (!name.includes('_')) {
+            const voidQ = LibTokenizer.isVoid(tok);
+            dict.push({
+              Name: name,
+              VoidQ: voidQ
+            });
+            let order = 0;
+            for (let i = 0; i < syntax.length; i++) {
+              if (tok.body.start < syntax[i].start && tok.body.end > syntax[i].end) {
+                order += 1;
+                aliases.push(Object.assign(syntax[i].alias, {
+                  Name: name,
+                  Order: order,
+                  VoidQ: voidQ
+                }));
+              }
             }
           }
         } else {
@@ -139,7 +151,7 @@ class LibTokenizer {
     }
         
     return {
-      Data: data,
+      Data: { Alias: aliases, Dict: dict },
       Errors: errors,
       Warnings: warnings
     };

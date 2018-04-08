@@ -58,9 +58,9 @@ class FSM {
   //   pop: true
   //   token: callback
 
-  tokenize(string, state) {
+  tokenize(string, state, epi = true) {
     let valid = true, index = 0;
-    const result = [], warnings = [];
+    let result = [], warnings = [];
     const syntax = this.getContext(state);
 
     while (string.length > 0) {
@@ -111,9 +111,10 @@ class FSM {
       }
     }
 
+    if (epi) result = FSM.arrange(result);
     return {
       Index: index,
-      Content: FSM.arrange(result),
+      Content: result,
       Warnings: warnings
     };
   }
@@ -156,7 +157,7 @@ class FSM {
         if (left < 0) {
           throw new Error();
         } else {
-          prior.Args[prior.LID - 1] = {
+          prior.Args[prior.LID] = {
             Type: 'Subtrack',
             Content: content.slice(left, prior.Id)
           };
@@ -170,7 +171,7 @@ class FSM {
         if (right === content.length) {
           throw new Error();
         } else {
-          prior.Args[prior.RID - 1] = {
+          prior.Args[prior.RID] = {
             Type: 'Subtrack',
             Content: content.slice(prior.Id + 1, right + 1)
           };
@@ -181,7 +182,7 @@ class FSM {
         Name: prior.Name,
         Args: prior.Args,
         Pos: prior.Pos,
-        Alias: prior.Index,
+        Alias: prior.Order,
         VoidQ: prior.VoidQ
       });
       prior = FSM.findPrior(content);

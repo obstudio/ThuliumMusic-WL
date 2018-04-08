@@ -9,7 +9,7 @@ const SpecialCharacters = [
 const AliasContexts = {
   default: [
     {
-      patt: /^\$\{([1-9]\d*):/,
+      patt: /^\$\{(\d+):/,
       push: FSM.next('class', /^\}/),
       token(match, content) {
         if (content.length === 1 && content[0].Type != '@und') {
@@ -177,7 +177,7 @@ class Alias extends FSM {
           if (dict[tok.Class].epilog) {
             result = dict[tok.Class].epilog(result);
           }
-          args[tok.Id - 1] = {
+          args[tok.Id] = {
             Type: dict[tok.Class].meta,
             Content: result
           };
@@ -189,10 +189,11 @@ class Alias extends FSM {
           Name: _this_.Name,
           LID: _this_.LeftId,
           RID: _this_.RightId,
-          Prec: _this_.Prec
+          Prec: _this_.Prec,
+          Order: _this_.Order
         };
       }
-    }
+    };
   }
 
 }

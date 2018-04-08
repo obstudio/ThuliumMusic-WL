@@ -229,6 +229,22 @@ class TrackSyntax extends FSM {
             };
           }
         },
+        {
+          patt: /^<\*/,
+          push: [
+            {
+              patt: /^\*>/,
+              pop: true
+            },
+            FSM.item('@literal', /^(.)/)
+          ],
+          token(match, content) {
+            return {
+              Type: 'Comment',
+              Content: content.map(tok => tok.Content).join('')
+            }
+          }
+        },
         FSM.item('PedalPress', /^&/),
         FSM.item('PedalRelease', /^\*/),
         FSM.item('Coda', /^\+/),
@@ -239,7 +255,7 @@ class TrackSyntax extends FSM {
         FSM.item('DaCapo', /^DC/),
         FSM.item('DaSegno', /^DS/),
         FSM.item('Fine', /^Fine/),
-        FSM.item('Space', /^\s+/)
+        FSM.item('Space', /^(\s+)/)
       ],
 
       // Plain Function Arguments

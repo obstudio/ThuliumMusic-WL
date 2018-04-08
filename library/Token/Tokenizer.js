@@ -71,12 +71,7 @@ class Tokenizer {
         case 'include':
           const name = origin.slice(command.index + command[0].length).trim();
           if (packageInfo.Packages.includes(name)) {
-            this.loadLibrary(name);
-            this.Library.push({
-              Type: 'Package',
-              Path: name,
-              Head: origin
-            });
+            this.loadLibrary(name, origin);
           } else {
             // custom
           }
@@ -217,7 +212,7 @@ class Tokenizer {
   getLibrary() {
     this.initialize();
     if (this.Errors.length > 0) {
-      throw new Error();
+      throw JSON.stringify(this.Errors);
     }
     return {
       Dict: this.Dict,
@@ -226,12 +221,17 @@ class Tokenizer {
     };
   }
 
-  loadLibrary(name) {
+  loadLibrary(name, origin = '#AUTOLOAD') {
     const path = packagePath + name + '/main.tml';
     const packageData = new Tokenizer(path, 'URL').getLibrary();
     this.Dict.push(...packageData.Dict);
     this.Chord.push(...packageData.Chord);
     this.Alias.push(...packageData.Alias);
+    this.Library.push({
+      Type: 'Package',
+      Path: name,
+      Head: origin
+    });
   }
 
   mergeLibrary(head, source, type) {
@@ -249,9 +249,6 @@ class Tokenizer {
 
 module.exports = Tokenizer
 
-// const test = new Tokenizer('../../package/Ammonia/main.tml', 'URL');
-// test.initialize()
-// console.log(test.Alias)
 const test = new Tokenizer('../../Songs/test.tm', 'URL');
 
-console.log(test.tokenize().Sections[0].Tracks[0].Content);
+console.log(test.tokenize().Sections[0].Tracks[0].Content[1]);

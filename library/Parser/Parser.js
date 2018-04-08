@@ -26,6 +26,7 @@ class Parser {
 
     parse() {
         const result = []
+        this.expandSection()
         this.generateOrder()
         this.tokenizedData.Sections.forEach((part) => {
             if (part.Type === 'Section') {
@@ -35,6 +36,16 @@ class Parser {
             }
         })
         return result
+    }
+
+    expandSection() {
+        const result = []
+        for (const section of this.tokenizedData.Sections) {
+            result.push(...section.Prolog, section, ...section.Epilog)
+            delete section.Prolog
+            delete section.Epilog
+        }
+        this.tokenizedData = result
     }
 
     generateOrder() {

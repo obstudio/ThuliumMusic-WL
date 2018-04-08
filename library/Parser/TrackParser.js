@@ -510,6 +510,7 @@ class SubtrackParser extends TrackParser {
 
     preprocess() {
         this.mergeMacro()
+        if (this.Repeat === undefined) this.Repeat = -1;
         if (this.Repeat > 0) {
             this.Content.forEach((token, index) => {
                 if (token.Skip === true) {

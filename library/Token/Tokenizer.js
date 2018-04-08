@@ -1,6 +1,13 @@
 const fs = require('fs');
 const LibTokenizer = require('./Library');
 const TrackSyntax = require('./Track');
+const FSM = require('./Context');
+
+const instrDict = require('../Config/Instrument.json');
+const drumDict = require('../Config/Percussion.json');
+
+const instrList = Object.keys(instrDict);
+const drumList = Object.keys(drumDict);
 
 const packagePath = '../../package/';
 const packageInfo = require(packagePath + 'index.json');
@@ -27,6 +34,7 @@ class Tokenizer {
     this.Settings = [];
     this.Function = [];
     this.Chord = [];
+    this.$init = false;
 
     let source;
     if (spec === 'URL') {
@@ -38,6 +46,8 @@ class Tokenizer {
   }
 
   initialize() {
+    if (this.$init) return;
+
     let ptr = 0;
     const src = this.Source;
 
@@ -100,6 +110,7 @@ class Tokenizer {
       }
     }
     this.Score = src.slice(ptr);
+    this.$init = true;
   }
 
   getLibrary() {
@@ -156,17 +167,55 @@ class Tokenizer {
   }
 
   tokenizeTrack(track) {
-    let name, inst = [];
+    let name, play, inst = [], degrees = ['0', '%'];
+    const instrDegrees = ['1', '2', '3', '4', '5', '6', '7'];
+    const drumDegrees = ['x'];
     const aliases = this.Function;
     const chords = this.Chord.map(chord => chord.Notation);
-    return new TrackSyntax(aliases, ['1', '2', '3', '4', '5', '6', '7'], chords);
+    const meta = track.match(/^<(?:(:)?([a-zA-Z][a-zA-Z\d]*):)?/);
+    if (meta) {
+      play = meta[1];
+      name = meta[2];
+      const syntax = new TrackSyntax(aliases, degrees, chords);
+      track = track.slice(meta[0].length);
+      const data = syntax.tokenize(track, 'meta');
+      data.Content.forEach(tok => {
+        if (tok.Type != '@inst') {
+          throw new Error();
+          return;
+        }
+        if (instrList.includes(tok.name)) {
+          instrDegrees.forEach(deg => {
+            if (!degrees.includes(deg)) degrees.push(deg);
+          });
+        } else if (instrList.includes(tok.name)) {
+          drumDegrees.forEach(deg => {
+            if (!degrees.includes(deg)) degrees.push(deg);
+          });
+        } else {
+          throw new Error();
+          return;
+        }
+        inst.push({ Name: tok.name, Spec: tok.spec });
+      });
+      track = track.slice(data.Index);
+    } else {
+      degrees = ['1', '2', '3', '4', '5', '6', '7', '0', '%'];
+    }
+    const syntax = new TrackSyntax(aliases, degrees, chords);
+    const result = syntax.tokenize(track, 'default');
+    return {
+      Play: Boolean(play),
+      Name: name,
+      Instruments: inst,
+      Content: result.Content
+    };
   }
 
   tokenizeSection(tracks, comments) {
-    console.log(111);
-    const src = tracks.map(this.tokenizeTrack);
+    const result = tracks.map(track => this.tokenizeTrack(track));
     return {
-      Tracks: tracks,
+      Tracks: result,
       Comments: comments
     };
   }
@@ -185,11 +234,10 @@ class Tokenizer {
 
 module.exports = Tokenizer
 
-//throw 0;
+// throw 0;
 
-// const test = new Tokenizer('../../Songs/test.tm', 'URL');
-const test = new Tokenizer('../../package/Ammonia/main.tml', 'URL');
-test.initialize();
+const test = new Tokenizer('../../Songs/test.tm', 'URL');
 
-console.log(test.tokenize().Sections);
+//test.tokenize()
 
+console.log(test.tokenize().Sections[0].Tracks[0]);

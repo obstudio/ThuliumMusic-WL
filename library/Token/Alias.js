@@ -117,16 +117,16 @@ class Alias extends FSM {
       } else {
         this.Warnings.push({ Err: 'NotSubtrackL' });
       }
+      this.Syntax.shift();
     }
-    this.Syntax.unshift();
     if (this.Syntax[this.Syntax.length - 1].Type === '@arg') {
       if (this.Syntax[this.Syntax.length - 1].Class === 'sub') {
         this.RightId = this.Syntax[this.Syntax.length - 1].Id;
       } else {
         this.Warnings.push({ Err: 'NotSubtrackR' });
       }
+      this.Syntax.pop();
     }
-    this.Syntax.pop();
 
     if (!this.Prec) {
       if (this.LeftId && this.RightId) {
@@ -144,9 +144,9 @@ class Alias extends FSM {
   }
 
   build(pattdict) {
-    let pattern = '';
+    let pattern = '^';
     const index = [];
-    const _this = this;
+    const _this_ = this;
 
     this.Syntax.forEach(tok => {
       if (tok.Type === '@lit') {
@@ -155,23 +155,28 @@ class Alias extends FSM {
         }
         pattern += tok.Content;
       } else {
-        pattern += pattdict[tok.Class];
-        index.push(tok.Id);
+        pattern += pattdict[tok.Class].patt;
+        index.push(tok);
       }
     });
 
     return {
-      patt: pattern,
+      patt: new RegExp(pattern),
       token(match) {
         const args = [];
-        index.forEach((id, index) => args[id] = match[index]);
+        index.forEach((tok, index) => {
+          args[tok.Id - 1] = {
+            Type: pattdict[tok.Class].meta,
+            Content: match[index + 1]
+          };
+        });
         return {
           Type: '@alias',
           Args: args,
-          Name: _this.Name,
-          LID: _this.LeftId,
-          RID: _this.RightId,
-          Prec: _this.Prec
+          Name: _this_.Name,
+          LID: _this_.LeftId,
+          RID: _this_.RightId,
+          Prec: _this_.Prec
         };
       }
     }

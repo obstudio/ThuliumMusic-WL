@@ -8,7 +8,21 @@ class FSM {
     return name;
   }
 
+  static autopop() {
+    return {
+      patt: /^(?=.)/,
+      pop: true
+    };
+  }
+
+  static ahead(str) {
+    return new RegExp('^(?=' + str + ')');
+  }
+
   static item(name, regexp) {
+    if (typeof regexp === 'string') {
+      regexp = new RegExp('^(' + regexp + ')');
+    }
     return {
       patt: regexp,
       token(match) {
@@ -22,14 +36,14 @@ class FSM {
   }
 
   static next(name, ...event) {
-    return [name,
-      ...event.map(regex => {
-        return {
-          patt: regex,
-          pop: true
-        };
-      })
-    ];
+    const result = event.map(regex => {
+      return {
+        patt: regex,
+        pop: true
+      };
+    });
+    result.push(name);
+    return result;
   }
 
   // syntax:
@@ -99,14 +113,19 @@ class FSM {
   }
 
   getContext(state) {
-    if (typeof state === 'string') state = this.Contexts[state];
-    let i = state.length;
+    let result;
+    if (typeof state === 'string') {
+      result = this.Contexts[state];
+    } else {
+      result = state;
+    }
+    let i = result.length;
     while (i--) {
-      if (typeof state[i] === 'string') {
-        state.splice(i, 1, ...this.Contexts[state[i]]);
+      if (typeof result[i] === 'string') {
+        result.splice(i, 1, ...this.getContext(result[i]));
       }
     }
-    return state;
+    return result;
   }
 
 }

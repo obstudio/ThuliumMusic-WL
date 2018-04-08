@@ -121,7 +121,7 @@ function Portamento(subtrack1, subtrack2) {
 }
 
 function GraceNote(subtrack1, subtrack2) {
-    // alias: (${1:sub}^)${2:sub}
+    // alias: (${1:notes}^)${2:sub}
     const src1 = this.ParseTrack(subtrack1);
     const src2 = this.ParseTrack(subtrack2);
     const seg = this.Settings.getOrSetDefault('Seg', 1 / 4)
@@ -151,7 +151,7 @@ function GraceNote(subtrack1, subtrack2) {
 }
 
 function Appoggiatura(subtrack1, subtrack2) {
-    // alias: ${1:sub}(^${2:sub})
+    // alias: ${1:sub}(^${2:notes})
     const src1 = this.ParseTrack(subtrack1);
     const src2 = this.ParseTrack(subtrack2);
     const seg = this.Settings.getOrSetDefault('Seg', 1 / 4)

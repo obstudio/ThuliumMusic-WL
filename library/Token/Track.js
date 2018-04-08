@@ -1,40 +1,69 @@
 const FSM = require('./Context');
 
+const ArgumentPatterns = {
+  uns: {
+    patt: '(\\d+(?:\\.\\d+)?)',
+    meta: 'Expression'
+  },
+  sig: {
+    patt: '([+\\-]\\d+(?:\\.\\d+)?)',
+    meta: 'Expression'
+  },
+  int: {
+    patt: '([+\\-]?\\d+(?:\\.\\d+)?)',
+    meta: 'Expression'
+  },
+  exp: {
+    patt: '([+\\-]?\\d+(?:[./]\\d+)?|Log2\\(\\d+\\)(?:[+\\-]\\d+)?)',
+    meta: 'Expression'
+  },
+  str: {
+    patt: '((?:[^\\{\\}\\(\\)\\[\\]\\"\\,]|\\\\.)*)',
+    meta: 'String'
+  },
+  nam: {
+    patt: '([a-zA-Z][a-zA-Z\\d]*)',
+    meta: 'String'
+  }
+};
+
 class NoteSyntax {
   constructor(degrees, chords) {
-    this.Degree = NoteSyntax.ArrayToRegex(degrees, false);
-    this.Chord = NoteSyntax.ArrayToRegex(chords, true);
-    this.PitOp = "[#b',]*";
-    this.DurOp = '[._=-]*'
-    this.VolOp = '[>:]*';
-    this.Epilog = '[`]*';
-  }
-
-  pattern() {
-    const inner = this.Degree + this.PitOp + this.Chord + this.VolOp;
-    const outer = this.DurOp + this.Epilog;
-    return '((?:\\[(?:' + inner + ')+\\]|'+ inner + ')' + outer + ')';
+    const degree = NoteSyntax.ArrayToRegex(degrees, false);
+    const chord = NoteSyntax.ArrayToRegex(chords, true);
+    const pitOp = "[#b',]*";
+    const durOp = '[._=-]*'
+    const volOp = '[>:]*';
+    const epilog = '[`]*';
+    const inner = `(?:${degree}${pitOp}${chord}${volOp})`;
+    const outer = `(?:${durOp}${epilog})`;
+    this.Inner = `(${degree})(${pitOp})(${chord})(${volOp})`,
+    this.Outer = `(${durOp})(${epilog})`;
+    this.Square = `(\\[(${inner}+)\\])`;
+    this.Patt = `((?:\\[${inner}+\\]|${inner})${outer})`;
   }
 
   static ArrayToRegex(array, multi = true) {
     let charset = '', quantifier = '';
-    if (array.length > 0) charset = '[' + array.join('') + ']';
-    if (multi && array.length > 0) quantifier = '*';
+    if (array.length > 0) {
+      if (multi) quantifier = '*';
+      charset = '[' + array.join('') + ']';
+    }
     return charset + quantifier;
   }
 }
 
 class TrackSyntax extends FSM {
   constructor(aliases, degrees, chords) {
-    const dict = {
-      uns: '(\\d+)',
-      sig: '([+\\-]\\d+)',
-      int: '([+\\-]?\\d+)',
-      exp: '([+\\-]?\\d+(?:[./]\\d+)?|Log2\\(\\d+\\)(?:[+\\-]\\d+)?)',
-      str: '((?:[^\\{\\}\\(\\)\\[\\]\\"\\,]|\\\\.)*)',
-      nam: '([a-zA-Z][a-zA-Z\\d]*)',
-      not: new NoteSyntax(degrees, chords).pattern()
-    };
+    const note = new NoteSyntax(degrees, chords);
+    const dict = Object.assign({
+      not: {
+        patt: note.Patt,
+        meta: 'Subtrack',
+        epilog: (arg) => this.tokenize(arg, 'note')
+      }
+    }, ArgumentPatterns);
+
     super({
 
       // Subtrack & Macrotrack & PlainFunction
@@ -80,54 +109,61 @@ class TrackSyntax extends FSM {
         }
       ],
 
-      init: [
+      note: [
         {
-          patt: /^</,
-          push: [
-            {
-              patt: /^>/,
-              pop: true
-            },
-            {
-              patt: /^(:)(?:([a-zA-Z][a-zA-Z\d]*):)/,
-              token(match) {
-                return {
-                  Type: '@name',
-                  name: match[2],
-                  macro: Boolean(match[1])
-                };
-              }
-            },
-            {
-              patt: /[a-zA-Z][a-zA-Z\d]*/,
-              push: FSM.next('default', /^, */, /^(?=>)/),
-              token(match, content) {
-                return {
-                  Type: '@inst',
-                  name: match[0],
-                  spec: content
-                };
-              }
-            },
-            {
-              patt: /, */
-            }
-          ],
-          token(match, content) {
+          patt: new RegExp(note.Inner + note.Outer),
+          token(match) {
             return {
-              Type: '@meta',
-              Name: '',
-              Instruments: []
+              Type: 'Note',
+              Pitches: [
+                {
+                  Degree: match[1],
+                  PitOp: match[2],
+                  Chord: match[3],
+                  VolOp: match[4]
+                }
+              ],
+              DurOp: match[5],
+              Stac: match[6].length()
             };
           }
         },
-        'default'
+        {
+          patt: new RegExp(note.Square + note.Outer),
+          token(match) {
+            return {
+              Type: 'Note',
+              Pitches: match[1],
+              DurOp: match[2],
+              Stac: match[3]
+            };
+          }
+        }
+      ],
+
+      meta: [
+        {
+          patt: /^>/,
+          pop: true
+        },
+        {
+          patt: /([a-zA-Z][a-zA-Z\d]*)/,
+          push: FSM.next('default', /^(?=>)/, /^,\s*/),
+          token(match, content) {
+            return {
+              Type: '@inst',
+              name: match[1],
+              spec: content
+            };
+          }
+        }
       ],
 
       // Track Contents
       default: [
         FSM.include('prototype'),
         FSM.include('alias'),
+        FSM.include('note'),
         {
           patt: /^\}/,
           pop: true
@@ -144,14 +180,13 @@ class TrackSyntax extends FSM {
             };
           }
         },
-        FSM.item('Note', new RegExp('^' + dict.not)),
         FSM.item('RepeatEndBegin', /^:\|\|:/),
         FSM.item('RepeatBegin', /^\|\|:/),
         FSM.item('RepeatEnd', /^:\|\|/),
         FSM.item('LocalIndicator', /^!/),
         {
           patt: /^\[(?=(\d+(~\d+)\. *)+\])/,
-          push: FSM.next('volta', /\]/),
+          push: FSM.next('volta', /^\]/),
           token(match, content) {
             return {
               Type: 'volta',
@@ -161,7 +196,7 @@ class TrackSyntax extends FSM {
         },
         {
           patt: /^\\(?=(\d+(~\d+))(, *(\d+(~\d+)))*:)/,
-          push: FSM.next('volta', /:/),
+          push: FSM.next('volta', /^:/),
           token(match, content) {
             return {
               Type: 'BarLine',
@@ -191,7 +226,8 @@ class TrackSyntax extends FSM {
         FSM.item('Segno', /^Segno/),
         FSM.item('DaCapo', /^DC/),
         FSM.item('DaSegno', /^DS/),
-        FSM.item('Fine', /^Fine/)
+        FSM.item('Fine', /^Fine/),
+        FSM.item('Space', /^\s+/)
       ],
 
       // Plain Function Arguments
@@ -213,17 +249,17 @@ class TrackSyntax extends FSM {
             };
           }
         },
-        FSM.item('Expression', new RegExp('^' + dict.exp)),
-        FSM.include('prototype'),
         {
-          patt: new RegExp('^"' + dict.str + '"'),
+          patt: /^"(([^\{\}\(\)\[\]\"\,]|\\.)*)"/,
           token(match) {
             return {
               Type: 'String',
               Content: match[1].replace(/\\(?=.)/, '')
             }
           }
-        }
+        },
+        FSM.item('Expression', /^([+\-]?\d+([./]\d+)?|Log2\(\d+\)([+\-]\d+)?)/),
+        FSM.include('prototype')
       ],
 
       // Volta Numbers
@@ -257,6 +293,5 @@ class TrackSyntax extends FSM {
 }
 
 module.exports = TrackSyntax;
-
 
 

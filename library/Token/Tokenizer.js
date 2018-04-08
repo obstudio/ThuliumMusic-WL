@@ -1,6 +1,7 @@
 const fs = require('fs');
 const LibTokenizer = require('./Library');
 const TrackSyntax = require('./Track');
+const FSM = require('./Context');
 
 const instrDict = require('../Config/Instrument.json');
 const drumDict = require('../Config/Percussion.json');
@@ -116,18 +117,18 @@ class Tokenizer {
     const src = this.Score;
     let ptr = 0, blank = 0;
     let tracks = [];
-    let comments = [];
+    let comment = [];
 
     while(ptr < src.length) {
       if (Tokenizer.startsTrue(src, ptr, '//')) {
         blank += 1;
         if (blank >= 2 && tracks.length != 0) {
-          sections.push(this.tokenizeSection(tracks, comments));
-          comments = [];
+          sections.push(this.tokenizeSection(tracks, comment));
+          comment = [];
           tracks = [];
         }
         if (src[ptr].startsWith('//')) {
-          comments.push(src[ptr].slice(2));
+          comment.push(src[ptr].slice(2));
         }
         ptr += 1;
       } else {
@@ -143,7 +144,7 @@ class Tokenizer {
     }
 
     if (tracks.length != 0) {
-      sections.push(this.tokenizeSection(tracks, comments));
+      sections.push(this.tokenizeSection(tracks, comment));
     }
 
     return {
@@ -162,8 +163,9 @@ class Tokenizer {
     const aliases = this.Alias;
     const chords = this.Chord.map(chord => chord.Notation);
     const meta = track.match(/^<(?:(:)?([a-zA-Z][a-zA-Z\d]*):)?/);
+
     if (meta) {
-      play = meta[1];
+      play = !meta[1];
       name = meta[2];
       const syntax = new TrackSyntax(functions, aliases, chords, degrees);
       track = track.slice(meta[0].length);
@@ -188,24 +190,55 @@ class Tokenizer {
         inst.push({ Name: tok.name, Spec: tok.spec });
       });
       track = track.slice(data.Index);
-    } else {
+    }
+
+    if (degrees.length === 2) {
       degrees = ['1', '2', '3', '4', '5', '6', '7', '0', '%'];
     }
     const syntax = new TrackSyntax(functions, aliases, chords, degrees);
     const result = syntax.tokenize(track, 'default');
+
     return {
-      Play: !!play,
+      Play: play,
       Name: name,
       Instruments: inst,
       Content: result.Content
     };
   }
 
-  tokenizeSection(tracks, comments) {
-    const result = tracks.map(track => this.tokenizeTrack(track));
+  tokenizeSection(tracklist, comment) {
+    const result = tracklist.map(track => this.tokenizeTrack(track));
+    const prolog = [], epilog = [], settings = [], tracks = [];
+    
+    result.forEach((track, index) => {
+      const content = track.Content;
+      if (content.every(tok => !FSM.isSubtrack(tok))) {
+        let sep = content.findIndex(tok => tok.Type === 'LocalIndicator');
+        if (index === 0 || index === result.length - 1) {
+          if (sep === -1) sep = content.length;
+          if (index === 0) {
+            prolog.push(...content.slice(0, sep));
+          } else {
+            epilog.push(...content.slice(0, sep));
+          }
+        } else {
+          sep = 0;
+        }
+        settings.push({
+          Index: index,
+          Spec: content.slice(sep)
+        });
+      } else {
+        tracks.push(track);
+      }
+    });
+    
     return {
-      Tracks: result,
-      Comments: comments
+      Prolog: prolog,
+      Comment: comment,
+      Settings: settings,
+      Tracks: tracks,
+      Epilog: epilog
     };
   }
 
@@ -249,6 +282,6 @@ class Tokenizer {
 
 module.exports = Tokenizer
 
-const test = new Tokenizer('../../Songs/test.tm', 'URL');
+const test = new Tokenizer('../../Songs/Touhou/test.tm', 'URL');
 
-console.log(test.tokenize().Sections[0].Tracks[0].Content[1]);
+fs.writeFileSync('../test.output.json', JSON.stringify(test.tokenize(),null,2));

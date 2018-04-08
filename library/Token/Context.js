@@ -14,17 +14,6 @@ class FSM {
     return name;
   }
 
-  static autopop() {
-    return {
-      patt: /^(?=.)/,
-      pop: true
-    };
-  }
-
-  static ahead(str) {
-    return new RegExp('^(?=' + str + ')');
-  }
-
   static item(name, regexp) {
     if (typeof regexp === 'string') {
       regexp = new RegExp('^(' + regexp + ')');

@@ -41,9 +41,10 @@ class Parser {
     expandSection() {
         const result = []
         for (const section of this.tokenizedData.Sections) {
-            result.push(...section.Prolog, section, ...section.Epilog)
+            result.push(...section.Prolog.filter((tok) => tok.Type !== 'Space'), section, ...section.Epilog.filter((tok) => tok.Type !== 'Space'))
             delete section.Prolog
             delete section.Epilog
+            section.Type = 'Section'
         }
         this.tokenizedData.Sections = result
     }
@@ -167,24 +168,42 @@ class Parser {
      */
     parseSection(section) {
         const settings = this.sectionContext.Settings.extend()
-        section.Settings.filter((token) => token.Type === 'Function')
-            .forEach((token) => this.libraries.FunctionPackage.applyFunction({ Settings: settings, Context: {} }, token))
+        for (const setting of section.Settings) {
+            setting.Spec.filter((token) => token.Type === 'Function')
+                .forEach((token) => this.libraries.FunctionPackage.applyFunction({ Settings: settings, Context: {} }, token))
+        }
         const instrStatistic = {}
         const sec = {
             ID: section.ID,
             Tracks: [].concat(...section.Tracks.map((track) => {
-                const tempTracks = new TrackParser(track, settings, this.libraries).parseTrack()
-                for (const tempTrack of tempTracks) {
-                    if (tempTrack.Instrument in instrStatistic) {
-                        instrStatistic[tempTrack.Instrument] += 1
-                    } else {
-                        instrStatistic[tempTrack.Instrument] = 1
-                    }
-                    if (track.ID === '') {
-                        tempTrack.ID += '#' + instrStatistic[tempTrack.Instrument].toString()
-                    }
+                if (track.Name !== undefined) {
+                    this.libraries.Track[track.Name] = track.Content
                 }
-                return tempTracks
+                if (track.Play) {
+                    const tempTracks = []
+                    if (track.Instruments.length === 0) {
+                        track.Instruments.push({
+                            Name: 'Piano',
+                            Spec: []
+                        })
+                    }
+                    for (const instr of track.Instruments) {
+                        tempTracks.push(new TrackParser(track, instr, settings, this.libraries).parseTrack())
+                    }
+                    for (const tempTrack of tempTracks) {
+                        if (tempTrack.Instrument in instrStatistic) {
+                            instrStatistic[tempTrack.Instrument] += 1
+                        } else {
+                            instrStatistic[tempTrack.Instrument] = 1
+                        }
+                        if (track.ID === '') {
+                            tempTrack.ID += '#' + instrStatistic[tempTrack.Instrument].toString()
+                        }
+                    }
+                    return tempTracks
+                } else {
+                    return []
+                }
             })),
             Warnings: []
         }
@@ -214,3 +233,6 @@ class Parser {
 }
 
 module.exports = Parser
+
+const result = new Parser(require('./test.output.json')).parse()
+result

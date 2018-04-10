@@ -52,7 +52,7 @@ class LibLoader {
             case LibLoader.libType.MetaInformation:
                 break
             case LibLoader.libType.FunctionPackage:
-                this.loadCode(lib.Data)
+                this.loadCode(lib.Code)
                 break
             case LibLoader.libType.MIDIEventList:
                 break
@@ -167,7 +167,7 @@ LibLoader.Default = {
                     Content: [],
                     Repeat: -1
                 }
-            }, token.Argument.map((arg) => {
+            }, token.Args.map((arg) => {
                 switch (arg.Type) {
                     case 'Number':
                     case 'String':

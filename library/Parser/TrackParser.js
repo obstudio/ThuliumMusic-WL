@@ -50,10 +50,10 @@ class TrackParser {
         return false
     }
 
-    constructor(track, sectionSettings, libraries, isSubtrack = false) {
+    constructor(track, instrument, sectionSettings, libraries, isSubtrack = false) {
         this.isSubtrack = isSubtrack
         this.ID = track.ID
-        this.Instruments = track.Instruments
+        this.Instrument = instrument
         this.Libraries = libraries
         this.Content = track.Content
         this.Settings = sectionSettings.extend()
@@ -86,53 +86,24 @@ class TrackParser {
 
     parseTrack() {
         this.preprocess()
-        if (this.isSubtrack) {
-            const trackResult = this.parseTrackContent()
-            TrackParser.processPedal(trackResult)
-            return [trackResult]
+        if (instr.includes(this.Instrument.Name)) {
+            currentType = 0
+        } else if (drum.includes(this.Instrument.Name)) {
+            currentType = 1
         } else {
-            if (this.Instruments.every((instrument) => instr.includes(instrument.Instrument))) {
-                currentType = 0
-            } else if (this.Instruments.every((instrument) => drum.includes(instrument.Instrument))) {
-                currentType = 1
-            } else {
-                currentType = 0
-            }
-            const trackResult = this.parseTrackContent()
-            TrackParser.processPedal(trackResult)
-            if (this.Instruments.length === 0) {
-                this.Instruments.push({
-                    Instrument: 'Piano',
-                    Proportion: 1
-                })
-            }
-            if (trackResult.Meta.Duration < this.Settings.FadeIn || trackResult.Meta.Duration < this.Settings.FadeOut) {
-                this.pushError(TmError.Types.Track.FadeOverLong, { Actual: [this.Settings.FadeIn, this.Settings.FadeOut] }, false)
-            }
-            if (!this.Instruments.every((instrument) => instrument.Instrument === '' || instr.includes(instrument.Instrument) || drum.includes(instrument.Instrument))) {
-                this.pushError(TmError.Types.Track.Instrument, { Actual: this.Instruments }, false)
-            }
-            return this.Instruments.map((instrument) => {
-                const warnings = trackResult.Warnings.slice()
-                if (instrument.Proportion === null) {
-                    instrument.Proportion = 1
-                }
-                return {
-                    Instrument: instrument.Instrument,
-                    ID: this.ID ? `${this.ID}#${instrument.Instrument}` : instrument.Instrument,
-                    Warnings: warnings,
-                    Meta: trackResult.Meta,
-                    Content: trackResult.Content.map((note) => {
-                        let vol = note.Volume * instrument.Proportion
-                        if (vol > 1) {
-                            warnings.push(new TmError(TmError.Types.Note.VolumeLimit, null, { Expected: 1, Actual: vol })) // FIXME: index
-                            vol = 1
-                        }
-                        return Object.assign({}, note, { Volume: vol })
-                    })
-                }
-            })
+            currentType = 0
         }
+        const trackResult = this.parseTrackContent()
+        TrackParser.processPedal(trackResult)
+        if (trackResult.Meta.Duration < this.Settings.FadeIn || trackResult.Meta.Duration < this.Settings.FadeOut) {
+            this.pushError(TmError.Types.Track.FadeOverLong, { Actual: [this.Settings.FadeIn, this.Settings.FadeOut] }, false)
+        }
+        if (!(instr.includes(instrument.Name) || drum.includes(instrument.Name))) {
+            this.pushError(TmError.Types.Track.Instrument, { Actual: this.Instrument }, false)
+        }
+        trackResult.Instrument = this.Instrument.Name
+        trackResult.ID = this.ID ? `${this.ID}#${this.Instrument.Name}` : this.Instrument.Name
+        return trackResult
     }
 
     mergeMacro() {
@@ -151,6 +122,7 @@ class TrackParser {
     }
 
     preprocess() {
+        this.Content = [...this.Instrument.Spec, ...this.Content]
         this.mergeMacro()
         if (this.Content.length === 1) return
         const last = this.Content.pop()
@@ -280,6 +252,7 @@ class TrackParser {
                 // this.pushError(TmError.Types.Track.Undefined, { Actual: token })
                 // break
                 case 'Clef':
+                case 'Comment':
                 case 'Whitespace':
                     break
             }
@@ -358,6 +331,14 @@ class TrackParser {
                     volumes.push(...[].concat(...new Array(chords.length).fill(this.getVolume(note.VolOp + pitch.VolOp))))
                 }
             }
+        }
+        if (!volumes.every((vol) => vol <= 1)) {
+            this.pushError(TmError.Types.Note.VolumeLimit, { Actual: volumes })
+            volumes.forEach((vol, index, arr) => {
+                if (vol > 1) {
+                    arr[index] = 1
+                }
+            })
         }
         if (TrackParser.isDup(pitches)) {
             this.pushError(TmError.Types.Note.Reduplicate, { Actual: pitches })
@@ -485,7 +466,7 @@ TrackParser.pitchOperatorDict = { '#': 1, 'b': -1, '\'': 12, ',': -12 }
 
 class SubtrackParser extends TrackParser {
     constructor(track, settings, libraries, { PitchQueue: pitchQueue, NotesBeforeTie: notesBeforeTie, TieLeft: tieLeft }) {
-        super(track, settings, libraries, true)
+        super(track, null, settings, libraries, true)
         this.Repeat = track.Repeat
         if (pitchQueue === undefined) {
             this.Meta.PitchQueue = []

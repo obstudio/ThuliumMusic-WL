@@ -234,5 +234,3 @@ class Parser {
 
 module.exports = Parser
 
-const result = new Parser(require('./test.output.json')).parse()
-result

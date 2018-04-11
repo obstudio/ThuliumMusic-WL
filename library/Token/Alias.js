@@ -147,7 +147,7 @@ class Alias extends FSM {
         this.Prec = 100;
       }
     }
-
+    delete this.Contexts;
     return this.Warnings.length === 0;
   }
 
@@ -195,7 +195,6 @@ class Alias extends FSM {
       }
     };
   }
-
 }
 
 Alias.Pattern = /^(?: *prec(?:edence)?: *(\d+);)? *alias:(.+)$/i;

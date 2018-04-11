@@ -35,6 +35,7 @@ class Tokenizer {
     this.Settings = [];
 
     this.Syntax = {
+      Code: '',
       Dict: [],       // Function Attributes
       Alias: [],      // Function Aliases
       Chord: []       // Chord Operators
@@ -249,15 +250,19 @@ class Tokenizer {
     };
   }
 
-  toJSON(specification) {
+  properties(...properties) {
     this.tokenize();
-    const exportProperties = properties => {
-      const result = {};
-      properties.forEach(property => {
-        if (this.hasOwnProperty(property)) result[property] = this[property];
-      });
-      return result;
-    }
+    const result = {};
+    properties.forEach(attr => result[attr] = this[attr]);
+    return result;
+  }
+
+  toParser() {
+    return this.properties('Settings', 'Syntax', 'Sections');
+  }
+
+  toJSON(specification = 'All') {
+    this.tokenize();
 
     const specDict = {
       All: ['Comment', 'Library', 'Settings', 'Warnings', 'Errors', 'Syntax', 'Sections'],
@@ -266,13 +271,14 @@ class Tokenizer {
       Debug: ['Warnings', 'Errors']
     };
 
-    return exportProperties(specDict[specification]);
+    return this.properties(specDict[specification]);
   }
 
   getLibrary() {
     this.initialize();
     if (this.Errors.length > 0) {
-      throw JSON.stringify(this.Errors);
+      console.log(this.Errors); 
+      throw 0;
     }
     return this.Syntax;
   }
@@ -283,6 +289,7 @@ class Tokenizer {
     this.Syntax.Dict.push(...packageData.Dict);
     this.Syntax.Chord.push(...packageData.Chord);
     this.Syntax.Alias.push(...packageData.Alias);
+    this.Syntax.Code += packageData.Code;
     this.Library.push({
       Type: 'Package',
       Path: name,
@@ -292,14 +299,17 @@ class Tokenizer {
 
   mergeLibrary(head, source, type) {
     const data = LibTokenizer[type + 'Tokenize'](source);
-    Object.assign(this.Syntax, data.Data);
+    if (data.Chord) this.Syntax.Chord.push(...data.Chord);
+    if (data.Dict) this.Syntax.Dict.push(...data.Dict);
+    if (data.Alias) this.Syntax.Alias.push(...data.Alias);
+    if (data.Code) this.Syntax.Code += data.Code;
     this.Errors.push(...data.Errors);
     this.Warnings.push(...data.Warnings);
-    this.Library.push(Object.assign({
+    this.Library.push({
       Type: type,
       Code: source,
       Head: head
-    }, data.Data));
+    });
   }
 }
 

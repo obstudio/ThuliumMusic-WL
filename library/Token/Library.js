@@ -89,7 +89,7 @@ class LibTokenizer {
       }
     });
     return {
-      Data: { Chord: data },
+      Chord: data,
       Errors: [],
       Warnings: warnings
     };
@@ -151,7 +151,9 @@ class LibTokenizer {
     }
         
     return {
-      Data: { Alias: aliases, Dict: dict },
+      Alias: aliases,
+      Dict: dict,
+      Code: code,
       Errors: errors,
       Warnings: warnings
     };

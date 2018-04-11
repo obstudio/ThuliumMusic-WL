@@ -36,7 +36,7 @@ const AliasContexts = {
     FSM.item('not', /^notes/),
     FSM.item('nam', /^name/),
     FSM.item('str', /^str(?:ing)?/),
-    FSM.item('und', /^[^\}]/)
+    FSM.item('@und', /^[^\}]/)
   ]
 }
 

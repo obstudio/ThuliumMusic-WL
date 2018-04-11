@@ -9,7 +9,7 @@ const drumDict = require('../Config/Percussion.json');
 const instrList = Object.keys(instrDict);
 const drumList = Object.keys(drumDict);
 
-const packagePath = '../../package/';
+const packagePath = __dirname + '/../../package/'
 const packageInfo = require(packagePath + 'index.json');
 
 class Tokenizer {
@@ -34,11 +34,14 @@ class Tokenizer {
     this.Errors = [];
     this.Settings = [];
 
-    this.Dict = [];       // Function Attributes
-    this.Alias = [];      // Function Aliases
-    this.Chord = [];      // Chord Operators
+    this.Syntax = {
+      Dict: [],       // Function Attributes
+      Alias: [],      // Function Aliases
+      Chord: []       // Chord Operators
+    };
 
     this.$init = false;
+    this.$token = false;
 
     let source;
     if (spec === 'URL') {
@@ -100,7 +103,11 @@ class Tokenizer {
           break;
 
         default:
-          throw new Error();
+          this.Errors.push({
+            Err: 'InvaildCommand',
+            Pos: ptr,
+            Src: origin
+          });
           break;
 
       }
@@ -110,10 +117,11 @@ class Tokenizer {
   }
 
   tokenize() {
+    if (this.$token) return;
     this.initialize();
     this.loadLibrary(packageInfo.AutoLoad);
+    this.Sections = [];
 
-    const sections = [];
     const src = this.Score;
     let ptr = 0, blank = 0;
     let tracks = [];
@@ -123,7 +131,7 @@ class Tokenizer {
       if (Tokenizer.startsTrue(src, ptr, '//')) {
         blank += 1;
         if (blank >= 2 && tracks.length != 0) {
-          sections.push(this.tokenizeSection(tracks, comment));
+          this.Sections.push(this.tokenizeSection(tracks, comment));
           comment = [];
           tracks = [];
         }
@@ -142,26 +150,20 @@ class Tokenizer {
         tracks.push(code);
       }
     }
-
     if (tracks.length != 0) {
-      sections.push(this.tokenizeSection(tracks, comment));
+      this.Sections.push(this.tokenizeSection(tracks, comment));
     }
 
-    return {
-      Comment: this.Comment,
-      Library: this.Library,
-      Settings: this.Settings,
-      Sections: sections
-    };
+    this.$token = true;
   }
 
   tokenizeTrack(track) {
     let name, play = true, inst = [], degrees = ['0', '%'];
     const instrDegrees = ['1', '2', '3', '4', '5', '6', '7'];
     const drumDegrees = ['x'];
-    const functions = this.Dict;
-    const aliases = this.Alias;
-    const chords = this.Chord.map(chord => chord.Notation);
+    const functions = this.Syntax.Dict;
+    const aliases = this.Syntax.Alias;
+    const chords = this.Syntax.Chord.map(chord => chord.Notation);
     const meta = track.match(/^<(?:(:)?([a-zA-Z][a-zA-Z\d]*):)?/);
 
     if (meta) {
@@ -172,22 +174,26 @@ class Tokenizer {
       const data = syntax.tokenize(track, 'meta');
       data.Content.forEach(tok => {
         if (tok.Type != '@inst') {
-          throw new Error();
-          return;
-        }
-        if (instrList.includes(tok.name)) {
+          this.Errors.push({
+            Err: 'NotInstrument',
+            Tok: tok
+          });
+        } else if (instrList.includes(tok.name)) {
           instrDegrees.forEach(deg => {
             if (!degrees.includes(deg)) degrees.push(deg);
           });
+          inst.push({ Name: tok.name, Spec: tok.spec });
         } else if (drumList.includes(tok.name)) {
           drumDegrees.forEach(deg => {
             if (!degrees.includes(deg)) degrees.push(deg);
           });
+          inst.push({ Name: tok.name, Spec: tok.spec });
         } else {
-          throw new Error();
-          return;
+          this.Errors.push({
+            Err: 'NotInstrument',
+            Tok: tok
+          });
         }
-        inst.push({ Name: tok.name, Spec: tok.spec });
       });
       track = track.slice(data.Index);
     }
@@ -202,7 +208,8 @@ class Tokenizer {
       Play: play,
       Name: name,
       Instruments: inst,
-      Content: result.Content
+      Content: result.Content,
+      Warnings: result.Warnings
     };
   }
 
@@ -242,24 +249,40 @@ class Tokenizer {
     };
   }
 
+  toJSON(specification) {
+    this.tokenize();
+    const exportProperties = properties => {
+      const result = {};
+      properties.forEach(property => {
+        if (this.hasOwnProperty(property)) result[property] = this[property];
+      });
+      return result;
+    }
+
+    const specDict = {
+      All: ['Comment', 'Library', 'Settings', 'Warnings', 'Errors', 'Syntax', 'Sections'],
+      Parse: ['Settings', 'Syntax', 'Sections'],
+      Token: ['Comment', 'Library', 'Warnings', 'Errors', 'Sections'],
+      Debug: ['Warnings', 'Errors']
+    };
+
+    return exportProperties(specDict[specification]);
+  }
+
   getLibrary() {
     this.initialize();
     if (this.Errors.length > 0) {
       throw JSON.stringify(this.Errors);
     }
-    return {
-      Dict: this.Dict,
-      Chord: this.Chord,
-      Alias: this.Alias
-    };
+    return this.Syntax;
   }
 
   loadLibrary(name, origin = '#AUTOLOAD') {
     const path = packagePath + name + '/main.tml';
     const packageData = new Tokenizer(path, 'URL').getLibrary();
-    this.Dict.push(...packageData.Dict);
-    this.Chord.push(...packageData.Chord);
-    this.Alias.push(...packageData.Alias);
+    this.Syntax.Dict.push(...packageData.Dict);
+    this.Syntax.Chord.push(...packageData.Chord);
+    this.Syntax.Alias.push(...packageData.Alias);
     this.Library.push({
       Type: 'Package',
       Path: name,
@@ -269,19 +292,16 @@ class Tokenizer {
 
   mergeLibrary(head, source, type) {
     const data = LibTokenizer[type + 'Tokenize'](source);
-    Object.assign(this, data.Data);
+    Object.assign(this.Syntax, data.Data);
     this.Errors.push(...data.Errors);
     this.Warnings.push(...data.Warnings);
-    this.Library.push({
+    this.Library.push(Object.assign({
       Type: type,
       Code: source,
       Head: head
-    });
+    }, data.Data));
   }
 }
 
 module.exports = Tokenizer
 
-const test = new Tokenizer('../../Songs/Touhou/test.tm', 'URL');
-
-fs.writeFileSync('../test.output.json', JSON.stringify(test.tokenize(),null,2));

@@ -207,7 +207,7 @@ class TrackSyntax extends FSM {
           }
         },
         {
-          patt: /^\\(?=(\d+(~\d+))(, *(\d+(~\d+)))*:)/,
+          patt: /^\\(?=(\d+(~\d+)?)(, *(\d+(~\d+)?))*:)/,
           push: FSM.next('volta', /^:/),
           token(match, content) {
             return {
@@ -247,6 +247,7 @@ class TrackSyntax extends FSM {
         },
         FSM.item('PedalPress', /^&/),
         FSM.item('PedalRelease', /^\*/),
+        FSM.item('Tie', /^\^/),
         FSM.item('Coda', /^\+/),
         FSM.item('Coda', /^Coda/),
         FSM.item('Coda', /^ToCoda/),

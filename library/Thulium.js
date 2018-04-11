@@ -5,13 +5,17 @@ const Tokenizer = require('./Token/Tokenizer');
 class Thulium {
 	constructor(input, spec = 'URL') {
 		this.Tokenizer = new Tokenizer(input, spec);
-		this.Parser = new Parser(this.Tokenizer.toParser());
+		this.$parse = false;
 	} 
-	parse() {
+	parse(forced = false) {
+		if (this.$parse && !forced) return;
+		this.Parser = new Parser(this.Tokenizer.toParser());
 		return this.Parser.parse();
+		this.$parse = true;
 	}
 }
 
-// const test = new Thulium('../Songs/Touhou/test.tm');
-// console.log(test.Tokenizer.Syntax.Chord[17].Pitches);
+module.exports = Thulium;
+// const test = new Thulium('E:/#Obstudio#/QingyunMusicPlayer/Songs/Touhou/test.tm');
+// console.log(test.Tokenizer.toParser().Sections[1].Tracks[0].Content[5].Content.filter(tok => tok.Type === 'BarLine').map(tok => tok.Order));
 

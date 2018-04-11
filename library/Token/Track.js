@@ -216,7 +216,8 @@ class TrackSyntax extends FSM {
               Overlay: false,
               Order: [].concat(...content)
             };
-          }
+          },
+          locate: false
         },
         {
           patt: /^(\/|\||\\)/,

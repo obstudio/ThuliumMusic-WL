@@ -276,7 +276,7 @@ class TrackParser {
         const volumes = []
         const beat = this.parseBeat(note)
         const duration = beat * 60 / this.Settings.Speed
-        const actualDuration = duration * (1 - this.Settings.Stac[note.Staccato])
+        const actualDuration = duration * (1 - this.Settings.Stac[note.Stac])
 
         // calculate pitch array and record it for further trace
         if (note.Pitches.length === 1 && note.Pitches[0].Degree === '%') {

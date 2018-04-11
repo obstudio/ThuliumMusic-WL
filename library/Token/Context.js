@@ -77,7 +77,11 @@ class FSM {
           }
           if (stx.pop) pop = true;
           if (stx.token) {
-            result.push(Object.assign(stx.token(match, content), {Pos: position}));
+            const tok = stx.token(match, content);
+            if (stx.locate === true || stx.locate === undefined) {
+              Object.assign(tok, {Pos: position});
+            }
+            result.push(tok);
           }
           break;
         }

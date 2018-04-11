@@ -25,7 +25,6 @@ class tmLoader {
 
 class tmPackage {
     constructor(source, dict) {
-        console.log(dict);
         this.Dict = new Function(`${source}
             return {${dict.map(func => func.Name).join(',')}};
         `)();

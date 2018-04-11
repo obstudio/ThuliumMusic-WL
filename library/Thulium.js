@@ -16,6 +16,7 @@ class Thulium {
 }
 
 module.exports = Thulium;
-// const test = new Thulium('E:/#Obstudio#/QingyunMusicPlayer/Songs/Touhou/test.tm');
-// console.log(test.Tokenizer.toParser().Sections[1].Tracks[0].Content[5].Content.filter(tok => tok.Type === 'BarLine').map(tok => tok.Order));
+const test = new Thulium('E:/#Obstudio#/QingyunMusicPlayer/Songs/Touhou/test.tm');
+// console.log(test.Tokenizer.toParser().Sections[5].Tracks[1].Content[73]);
+// console.log(test.parse()[5].Tracks[2].Content.slice(-20).map(t=>t.Pitch).join(', '))
 

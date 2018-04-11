@@ -35,12 +35,13 @@ class NoteSyntax {
     const durOp = '[._=-]*'
     const volOp = '[>:]*';
     const epilog = '[`]*';
-    const inner = `(?:${degree}${pitOp}${chord}${volOp})`;
+    const inner = `(?:${pitOp}${chord}${volOp})`;
     const outer = `(?:${durOp}${epilog})`;
-    this.Inner = `(${degree})(${pitOp})(${chord})(${volOp})`,
-    this.Outer = `(${durOp})(${epilog})`;
-    this.Square = `\\[(${inner}+)\\]`;
-    this.Patt = `((?:\\[${inner}+\\]|${inner})${outer})`;
+    this.deg = `(${degree})`;
+    this.in = `(${pitOp})(${chord})(${volOp})`,
+    this.out = `(${durOp})(${epilog})`;
+    this.sqr = `\\[((?:${degree}${inner})+)\\]`;
+    this.Patt = `((?:\\[(?:${degree}${inner})+\\]|${degree})${inner}${outer})`;
   }
 
   static ArrayToRegex(array, multi = true) {
@@ -113,7 +114,7 @@ class TrackSyntax extends FSM {
 
       note: [
         {
-          patt: new RegExp('^' + note.Inner + note.Outer),
+          patt: new RegExp('^' + note.deg + note.in + note.out),
           token(match) {
             return {
               Type: 'Note',
@@ -125,15 +126,18 @@ class TrackSyntax extends FSM {
                   VolOp: match[4]
                 }
               ],
+              PitOp: '',
+              Chord: '',
+              VolOp: '',
               DurOp: match[5],
               Stac: match[6].length
             };
           }
         },
         {
-          patt: new RegExp('^' + note.Square + note.Outer),
+          patt: new RegExp('^' + note.sqr + note.in + note.out),
           token(match) {
-            const inner = new RegExp(note.Inner);
+            const inner = new RegExp(note.deg + note.in);
             const match1 = match[1].match(new RegExp(inner, 'g'));
             return {
               Type: 'Note',
@@ -146,8 +150,11 @@ class TrackSyntax extends FSM {
                   VolOp: match[4]
                 };
               }),
-              DurOp: match[2],
-              Stac: match[3].length
+              PitOp: match[2],
+              Chord: match[3],
+              VolOp: match[4],
+              DurOp: match[5],
+              Stac: match[6].length
             };
           }
         }
@@ -207,7 +214,7 @@ class TrackSyntax extends FSM {
           }
         },
         {
-          patt: /^\\(?=(\d+(~\d+)?)(, *(\d+(~\d+)?))*:)/,
+          patt: /^\\(?=(\d+(~\d+)?(, *\d+(~\d+)?)*)?:)/,
           push: FSM.next('volta', /^:/),
           token(match, content) {
             return {

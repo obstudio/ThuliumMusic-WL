@@ -261,17 +261,8 @@ class Tokenizer {
     return this.properties('Settings', 'Syntax', 'Sections');
   }
 
-  toJSON(specification = 'All') {
-    this.tokenize();
-
-    const specDict = {
-      All: ['Comment', 'Library', 'Settings', 'Warnings', 'Errors', 'Syntax', 'Sections'],
-      Parse: ['Settings', 'Syntax', 'Sections'],
-      Token: ['Comment', 'Library', 'Warnings', 'Errors', 'Sections'],
-      Debug: ['Warnings', 'Errors']
-    };
-
-    return this.properties(specDict[specification]);
+  fullForm() {
+    return this.properties('Comment', 'Library', 'Settings', 'Warnings', 'Errors', 'Syntax', 'Sections');
   }
 
   getLibrary() {

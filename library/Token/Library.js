@@ -116,22 +116,20 @@ class LibTokenizer {
       result.body.forEach((tok) => {
         if (tok.type === 'FunctionDeclaration') {
           const name = tok.id.name;
-          if (!name.includes('_')) {
-            const voidQ = LibTokenizer.isVoid(tok);
-            dict.push({
-              Name: name,
-              VoidQ: voidQ
-            });
-            let order = 0;
-            for (let i = 0; i < syntax.length; i++) {
-              if (tok.body.start < syntax[i].start && tok.body.end > syntax[i].end) {
-                order += 1;
-                aliases.push(Object.assign(syntax[i].alias, {
-                  Name: name,
-                  Order: order,
-                  VoidQ: voidQ
-                }));
-              }
+          const voidQ = LibTokenizer.isVoid(tok);
+          dict.push({
+            Name: name,
+            VoidQ: voidQ
+          });
+          let order = 0;
+          for (let i = 0; i < syntax.length; i++) {
+            if (tok.body.start < syntax[i].start && tok.body.end > syntax[i].end) {
+              order += 1;
+              aliases.push(Object.assign(syntax[i].alias, {
+                Name: name,
+                Order: order,
+                VoidQ: voidQ
+              }));
             }
           }
         } else {

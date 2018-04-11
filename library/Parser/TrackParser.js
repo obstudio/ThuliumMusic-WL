@@ -195,7 +195,7 @@ class TrackParser {
                 case 'Subtrack': {
                     let subtrack
                     if (token.Type === 'Function') {
-                        subtrack = this.Libraries.FunctionPackage.applyFunction(this, token)
+                        subtrack = this.Libraries.Package.applyFunction(this, token)
                         if (subtrack === undefined) {
                             break
                         }

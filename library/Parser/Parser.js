@@ -1,4 +1,4 @@
-const Loader = require('./LibLoader')
+const Loader = require('./Loader')
 const GlobalSetting = require('./GlobalSetting')
 const { TrackParser } = require('./TrackParser')
 const TmError = require('./Error')
@@ -7,13 +7,13 @@ const EPSILON = 0.0000000001
 class Parser {
     /**
      * Tm Parser
-     * @param {Tm.TokenizedData} tokenizedData 经过tok的JSON对象
+     * @param {data} tokenizedData 经过tok的JSON对象
      * @example
      * new Parser(tokenizedData)
      */
-    constructor(tokenizedData) {
-        this.tokenizedData = tokenizedData
-        this.libraries = new Loader(this.tokenizedData.Library).load()
+    constructor(data) {
+        this.Sections = data.Sections
+        this.libraries = new Loader(data.Syntax)
         this.result = {
             Sections: undefined
         }
@@ -26,20 +26,34 @@ class Parser {
 
     parse() {
         const result = []
+        this.expandSection()
         this.generateOrder()
-        this.tokenizedData.Sections.forEach((part) => {
+        this.Sections.forEach((part) => {
             if (part.Type === 'Section') {
                 result.push(this.parseSection(part))
             } else {
-                this.libraries.FunctionPackage.applyFunction({ Settings: this.sectionContext.Settings, Context: {} }, part)
+                this.libraries.Package.applyFunction({
+                    Settings: this.sectionContext.Settings, Context: {}
+                }, part)
             }
         })
         return result
     }
 
+    expandSection() {
+        const result = []
+        for (const section of this.Sections) {
+            result.push(...section.Prolog, section, ...section.Epilog)
+            delete section.Prolog
+            delete section.Epilog
+            section.Type = 'Section'
+        }
+        this.Sections = result
+    }
+
     generateOrder() {
-        const secs = this.tokenizedData.Sections
-        this.tokenizedData.Sections = [] // 一会儿展开后还存这里面
+        const secs = this.Sections
+        this.Sections = [] // 一会儿展开后还存这里面
         const length = secs.length
         let pointer = 0
         let repeatBeginIndex = [] // 用数组存储嵌套反复每次开始的位置
@@ -143,7 +157,7 @@ class Parser {
                     return
                 case 'Section':
                 case 'Function':
-                    this.tokenizedData.Sections.push(element)
+                    this.Sections.push(element)
                     break
             }
             pointer += 1
@@ -156,24 +170,41 @@ class Parser {
      */
     parseSection(section) {
         const settings = this.sectionContext.Settings.extend()
-        section.Settings.filter((token) => token.Type === 'Function')
-            .forEach((token) => this.libraries.FunctionPackage.applyFunction({ Settings: settings, Context: {} }, token))
+        for (const setting of section.Settings) {
+            setting.Spec.filter((token) => token.Type === 'Function')
+                .forEach((token) => this.libraries.Package.applyFunction({ Settings: settings, Context: {} }, token))
+        }
         const instrStatistic = {}
         const sec = {
-            ID: section.ID,
             Tracks: [].concat(...section.Tracks.map((track) => {
-                const tempTracks = new TrackParser(track, settings, this.libraries).parseTrack()
-                for (const tempTrack of tempTracks) {
-                    if (tempTrack.Instrument in instrStatistic) {
-                        instrStatistic[tempTrack.Instrument] += 1
-                    } else {
-                        instrStatistic[tempTrack.Instrument] = 1
-                    }
-                    if (track.ID === '') {
-                        tempTrack.ID += '#' + instrStatistic[tempTrack.Instrument].toString()
-                    }
+                if (track.Name !== undefined) {
+                    this.libraries.Track[track.Name] = track.Content
                 }
-                return tempTracks
+                if (track.Play) {
+                    const tempTracks = []
+                    if (track.Instruments.length === 0) {
+                        track.Instruments.push({
+                            Name: 'Piano',
+                            Spec: []
+                        })
+                    }
+                    for (const instr of track.Instruments) {
+                        tempTracks.push(new TrackParser(track, instr, settings, this.libraries).parseTrack())
+                    }
+                    for (const tempTrack of tempTracks) {
+                        if (tempTrack.Instrument in instrStatistic) {
+                            instrStatistic[tempTrack.Instrument] += 1
+                        } else {
+                            instrStatistic[tempTrack.Instrument] = 1
+                        }
+                        if (track.ID === '') {
+                            tempTrack.ID += '#' + instrStatistic[tempTrack.Instrument].toString()
+                        }
+                    }
+                    return tempTracks
+                } else {
+                    return []
+                }
             })),
             Warnings: []
         }
@@ -203,3 +234,4 @@ class Parser {
 }
 
 module.exports = Parser
+

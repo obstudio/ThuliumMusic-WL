@@ -54,23 +54,15 @@ Parse[origin_,partspec_]:=Block[
 				Message[Parse::nfound,origin];Return[];
 			];
 			Switch[ToLowerCase@FileExtension[origin],
-				"json",
-					rawData=ExternalEvaluate[System`JS,"Parse('"<>origin<>"')"],
+				(*"json",
+					rawData=ExternalEvaluate[System`JS,"Parse('"<>origin<>"')"],*)
 				"tm",
-					tempFile=TempPath[];
-					Export[tempFile,Tokenize[origin][["Tokenizer"]]];
-					rawData=ExternalEvaluate[System`JS,"Parse('"<>tempFile<>"')"];
-					DeleteFile[tempFile],
+					rawData=ExternalEvaluate[System`JS, "new Thulium('"<>origin<>"').parse()"],
 				"",
 					Message[Parse::ext2];Return[],
 				_,
 					Message[Parse::ext1,FileExtension[origin]];Return[];
 			],
-		_Association,
-			tempFile=TempPath[];
-			Export[tempFile,origin];
-			rawData=ExternalEvaluate[System`JS,"Parse('"<>tempFile<>"')"];
-			DeleteFile[tempFile],
 		_,
 			Message[Parse::type];Return[];
 	];
@@ -104,7 +96,7 @@ Parse[origin_,partspec_]:=Block[
 ];
 
 
-(* ::Subsubsection::Closed:: *)
+(* ::Subsubsection:: *)
 (*Constructor*)
 
 
@@ -357,7 +349,11 @@ AudioAdapt[rawData_,OptionsPattern[AdaptingOptions]]:=Block[
 (* ::Input:: *)
 (*AudioStop[];AudioPlay[#[[2]]]&@*)
 (*EchoFunction["time: ",#[[1]]&]@*)
-(*Timing[AudioAdapt[Parse[localPath<>"Songs/Touhou/test.tm",{2,3}],"Rate"->1.2]];*)
+(*Timing[AudioAdapt[Parse[localPath<>"Songs/Touhou/test.tm",{-1}],"Rate"->1.1]];*)
+
+
+(* ::Input:: *)
+(*AudioAdapt[Parse[localPath<>"Songs/Touhou/test.tm",{2,3}],"Rate"->1.2]*)
 
 
 (* ::Input:: *)

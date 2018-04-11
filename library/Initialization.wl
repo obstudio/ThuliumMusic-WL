@@ -27,14 +27,7 @@ playlistTemplate=<|
 InitializeParser := Monitor[
 	Off[General::shdw];
 	System`JS = StartExternalSession["NodeJS"];
-	ExternalEvaluate[System`JS, File[localPath <> "library/Parser/Parser.js"]];
-	ExternalEvaluate[System`JS, "const fs = require('fs')"];
-	ExternalEvaluate[System`JS, "
-		function Parse(filePath) {
-			const data = JSON.parse(fs.readFileSync(filePath, 'utf8'))
-			return new Parser(data).parse()
-		}
-	"];
+	ExternalEvaluate[System`JS, File[localPath <> "library/Thulium.js"]];
 	DeleteObject[Drop[ExternalSessions[], -1]];
 	On[General::shdw],
 	(* monitor *)
@@ -43,6 +36,10 @@ InitializeParser := Monitor[
 		"PrintTemporary"
 	]]
 ];
+
+
+(* ::Input:: *)
+(*InitializeParser;*)
 
 
 updateIndex := Block[

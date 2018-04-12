@@ -3,8 +3,8 @@ const Parser = require('./Parser/Parser');
 const Tokenizer = require('./Token/Tokenizer');
 
 class Thulium {
-	constructor(input, spec = 'URL') {
-		this.Tokenizer = new Tokenizer(input, spec);
+	constructor(input, {spec = 'URL', buffer = true} = {}) {
+		this.Tokenizer = new Tokenizer(input, {spec: spec, buffer: buffer});
 		this.$parse = false;
 	} 
 	parse(forced = false) {
@@ -16,7 +16,8 @@ class Thulium {
 }
 
 module.exports = Thulium;
-const test = new Thulium('E:/#Obstudio#/QingyunMusicPlayer/Songs/Touhou/test.tm');
+// const test = new Thulium('E:/#Obstudio#/QingyunMusicPlayer/Songs/Yueting.tm');
 // console.log(test.Tokenizer.toParser().Sections[5].Tracks[1].Content[73]);
-// console.log(test.parse()[5].Tracks[2].Content.slice(-20).map(t=>t.Pitch).join(', '))
+// console.log(test.parse())
+
 

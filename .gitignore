@@ -10,3 +10,4 @@
 *.mid
 test*.*
 test/*.*
+buffer.json

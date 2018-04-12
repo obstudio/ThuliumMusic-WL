@@ -27,7 +27,7 @@ class Tokenizer {
     );
   }
 
-  constructor(input, spec = 'String') {
+  constructor(input, {spec = 'String', buffer = true} = {}) {
     this.Comment = [];
     this.Library = [];
     this.Warnings = [];
@@ -43,6 +43,7 @@ class Tokenizer {
 
     this.$init = false;
     this.$token = false;
+    this.$buffer = buffer;
 
     let source;
     if (spec === 'URL') {
@@ -175,7 +176,7 @@ class Tokenizer {
       const data = syntax.tokenize(track, 'meta');
       data.Content.forEach(tok => {
         if (tok.Type != '@inst') {
-          this.Errors.push({
+          this.Warnings.push({
             Err: 'NotInstrument',
             Tok: tok
           });
@@ -190,7 +191,7 @@ class Tokenizer {
           });
           inst.push({ Name: tok.name, Spec: tok.spec });
         } else {
-          this.Errors.push({
+          this.Warnings.push({
             Err: 'NotInstrument',
             Tok: tok
           });
@@ -275,8 +276,14 @@ class Tokenizer {
   }
 
   loadLibrary(name, origin = '#AUTOLOAD') {
-    const path = packagePath + name + '/main.tml';
-    const packageData = new Tokenizer(path, 'URL').getLibrary();
+    const path = packagePath + name;
+    let packageData;
+    if (fs.existsSync(path + '/buffer.json') && this.$buffer) {
+      packageData = require(path + '/buffer.json');
+    } else {
+      packageData = new Tokenizer(path + '/main.tml', {spec: 'URL'}).getLibrary();
+      fs.writeFileSync(path + '/buffer.json', JSON.stringify(packageData), 'utf8');
+    }
     this.Syntax.Dict.push(...packageData.Dict);
     this.Syntax.Chord.push(...packageData.Chord);
     this.Syntax.Alias.push(...packageData.Alias);

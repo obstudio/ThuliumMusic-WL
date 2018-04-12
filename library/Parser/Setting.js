@@ -1,4 +1,4 @@
-class GlobalSetting {
+class tmSetting {
     constructor({
         Key = [0],
         Volume = [1],
@@ -39,7 +39,7 @@ class GlobalSetting {
     }
 
     extend(settingObj = {}) {
-        const newSetting = new GlobalSetting()
+        const newSetting = new tmSetting()
         const specialSettings = { Stac: this.Stac.slice(), Key: this.Key.slice(), Volume: this.Volume.slice() }
         Object.assign(newSetting, this, specialSettings, settingObj)
         return newSetting
@@ -51,7 +51,7 @@ class GlobalSetting {
 
     /**
      *
-     * @param {Tm.GlobalSetting} globalSetting
+     * @param {tmSetting} tmSetting
      * @param {string} key
      * @param {number} value
      * @param {function} criterion
@@ -88,4 +88,4 @@ class GlobalSetting {
     }
 }
 
-module.exports = GlobalSetting
+module.exports = tmSetting

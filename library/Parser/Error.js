@@ -2,7 +2,7 @@ class TmError {
     constructor(err, pos, arg) {
         this.name = err
         this.arg = arg
-        this.pos = pos
+        this.pos = pos === null ? [] : [pos]
     }
 
     toJSON() {

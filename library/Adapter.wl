@@ -54,23 +54,15 @@ Parse[origin_,partspec_]:=Block[
 				Message[Parse::nfound,origin];Return[];
 			];
 			Switch[ToLowerCase@FileExtension[origin],
-				"json",
-					rawData=ExternalEvaluate[System`JS,"Parse('"<>origin<>"')"],
+				(*"json",
+					rawData=ExternalEvaluate[System`JS,"Parse('"<>origin<>"')"],*)
 				"tm",
-					tempFile=TempPath[];
-					Export[tempFile,Tokenize[origin][["Tokenizer"]]];
-					rawData=ExternalEvaluate[System`JS,"Parse('"<>tempFile<>"')"];
-					DeleteFile[tempFile],
+					rawData=ExternalEvaluate[System`JS, "new Thulium('"<>origin<>"').parse()"],
 				"",
 					Message[Parse::ext2];Return[],
 				_,
 					Message[Parse::ext1,FileExtension[origin]];Return[];
 			],
-		_Association,
-			tempFile=TempPath[];
-			Export[tempFile,origin];
-			rawData=ExternalEvaluate[System`JS,"Parse('"<>tempFile<>"')"];
-			DeleteFile[tempFile],
 		_,
 			Message[Parse::type];Return[];
 	];
@@ -269,7 +261,7 @@ AudioAdapt[rawData_,OptionsPattern[AdaptingOptions]]:=Block[
 ];
 
 
-(* ::Subsubsection:: *)
+(* ::Subsubsection::Closed:: *)
 (*Debug*)
 
 
@@ -318,6 +310,10 @@ AudioAdapt[rawData_,OptionsPattern[AdaptingOptions]]:=Block[
 (*EmitSound@Sound@SoundNote["VoiceAahs",1]*)
 
 
+(* ::Input:: *)
+(*InitializeParser;*)
+
+
 (* ::Subsubsection:: *)
 (*MIDI*)
 
@@ -335,7 +331,11 @@ AudioAdapt[rawData_,OptionsPattern[AdaptingOptions]]:=Block[
 (* ::Input:: *)
 (*MIDIStop[];MIDIPlay[#[[2]]]&@*)
 (*EchoFunction["time: ",#[[1]]&]@*)
-(*Timing[MIDIAdapt[Parse[localPath<>"Research/test.tm"]]];*)
+(*Timing[MIDIAdapt[Parse[localPath<>"Songs/Touhou/test.tm"]]];*)
+
+
+(* ::Input:: *)
+(*Parse[localPath<>"Songs/test.tm"][[1,"Tracks",1,"Content"]]*)
 
 
 (* ::Subsubsection:: *)
@@ -349,7 +349,15 @@ AudioAdapt[rawData_,OptionsPattern[AdaptingOptions]]:=Block[
 (* ::Input:: *)
 (*AudioStop[];AudioPlay[#[[2]]]&@*)
 (*EchoFunction["time: ",#[[1]]&]@*)
-(*Timing[AudioAdapt[Parse[localPath<>"Songs/Touhou/TH11-Chireiden/3rd_Eye.tm",{5,6}],"Rate"->1.1]];*)
+(*Timing[AudioAdapt[Parse[localPath<>"Songs/Touhou/test.tm",{1,3}],"Rate"->1.1]];*)
+
+
+(* ::Input:: *)
+(*AudioAdapt[Parse[localPath<>"Songs/Yueting.tm"]]*)
+
+
+(* ::Input:: *)
+(*AudioAdapt[Parse[localPath<>"Songs/Touhou/test.tm",{2,3}],"Rate"->1.2]*)
 
 
 (* ::Input:: *)

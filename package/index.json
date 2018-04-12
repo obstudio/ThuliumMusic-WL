@@ -1,0 +1,7 @@
+{
+	"AutoLoad": "Ammonia",
+	"Packages": [
+		"Ammonia",
+		"Benzene"
+	]
+}

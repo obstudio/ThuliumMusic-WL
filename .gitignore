@@ -5,5 +5,9 @@
 /*.docx
 /*.png
 *.txt
+*.mp3
+*.sf2
+*.mid
 test*.*
 test/*.*
+buffer.json

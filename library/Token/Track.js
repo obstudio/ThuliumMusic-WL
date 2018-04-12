@@ -1,4 +1,5 @@
 const FSM = require('./Context');
+const {Alias} = require('./Alias');
 
 const ArgumentPatterns = {
   uns: {
@@ -325,7 +326,7 @@ class TrackSyntax extends FSM {
 
     });
 
-    this.Contexts.alias = aliases.map(alias => alias.build(dict));
+    this.Contexts.alias = aliases.map(alias => new Alias(alias).build(dict));
   }
 }
 

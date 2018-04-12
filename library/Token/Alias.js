@@ -40,11 +40,11 @@ const AliasContexts = {
   ]
 }
 
-class Alias extends FSM {
+class AliasSyntax extends FSM {
   
   constructor(declaration) {
     super(AliasContexts);
-    const match = declaration.match(Alias.Pattern);
+    const match = declaration.match(AliasSyntax.Pattern);
     this.Source = match[2].trim();
     this.Prec = match[1];
   }
@@ -150,6 +150,12 @@ class Alias extends FSM {
     delete this.Contexts;
     return this.Warnings.length === 0;
   }
+}
+
+class Alias {
+  constructor(proto) {
+    Object.assign(this, proto);
+  }
 
   build(dict) {
     let pattern = '^';
@@ -197,6 +203,6 @@ class Alias extends FSM {
   }
 }
 
-Alias.Pattern = /^(?: *prec(?:edence)?: *(\d+);)? *alias:(.+)$/i;
+AliasSyntax.Pattern = /^(?: *prec(?:edence)?: *(\d+);)? *alias:(.+)$/i;
 
-module.exports = Alias;
+module.exports = {Alias, AliasSyntax};

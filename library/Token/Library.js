@@ -1,5 +1,5 @@
 const acorn = require('acorn');
-const Alias = require('./Alias');
+const {AliasSyntax} = require('./Alias');
 
 const int = '([+\\-]?\\d+)';
 const item = `(\\[${int}?(:${int}?)?\\])?${int}?`;
@@ -102,11 +102,11 @@ class LibTokenizer {
       const result = acorn.parse(code, {
         ecmaVersion: 8,
         onComment(isBlock, text, start, end) {
-          const result = Alias.Pattern.exec(text);
+          const result = AliasSyntax.Pattern.exec(text);
           if (!isBlock && result) {
-            const alias = new Alias(text);
+            const alias = new AliasSyntax(text);
             if (alias.analyze()) {
-              syntax.push({ start, end, alias });
+              syntax.push({start, end, alias});
             } else {
               warnings.push(...alias.Warnings);
             }

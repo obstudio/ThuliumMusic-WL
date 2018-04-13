@@ -39,11 +39,25 @@ class tmSetting {
     }
 
     extend(settingObj = {}) {
-        const newSetting = new tmSetting()
-        const specialSettings = { Stac: this.Stac.slice(), Key: this.Key.slice(), Volume: this.Volume.slice() }
-        Object.assign(newSetting, this, specialSettings, settingObj)
-        return newSetting
-      }
+        function copy(obj) {
+            if (obj instanceof Array) {
+                return obj.slice();
+            } else {
+                return obj;
+            }
+        }
+        const settings = new tmSetting();
+        for (const setting in settings) {
+            if (setting in settingObj) {
+                settings[setting] = copy(settingObj[setting]);
+            } else {
+                settings[setting] = copy(this[setting]);
+            }
+        }
+        // const specialSettings = { Stac: this.Stac.slice(), Key: this.Key.slice(), Volume: this.Volume.slice() }
+        // Object.assign(newSetting, this, specialSettings, settingObj)
+        return settings;
+    }
 
     update(settingObj) {
         Object.assign(this, settingObj)

@@ -37,7 +37,7 @@ class Parser {
                 }, part)
             }
         })
-        return result
+        return result.filter(sect => sect.Tracks.length > 0)
     }
 
     expandSection() {

@@ -35,6 +35,7 @@ const AliasContexts = {
     FSM.item('uns', /^uns(?:igned)?/),
     FSM.item('not', /^notes/),
     FSM.item('nam', /^name/),
+    FSM.item('mac', /^macro/),
     FSM.item('str', /^str(?:ing)?/),
     FSM.item('@und', /^[^\}]/)
   ]
@@ -50,7 +51,7 @@ class AliasSyntax extends FSM {
   }
 
   analyze() {
-    const token = super.tokenize(this.Source, 'default');
+    const token = super.tokenize(this.Source, 'default', false);
     token.Warnings.forEach(err => err.Err = 'InvalidLiteral');
     this.Syntax = token.Content;
     this.Warnings = token.Warnings;
@@ -114,18 +115,18 @@ class AliasSyntax extends FSM {
     if (this.Syntax[0].Type === '@arg') {
       if (this.Syntax[0].Class === 'sub') {
         this.LeftId = this.Syntax[0].Id;
-      } else {
+        this.Syntax.shift();
+      } else if (!this.Syntax[0].Class === 'mac') {
         this.Warnings.push({ Err: 'NotSubtrackL' });
       }
-      this.Syntax.shift();
     }
     if (this.Syntax[this.Syntax.length - 1].Type === '@arg') {
       if (this.Syntax[this.Syntax.length - 1].Class === 'sub') {
         this.RightId = this.Syntax[this.Syntax.length - 1].Id;
-      } else {
+        this.Syntax.pop();
+      } else if (!this.Syntax[this.Syntax.length - 1].Class === 'mac') {
         this.Warnings.push({ Err: 'NotSubtrackR' });
       }
-      this.Syntax.pop();
     }
 
     if (this.Prec === 0 || this.Prec >= FSM.MaxPrec) {

@@ -4,8 +4,8 @@
 # Function
 
 function _take_(origin, start, end) {
-	origin = this._zoom_(origin.filter(note => {
-		note.StartTime >= start && note.StartTime + note.Duration < end
+	return this._zoom_(origin.filter(note => {
+		return note.StartTime >= start && note.StartTime + note.Duration <= end;
 	}), 1, -start);
 }
 
@@ -29,7 +29,27 @@ function _adjust_(matrix, source) {
 	return source;
 }
 
-function Extend(beats, subtrack = this.EmptyTrack) {
+function Only() {
+	// Alias: Clear
+	const settings = {};
+	for (property of arguments) {
+		settings[property] = this.Settings[property];
+		if (settings[property] instanceof Array) {
+			settings[property] = settings[property].slice();
+		}
+	}
+	Object.assign(this.Settings, this.newSettings(settings));
+}
+
+function Except() {
+	const settings = this.newSettings();
+	for (property of arguments) {
+		this.Settings[property] = settings[property];
+	}
+}
+
+function Extend(subtrack, beats) {
+	// Alias: Rest(${1:int})
 	const src = this.ParseTrack(subtrack);
 	src.Content.forEach(note => {
 		note.Duration = beats * 60 / this.Settings.Speed
@@ -41,6 +61,15 @@ function Extend(beats, subtrack = this.EmptyTrack) {
 		BarFirst: this.Settings.Bar,
 		BarLast: beats % this.Settings.Bar
 	});
+	return src;
+}
+
+function ReplaceRight(subtrack, replacement) {
+	const src = this.ParseTrack(subtrack);
+	const repl = this.ParseTrack(replacement);
+	if (beats < 0) {
+		src.Content = this.Library._take_(src.Content, 0, src.Meta.Duration + beats * 60 / src.Settings.Speed);
+	}
 	return src;
 }
 
@@ -92,7 +121,7 @@ function Map(template, subtrack) {
 		const sStart = sNote.StartTime * temp.Meta.Duration;
 		temp.Content.forEach(tNote => {
 			const tStart = tNote.StartTime * sNote.Duration;
-			const tempo = 
+			const tempo = 0;
 			content.push({
 				Type: 'Note',
 				Pitch: sNote.Pitch + tNote.Pitch,
@@ -105,15 +134,40 @@ function Map(template, subtrack) {
 	return this.Library._adjust_(this, {
 		Content: content,
 		Meta: Object.assign(src.Meta, {
-			BarCount: Math.ceil()
+			BarCount: Math.ceil(1)
 		}),
 		Settings: src.Settings
 	});
 }
 
+function Apply(template, subtrack) {
+	// Alias: ${0:sub}:${1:sub}
+	const temp = this.ParseTrack(template, { Settings: this.newSettings() });
+	const src = this.ParseTrack(subtrack);
+	const scale = temp.Settings.Speed / src.Settings.Speed;
+	const proto = this.Library._zoom_(temp.Content, scale);
+	const content = [];
+	src.Content.forEach(sNote => {
+		const filler = this.Library._fill_(proto, temp.Meta.Duration * scale, sNote.Duration);
+		content.push(...filler.map(note => Object.assign(note, {
+			Pitch: note.Pitch + sNote.Pitch,
+			StartTime: note.StartTime + sNote.StartTime,
+			StartBeat: note.StartBeat + sNote.StartBeat,
+			Volume: note.Volume * sNote.Volume
+		})));
+	});
+	return Object.assign(src, {Content: content});
+}
+
 function OctShift(delta) {
-	for (var i = 0, length = this.Settings.Key.length; i < length; i++) {
+	for (let i = 0, length = this.Settings.Key.length; i < length; i++) {
 		this.Settings.Key[i] += delta * 12
+	}
+}
+
+function VolShift(delta) {
+	for (let i = 0, length = this.Settings.Volume.length; i < length; i++) {
+		this.Settings.Volume[i] *= delta 
 	}
 }
 

@@ -1,0 +1,44 @@
+# Thulium API
+
+Thulium 语言为开发者提供了一套完善的 API 体系，该体系能够让开发者用户随心所欲地创造各种各样的函数。当用户编写自己的函数时，其中的 this 参数就是一个 tmAPI 对象，该对象具有的属性和方法，将在下文详细介绍。
+
+---
+## tmAPI 属性
+
+一个 tmAPI 对象包含下面的属性：
+
++ Settings
+
+一个 tmSettings 对象，包含当前位置的设置。参考 [Settings] 页面了解 tmSettings 对象含有的属性和方法。
+
++ Meta
+
+一个 tmMeta 对象，包含当前位置的元信息。参考 [Meta] 页面了解 tmMeta 对象含有的属性和方法。
+
++ Token
+
+一个 tmToken 对象，包含当前函数的信息。参考 [Token] 页面了解 tmToken 对象含有的属性和方法。
+
++ Library
+
+一个字典，包含所有官方和用户的函数，可以使用`Library.func()`来调用任何一个函数。
+
+---
+## tmAPI 方法
+
++ ParseTrack(subtrack, specifications = {})
+
+解析一个子音轨，返回解析后的事件列表。
+subtrack：要解析的子音轨的 Token 序列。
+specification：设置对象，允许下面两个键：
+  + Protocol：解析协议（详见[解析协议]章节）
+  + Settings：预加载的设置列表
+
++ JoinTrack()
+
++ newSettings()
+
++ ReportError()
+
+
+

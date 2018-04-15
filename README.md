@@ -10,8 +10,8 @@ After installation, run Node.js command prompt:
 
 ```Command
 npm install zeromq
-ren node_modules .node_modules
 npm install acorn
+ren node_modules .node_modules
 ```
 
 ## Why my Mathematica reports an error?

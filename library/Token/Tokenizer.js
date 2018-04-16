@@ -251,21 +251,6 @@ class Tokenizer {
     };
   }
 
-  properties(...properties) {
-    this.tokenize();
-    const result = {};
-    properties.forEach(attr => result[attr] = this[attr]);
-    return result;
-  }
-
-  toParser() {
-    return this.properties('Settings', 'Syntax', 'Sections');
-  }
-
-  fullForm() {
-    return this.properties('Comment', 'Library', 'Settings', 'Warnings', 'Errors', 'Syntax', 'Sections');
-  }
-
   getLibrary() {
     this.initialize();
     if (this.Errors.length > 0) {

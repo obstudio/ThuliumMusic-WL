@@ -64,6 +64,11 @@ function Extend(subtrack, beats) {
 	return src;
 }
 
+function Preset(subtrack) {
+	const src = this.ParseTrack(subtrack);
+	this.Meta.PitchQueue.push(...src.Meta.PitchQueue);
+}
+
 function ReplaceRight(subtrack, replacement) {
 	const src = this.ParseTrack(subtrack);
 	const repl = this.ParseTrack(replacement);

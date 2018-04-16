@@ -20,7 +20,7 @@ ren node_modules .node_modules
 
 > Thulium Music Player uses some new functions in Mathematica 11.2, such as [ExternalEvaluate](http://reference.wolfram.com/language/ref/ExternalEvaluate.html) and [AudioStream](http://reference.wolfram.com/language/ref/AudioStream.html).
 
-2. Make sure **Node.js** and **ZeroMQ** has been installed. You can run a simple Mathematica program to check:
+2. Make sure **Node.js** and **zeromq** and **acorn** has been installed. You can run a simple Mathematica program to check:
 
 ```Mathemetica
 FindExternalEvaluators["NodeJS"]

@@ -2,3 +2,12 @@
 	path = docs
 	url = git@github.com:obstudio/ThuliumMusic-Docs.git
 	branch = master
+[submodule "library/Parser"]
+	path = library/Parser
+	url = git@github.com:obstudio/ThuliumMusic-Parser.git
+[submodule "library/Detok"]
+	path = library/Detok
+	url = git@github.com:obstudio/ThuliumMusic-Detokenizer.git
+[submodule "library/Token"]
+	path = library/Token
+	url = git@github.com:obstudio/ThuliumMusic-Tokenizer.git

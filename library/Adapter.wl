@@ -261,7 +261,7 @@ AudioAdapt[rawData_,OptionsPattern[AdaptingOptions]]:=Block[
 ];
 
 
-(* ::Subsubsection::Closed:: *)
+(* ::Subsubsection:: *)
 (*Debug*)
 
 
@@ -349,25 +349,13 @@ AudioAdapt[rawData_,OptionsPattern[AdaptingOptions]]:=Block[
 (* ::Input:: *)
 (*AudioStop[];AudioPlay[#[[2]]]&@*)
 (*EchoFunction["time: ",#[[1]]&]@*)
-(*Timing[AudioAdapt[Parse[localPath<>"Songs/Touhou/test.tm",{1,3}],"Rate"->1.1]];*)
-
-
-(* ::Input:: *)
-(*AudioAdapt[Parse[localPath<>"Songs/Yueting.tm"]]*)
-
-
-(* ::Input:: *)
-(*AudioAdapt[Parse[localPath<>"Songs/Touhou/test.tm",{2,3}],"Rate"->1.2]*)
+(*Timing[AudioAdapt[Parse[localPath<>"Songs/Touhou/test.tm",{2,3}],"Rate"->1.1]];*)
 
 
 (* ::Input:: *)
 (*AudioStop[];AudioPlay[#[[2]]]&@*)
 (*EchoFunction["time: ",#[[1]]&]@*)
-(*Timing[AudioAdapt[Parse[localPath<>"Research/test.tm"]]];*)
-
-
-(* ::Input:: *)
-(*Export[localPath<>"test.mp3",AudioAdapt[Parse[localPath<>"Songs/Touhou/TH11-Chireiden/3rd_Eye.tm",1]]];*)
+(*Timing[AudioAdapt[Parse[localPath<>"Songs/Levan_Polkka.tm"],"Rate"->1.1]];*)
 
 
 (* ::Subsubsection:: *)

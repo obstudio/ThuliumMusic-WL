@@ -1,9 +1,0 @@
-## 基本语法
-
-+ 音符
-
-+ [$Note] + [$Pitch] + [$NoteLength] + [$NoteVolume] + [$Chord] + [$Rest] + [$UndeterminedPitch] +
-
-+ 节奏
-
-+ [$BarLine] + [$TieAndSlur] +

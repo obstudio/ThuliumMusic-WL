@@ -8,3 +8,6 @@
 [submodule "library/Detok"]
 	path = library/Detok
 	url = git@github.com:obstudio/ThuliumMusic-Detokenizer.git
+[submodule "library/Token"]
+	path = library/Token
+	url = git@github.com:obstudio/ThuliumMusic-Tokenizer.git

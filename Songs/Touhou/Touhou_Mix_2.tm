@@ -7,6 +7,8 @@
 //ZUN 曲
 //Kouchya 改编
 
+# Include Benzene
+
 #Chord
 f		flag		0, 8, 12
 F		Flag		0, 9, 12

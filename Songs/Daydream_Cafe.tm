@@ -1,6 +1,8 @@
 //Daydream Cafe
 
-(1=Eb)(150)
+# Include Benzene
+
+(1=bE)(150)
 
 <Piano(100%)>(2/4)(Dur:1)03'4'5'|(4/4)|
 [6o2']-%-%%-7tP^|%%4'%6m4'6m2'|3tP-5o-3tP--7tP^|%6'7tP4'6m---|

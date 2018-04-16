@@ -349,7 +349,7 @@ AudioAdapt[rawData_,OptionsPattern[AdaptingOptions]]:=Block[
 (* ::Input:: *)
 (*AudioStop[];AudioPlay[#[[2]]]&@*)
 (*EchoFunction["time: ",#[[1]]&]@*)
-(*Timing[AudioAdapt[Parse[localPath<>"Songs/Touhou/test.tm",{2,3}],"Rate"->1.1]];*)
+(*Timing[AudioAdapt[Parse[localPath<>"Songs/Touhou/Tohno_Gensou_Monogatari.tm",{1}],"Rate"->1.1]];*)
 
 
 (* ::Input:: *)

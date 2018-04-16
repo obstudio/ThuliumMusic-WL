@@ -7,20 +7,12 @@ M		Major			0, 4, 7
 m		Minor			0, 3, 7
 a		Augmented		0, 4, 8
 d		Diminished		0, 3, 6
-t		tres			[], 3
-T		tres+			[], 4
 q		quattuor		[], 5
-Q		quattuor+		[], 6
 p		quinque			[], 7
-P		quinque+		[], 8
-h		sex				[], 9
-H		sex+			[], 10
-s		septem			[], 11
 o		octo			[], 12
 u		octo (Under)	[-1]-12, []
 i		1st inversion	[:0]+12, [1:]
 j		2nd inversion	[:1]+12, [2:]
-k		3rd inversion	[:2]+12, [3:]
 
 # Function
 

@@ -1,6 +1,18 @@
 // TM Benzene Package
 // Updated: 2018.4.13.
 
+# Chord
+
+t		tres			[], 3
+T		tres+			[], 4
+Q		quattuor+		[], 6
+P		quinque+		[], 8
+h		sex				[], 8
+H		sex+			[], 9
+s		septem			[], 10
+S		septem+			[], 11
+k		3rd inversion	[:2]+12, [3:]
+
 # Function
 
 function _take_(origin, start, end) {

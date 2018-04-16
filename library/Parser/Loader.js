@@ -1,4 +1,5 @@
 const { SubtrackParser } = require('./TrackParser')
+const tmSetting = require('./Setting')
 
 const packagePath = '../../package/'
 const packageInfo = require(packagePath + 'index.json')
@@ -59,24 +60,33 @@ const Protocols = {
 }
 
 class tmAPI {
+    /**
+     * Thulium API
+     * @param {tmParser} Thulium Parser Object
+     * @param {tmToken} Function Token
+     * @param {tmPackageDict} Map of Functions
+     */
     constructor(parser, token, dict) {
         Object.assign(this, parser);
         this.Token = token;
-        this.EmptyTrack = {
-            Type: 'Subtrack',
-            Content: []
-        };
         this.Library = new Proxy({}, {
             get: (_, name) => dict[name]
         });
     }
 
-    ParseTrack(track, { protocol = 'Default', settings = null } = {}) {
+    newSettings(settings = {}) {
+        return new tmSetting(settings);
+    }
+
+    ParseTrack(track, { Protocol = 'Default', Settings = null } = {}) {
+        if (track === undefined) {
+            track = { Type: 'Subtrack', Content: [] };
+        }
         return new SubtrackParser(
             track,
-            settings === null ? this.Settings : this.Settings.extend(settings),
+            Settings === null ? this.Settings : this.Settings.extend(Settings),
             this.Libraries,
-            tmAPI.wrap(this.Meta, protocol)
+            tmAPI.wrap(this.Meta, Protocol)
         ).parseTrack();
     }
 

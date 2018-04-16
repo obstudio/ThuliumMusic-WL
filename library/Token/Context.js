@@ -63,7 +63,7 @@ class FSM {
           index += match[0].length;
           string = string.slice(match[0].length);
           if (stx.push) {
-            const subtoken = this.tokenize(string, stx.push);
+            const subtoken = this.tokenize(string, stx.push, epi);
             warnings.push(...subtoken.Warnings.map(msg => {
               return {
                 Err: msg.Err,
@@ -142,7 +142,7 @@ class FSM {
     let prior = FSM.findPrior(content);
     while (prior.Prec < FSM.MaxPrec) {
       let left = prior.Id, right = prior.Id;
-      if (prior.LID) {
+      if (prior.LID != undefined) {
         left = prior.Id - 1;
         while (left >= 0 && !FSM.isSubtrack(content[left])) {
           left -= 1;
@@ -156,7 +156,7 @@ class FSM {
           };
         }
       }
-      if (prior.RID) {
+      if (prior.RID != undefined) {
         right = prior.Id + 1;
         while (right < content.length && !FSM.isSubtrack(content[right])) {
           right += 1;

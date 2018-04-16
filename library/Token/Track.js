@@ -25,6 +25,10 @@ const ArgumentPatterns = {
   nam: {
     patt: '([a-zA-Z][a-zA-Z\\d]*)',
     meta: 'String'
+  },
+  mac: {
+    patt: '(@[a-zA-Z]\\w*)',
+    meta: 'Macrotrack'
   }
 };
 
@@ -63,7 +67,7 @@ class TrackSyntax extends FSM {
       not: {
         patt: note.Patt,
         meta: 'Subtrack',
-        epilog: (arg) => this.tokenize(arg, 'note').Content
+        epilog: arg => this.tokenize(arg, 'note').Content
       }
     }, ArgumentPatterns);
 
@@ -181,8 +185,8 @@ class TrackSyntax extends FSM {
 
       // Track Contents
       default: [
-        FSM.include('prototype'),
         FSM.include('alias'),
+        FSM.include('prototype'),
         FSM.include('note'),
         {
           patt: /^\}/,

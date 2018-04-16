@@ -278,10 +278,11 @@ class Tokenizer {
   loadLibrary(name, origin = '#AUTOLOAD') {
     const path = packagePath + name;
     let packageData;
-    if (fs.existsSync(path + '/buffer.json') && this.$buffer) {
+    if (this.$buffer && fs.existsSync(path + '/buffer.json')) {
       packageData = require(path + '/buffer.json');
     } else {
       packageData = new Tokenizer(path + '/main.tml', {spec: 'URL'}).getLibrary();
+      // console.log(packageData);
       fs.writeFileSync(path + '/buffer.json', JSON.stringify(packageData), 'utf8');
     }
     this.Syntax.Dict.push(...packageData.Dict);

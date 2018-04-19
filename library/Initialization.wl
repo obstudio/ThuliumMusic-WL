@@ -154,6 +154,7 @@ updateBuffer := Block[
 		If[KeyExistsQ[bufferHash,song],
 			If[bufferHash[[song]]==hash && FileExistsQ[dataPath<>"Buffer/"<>song<>".buffer"],
 				Continue[],
+				bufferHash[[song]]=hash;
 				AppendTo[updates,song];
 			],
 			AppendTo[bufferHash,song->hash];
@@ -165,9 +166,11 @@ updateBuffer := Block[
 		Do[
 			song=updates[[i]];
 			filename=localPath<>"Songs/"<>song<>".tm";
-			bufferHash[[song]]=IntegerString[FileHash[filename],32];
-			audio=AudioAdapt[Parse[filename]];
-			Export[dataPath<>"Buffer/"<>song<>".buffer",audio,"MP3"],
+			Check[
+				audio=AudioAdapt[Parse[filename]];
+				Export[dataPath<>"Buffer/"<>song<>".buffer",audio,"MP3"],
+				Delete[bufferHash, song];
+			],
 		{i,Length@updates}];
 		Export[dataPath<>"Buffer.json",bufferHash[[Intersection[Keys@bufferHash,songs]]]];
 		ResetDirectory[],

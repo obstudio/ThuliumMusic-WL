@@ -84,13 +84,16 @@ uiPlayer[song_]:=Block[
 		imageExist=False,
 		aspectRatio
 	},
+	Quiet@Check[
+		audio=Import[dataPath<>"Buffer/"<>song<>".buffer","MP3"],
+		Return[uiPlaylist[currentPlaylist]],
+	Import::nffil];
 	AudioStop[];
 	If[index[[song,"Image"]]!="",
 		imageExist=True;
 		image=Import[dataPath<>"Images/"<>index[[song,"Image"]]];
 		aspectRatio=ImageAspectRatio[image];
 	];
-	audio=Import[dataPath<>"Buffer/"<>song<>".buffer","MP3"];
 	$CurrentDuration=Duration[audio];
 	$CurrentStream=AudioPlay[audio];
 	CreateDialog[Row[{

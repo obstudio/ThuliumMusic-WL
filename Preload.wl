@@ -44,17 +44,16 @@ tagDict=Association/@Association@Import[localPath<>"Tags.json"];
 
 version = 509;
 cloudPath = "http://qymp.ob-studio.cn/assets/";
-With[{defaultDataPath = StringReplace[FileNameDrop[$BaseDirectory], "\\" -> "/"] <> "/ObStudio/QYMP/"},
-	If[!DirectoryQ[defaultDataPath], CreateDirectory[defaultDataPath]];
-	userInfoTemplate=<|
-		"Version" -> version,
-		"NodeJS" -> False,
-		"Language" -> "chs",
-		"Developer" -> False,
-		"Player" -> "New",
-		"DataPath" -> defaultDataPath
-	|>;
-];
+defaultDataPath = StringReplace[FileNameDrop[$BaseDirectory], "\\" -> "/"] <> "/ObStudio/QYMP/";
+If[!DirectoryQ[defaultDataPath], CreateDirectory[defaultDataPath]];
+userInfoTemplate=<|
+	"Version" -> version,
+	"NodeJS" -> False,
+	"Language" -> "chs",
+	"Developer" -> False,
+	"Player" -> "New",
+	"DataPath" -> defaultDataPath
+|>;
 
 
 userPath = StringReplace[FileNameDrop[$UserBaseDirectory], {"\\" -> "/", "Roaming"~~EndOfString -> "Local"}] <> "/ObStudio/QYMP/";

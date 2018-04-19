@@ -1,6 +1,6 @@
 (* ::Package:: *)
 
-(* ::Subsubsection:: *)
+(* ::Subsubsection::Closed:: *)
 (*Parser*)
 
 
@@ -355,7 +355,13 @@ AudioAdapt[rawData_,OptionsPattern[AdaptingOptions]]:=Block[
 (* ::Input:: *)
 (*AudioStop[];AudioPlay[#[[2]]]&@*)
 (*EchoFunction["time: ",#[[1]]&]@*)
-(*Timing[AudioAdapt[Parse[localPath<>"Songs/Levan_Polkka.tm"],"Rate"->1.1]];*)
+(*Timing[AudioAdapt[Parse[localPath<>"Songs/BMV_846_Prelude.tm"],"Rate"->1.8]];*)
+
+
+(* ::Input:: *)
+(*AudioStop[];AudioPlay[#[[2]]]&@*)
+(*EchoFunction["time: ",#[[1]]&]@*)
+(*Timing[AudioAdapt[Parse[localPath<>"Songs/test.tm"],"Rate"->1]];*)
 
 
 (* ::Subsubsection:: *)

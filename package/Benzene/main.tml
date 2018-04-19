@@ -3,6 +3,7 @@
 
 # Chord
 
+D		duo+			[], 2
 t		tres			[], 3
 T		tres+			[], 4
 Q		quattuor+		[], 6
@@ -11,7 +12,7 @@ h		sex				[], 8
 H		sex+			[], 9
 s		septem			[], 10
 S		septem+			[], 11
-k		3rd inversion	[:2]+12, [3:]
+k		3rd inversion	[3:], [:2]+12
 
 # Function
 
@@ -41,6 +42,23 @@ function _adjust_(matrix, source) {
 	return source;
 }
 
+function Arpeggiando(subtrack) {
+    // alias: $~${0:sub}
+    const src = this.ParseTrack(subtrack);
+    const scale = src.Meta.Duration / src.Content.length;
+    src.Content.forEach((note, index) => {
+        note.StartTime = index * scale;
+        note.Duration = scale;
+    });
+    return src;
+}
+
+function Call(template, subtrack) {
+    // Alias: ${0:sub}?${1:sub}
+    this.Libraries.Track.this = subtrack.Content;
+    return this.ParseTrack(template);
+}
+
 function Only() {
 	// Alias: Clear
 	const settings = {};
@@ -67,7 +85,7 @@ function Extend(subtrack, beats) {
 		note.Duration = beats * 60 / this.Settings.Speed
 	});
 	Object.assign(src.Meta, {
-		Duration: beats * 60 / this.Settings.Speed,
+		Duration: ((a, b) => a > b ? a : b)(beats * 60 / this.Settings.Speed, src.Meta.Duration),
 		BeatCount: beats,
 		BarCount: Math.floor(beats / this.Settings.Bar),
 		BarFirst: this.Settings.Bar,

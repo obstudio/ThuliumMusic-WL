@@ -11,8 +11,8 @@ q		quattuor		[], 5
 p		quinque			[], 7
 o		octo			[], 12
 u		octo (Under)	[-1]-12, []
-i		1st inversion	[:0]+12, [1:]
-j		2nd inversion	[:1]+12, [2:]
+i		1st inversion	[1:], [:0]+12
+j		2nd inversion	[2:], [:1]+12
 
 # Function
 

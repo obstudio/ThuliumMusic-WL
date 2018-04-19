@@ -1,6 +1,6 @@
 [submodule "docs"]
 	path = docs
-url=git@github.com:obstudio/ThuliumMusic-Documents.git
+	url=git@github.com:obstudio/ThuliumMusic-Documents.git
 	branch = master
 [submodule "library/Parser"]
 	path = library/Parser

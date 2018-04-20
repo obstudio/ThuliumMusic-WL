@@ -19,7 +19,7 @@ function loader(path, buffer = false) {
 
 class Thulium {
 	constructor(input, { spec = 'URL', buffer = false } = {}) {
-		if (spec = 'URL') {
+		if (spec === 'URL') {
 			input = fs.readFileSync(input, 'utf8');
 		}
 		const tokenizer = new Tokenizer(input, loader, library);

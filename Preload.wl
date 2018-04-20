@@ -56,10 +56,10 @@ userInfoTemplate=<|
 |>;
 
 
-userPath = StringReplace[FileNameDrop[$UserBaseDirectory], {"\\" -> "/", "Roaming"~~EndOfString -> "Local"}] <> "/ObStudio/QYMP/";
-If[!DirectoryQ[userPath],
+userPath = StringReplace[FileNameDrop[$UserBaseDirectory], {"\\" -> "/", "Roaming"~~EndOfString -> "Local"}] <> "/ObStudio/Thulium/";
+If[!DirectoryQ[userPath] || !FileExistsQ[userPath <> "Default.json"],
 	(* initial use *)
-	CreateDirectory[userPath];
+	Quiet @ CreateDirectory[userPath];
 	userInfo = userInfoTemplate;
 	refreshLanguage;
 	uiSetPath;

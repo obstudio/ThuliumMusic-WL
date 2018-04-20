@@ -10,41 +10,25 @@
 NotebookFileLineBreakTest
 NotebookFileLineBreakTest
 NotebookDataPosition[       158,          7]
-NotebookDataLength[     15804,        385]
-NotebookOptionsPosition[      3095,         88]
-NotebookOutlinePosition[     15498,        381]
-CellTagsIndexPosition[     15377,        374]
+NotebookDataLength[     12966,        324]
+NotebookOptionsPosition[      2284,         72]
+NotebookOutlinePosition[     12660,        320]
+CellTagsIndexPosition[     12539,        313]
 WindowTitle->Thulium Music Player
 WindowFrame->ModelessDialog*)
 
 (* Beginning of Notebook Content *)
 Notebook[{
 Cell[BoxData[
- TemplateBox[{"Thulium Music Player","\"v2.1\""},
+ TemplateBox[{"Thulium Music Player","\"v2.2\""},
   "Title"]], "Title",
- CellTags->"$title",ExpressionUUID->"9fc019b1-3061-4e61-92a5-05342d02de64"],
+ CellTags->"$title",ExpressionUUID->"3eb174ed-d118-4812-92e0-5446101a163b"],
 
 Cell[BoxData[GridBox[{
    {
     TemplateBox[{
      "Initialize Thulium","Click to initialize the kernel.",
-      Hold[$CellContext`localPath = StringReplace[
-          NotebookDirectory[], "\\" -> "/"]; 
-       SetDirectory[$CellContext`localPath]; Scan[Get, 
-         FileNames["*.wl", "library", Infinity]]; Scan[Get, 
-         FileNames["*.wl", "package", Infinity]]; Scan[Get, 
-         FileNames["*.wl", "assets", Infinity]]; Get[
-         StringJoin[$CellContext`localPath, "Preload.wl"]]; NotebookDelete[
-         Cells[CellTags -> "$msg:init"]]; NotebookDelete[
-         Cells[CellStyle -> {"Input", "Output", "Music"}]]; 
-       build`benchData = First[
-          Import[
-           StringJoin[$CellContext`userPath, "WorkBench.nb"], "Notebook"]]; 
-       SelectionMove[
-         First[
-          Cells[CellTags -> "$init"]], After, Cell, AutoScroll -> False]; 
-       NotebookWrite[
-         EvaluationNotebook[], build`benchData]; Null]},
+      build`InitializeThulium},
      "TextButton"], 
     TemplateBox[{
      "Initialize Parser","Click to initialize the parser.",
@@ -75,16 +59,16 @@ Cell[BoxData[GridBox[{
       Offset[0.2], {
        Offset[0.4]}, 
       Offset[0.2]}, "RowsIndexed" -> {}}]], "Controls",ExpressionUUID->\
-"206989df-c607-4fbb-85c6-b6ac159cbe53"],
+"2a3dbc12-2b8c-49fd-ab14-278945167936"],
 
 Cell[BoxData["Null"], "Initialization",
- CellTags->"$init",ExpressionUUID->"b97d0cf0-63c8-4b9c-a212-6f84624f50d3"],
+ CellTags->"$init",ExpressionUUID->"b985a955-e20f-4a2e-ae85-61bc7e890430"],
 
 Cell[BoxData[
  TemplateBox[{
   "Please click on the \"Initialize\" buttons in sequence to get started."},
   "Tip"]], "Tip",
- CellTags->"$msg:init",ExpressionUUID->"fb708452-248e-49ed-8084-633e9872ca0c"]
+ CellTags->"$msg:init",ExpressionUUID->"32cd3a83-f913-4f48-b3e4-be40f289f1a3"]
 },
 Editable->True,
 Saveable->False,
@@ -108,52 +92,7 @@ StyleDefinitions->Notebook[{
    Cell[
     StyleData[StyleDefinitions -> "Default.nb"]], 
    Cell[
-    StyleData["TextButtonContent"], FontFamily -> "Sitka Text", FontSize -> 
-    15], 
-   Cell[
-    StyleData["TextButtonTooltip"], 
-    TemplateBoxOptions -> {DisplayFunction -> (RowBox[{
-         TemplateBox[{1}, "Spacer1"], 
-         StyleBox[#, FontFamily -> "Calibri", FontSize -> 24], 
-         TemplateBox[{1}, "Spacer1"]}]& )}], 
-   Cell[
-    StyleData["TextButtonDisplay"], 
-    TemplateBoxOptions -> {DisplayFunction -> (FrameBox[
-        RowBox[{
-          TemplateBox[{4}, "Spacer1"], 
-          AdjustmentBox[
-           StyleBox[#, FontColor -> #2], BoxBaselineShift -> 0.2], 
-          TemplateBox[{4}, "Spacer1"]}], Background -> #3, 
-        ImageMargins -> {{1, 1}, {0, 0}}, ImageSize -> {Automatic, 32}, 
-        BoxFrame -> {{0, 0}, {0, 0}}, RoundingRadius -> {8, 8}, 
-        ContentPadding -> True, BaselinePosition -> 1]& )}], 
-   Cell[
-    StyleData["TextButton"], 
-    TemplateBoxOptions -> {
-     DisplayFunction -> (PaneSelectorBox[{True -> TooltipBox[
-           TagBox[
-            TagBox[
-             PaneSelectorBox[{True -> TemplateBox[{
-                  StyleBox[#, "TextButtonContent"], 
-                  RGBColor[0, 0, 0], 
-                  RGBColor[0.5, 0.8, 1]}, "TextButtonDisplay"], False -> 
-               TemplateBox[{
-                  StyleBox[#, "TextButtonContent"], 
-                  RGBColor[0.08, 0.04, 0], 
-                  RGBColor[0.8, 0.9, 1]}, "TextButtonDisplay"]}, 
-              Dynamic[
-               CurrentValue["MouseButtonTest"]]], 
-             EventHandlerTag[{"MouseClicked" :> ReleaseHold[#3]}]], 
-            MouseAppearanceTag["LinkHand"]], 
-           TemplateBox[{#2}, "TextButtonTooltip"], TooltipDelay -> 0.2, 
-           TooltipStyle -> {
-            CellFrameColor -> RGBColor[0.7, 0.7, 0.6, 0.5], Background -> 
-             RGBColor[1, 1, 0.9, 0.7]}], False -> TemplateBox[{
-            StyleBox[#, "TextButtonContent"], 
-            RGBColor[0.2, 0.1, 0], 
-            RGBColor[0.92, 0.96, 1]}, "TextButtonDisplay"]}, 
-        Dynamic[
-         CurrentValue["MouseOver"]]]& )}], 
+    BoxData["WorkBench"], "Input"], 
    Cell[
     StyleData["Title"], Editable -> False, Deletable -> False, 
     ShowCellBracket -> False, CellMargins -> {{40, 40}, {16, 32}}, 
@@ -361,31 +300,31 @@ StyleDefinitions->Notebook[{
 (*CellTagsOutline
 CellTagsIndex->{
  "$title"->{
-  Cell[600, 21, 161, 3, 140, "Title",ExpressionUUID->"9fc019b1-3061-4e61-92a5-05342d02de64",
+  Cell[600, 21, 161, 3, 140, "Title",ExpressionUUID->"3eb174ed-d118-4812-92e0-5446101a163b",
    CellTags->"$title"]},
  "$init"->{
-  Cell[2772, 79, 114, 1, 140, "Initialization",ExpressionUUID->"b97d0cf0-63c8-4b9c-a212-6f84624f50d3",
+  Cell[1961, 63, 114, 1, 140, "Initialization",ExpressionUUID->"b985a955-e20f-4a2e-ae85-61bc7e890430",
    CellTags->"$init"]},
  "$msg:init"->{
-  Cell[2889, 82, 202, 4, 140, "Tip",ExpressionUUID->"fb708452-248e-49ed-8084-633e9872ca0c",
+  Cell[2078, 66, 202, 4, 140, "Tip",ExpressionUUID->"32cd3a83-f913-4f48-b3e4-be40f289f1a3",
    CellTags->"$msg:init"]}
  }
 *)
 (*CellTagsIndex
 CellTagsIndex->{
- {"$title", 14961, 362},
- {"$init", 15091, 365},
- {"$msg:init", 15234, 368}
+ {"$title", 12123, 301},
+ {"$init", 12253, 304},
+ {"$msg:init", 12396, 307}
  }
 *)
 (*NotebookFileOutline
 Notebook[{
-Cell[600, 21, 161, 3, 140, "Title",ExpressionUUID->"9fc019b1-3061-4e61-92a5-05342d02de64",
+Cell[600, 21, 161, 3, 140, "Title",ExpressionUUID->"3eb174ed-d118-4812-92e0-5446101a163b",
  CellTags->"$title"],
-Cell[764, 26, 2005, 51, 140, "Controls",ExpressionUUID->"206989df-c607-4fbb-85c6-b6ac159cbe53"],
-Cell[2772, 79, 114, 1, 140, "Initialization",ExpressionUUID->"b97d0cf0-63c8-4b9c-a212-6f84624f50d3",
+Cell[764, 26, 1194, 35, 140, "Controls",ExpressionUUID->"2a3dbc12-2b8c-49fd-ab14-278945167936"],
+Cell[1961, 63, 114, 1, 140, "Initialization",ExpressionUUID->"b985a955-e20f-4a2e-ae85-61bc7e890430",
  CellTags->"$init"],
-Cell[2889, 82, 202, 4, 140, "Tip",ExpressionUUID->"fb708452-248e-49ed-8084-633e9872ca0c",
+Cell[2078, 66, 202, 4, 140, "Tip",ExpressionUUID->"32cd3a83-f913-4f48-b3e4-be40f289f1a3",
  CellTags->"$msg:init"]
 }
 ]

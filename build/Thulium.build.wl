@@ -19,7 +19,7 @@ With[{InitializeThulium = build`InitializeThulium},
 	build`TemporaryNotebook = CreateDocument[
 		{
 			Cell[
-				BoxData @ TemplateBox[{"Thulium Music Player", "\"v2.1\""}, "Title"],
+				BoxData @ TemplateBox[{"Thulium Music Player", "\"v2.2\""}, "Title"],
 				"Title", CellTags -> "$title"
 			],
 			Cell[BoxData @ GridBox[{

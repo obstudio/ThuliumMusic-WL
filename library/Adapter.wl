@@ -349,13 +349,13 @@ AudioAdapt[rawData_,OptionsPattern[AdaptingOptions]]:=Block[
 (* ::Input:: *)
 (*AudioStop[];AudioPlay[#[[2]]]&@*)
 (*EchoFunction["time: ",#[[1]]&]@*)
-(*Timing[AudioAdapt[Parse[localPath<>"Songs/Touhou/Tohno_Gensou_Monogatari.tm",{2}],"Rate"->1.1]];*)
+(*Timing[AudioAdapt[Parse[localPath<>"Songs/Touhou/TH11-Chireiden/Good_Cheer.tm",{1,3}],"Rate"->1.1]];*)
 
 
 (* ::Input:: *)
 (*AudioStop[];AudioPlay[#[[2]]]&@*)
 (*EchoFunction["time: ",#[[1]]&]@*)
-(*Timing[AudioAdapt[Parse[localPath<>"Songs/BMV_846_Prelude.tm"],"Rate"->1.8]];*)
+(*Timing[AudioAdapt[Parse[localPath<>"Songs/If_you_Were_By_My_Side.tm"],"Rate"->1]];*)
 
 
 (* ::Input:: *)

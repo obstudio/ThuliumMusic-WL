@@ -48,6 +48,9 @@ updateIndex := Block[
 		playlistInfo, songList
 	},
 	Monitor[
+		If[Length[PacletCheckUpdate["QuantityUnits"]]!=0,
+			PacletUpdate["QuantityUnits"]
+		];
 		SetDirectory[localPath];
 		metaTree = StringReplace["\\" -> "/"] /@ StringDrop[FileNames["*", "Meta", Infinity], 5];
 		songs = StringDrop[Select[metaTree, StringMatchQ[__~~".json"]], -5];

@@ -1,6 +1,10 @@
 (* ::Package:: *)
 
 build`InitializeThulium := Hold[
+	If[Length[PacletCheckUpdate["QuantityUnits"]] != 0,
+		PacletUpdate["QuantityUnits"];
+		Quit[];
+	];
 	localPath = StringReplace[NotebookDirectory[], "\\"->"/"];
 	SetDirectory[localPath];
 	Scan[Get, FileNames["*.wl", "library", Infinity]];

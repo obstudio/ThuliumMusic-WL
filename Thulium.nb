@@ -10,10 +10,10 @@
 NotebookFileLineBreakTest
 NotebookFileLineBreakTest
 NotebookDataPosition[       158,          7]
-NotebookDataLength[     12966,        324]
-NotebookOptionsPosition[      2284,         72]
-NotebookOutlinePosition[     12660,        320]
-CellTagsIndexPosition[     12539,        313]
+NotebookDataLength[     13777,        340]
+NotebookOptionsPosition[      3095,         88]
+NotebookOutlinePosition[     13471,        336]
+CellTagsIndexPosition[     13350,        329]
 WindowTitle->Thulium Music Player
 WindowFrame->ModelessDialog*)
 
@@ -22,13 +22,29 @@ Notebook[{
 Cell[BoxData[
  TemplateBox[{"Thulium Music Player","\"v2.2\""},
   "Title"]], "Title",
- CellTags->"$title",ExpressionUUID->"3eb174ed-d118-4812-92e0-5446101a163b"],
+ CellTags->"$title",ExpressionUUID->"f1bd12c5-a611-4567-bbbc-fee9244d4465"],
 
 Cell[BoxData[GridBox[{
    {
     TemplateBox[{
      "Initialize Thulium","Click to initialize the kernel.",
-      build`InitializeThulium},
+      Hold[$CellContext`localPath = StringReplace[
+          NotebookDirectory[], "\\" -> "/"]; 
+       SetDirectory[$CellContext`localPath]; Scan[Get, 
+         FileNames["*.wl", "library", Infinity]]; Scan[Get, 
+         FileNames["*.wl", "package", Infinity]]; Scan[Get, 
+         FileNames["*.wl", "assets", Infinity]]; Get[
+         StringJoin[$CellContext`localPath, "Preload.wl"]]; NotebookDelete[
+         Cells[CellTags -> "$msg:init"]]; NotebookDelete[
+         Cells[CellStyle -> {"Input", "Output", "Music"}]]; 
+       build`benchData = First[
+          Import[
+           StringJoin[$CellContext`userPath, "WorkBench.nb"], "Notebook"]]; 
+       SelectionMove[
+         First[
+          Cells[CellTags -> "$init"]], After, Cell, AutoScroll -> False]; 
+       NotebookWrite[
+         EvaluationNotebook[], build`benchData]; Null]},
      "TextButton"], 
     TemplateBox[{
      "Initialize Parser","Click to initialize the parser.",
@@ -59,16 +75,16 @@ Cell[BoxData[GridBox[{
       Offset[0.2], {
        Offset[0.4]}, 
       Offset[0.2]}, "RowsIndexed" -> {}}]], "Controls",ExpressionUUID->\
-"2a3dbc12-2b8c-49fd-ab14-278945167936"],
+"37e98001-d219-4af3-bb5b-87b740ea752b"],
 
 Cell[BoxData["Null"], "Initialization",
- CellTags->"$init",ExpressionUUID->"b985a955-e20f-4a2e-ae85-61bc7e890430"],
+ CellTags->"$init",ExpressionUUID->"e4a001d4-3a62-4e61-85f4-3481b4065743"],
 
 Cell[BoxData[
  TemplateBox[{
   "Please click on the \"Initialize\" buttons in sequence to get started."},
   "Tip"]], "Tip",
- CellTags->"$msg:init",ExpressionUUID->"32cd3a83-f913-4f48-b3e4-be40f289f1a3"]
+ CellTags->"$msg:init",ExpressionUUID->"e967eef1-8d35-48ae-9f4e-a50cec12c8b0"]
 },
 Editable->True,
 Saveable->False,
@@ -300,31 +316,31 @@ StyleDefinitions->Notebook[{
 (*CellTagsOutline
 CellTagsIndex->{
  "$title"->{
-  Cell[600, 21, 161, 3, 140, "Title",ExpressionUUID->"3eb174ed-d118-4812-92e0-5446101a163b",
+  Cell[600, 21, 161, 3, 140, "Title",ExpressionUUID->"f1bd12c5-a611-4567-bbbc-fee9244d4465",
    CellTags->"$title"]},
  "$init"->{
-  Cell[1961, 63, 114, 1, 140, "Initialization",ExpressionUUID->"b985a955-e20f-4a2e-ae85-61bc7e890430",
+  Cell[2772, 79, 114, 1, 140, "Initialization",ExpressionUUID->"e4a001d4-3a62-4e61-85f4-3481b4065743",
    CellTags->"$init"]},
  "$msg:init"->{
-  Cell[2078, 66, 202, 4, 140, "Tip",ExpressionUUID->"32cd3a83-f913-4f48-b3e4-be40f289f1a3",
+  Cell[2889, 82, 202, 4, 140, "Tip",ExpressionUUID->"e967eef1-8d35-48ae-9f4e-a50cec12c8b0",
    CellTags->"$msg:init"]}
  }
 *)
 (*CellTagsIndex
 CellTagsIndex->{
- {"$title", 12123, 301},
- {"$init", 12253, 304},
- {"$msg:init", 12396, 307}
+ {"$title", 12934, 317},
+ {"$init", 13064, 320},
+ {"$msg:init", 13207, 323}
  }
 *)
 (*NotebookFileOutline
 Notebook[{
-Cell[600, 21, 161, 3, 140, "Title",ExpressionUUID->"3eb174ed-d118-4812-92e0-5446101a163b",
+Cell[600, 21, 161, 3, 140, "Title",ExpressionUUID->"f1bd12c5-a611-4567-bbbc-fee9244d4465",
  CellTags->"$title"],
-Cell[764, 26, 1194, 35, 140, "Controls",ExpressionUUID->"2a3dbc12-2b8c-49fd-ab14-278945167936"],
-Cell[1961, 63, 114, 1, 140, "Initialization",ExpressionUUID->"b985a955-e20f-4a2e-ae85-61bc7e890430",
+Cell[764, 26, 2005, 51, 140, "Controls",ExpressionUUID->"37e98001-d219-4af3-bb5b-87b740ea752b"],
+Cell[2772, 79, 114, 1, 140, "Initialization",ExpressionUUID->"e4a001d4-3a62-4e61-85f4-3481b4065743",
  CellTags->"$init"],
-Cell[2078, 66, 202, 4, 140, "Tip",ExpressionUUID->"32cd3a83-f913-4f48-b3e4-be40f289f1a3",
+Cell[2889, 82, 202, 4, 140, "Tip",ExpressionUUID->"e967eef1-8d35-48ae-9f4e-a50cec12c8b0",
  CellTags->"$msg:init"]
 }
 ]

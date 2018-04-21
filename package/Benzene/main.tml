@@ -54,7 +54,7 @@ function Arpeggiando(subtrack) {
 }
 
 function Call(template, subtrack) {
-    // Alias: ${0:sub}?${1:sub}
+    // Alias: ${0:sub}?=${1:sub}
     this.Libraries.Track.this = subtrack.Content;
     return this.ParseTrack(template);
 }
@@ -176,7 +176,7 @@ function Map(template, subtrack) {
 }
 
 function Apply(template, subtrack) {
-	// Alias: ${0:sub}:${1:sub}
+	// Alias: ${0:sub}?:${1:sub}
 	const temp = this.ParseTrack(template, { Settings: this.newSettings() });
 	const src = this.ParseTrack(subtrack);
 	const scale = temp.Settings.Speed / src.Settings.Speed;

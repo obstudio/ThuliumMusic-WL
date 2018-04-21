@@ -13,6 +13,9 @@ Switch[$VersionNumber,
 ];
 
 
+UnitConvert[Quantity[1`, "Minutes"], "Seconds"];
+
+
 (* tags *)
 textInfoTags = {"SongName", "Lyricist", "Composer", "Adapter", "Comment", "Abstract", "Origin"};
 otherInfoTags = {"Image", "Uploader", "Tags"};

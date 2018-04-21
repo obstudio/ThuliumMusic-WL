@@ -4,15 +4,31 @@ A simple program aimed to play electronic music on any platforms or devices.
 
 ## Installation
 
-To run Thulium Music Player, you need to install **[Mathematica](http://www.wolfram.com/mathematica/)** and **[Node.js](https://nodejs.org/en/)**.
+> The following steps require Internet connection.
 
-After installation, run Node.js command prompt:
+To run Thulium Music Player, you need to install **[Mathematica](http://www.wolfram.com/mathematica/)** and **[Node.js](https://nodejs.org/)** first.
+
+After installation,
+
++ For Windows, open Node.js command prompt, and run the following commands:
 
 ```Command
+cd %USERPROFILE%
 npm install zeromq
 npm install acorn
 ren node_modules .node_modules
 ```
+
++ For macOS and Linux, open the terminal and run:
+
+```Command
+cd ~
+npm install zeromq
+npm install acorn
+mv node_modules .node_modules
+```
+
+Then you are ready to run Thulium Music Player. Open Thulium.nb with Mathematica, and follow the hint to enjoy the music.
 
 ## Why my Mathematica reports an error?
 

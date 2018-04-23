@@ -1,0 +1,16 @@
+{
+	"Title": "东方妖妖梦",
+	"Comment": "東方妖々夢 ~ Perfect Cherry Blossom",
+	"Abstract": "",
+	"Path": "Touhou/TH7-Youyoumu/",
+	"SongList": [
+		{"Index": "一面道中曲", "Song": "Deep_Mountain"},
+		{"Index": "二面道中曲", "Song": "Tohno_Gensou_Monogatari"},
+		{"Index": "四面道中曲", "Song": "Tenkuu_Hana_Miyako"},
+		{"Index": "四面BOSS曲", "Song": "Phantom_Ensemble"},
+		{"Index": "六面BOSS曲", "Song": "Sumizome_Sakura"},
+		{"Index": "六面BOSS曲", "Song": "Border_of_Life"},
+		{"Index": "PH面BOSS曲", "Song": "Necro_Fantasia"}
+	],
+	"IndexWidth": 160
+}

@@ -329,11 +329,11 @@ AudioAdapt[rawData_,OptionsPattern[AdaptingOptions]]:=Block[
 (* ::Input:: *)
 (*AudioStop[];AudioPlay[#[[2]]]&@*)
 (*EchoFunction["time: ",#[[1]]&]@*)
-(*Timing[AudioAdapt[Parse[localPath<>"Songs/Touhou/Oriental_Blood.tm",{2,3}],"Rate"->1]];*)
+(*Timing[AudioAdapt[Parse[localPath<>"Songs/Touhou/Oriental_Blood.tm"],"Rate"->1]];*)
 
 
 (* ::Input:: *)
-(*Export[localPath<>"test.mid",Sound@MIDIAdapt[Parse[localPath<>"Songs/Touhou/Oriental_Blood.tm",{3}]]];*)
+(*Export[localPath<>"test.mp3",AudioAdapt[Parse[localPath<>"Songs/Touhou/Oriental_Blood.tm"]]];*)
 
 
 (* ::Input:: *)

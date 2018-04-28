@@ -96,7 +96,7 @@ Parse[origin_,partspec_]:=Block[
 ];
 
 
-(* ::Subsubsection::Closed:: *)
+(* ::Subsubsection:: *)
 (*Constructor*)
 
 
@@ -126,7 +126,7 @@ TrackConstruct[inst_,chan_,events_]:=Sound`MIDITrack[{
 		"Note"->#Note,
 		"Channel"->chan,
 		"Velocity"->#Velocity
-	]&/@SortBy[events,{#Time&,#Event&}])
+	]&/@SortBy[events,{#Event&,#Time&}])
 }];
 
 $Resolution = 48;
@@ -266,26 +266,6 @@ AudioAdapt[rawData_,OptionsPattern[AdaptingOptions]]:=Block[
 
 
 (* ::Input:: *)
-(*Parse[Tokenize[localPath<>"src/test/test.tm"][["Tokenizer"]]]*)
-
-
-(* ::Input:: *)
-(*With[{testfile=localPath<>"Songs/PVZ/Watery_Grave"},*)
-(*Export[testfile<>".json",Parse[testfile<>".tm"]]*)
-(*];*)
-
-
-(* ::Input:: *)
-(*With[{testfile=localPath<>"Songs/PVZ/Watery_Grave"},*)
-(*Export[testfile<>".json",Tokenize[testfile<>".tm"][["Tokenizer"]]]*)
-(*];*)
-
-
-(* ::Input:: *)
-(*Tokenize[localPath<>"Research/test.tm"][["Tokenizer"]]*)
-
-
-(* ::Input:: *)
 (*Parse[localPath<>"Research/test.tm"]*)
 
 
@@ -349,7 +329,11 @@ AudioAdapt[rawData_,OptionsPattern[AdaptingOptions]]:=Block[
 (* ::Input:: *)
 (*AudioStop[];AudioPlay[#[[2]]]&@*)
 (*EchoFunction["time: ",#[[1]]&]@*)
-(*Timing[AudioAdapt[Parse[localPath<>"Songs/Touhou/Tohno_Gensou_Monogatari.tm",{2,3}],"Rate"->1.1]];*)
+(*Timing[AudioAdapt[Parse[localPath<>"Songs/Touhou/Oriental_Blood.tm",{2,3}],"Rate"->1]];*)
+
+
+(* ::Input:: *)
+(*Export[localPath<>"test.mid",Sound@MIDIAdapt[Parse[localPath<>"Songs/Touhou/Oriental_Blood.tm",{3}]]];*)
 
 
 (* ::Input:: *)
@@ -362,15 +346,3 @@ AudioAdapt[rawData_,OptionsPattern[AdaptingOptions]]:=Block[
 (*AudioStop[];AudioPlay[#[[2]]]&@*)
 (*EchoFunction["time: ",#[[1]]&]@*)
 (*Timing[AudioAdapt[Parse[localPath<>"Songs/test.tm"],"Rate"->1]];*)
-
-
-(* ::Subsubsection:: *)
-(*Interpretation*)
-
-
-(* ::Input:: *)
-(*CurrentValue[{StyleDefinitions,"Quantity"}]*)
-
-
-(* ::Input:: *)
-(*CurrentValue[{StyleDefinitions,"QuantityPanel"}]*)

@@ -2,6 +2,7 @@ const fs = require('fs');
 const path = require('path');
 const Parser = require('./Parser/Parser');
 const Tokenizer = require('./Token/Tokenizer');
+const Detokenizer = require('./Detok/Detokenizer');
 
 const packagePath = __dirname + '/../package';
 const packageInfo = require(packagePath + '/index.json');
@@ -57,10 +58,23 @@ class Thulium {
 		return this.MusicClips;
 	}
 
-	attributes(...attrs) {
+	detokenize() {
+		return new Detokenizer(this.Tokenizer, this.Syntax).detokenize();
+	}
+
+	attributes(attrs) {
 		const result = {};
 		attrs.forEach(attr => result[attr] = this[attr]);
 		return result;
+	}
+
+	get Tokenizer() {
+		return this.attributes([
+			'Comment',
+			'Library',
+			'Sections',
+			'Warnings'
+		]);
 	}
 }
 

@@ -1,7 +1,8 @@
 // TM Ammonia Package
 // Updated: 2018.4.3.
 
-# Include ./ornaments
+# Include ./ornament
+# Include ./repeat
 
 # Chord
 

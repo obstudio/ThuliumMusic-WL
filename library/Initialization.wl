@@ -24,6 +24,18 @@ playlistTemplate=<|
 |>;
 
 
+InitializePackage := Monitor[
+	SetDirectory[localPath];
+	Scan[Get, FileNames["*.wl", "library", Infinity]];
+	Scan[Get, FileNames["*.wl", "assets", Infinity]];
+	Get[localPath <> "Preload.wl"],
+	MonitorDisplay[Style[
+		"Initializing Node.js as external evaluator ......",
+		"PrintTemporary"
+	]]
+];
+
+
 InitializeParser := Monitor[
 	Off[General::shdw];
 	System`JS = StartExternalSession["NodeJS"];

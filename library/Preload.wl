@@ -27,11 +27,11 @@ instList = Keys @ instDict;
 percList = Keys @ percDict;
 
 (* local data *)
-colorData=Association@Import[localPath<>"Assets/color.json"];                               (* colors *)
+colorData=Association@Import[localPath<>"library/Assets/color.json"];                               (* colors *)
 styleColor=RGBColor/@Association@colorData[["StyleColor"]];
 buttonColor=RGBColor/@#&/@Association/@Association@colorData[["ButtonColor"]];
 pageSelectorColor=RGBColor/@#&/@Association/@Association@colorData[["PageSelectorColor"]];
-styleData=Association/@Association@Import[localPath<>"Assets/style.json"];                  (* styles *)
+styleData=Association/@Association@Import[localPath<>"library/Assets/style.json"];                  (* styles *)
 styleDict=Normal@Module[{outcome={}},
 	If[KeyExistsQ[#,"Size"],AppendTo[outcome,FontSize->#[["Size"]]]];
 	If[KeyExistsQ[#,"Family"],AppendTo[outcome,FontFamily->#[["Family"]]]];

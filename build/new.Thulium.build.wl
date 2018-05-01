@@ -40,56 +40,56 @@ With[
       Get[localPath <> "library/initialization.wl"];
       Cells[CellTags -> "$title"];
       NotebookDelete[Cells[CellTags -> "$init"]];
-      SelectionMove[First @ Cells[CellTags -> "$monitor"], Before, Cell, AutoScroll -> False];
-      NotebookWrite[EvaluationNotebook[], Cell[BoxData @ RowBox[{
-        TemplateBox[{4}, "Spacer1"],
-        TemplateBox[{
-          "Initialize Thulium",
-          "Click to initialize the kernel.",
-          Unevaluated @ InitializePackage
-        }, "TextButtonMonitored"],
-        TemplateBox[{4}, "Spacer1"],
-        TemplateBox[{
-          "Initialize Parser",
-          "Click to initialize the parser.",
-          Unevaluated @ InitializeParser
-        }, "TextButtonMonitored"],
-        TemplateBox[{4}, "Spacer1"],
-        TemplateBox[{
-          "Initialize Songs",
-          "Click to initialize the songs.",
-          Unevaluated @ update
-        }, "TextButtonMonitored"],
-        TemplateBox[{4}, "Spacer1"],
-        TemplateBox[{
-          "Start Front End",
-          "Click to run the front end.",
-          Hold @ homepage
-        }, "TextButton"],
-        TemplateBox[{4}, "Spacer1"]
-      }], "Controls", CellTags -> "$controls"]];
+      SelectionMove[First @ Cells[CellTags -> "$title"], After, Cell, AutoScroll -> False];
+      NotebookWrite[EvaluationNotebook[], {
+        Cell[BoxData @ RowBox[{
+          TemplateBox[{4}, "Spacer1"],
+          TemplateBox[{
+            "Initialize Thulium",
+            "Click to initialize the kernel.",
+            Unevaluated @ InitializePackage
+          }, "TextButtonMonitored"],
+          TemplateBox[{4}, "Spacer1"],
+          TemplateBox[{
+            "Initialize Parser",
+            "Click to initialize the parser.",
+            Unevaluated @ InitializeParser
+          }, "TextButtonMonitored"],
+          TemplateBox[{4}, "Spacer1"],
+          TemplateBox[{
+            "Initialize Songs",
+            "Click to initialize the songs.",
+            Unevaluated @ update
+          }, "TextButtonMonitored"],
+          TemplateBox[{4}, "Spacer1"],
+          TemplateBox[{
+            "Start Front End",
+            "Click to run the front end.",
+            Hold @ homepage
+          }, "TextButton"],
+          TemplateBox[{4}, "Spacer1"]
+        }], "Controls", CellTags -> "$controls"],
+        Cell[BoxData @ Null, "Hidden", CellTags -> "$monitor"]
+      }];
     ]
   },
   
   build`TemporaryNotebook = CreateDialog[
     {
-      Cell[
-        BoxData @ RowBox[{
-          StyleBox["Thulium Music Player",
-            FontFamily -> "Source Sans Pro",
-            FontSize -> 32,
-            FontColor -> RGBColor[0.1, 0.4, 0.7]
-          ],
-          TemplateBox[{1}, "Spacer1"],
-          StyleBox[FormBox["\"v2.3\"", InputForm],
-            FontFamily -> "Source Sans Pro",
-            FontSize -> 24,
-            FontColor -> RGBColor[0.3, 0.5, 0.8]
-          ]
-        }],
-        "Title", CellTags -> "$title"
-      ],
-          
+      Cell[BoxData @ RowBox[{
+        StyleBox["Thulium Music Player",
+          FontFamily -> "Source Sans Pro",
+          FontSize -> 32,
+          FontColor -> RGBColor[0.1, 0.4, 0.7]
+        ],
+        TemplateBox[{1}, "Spacer1"],
+        StyleBox[FormBox["\"v2.3\"", InputForm],
+          FontFamily -> "Source Sans Pro",
+          FontSize -> 24,
+          FontColor -> RGBColor[0.3, 0.5, 0.8]
+        ]
+      }], "Title", CellTags -> "$title"],
+      
       Cell[BoxData @ RowBox[{
         TemplateBox[{4}, "Spacer1"],
         TemplateBox[{
@@ -98,9 +98,7 @@ With[
           InitializeThulium
         }, "LogoButton"],
         TemplateBox[{4}, "Spacer1"]
-      }], "Init", CellTags -> "$init"],
-      
-      Cell[BoxData @ Null, "Hidden", CellTags -> "$monitor"]
+      }], "Init", CellTags -> "$init"]
     },
     
     StyleDefinitions -> Notebook[{
@@ -170,14 +168,27 @@ With[
       
       Cell[StyleData["ButtonTooltip"],
         TemplateBoxOptions -> {DisplayFunction -> Function[
-          RowBox[{
-            TemplateBox[{1}, "Spacer1"],
-            StyleBox[#1,
-              FontFamily -> "Calibri",
-              FontSize -> 24
-            ],
-            TemplateBox[{1}, "Spacer1"]
-          }]
+          FrameBox[
+            RowBox[{
+              TemplateBox[{1, 24}, "Spacer2"],
+              AdjustmentBox[
+                StyleBox[#1,
+                  FontFamily -> "Calibri",
+                  FontSize -> 24,
+                  FontColor -> RGBColor[0, 0, 0]
+                ],
+                BoxBaselineShift -> -0.1
+              ],
+              TemplateBox[{1, 24}, "Spacer2"]
+            }],
+            Background -> RGBColor[1, 1, 0.9, 0.8],
+            ImageMargins -> {{1, 1}, {0, 0}},
+            ImageSize -> {Automatic, Automatic},
+            FrameStyle -> {1, RGBColor[0.8, 0.8, 0.7, 0.2]},
+            RoundingRadius -> {8, 8},
+            ContentPadding -> True,
+            BaselinePosition -> 1
+          ]
         ]}
       ],
       
@@ -214,8 +225,8 @@ With[
       ],
       
       Cell[StyleData["ButtonTemplate"],
-        (*|    1    |    2    |    3    |    4   |    5    |*)
-        (*| Default | Clicked | Hovered | Action | Tooltip |*)
+        (*    1    |    2    |    3    |    4   |    5    *)
+        (* Default | Clicked | Hovered | Action | Tooltip *)
         TemplateBoxOptions -> {DisplayFunction -> Function[
           PaneSelectorBox[{
             True -> TooltipBox[
@@ -230,9 +241,8 @@ With[
               TemplateBox[{#5}, "ButtonTooltip"],
               TooltipDelay -> 0.2,
               TooltipStyle -> {
-                CellFrameMargins -> {{4, 4}, {4, 4}},
-                CellFrameColor -> RGBColor[0.7, 0.7, 0.6, 0.5],
-                Background -> RGBColor[1, 1, 0.9, 0.7]
+                CellFrame -> {{0, 0}, {0, 0}},
+                Background -> RGBColor[0, 0, 0, 0]
               }
             ],
             False -> #1
@@ -286,8 +296,7 @@ With[
             NotebookLocate["$monitor"];
             NotebookWrite[EvaluationNotebook[], Cell[
               BoxData @ MakeBoxes @ Evaluate @ #3,
-              "Hidden",
-              CellTags -> "$monitor"
+              "Hidden", CellTags -> "$monitor"
             ], All];
             SelectionEvaluate[EvaluationNotebook[]];
             NotebookLocate["$title"];

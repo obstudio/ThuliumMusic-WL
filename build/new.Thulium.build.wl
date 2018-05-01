@@ -31,50 +31,38 @@ With[
     }]}],
     
     InitializeThulium = Hold[
-      (* FIXME: optimized paclet tests *)
+      (* FIXME: to be optimized *)
       If[Length[PacletCheckUpdate["QuantityUnits"]] != 0,
         PacletUpdate["QuantityUnits"];
         Quit[];
       ];
+      Thulium`StatusNotebook = Notebook[{
+        StyleBox["Welcome to Thulium Music!", FontSize -> 16, FontFamily -> "Calibri"]
+      }];
       localPath = StringReplace[NotebookDirectory[], "\\"->"/"];
+      SetDirectory[localPath];
+      (* FIXME: no use *)
+      If[!MemberQ[
+        CurrentValue[$FrontEnd, {"NotebookSecurityOptions", "TrustedPath"}],
+        FrontEnd`FileName[{$RootDirectory}, Evaluate @ NotebookDirectory[]]
+      ], AppendTo[
+        CurrentValue[$FrontEnd, {"NotebookSecurityOptions", "TrustedPath"}],
+        FrontEnd`FileName[{$RootDirectory}, Evaluate @ NotebookDirectory[]]
+      ]];
       Get[localPath <> "library/initialization.wl"];
       Cells[CellTags -> "$title"];
       NotebookDelete[Cells[CellTags -> "$init"]];
       SelectionMove[First @ Cells[CellTags -> "$title"], After, Cell, AutoScroll -> False];
       NotebookWrite[EvaluationNotebook[], {
-        Cell[BoxData @ RowBox[{
-          TemplateBox[{4}, "Spacer1"],
-          TemplateBox[{
-            "Initialize Thulium",
-            "Click to initialize the kernel.",
-            Unevaluated @ InitializePackage
-          }, "TextButtonMonitored"],
-          TemplateBox[{4}, "Spacer1"],
-          TemplateBox[{
-            "Initialize Parser",
-            "Click to initialize the parser.",
-            Unevaluated @ InitializeParser
-          }, "TextButtonMonitored"],
-          TemplateBox[{4}, "Spacer1"],
-          TemplateBox[{
-            "Initialize Songs",
-            "Click to initialize the songs.",
-            Unevaluated @ update
-          }, "TextButtonMonitored"],
-          TemplateBox[{4}, "Spacer1"],
-          TemplateBox[{
-            "Start Front End",
-            "Click to run the front end.",
-            Hold @ homepage
-          }, "TextButton"],
-          TemplateBox[{4}, "Spacer1"]
-        }], "Controls", CellTags -> "$controls"],
-        Cell[BoxData @ Null, "Hidden", CellTags -> "$monitor"]
+        Thulium`MenuCell,
+        Cell[BoxData @ Null, "Hidden", CellTags -> "$monitor"],
+        Cell[BoxData @ TemplateBox[{Cell[Thulium`StatusNotebook]}, "Status"], "Status"]
       }];
+      NotebookLocate["$title"];
     ]
   },
   
-  build`TemporaryNotebook = CreateDialog[
+  Thulium`MainNotebook = CreateDialog[
     {
       Cell[BoxData @ RowBox[{
         StyleBox["Thulium Music Player",
@@ -108,7 +96,6 @@ With[
         TextAlignment -> Center,
         ShowStringCharacters -> False,
         CellMargins -> {{40, 40}, {16, 32}},
-        ShowCellBracket -> False,
         Evaluatable -> False,
         Deletable -> False,
         Deployed -> True
@@ -117,14 +104,12 @@ With[
       Cell[StyleData["Init"],
         CellMargins -> {{24, 24}, {60, 60}},
         TextAlignment -> Center,
-        ShowCellBracket -> False,
         Deployed -> True
       ],
       
-      Cell[StyleData["Controls"],
+      Cell[StyleData["Menu"],
         CellMargins -> {{24, 24}, {8, 8}},
         TextAlignment -> Center,
-        ShowCellBracket -> False,
         Deletable -> False,
         Deployed -> True
       ],
@@ -159,7 +144,7 @@ With[
         FontSize -> 1,
         FontColor -> RGBColor[0, 0, 0, 0],
         CellSize -> {Inherited, 1},
-        CellMargins -> {{24, 24}, {0, 0}},
+        CellMargins -> {{24, 24}, {20, 0}},
         CellElementSpacings -> {"CellMinHeight" -> 1},
         Background -> Inherited,
         Evaluatable -> True,
@@ -169,25 +154,18 @@ With[
       Cell[StyleData["ButtonTooltip"],
         TemplateBoxOptions -> {DisplayFunction -> Function[
           FrameBox[
-            RowBox[{
-              TemplateBox[{1, 24}, "Spacer2"],
-              AdjustmentBox[
-                StyleBox[#1,
-                  FontFamily -> "Calibri",
-                  FontSize -> 24,
-                  FontColor -> RGBColor[0, 0, 0]
-                ],
-                BoxBaselineShift -> -0.1
+            AdjustmentBox[
+              StyleBox[#1,
+                FontFamily -> "Calibri",
+                FontSize -> 24,
+                FontColor -> RGBColor[0, 0, 0]
               ],
-              TemplateBox[{1, 24}, "Spacer2"]
-            }],
+              BoxMargins -> {{0.4, 0.4}, {0.4, 0.4}}
+            ],
             Background -> RGBColor[1, 1, 0.9, 0.8],
-            ImageMargins -> {{1, 1}, {0, 0}},
-            ImageSize -> {Automatic, Automatic},
             FrameStyle -> {1, RGBColor[0.8, 0.8, 0.7, 0.2]},
             RoundingRadius -> {8, 8},
-            ContentPadding -> True,
-            BaselinePosition -> 1
+            ContentPadding -> True
           ]
         ]}
       ],
@@ -225,8 +203,8 @@ With[
       ],
       
       Cell[StyleData["ButtonTemplate"],
-        (*    1    |    2    |    3    |    4   |    5    *)
-        (* Default | Clicked | Hovered | Action | Tooltip *)
+        (*    1    |    2    |    3    |    4    |    5    *)
+        (* Default | Clicked | Hovered |  Action | Tooltip *)
         TemplateBoxOptions -> {DisplayFunction -> Function[
           PaneSelectorBox[{
             True -> TooltipBox[
@@ -253,18 +231,9 @@ With[
       Cell[StyleData["TextButton"],
         TemplateBoxOptions -> {DisplayFunction -> Function[
           TemplateBox[{
-            TemplateBox[{#1,
-              RGBColor[0.2, 0.1, 0],
-              RGBColor[0.92, 0.96, 1]
-            }, "TextButtonDisplay"],
-            TemplateBox[{#1,
-              RGBColor[0, 0, 0],
-              RGBColor[0.5, 0.8, 1]
-            }, "TextButtonDisplay"],
-            TemplateBox[{#1,
-              RGBColor[0.08, 0.04, 0],
-              RGBColor[0.8, 0.9, 1]
-            }, "TextButtonDisplay"],
+            TemplateBox[{#1, RGBColor[0.2, 0.1, 0], RGBColor[0.92, 0.96, 1]}, "TextButtonDisplay"],
+            TemplateBox[{#1, RGBColor[0, 0, 0], RGBColor[0.5, 0.8, 1]}, "TextButtonDisplay"],
+            TemplateBox[{#1, RGBColor[0.08, 0.04, 0], RGBColor[0.8, 0.9, 1]}, "TextButtonDisplay"],
             #3, #2
           }, "ButtonTemplate"]
         ]}
@@ -273,18 +242,9 @@ With[
       Cell[StyleData["LogoButton"],
         TemplateBoxOptions -> {DisplayFunction -> Function[
           TemplateBox[{
-            TemplateBox[{#1,
-              RGBColor[0.2, 0.1, 0],
-              RGBColor[0.8, 0.96, 1]
-            }, "LogoButtonDisplay"],
-            TemplateBox[{#1,
-              RGBColor[0, 0, 0],
-              RGBColor[0.5, 0.8, 1]
-            }, "LogoButtonDisplay"],
-            TemplateBox[{#1,
-              RGBColor[0.08, 0.04, 0],
-              RGBColor[0.72, 0.9, 1]
-            }, "LogoButtonDisplay"],
+            TemplateBox[{#1, RGBColor[0.2, 0.1, 0], RGBColor[0.8, 0.96, 1]}, "LogoButtonDisplay"],
+            TemplateBox[{#1, RGBColor[0, 0, 0], RGBColor[0.5, 0.8, 1]}, "LogoButtonDisplay"],
+            TemplateBox[{#1, RGBColor[0.08, 0.04, 0], RGBColor[0.72, 0.9, 1]}, "LogoButtonDisplay"],
             #3, #2
           }, "ButtonTemplate"]
         ]}
@@ -304,30 +264,32 @@ With[
         ]}
       ],
       
+      Cell[StyleData["Status"],
+        CellMargins -> {{24, 24}, {8, 8}},
+        TextAlignment -> Center,
+        Deletable -> False,
+        Deployed -> True,
+        TemplateBoxOptions -> {DisplayFunction -> (FrameBox[
+          PaneBox[#1,
+            Scrollbars -> False,
+            Alignment -> {Center, Center},
+            ImageMargins -> {{4, 4}, {4, 4}},
+            ImageSize -> {Dynamic[CurrentValue[EvaluationNotebook[], WindowSize][[1]] / 2 - 200], 160}
+          ],
+          Background -> RGBColor[0.96, 0.98, 1],
+          RoundingRadius -> {8, 8},
+          ContentPadding -> True,
+          FrameStyle -> None
+        ]&)}
+      ],
+      
       (* Enhancement for cell style - PrintTemporary *)
       Cell[StyleData["PrintTemporary", StyleDefinitions -> "PrintTemporary"],
         FontFamily -> "Calibri",
         FontSize -> 16,
+        TextAlignment -> Center,
         CellMargins -> {{60, 60}, {8, 4}},
-        Deployed -> True,
-        Copyable -> False,
-        ShowCellBracket -> False,
-        TextAlignment -> Center
-      ],
-      
-      (* Enhancement for cell style - Input *)
-      Cell[StyleData["Input", StyleDefinitions -> "Input"],
-        NumberMarks -> False,
-        Editable -> True,
-        Evaluatable -> True,
-        StyleKeyMapping -> {">" -> "Music"},
-        ContextMenu -> {
-          MenuItem["Cut", "Cut"],
-          MenuItem["Copy", "Copy"],
-          MenuItem["Paste", FrontEnd`Paste[After]],
-          Delimiter,
-          MenuItem["Evaluate Cell", "EvaluateCells"]
-        }
+        Deployed -> True
       ]
     }],
     
@@ -335,7 +297,7 @@ With[
     ShowCellTags -> False,
     ShowCellBracket -> False,
     CellGrouping -> Manual,
-    Background -> RGBColor["#FFFFFF"],
+    Background -> RGBColor[1, 1, 1],
     WindowTitle -> " Thulium Music Player 2.3",
     WindowElements -> {},
     WindowFrameElements -> {"CloseBox", "MinimizeBox", "ZoomBox"},
@@ -347,8 +309,8 @@ With[
     Editable -> False
   ];
   
-  NotebookSave[build`TemporaryNotebook, localPath <> "Thulium.new.nb"];
-  NotebookClose[build`TemporaryNotebook];
+  NotebookSave[Thulium`MainNotebook, localPath <> "Thulium.new.nb"];
+  NotebookClose[Thulium`MainNotebook];
   NotebookOpen[localPath <> "Thulium.new.nb"];
 ]
 

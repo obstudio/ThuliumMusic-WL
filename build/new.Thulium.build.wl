@@ -36,9 +36,11 @@ With[
         PacletUpdate["QuantityUnits"];
         Quit[];
       ];
-      Thulium`StatusNotebook = Notebook[{
-        StyleBox["Welcome to Thulium Music!", FontSize -> 16, FontFamily -> "Calibri"]
-      }];
+      Thulium`$Init = False;
+      Thulium`$Parser = False;
+      Thulium`WelcomeCell = Cell[BoxData @ TemplateBox[
+        {"Welcome to Thulium Music!"}, "Tip"
+      ], "Tip", CellTags -> {"$msg"}];
       localPath = StringReplace[NotebookDirectory[], "\\"->"/"];
       SetDirectory[localPath];
       (* FIXME: no use *)
@@ -49,14 +51,14 @@ With[
         CurrentValue[$FrontEnd, {"NotebookSecurityOptions", "TrustedPath"}],
         FrontEnd`FileName[{$RootDirectory}, Evaluate @ NotebookDirectory[]]
       ]];
+      Scan[Get, FileNames["*.wl", "library/Paclet", Infinity]];
       Get[localPath <> "library/initialization.wl"];
-      Cells[CellTags -> "$title"];
       NotebookDelete[Cells[CellTags -> "$init"]];
       SelectionMove[First @ Cells[CellTags -> "$title"], After, Cell, AutoScroll -> False];
       NotebookWrite[EvaluationNotebook[], {
         Thulium`MenuCell,
         Cell[BoxData @ Null, "Hidden", CellTags -> "$monitor"],
-        Cell[BoxData @ TemplateBox[{Cell[Thulium`StatusNotebook]}, "Status"], "Status"]
+        Thulium`WelcomeCell
       }];
       NotebookLocate["$title"];
     ]
@@ -114,6 +116,26 @@ With[
         Deployed -> True
       ],
       
+      Cell[StyleData["MessageTemplate"],
+        TemplateBoxOptions -> {DisplayFunction -> Function[
+          FrameBox[
+            AdjustmentBox[
+              RowBox[{
+                StyleBox[#2, FontSize -> 18],
+                TemplateBox[{4}, "Spacer1"],
+                StyleBox[#1, FontFamily -> "Calibri", FontSize -> 16]
+              }],
+              BoxBaselineShift -> 0,
+              BoxMargins -> {{2, 2}, {2, 2}}
+            ],
+            Background -> #3,
+            RoundingRadius -> {8, 8},
+            ContentPadding -> True,
+            FrameStyle -> None
+          ]
+        ]}
+      ],
+      
       Cell[StyleData["Tip"],
         CellMargins -> {{60, 60}, {8, 4}},
         Deployed -> True,
@@ -122,21 +144,7 @@ With[
         TextAlignment -> Center,
         ShowCellLabel -> False,
         TemplateBoxOptions -> {DisplayFunction -> Function[
-          FrameBox[
-            AdjustmentBox[
-              RowBox[{
-                StyleBox["\[LightBulb]", FontSize -> 18],
-                TemplateBox[{4}, "Spacer1"],
-                StyleBox[#1, FontFamily -> "Calibri", FontSize -> 16]
-              }],
-              BoxBaselineShift -> 0,
-              BoxMargins -> {{2, 2}, {2, 2}}
-            ],
-            Background -> RGBColor[1, 0.96, 0.98],
-            RoundingRadius -> {8, 8},
-            ContentPadding -> True,
-            FrameStyle -> None
-          ]
+          TemplateBox[{#1, "\[LightBulb]", RGBColor[0.98, 1, 0.96]}, "MessageTemplate"]
         ]}
       ],
       
@@ -151,21 +159,28 @@ With[
         CellGroupingRules -> "InputGrouping"
       ],
       
-      Cell[StyleData["ButtonTooltip"],
+      Cell[StyleData["TooltipTemplate"],
         TemplateBoxOptions -> {DisplayFunction -> Function[
-          FrameBox[
-            AdjustmentBox[
-              StyleBox[#1,
-                FontFamily -> "Calibri",
-                FontSize -> 24,
-                FontColor -> RGBColor[0, 0, 0]
+          TooltipBox[#1,
+            FrameBox[
+              AdjustmentBox[
+                StyleBox[#2,
+                  FontFamily -> "Calibri",
+                  FontSize -> 24,
+                  FontColor -> RGBColor[0, 0, 0]
+                ],
+                BoxMargins -> {{0.4, 0.4}, {0.2, 0.4}}
               ],
-              BoxMargins -> {{0.4, 0.4}, {0.4, 0.4}}
+              Background -> RGBColor[1, 1, 0.9, 0.8],
+              FrameStyle -> {1, RGBColor[0.8, 0.8, 0.7, 0.2]},
+              RoundingRadius -> {8, 8},
+              ContentPadding -> True
             ],
-            Background -> RGBColor[1, 1, 0.9, 0.8],
-            FrameStyle -> {1, RGBColor[0.8, 0.8, 0.7, 0.2]},
-            RoundingRadius -> {8, 8},
-            ContentPadding -> True
+            TooltipDelay -> 0.2,
+            TooltipStyle -> {
+              CellFrame -> {{0, 0}, {0, 0}},
+              Background -> RGBColor[0, 0, 0, 0]
+            }
           ]
         ]}
       ],
@@ -207,7 +222,7 @@ With[
         (* Default | Clicked | Hovered |  Action | Tooltip *)
         TemplateBoxOptions -> {DisplayFunction -> Function[
           PaneSelectorBox[{
-            True -> TooltipBox[
+            True -> TemplateBox[{
               TagBox[
                 TagBox[
                   PaneSelectorBox[{
@@ -216,13 +231,8 @@ With[
                   }, Dynamic @ CurrentValue["MouseButtonTest"]],
                 EventHandlerTag @ {"MouseClicked" :> ReleaseHold @ #4}],
               MouseAppearanceTag @ "LinkHand"],
-              TemplateBox[{#5}, "ButtonTooltip"],
-              TooltipDelay -> 0.2,
-              TooltipStyle -> {
-                CellFrame -> {{0, 0}, {0, 0}},
-                Background -> RGBColor[0, 0, 0, 0]
-              }
-            ],
+              #5
+            }, "TooltipTemplate"],
             False -> #1
           }, Dynamic @ CurrentValue["MouseOver"]]
         ]}
@@ -281,6 +291,15 @@ With[
           ContentPadding -> True,
           FrameStyle -> None
         ]&)}
+      ],
+      
+      (* Enhancement for cell style - Output *)
+      Cell[StyleData["Output", StyleDefinitions -> "Output"],
+        FontFamily -> "Calibri",
+        FontSize -> 16,
+        TextAlignment -> Center,
+        CellMargins -> {{60, 60}, {8, 4}},
+        Deployed -> True
       ],
       
       (* Enhancement for cell style - PrintTemporary *)

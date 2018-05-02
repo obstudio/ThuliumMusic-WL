@@ -111,3 +111,6 @@ If[!FileExistsQ[dataPath <> "Index.mx"],
 	Get[dataPath <> "Index.mx"]
 ];
 imageData = Association /@ Association @ Import[dataPath <> "image.json"];
+
+
+Thulium`$Init = True;

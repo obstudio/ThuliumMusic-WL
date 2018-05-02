@@ -167,7 +167,9 @@ updateBuffer := Block[
 ];
 
 
-update := (updateIndex; updateImage; updateBuffer);
+update := (
+  If[!Thulium`$Parser, Thulium`InitializeParser];
+updateIndex; updateImage; updateBuffer);
 
 
 MonitorDisplay[content_] := Style[
@@ -191,19 +193,13 @@ MonitorDisplay[content_] := Style[
 Thulium`MenuCell = Cell[BoxData @ RowBox[{
   TemplateBox[{4}, "Spacer1"],
   TemplateBox[{
-    "Initialize Thulium",
-    "Click to initialize the kernel.",
-    Unevaluated @ Thulium`InitializePackage
-  }, "TextButtonMonitored"],
-  TemplateBox[{4}, "Spacer1"],
-  TemplateBox[{
-    "Initialize Parser",
+    "Initialize",
     "Click to initialize the parser.",
     Unevaluated @ Thulium`InitializeParser
   }, "TextButtonMonitored"],
   TemplateBox[{4}, "Spacer1"],
   TemplateBox[{
-    "Initialize Songs",
+    "Check Update",
     "Click to initialize the songs.",
     Unevaluated @ update
   }, "TextButtonMonitored"],
@@ -218,20 +214,21 @@ Thulium`MenuCell = Cell[BoxData @ RowBox[{
 
 
 Thulium`InitializePackage := Block[
-  {paclets, packages},
+  {paclets, packages, length},
   SetDirectory[localPath <> "library"];
-  paclets = FileNames["*.wl", "Paclet", Infinity];
-  Scan[Get, paclets];
   Monitor[
-    packages = Complement[FileNames["*.wl", "*", Infinity], paclets];
+    paclets = FileNames["*.wl", "Paclet", Infinity];
+    packages = FileNames["*.wl", "*", Infinity];
+    length = Length @ packages;
+    packages = Complement[packages, paclets];
     Do[Get[packages[[i]]], {i, Length @ packages}],
     MonitorDisplay[Column[{
       "Loading packages from library ......",
-      Graphics[progressBar[(i - 1) / Length[packages], 24], ImageSize -> {400, 20}],
+      Graphics[progressBar[(i - 1 + Length @ paclets) / length, 24], ImageSize -> {400, 20}],
       Row[{
         "Loading: ", Spacer[2],
         packages[[i]], Spacer[6],
-        "(", i, "/", Length[packages], ")"
+        "(", i + Length @ paclets, "/", length, ")"
       }]
     }, Alignment -> Center]]
   ];
@@ -240,12 +237,35 @@ Thulium`InitializePackage := Block[
 ];
 
 
-Thulium`InitializeParser := Monitor[
-  Off[General::shdw];
-  System`JS = StartExternalSession["NodeJS"];
-  ExternalEvaluate[System`JS, File[localPath <> "library/Thulium.js"]];
-  DeleteObject[Drop[ExternalSessions[], -1]];
-  On[General::shdw],
-  (* monitor *)
-  MonitorDisplay["Initializing Node.js as external evaluator ......"]
-];
+Thulium`InitializeParser := (
+  Monitor[
+    If[!Thulium`$Init, Thulium`InitializePackage];
+    System`JS = StartExternalSession["NodeJS"];
+    ExternalEvaluate[System`JS, File[localPath <> "library/Thulium.js"]];
+    DeleteObject[Drop[ExternalSessions[], -1]];
+    Thulium`$Parser = True,
+    MonitorDisplay["Initializing Node.js as external evaluator ......"]
+  ];
+  SelectionMove[First @ Cells[CellTags -> "$monitor"], After, Cell, AutoScroll -> False];
+  NotebookWrite[EvaluationNotebook[], {
+    Cell[BoxData @ TemplateBox[{
+      RowBox[{
+        "Secceed: Start External Session ",
+        TemplateBox[{"(details)",
+          GridBox[{
+            {"System: ", FormBox[StyleBox[
+              "\"" <> System`JS["System"] <> " " <> System`JS["Version"] <> "\"",
+            FontFamily -> "Calibri", FontSize -> 24], "InputForm"]},
+            {"Path: ", FormBox[StyleBox[
+              "\"" <> StringReplace[System`JS["Executable"], "\\" -> "\\\\"] <> "\"",
+            FontFamily -> "Calibri", FontSize -> 24], "InputForm"]},
+            {"UUID: ", FormBox[StyleBox[
+              "\"" <> Level[System`JS, 1][[1]] <> "\"",
+            FontFamily -> "Calibri", FontSize -> 24], "InputForm"]}
+          }, ColumnAlignments -> {Center, Center}]
+        }, "TooltipTemplate"]
+      }]
+    }, "Tip"], "Tip", CellTags -> "Status"]
+  }];
+  NotebookLocate["$title"];
+);

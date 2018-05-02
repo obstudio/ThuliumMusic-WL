@@ -1,0 +1,172 @@
+// TM Ammonia Package - Repeat Notations
+// Updated: 2018.4.30.
+
+# Notation
+
+class Repeat {
+  constructor() {
+    this.syntax = {
+      volta: [
+        {
+          patt: /^(\d+)~(\d+)/,
+          token(match) {
+            const result = []
+            for (let i = parseInt(match[1]); i <= parseInt(match[2]); i++) {
+              result.push(i)
+            }
+            return result
+          }
+        },
+        {
+          patt: /^\d+/,
+          token: match => parseInt(match[0])
+        },
+        {
+          patt: /^, */
+        },
+        {
+          patt: /^\. */
+        }
+      ],
+      section: [
+        FSM.item('RepeatEndBegin', /^:\|\|:/),
+        FSM.item('RepeatBegin', /^\|\|:/),
+        FSM.item('RepeatEnd', /^:\|\|/),
+        {
+          patt: /^\[(?=(\d+(~\d+)?\. *)+\])/,
+          push: FSM.next('volta', /^\]/),
+          token(match, content) {
+            return {
+              Type: 'volta',
+              Order: [].concat(...content)
+            }
+          }
+        },
+        FSM.item('Coda', /^\+/),
+        FSM.item('Coda', /^Coda/),
+        FSM.item('Coda', /^ToCoda/),
+        FSM.item('Segno', /^s/),
+        FSM.item('Segno', /^Segno/),
+        FSM.item('DaCapo', /^DC/),
+        FSM.item('DaSegno', /^DS/),
+        FSM.item('Fine', /^Fine/)
+      ]
+    }
+  }
+
+  proGlobal(parser) {
+    const result = []
+    const source = parser.Sections
+    const length = source.length
+    let pointer = 0
+    let repeatBeginIndex = [] // 用数组存储嵌套反复每次开始的位置
+    let segnoIndex = null
+    let order = [] // 嵌套反复每次反复的次数
+    let volta = [] // 存储当前小房子反复跳跃记号对应的反复次数
+    let skip = false // 是否是大反复的第二次反复
+    while (pointer < length) {
+      const element = source[pointer]
+      switch (element.Type) {
+      case 'RepeatBegin':
+        repeatBeginIndex.push(pointer)
+        order.push(1)
+        break
+      case 'RepeatEnd':
+        if (order.length === 0) { // 无反复开始记号，即为从头反复
+          repeatBeginIndex.push(-1)
+          order.push(1)
+        }
+        if (volta.length > 0) { // 当前在小房子里
+          if (volta.indexOf(order[order.length - 1] + 1) === -1 && (source[pointer + 1].Type !== 'Volta' || source[pointer + 1].Order.indexOf(order[order.length - 1] + 1) === -1)) { // 判断是否还有下一次反复，没有则终止反复
+            repeatBeginIndex.pop()
+            order.pop()
+          } else { // 还有下一次反复
+            order[order.length - 1]++
+            pointer = repeatBeginIndex[repeatBeginIndex.length - 1]
+            volta = []
+          }
+        } else { // 没有小房子，则反复两次
+          if (order[order.length - 1] === 1) {
+            order[order.length - 1]++
+            pointer = repeatBeginIndex[repeatBeginIndex.length - 1]
+          } else {
+            repeatBeginIndex.pop()
+            order.pop()
+          }
+        }
+        break
+      case 'Volta':
+        if (element.Order.indexOf(order[order.length - 1]) === -1) { // 反复跳跃记号不是当前反复次数
+          let pointer1 = pointer + 1
+          let nest = 1
+          while (pointer1 < length && nest > 0) { // 寻找匹配的反复结束记号
+            switch (source[pointer1].Type) {
+            case 'RepeatBegin':
+              nest++
+              break
+            case 'RepeatEnd':
+              nest--
+              break
+            case 'Volta':
+              // 对于带反复跳跃记号的反复中又含带反复跳跃记号的反复的情况，会引起严重的歧义，并导致错误匹配 RepeatEnd，最好能报错阻止
+              break
+            }
+            pointer1++
+          }
+          if (nest === 0) {
+            pointer = pointer1 - 1 // 指向匹配的反复结束记号
+          } else {
+            // 报个错
+          }
+        } else {
+          volta = element.Order
+        }
+        break
+      case 'Segno':
+        if (segnoIndex == null) {
+          segnoIndex = pointer
+        } else if (segnoIndex !== pointer) {
+          // 报个错
+        }
+        break
+      case 'Coda':
+        if (skip) {
+          pointer++
+          while (pointer < length && source[pointer].Type !== 'Coda') {
+            pointer++
+          }
+          if (pointer === length) {
+            // 报个错
+          }
+        }
+        break
+      case 'DaCapo':
+        if (!skip) {
+          skip = true
+          pointer = -1
+        }
+        break
+      case 'DaSegno':
+        if (!skip) {
+          if (segnoIndex == null) {
+            // 报个错
+          } else {
+            skip = true
+            pointer = segnoIndex
+          }
+        }
+        break
+      case 'Fine':
+        return
+      case 'Section':
+      case 'Function':
+        result.push(element)
+        break
+      }
+      pointer += 1
+    }
+    parser.Sections = result
+  }
+}
+
+# End

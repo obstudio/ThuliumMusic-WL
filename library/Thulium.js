@@ -2,7 +2,7 @@ const fs = require('fs');
 const path = require('path');
 const Parser = require('./Parser/Parser');
 const Tokenizer = require('./Token/Tokenizer');
-const Detokenizer = require('./Detok/Detokenizer');
+const Detokenizer = require('./Linter/Detokenizer');
 
 const packagePath = __dirname + '/../package';
 const packageInfo = require(packagePath + '/index.json');

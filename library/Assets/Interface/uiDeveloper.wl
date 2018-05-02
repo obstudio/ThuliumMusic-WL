@@ -1,7 +1,7 @@
 (* ::Package:: *)
 
 uiModifySong[song_]:=DynamicModule[{textInfo},
-	textInfo=index[[song,textInfoTags]];
+	textInfo=Thulium`SongIndex[[song,textInfoTags]];
 	CreateDialog[Column[{Spacer[{20,20}],
 		caption[textInfo[["SongName"]],"Title"],
 		Spacer[1],
@@ -13,7 +13,7 @@ uiModifySong[song_]:=DynamicModule[{textInfo},
 		Spacer[1],
 		Grid[{
 			{Button[text[["Save"]],putTextInfo[song,textInfo],ImageSize->150,Enabled->Dynamic[textInfo[["SongName"]]!=""]],
-			Button[text[["Undo"]],textInfo=index[[song,textInfoTags]],ImageSize->150]},
+			Button[text[["Undo"]],textInfo=Thulium`SongIndex[[song,textInfoTags]],ImageSize->150]},
 			{Button[text[["DeleteSong"]],DialogReturn[uiDeleteSong[song]],ImageSize->150],
 			Button[text[["Return"]],DialogReturn[refresh;uiPlaylist["All"]],ImageSize->150]}
 		}],Spacer[{20,20}]
@@ -27,19 +27,19 @@ uiModifySong[song_]:=DynamicModule[{textInfo},
 
 
 putTextInfo[song_,textInfo_]:=Module[
-	{info=index[[song]]},
+	{info=Thulium`SongIndex[[song]]},
 	Do[
 		info[[tag]]=textInfo[[tag]],
 	{tag,textInfoTags}];
-	index[[song]]=info;
-	Export[localPath<>"Meta/"<>song<>".json",index[[song]]];
+	Thulium`SongIndex[[song]]=info;
+	Export[localPath<>"Meta/"<>song<>".json",Thulium`SongIndex[[song]]];
 ];
 
 
 tagTemplate=<|"Image"->"","Uploader"->"","Tags"->{}|>;
 addSong[songPath_,textInfo_]:=Module[{song,metaInfo,audio},
 	song=StringDelete[songPath,RegularExpression["\\.\\w+$"]];
-	AppendTo[index,song->Join[textInfo,tagTemplate]];
+	AppendTo[Thulium`SongIndex,song->Join[textInfo,tagTemplate]];
 	putTextInfo[song,textInfo];
 ];
 
@@ -53,7 +53,7 @@ uiAddSong:=DynamicModule[{songPath,textInfo,candidates},
 	textInfo=AssociationMap[""&,textInfoTags];
 	SetDirectory[localPath];
 	candidates=Complement[StringDrop[StringReplace["\\"->"/"]/@FileNames["*.tm","Songs",Infinity],6],
-		#<>".tm"&/@songs,
+		#<>".tm"&/@Keys@Thulium`SongIndex,
 		ignoreList
 	];
 	CreateDialog[Column[{Spacer[{40,40}],
@@ -79,7 +79,7 @@ uiDeleteSong[song_]:=CreateDialog[Column[{"",
 	text[["SureToRemove"]],"",
 	Row[{
 		Button[text[["Confirm"]],
-			index=Delete[index,song];
+			Thulium`SongIndex=Delete[Thulium`SongIndex,song];
 			DeleteFile[localPath<>"Meta/"<>song<>".json"];
 			DialogReturn[refresh;uiPlaylist["All"]],
 		ImageSize->100],

@@ -1,5 +1,14 @@
 (* ::Package:: *)
 
+Thulium`$Version = "2.3";
+If[DirectoryQ[localPath <> ".git"], 
+  With[{ref = StringCases[Import[localPath <> ".git/HEAD"], RegularExpression["^ref: (.+)$"] :> "$1"]},
+    Thulium`$Commit = StringTake[Import[localPath <> ".git/" <> ref], 7];
+  ],
+  Thulium`$Commit = "";
+];
+
+
 Switch[$VersionNumber,
 	11.2, StatusAlias = "State",
 	11.3, StatusAlias = "Status",
@@ -10,6 +19,19 @@ Switch[$VersionNumber,
 			DefaultButton[]
 		}];
 		Abort[];
+];
+
+
+dirCreate[path_] := If[!DirectoryQ[path], CreateDirectory[path]];
+jsonCreate[path_] := If[!FileExistsQ[path], Export[path, {}]];
+
+
+refreshLanguage := With[
+  {langDataPath=localPath<>"language/"<>userInfo[["Language"]]<>"/"},
+  tagName=Association@Import[langDataPath<>"GeneralTags.json"];
+  instrName=Association@Import[langDataPath<>"Instruments.json"];
+  text=Association@Import[langDataPath<>"GeneralTexts.json"];
+  msgData=Association@Import[langDataPath<>"Messages.json"];
 ];
 
 
@@ -27,11 +49,11 @@ instList = Keys @ instDict;
 percList = Keys @ percDict;
 
 (* local data *)
-colorData=Association@Import[localPath<>"Assets/color.json"];                               (* colors *)
+colorData=Association@Import[localPath<>"library/Assets/color.json"];                               (* colors *)
 styleColor=RGBColor/@Association@colorData[["StyleColor"]];
 buttonColor=RGBColor/@#&/@Association/@Association@colorData[["ButtonColor"]];
 pageSelectorColor=RGBColor/@#&/@Association/@Association@colorData[["PageSelectorColor"]];
-styleData=Association/@Association@Import[localPath<>"Assets/style.json"];                  (* styles *)
+styleData=Association/@Association@Import[localPath<>"library/Assets/style.json"];                  (* styles *)
 styleDict=Normal@Module[{outcome={}},
 	If[KeyExistsQ[#,"Size"],AppendTo[outcome,FontSize->#[["Size"]]]];
 	If[KeyExistsQ[#,"Family"],AppendTo[outcome,FontFamily->#[["Family"]]]];
@@ -81,23 +103,6 @@ favorite = Import[userPath <> "Favorite.json"];
 If[!FileExistsQ[userPath <> "WorkBench.nb"], Export[userPath <> "WorkBench.nb", WorkBenchTemplate]];
 
 
-(* Find Node.js as external evaluator *)
-If[!userInfo[["NodeJS"]],
-	Off[General::shdw];
-	If[Length @ FindExternalEvaluators["NodeJS"] == 0,
-		CreateDialog[{
-			TextCell["Thulium Music Player requires Node.js as external evaluator."],
-			TextCell["Please follow the guide to install Node.js and Zeromq first."],
-			DefaultButton[]
-		}];
-		Abort[],
-		userInfo[["NodeJS"]] = True;
-		Export[userPath <> "Default.json", userInfo];
-	];
-	On[General::shdw];
-];
-
-
 (* program data *)
 dataPath = userInfo[["DataPath"]];
 dirCreate[dataPath];
@@ -106,8 +111,19 @@ dirCreate[dataPath <> "images/"];
 jsonCreate[dataPath <> "Buffer.json"];
 jsonCreate[dataPath <> "Image.json"];
 If[!FileExistsQ[dataPath <> "Index.mx"],
-	index = <||>;
-	DumpSave[dataPath <> "Index.mx", index],
-	Get[dataPath <> "Index.mx"]
+  Thulium`SongIndex = <||>;
+  Thulium`PlaylistIndex = <||>;
+  Thulium`ImageIndex = <||>;
+  Thulium`PageIndex = <|"Main" -> 1|>;
+  DumpSave[dataPath <> "Index.mx", {
+    Thulium`SongIndex, Thulium`PlaylistIndex, Thulium`ImageIndex
+  }],
+  Get[dataPath <> "Index.mx"];
+  Thulium`PageIndex = Prepend[
+    AssociationMap[1&, Keys @ Thulium`PlaylistIndex],
+    {"Main" -> 1}
+  ];
 ];
-imageData = Association /@ Association @ Import[dataPath <> "image.json"];
+
+
+Thulium`update`BufferHash = Association @ Import[dataPath <> "Buffer.json"];

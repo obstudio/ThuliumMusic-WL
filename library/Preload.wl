@@ -22,6 +22,19 @@ Switch[$VersionNumber,
 ];
 
 
+dirCreate[path_] := If[!DirectoryQ[path], CreateDirectory[path]];
+jsonCreate[path_] := If[!FileExistsQ[path], Export[path, {}]];
+
+
+refreshLanguage := With[
+  {langDataPath=localPath<>"language/"<>userInfo[["Language"]]<>"/"},
+  tagName=Association@Import[langDataPath<>"GeneralTags.json"];
+  instrName=Association@Import[langDataPath<>"Instruments.json"];
+  text=Association@Import[langDataPath<>"GeneralTexts.json"];
+  msgData=Association@Import[langDataPath<>"Messages.json"];
+];
+
+
 (* tags *)
 textInfoTags = {"SongName", "Lyricist", "Composer", "Adapter", "Comment", "Abstract", "Origin"};
 otherInfoTags = {"Image", "Uploader", "Tags"};

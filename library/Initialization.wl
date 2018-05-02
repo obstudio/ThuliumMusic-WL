@@ -1,18 +1,5 @@
 (* ::Package:: *)
 
-dirCreate[path_] := If[!DirectoryQ[path], CreateDirectory[path]];
-jsonCreate[path_] := If[!FileExistsQ[path], Export[path, {}]];
-
-
-refreshLanguage := With[
-  {langDataPath=localPath<>"language/"<>userInfo[["Language"]]<>"/"},
-  tagName=Association@Import[langDataPath<>"GeneralTags.json"];
-  instrName=Association@Import[langDataPath<>"Instruments.json"];
-  text=Association@Import[langDataPath<>"GeneralTexts.json"];
-  msgData=Association@Import[langDataPath<>"Messages.json"];
-];
-
-
 MonitorDisplay[content_] := Style[
   Framed[
     Pane[content,
@@ -28,6 +15,18 @@ MonitorDisplay[content_] := Style[
   ],
   FontFamily -> "Calibri",
   FontSize -> 16
+];
+
+ProgressDisplay[items_, index_, title_] := MonitorDisplay[
+  Column[{
+    title,
+    Graphics[progressBar[(index - 1) / Length[items], 24], ImageSize -> {400, 20}],
+    Row[{
+      "Loading: ", Spacer[2],
+      items[[index]], Spacer[6],
+      "(", index, "/", Length[items], ")"
+    }]
+  }, Alignment -> Center]
 ];
 
 MessageDisplay[cells_] := Block[{msgCells},
@@ -69,27 +68,15 @@ Thulium`MenuCell = Cell[BoxData @ RowBox[{(*
 }], "Menu", CellTags -> "$menu"];
 
 
-Thulium`InitializePackage := Block[{paclets, packages, length},
+Thulium`InitializePackage := Block[{packages},
   CleanMessages[2];
   SetDirectory[localPath <> "library"];
   Monitor[
-    paclets = FileNames["*.wl", "Paclet", Infinity];
-    packages = FileNames["*.wl", "*", Infinity];
-    length = Length @ packages;
-    packages = Complement[packages, paclets];
-    Do[Get[packages[[i]]], {i, Length @ packages}];
-    Thulium`$Init = True,
-    MonitorDisplay[Column[{
-      "Loading packages from library ......",
-      Graphics[progressBar[(i - 1 + Length @ paclets) / length, 24], ImageSize -> {400, 20}],
-      Row[{
-        "Loading: ", Spacer[2],
-        packages[[i]], Spacer[6],
-        "(", i + Length @ paclets, "/", length, ")"
-      }]
-    }, Alignment -> Center]]
-  ];
+    packages = Complement[FileNames["*.wl", "*", Infinity], FileNames["*.wl", "Paclet", Infinity]];
+    Do[Get[packages[[i]]], {i, Length @ packages}],
+  ProgressDisplay[packages, i, "Loading packages from library ......"]];
   Get["Preload.wl"];
+  Thulium`$Init = True;
   MessageDisplay[Cell[BoxData @ TemplateBox[{
     RowBox[{
       "Succeed: Initializing Thulium Kernel ",
@@ -278,16 +265,7 @@ Thulium`UpdateImage := With[{updates = Thulium`update`NewSongs}, Block[{filename
       CopyFile[cloudPath <> "images/" <> filename, dataPath <> "Images/" <> filename];
       AssociateTo[Thulium`ImageIndex, filename -> Association @ Import[cloudPath <> "images/" <> metaFileName]],
     {i, Length @ updates}],
-    MonitorDisplay[Column[{
-      "Downloading images from the internet ......",
-      Graphics[progressBar[(i - 1) / Length[updates], 24], ImageSize -> {400, 20}],
-      Row[{
-        "Loading: ", Spacer[2],
-        updates[[i]], Spacer[6],
-        "(", i, "/", Length[updates], ")"
-      }]
-    }, Alignment -> Center]]
-  ];
+  ProgressDisplay[updates, i, "Downloading images from the internet ......"]];
 ]];
 
 
@@ -305,16 +283,7 @@ Thulium`UpdateBuffer := With[{updates = Thulium`update`NewSongs}, Block[{song, a
     Export[dataPath <> "Buffer.json", Thulium`update`BufferHash[[
       Intersection[Keys @ Thulium`update`BufferHash, Keys @ Thulium`SongIndex]
     ]]],
-    MonitorDisplay[Column[{
-      "Generating music buffer ......",
-      Graphics[progressBar[(i - 1) / Length[updates], 24], ImageSize -> {400, 20}],
-      Row[{
-        "Loading: ", Spacer[2],
-        updates[[i]], Spacer[6],
-        "(", i, "/", Length[updates], ")"
-      }]
-    }, Alignment -> Center]]
-  ];
+  ProgressDisplay[updates, i, "Generating music buffer ......"]];
 ]];
 
 

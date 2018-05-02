@@ -1,5 +1,14 @@
 (* ::Package:: *)
 
+Thulium`$Version = "2.3";
+If[DirectoryQ[localPath <> ".git"], 
+  With[{ref = StringCases[Import[localPath <> ".git/HEAD"], RegularExpression["^ref: (.+)$"] :> "$1"]},
+    Thulium`$Commit = StringTake[Import[localPath <> ".git/" <> ref], 7];
+  ],
+  Thulium`$Commit = "";
+];
+
+
 Switch[$VersionNumber,
 	11.2, StatusAlias = "State",
 	11.3, StatusAlias = "Status",
@@ -89,14 +98,19 @@ dirCreate[dataPath <> "images/"];
 jsonCreate[dataPath <> "Buffer.json"];
 jsonCreate[dataPath <> "Image.json"];
 If[!FileExistsQ[dataPath <> "Index.mx"],
-	Thulium`SongIndex = <||>;
-	Thulium`PlaylistIndex = <||>;
-	Thulium`PageIndex = <|"Main" -> 1|>;
-	DumpSave[dataPath <> "Index.mx", {Thulium`SongIndex, Thulium`PlaylistIndex}],
-	Get[dataPath <> "Index.mx"];
-	Thulium`PageIndex = Prepend[
-      AssociationMap[1&, Keys @ Thulium`PlaylistIndex],
-      {"Main" -> 1}
-    ];
+  Thulium`SongIndex = <||>;
+  Thulium`PlaylistIndex = <||>;
+  Thulium`ImageIndex = <||>;
+  Thulium`PageIndex = <|"Main" -> 1|>;
+  DumpSave[dataPath <> "Index.mx", {
+    Thulium`SongIndex, Thulium`PlaylistIndex, Thulium`ImageIndex
+  }],
+  Get[dataPath <> "Index.mx"];
+  Thulium`PageIndex = Prepend[
+    AssociationMap[1&, Keys @ Thulium`PlaylistIndex],
+    {"Main" -> 1}
+  ];
 ];
-imageData = Association /@ Association @ Import[dataPath <> "image.json"];
+
+
+Thulium`update`BufferHash = Association @ Import[dataPath <> "Buffer.json"];

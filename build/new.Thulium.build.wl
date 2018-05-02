@@ -117,7 +117,7 @@ With[
         Deployed -> True
       ],
       
-      Cell[StyleData["MessageTemplate"],
+      Cell[StyleData["<Message>"],
         TemplateBoxOptions -> {DisplayFunction -> Function[
           FrameBox[
             AdjustmentBox[
@@ -146,13 +146,13 @@ With[
       
       Cell[StyleData["SuccessMessage"],
         TemplateBoxOptions -> {DisplayFunction -> Function[
-          TemplateBox[{#1, "\[LightBulb]", RGBColor[0.98, 1, 0.96]}, "MessageTemplate"]
+          TemplateBox[{#1, "\[LightBulb]", RGBColor[0.98, 1, 0.96]}, "<Message>"]
         ]}
       ],
       
       Cell[StyleData["FailureMessage"],
         TemplateBoxOptions -> {DisplayFunction -> Function[
-          TemplateBox[{#1, "\[WarningSign]", RGBColor[1, 0.96, 0.98]}, "MessageTemplate"]
+          TemplateBox[{#1, "\[WarningSign]", RGBColor[1, 0.96, 0.98]}, "<Message>"]
         ]}
       ],
       
@@ -167,7 +167,7 @@ With[
         CellGroupingRules -> "InputGrouping"
       ],
       
-      Cell[StyleData["TooltipTemplate"],
+      Cell[StyleData["<Tooltip>"],
         TemplateBoxOptions -> {DisplayFunction -> Function[
           TooltipBox[#1,
             FrameBox[
@@ -225,7 +225,7 @@ With[
         ]}
       ],
       
-      Cell[StyleData["ButtonTemplate"],
+      Cell[StyleData["<Button>"],
         (*    1    |    2    |    3    |    4    |    5    *)
         (* Default | Clicked | Hovered |  Action | Tooltip *)
         TemplateBoxOptions -> {DisplayFunction -> Function[
@@ -240,7 +240,7 @@ With[
                 EventHandlerTag @ {"MouseClicked" :> ReleaseHold @ #4}],
               MouseAppearanceTag @ "LinkHand"],
               #5, 0.2
-            }, "TooltipTemplate"],
+            }, "<Tooltip>"],
             False -> #1
           }, Dynamic @ CurrentValue["MouseOver"]]
         ]}
@@ -253,7 +253,7 @@ With[
             TemplateBox[{#1, RGBColor[0, 0, 0], RGBColor[0.5, 0.8, 1]}, "TextButtonDisplay"],
             TemplateBox[{#1, RGBColor[0.08, 0.04, 0], RGBColor[0.8, 0.9, 1]}, "TextButtonDisplay"],
             #3, #2
-          }, "ButtonTemplate"]
+          }, "<Button>"]
         ]}
       ],
       
@@ -264,7 +264,7 @@ With[
             TemplateBox[{#1, RGBColor[0, 0, 0], RGBColor[0.5, 0.8, 1]}, "LogoButtonDisplay"],
             TemplateBox[{#1, RGBColor[0.08, 0.04, 0], RGBColor[0.72, 0.9, 1]}, "LogoButtonDisplay"],
             #3, #2
-          }, "ButtonTemplate"]
+          }, "<Button>"]
         ]}
       ],
       

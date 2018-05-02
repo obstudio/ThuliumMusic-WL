@@ -10,10 +10,10 @@
 NotebookFileLineBreakTest
 NotebookFileLineBreakTest
 NotebookDataPosition[       158,          7]
-NotebookDataLength[     11682,        292]
+NotebookDataLength[     11634,        292]
 NotebookOptionsPosition[      2678,         78]
-NotebookOutlinePosition[     11595,        291]
-CellTagsIndexPosition[     11502,        285]
+NotebookOutlinePosition[     11547,        291]
+CellTagsIndexPosition[     11454,        285]
 WindowTitle-> Thulium Music Player 2.3
 WindowFrame->ModelessDialog*)
 
@@ -32,7 +32,7 @@ Cell[BoxData[
    FontFamily->"Source Sans Pro",
    FontSize->24,
    FontColor->RGBColor[0.3, 0.5, 0.8]]}]], "Title",
- CellTags->"$title",ExpressionUUID->"e2e63aed-ae5b-48e8-bc56-d4a98eaf3768"],
+ CellTags->"$title",ExpressionUUID->"94183999-d780-4f5b-b36d-19dec420c700"],
 
 Cell[BoxData[
  RowBox[{
@@ -74,7 +74,7 @@ Cell[BoxData[
    "LogoButton"], 
   TemplateBox[{4},
    "Spacer1"]}]], "Init",
- CellTags->"$init",ExpressionUUID->"5208db02-d98f-4287-b57e-e5a6ad906730"]
+ CellTags->"$init",ExpressionUUID->"5cf96069-2ba4-429b-ac7d-da4e630651e6"]
 },
 Editable->False,
 Saveable->False,
@@ -118,7 +118,7 @@ StyleDefinitions->Notebook[{
     StyleData["Menu"], Deletable -> False, CellMargins -> {{24, 24}, {8, 8}}, 
     Deployed -> True, TextAlignment -> Center], 
    Cell[
-    StyleData["MessageTemplate"], 
+    StyleData["<Message>"], 
     TemplateBoxOptions -> {DisplayFunction -> (FrameBox[
         AdjustmentBox[
          RowBox[{
@@ -134,19 +134,19 @@ StyleDefinitions->Notebook[{
    Cell[
     StyleData["SuccessMessage"], 
     TemplateBoxOptions -> {DisplayFunction -> (TemplateBox[{#, "\[LightBulb]", 
-         RGBColor[0.98, 1, 0.96]}, "MessageTemplate"]& )}], 
+         RGBColor[0.98, 1, 0.96]}, "<Message>"]& )}], 
    Cell[
     StyleData["FailureMessage"], 
     TemplateBoxOptions -> {
      DisplayFunction -> (TemplateBox[{#, "\[WarningSign]", 
-         RGBColor[1, 0.96, 0.98]}, "MessageTemplate"]& )}], 
+         RGBColor[1, 0.96, 0.98]}, "<Message>"]& )}], 
    Cell[
     StyleData["Hidden"], CellMargins -> {{24, 24}, {20, 0}}, 
     CellElementSpacings -> {"CellMinHeight" -> 1}, Evaluatable -> True, 
     CellGroupingRules -> "InputGrouping", CellSize -> {Inherited, 1}, 
     FontSize -> 1, FontColor -> RGBColor[0, 0, 0, 0]], 
    Cell[
-    StyleData["TooltipTemplate"], 
+    StyleData["<Tooltip>"], 
     TemplateBoxOptions -> {DisplayFunction -> (TooltipBox[#, 
         FrameBox[
          AdjustmentBox[
@@ -200,7 +200,7 @@ NBVD3HugwQGs7ydUv2AjJLw1Sg6AlMnFN0LsC8NMr5TyAWtplCQ=
         BoxFrame -> {{0, 0}, {0, 0}}, RoundingRadius -> {8, 8}, 
         ContentPadding -> True, BaselinePosition -> 1]& )}], 
    Cell[
-    StyleData["ButtonTemplate"], 
+    StyleData["<Button>"], 
     TemplateBoxOptions -> {
      DisplayFunction -> (PaneSelectorBox[{True -> TemplateBox[{
             TagBox[
@@ -209,7 +209,7 @@ NBVD3HugwQGs7ydUv2AjJLw1Sg6AlMnFN0LsC8NMr5TyAWtplCQ=
                Dynamic[
                 CurrentValue["MouseButtonTest"]]], 
               EventHandlerTag[{"MouseClicked" :> ReleaseHold[#4]}]], 
-             MouseAppearanceTag["LinkHand"]], #5, 0.2}, "TooltipTemplate"], 
+             MouseAppearanceTag["LinkHand"]], #5, 0.2}, "<Tooltip>"], 
          False -> #}, 
         Dynamic[
          CurrentValue["MouseOver"]]]& )}], 
@@ -225,7 +225,7 @@ NBVD3HugwQGs7ydUv2AjJLw1Sg6AlMnFN0LsC8NMr5TyAWtplCQ=
          TemplateBox[{#, 
            RGBColor[0.08, 0.04, 0], 
            RGBColor[0.8, 0.9, 1]}, "TextButtonDisplay"], #3, #2}, 
-        "ButtonTemplate"]& )}], 
+        "<Button>"]& )}], 
    Cell[
     StyleData["LogoButton"], 
     TemplateBoxOptions -> {DisplayFunction -> (TemplateBox[{
@@ -238,7 +238,7 @@ NBVD3HugwQGs7ydUv2AjJLw1Sg6AlMnFN0LsC8NMr5TyAWtplCQ=
          TemplateBox[{#, 
            RGBColor[0.08, 0.04, 0], 
            RGBColor[0.72, 0.9, 1]}, "LogoButtonDisplay"], #3, #2}, 
-        "ButtonTemplate"]& )}], 
+        "<Button>"]& )}], 
    Cell[
     StyleData["TextButtonMonitored"], 
     TemplateBoxOptions -> {DisplayFunction -> (TemplateBox[{#, #2, 
@@ -275,24 +275,24 @@ NBVD3HugwQGs7ydUv2AjJLw1Sg6AlMnFN0LsC8NMr5TyAWtplCQ=
 (*CellTagsOutline
 CellTagsIndex->{
  "$title"->{
-  Cell[605, 21, 420, 13, 140, "Title",ExpressionUUID->"e2e63aed-ae5b-48e8-bc56-d4a98eaf3768",
+  Cell[605, 21, 420, 13, 140, "Title",ExpressionUUID->"94183999-d780-4f5b-b36d-19dec420c700",
    CellTags->"$title"]},
  "$init"->{
-  Cell[1028, 36, 1646, 40, 140, "Init",ExpressionUUID->"5208db02-d98f-4287-b57e-e5a6ad906730",
+  Cell[1028, 36, 1646, 40, 140, "Init",ExpressionUUID->"5cf96069-2ba4-429b-ac7d-da4e630651e6",
    CellTags->"$init"]}
  }
 *)
 (*CellTagsIndex
 CellTagsIndex->{
- {"$title", 11229, 276},
- {"$init", 11360, 279}
+ {"$title", 11181, 276},
+ {"$init", 11312, 279}
  }
 *)
 (*NotebookFileOutline
 Notebook[{
-Cell[605, 21, 420, 13, 140, "Title",ExpressionUUID->"e2e63aed-ae5b-48e8-bc56-d4a98eaf3768",
+Cell[605, 21, 420, 13, 140, "Title",ExpressionUUID->"94183999-d780-4f5b-b36d-19dec420c700",
  CellTags->"$title"],
-Cell[1028, 36, 1646, 40, 140, "Init",ExpressionUUID->"5208db02-d98f-4287-b57e-e5a6ad906730",
+Cell[1028, 36, 1646, 40, 140, "Init",ExpressionUUID->"5cf96069-2ba4-429b-ac7d-da4e630651e6",
  CellTags->"$init"]
 }
 ]

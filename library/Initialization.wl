@@ -13,107 +13,6 @@ refreshLanguage := With[
 ];
 
 
-playlistTemplate=<|
-  "Type"->"Playlist",
-  "Path"->"",
-  "Title"->"",
-  "Abstract"->"",
-  "Comment"->"",
-  "SongList"->"",
-  "IndexWidth"->0
-|>;
-
-
-updateImage := Block[
-  {
-    updates={}, image, filename, meta,
-    imageData = Association /@ Association @ Import[dataPath <> "image.json"]
-  },
-  Do[
-    If[KeyExistsQ[Thulium`SongIndex[[song]],"Image"]&&!FileExistsQ[dataPath<>"Images/"<>Thulium`SongIndex[[song,"Image"]]],
-      AppendTo[updates,Thulium`SongIndex[[song,"Image"]]]
-    ],
-  {song,Keys@Thulium`SongIndex}];
-  If[updates=={},Return[]];
-  Monitor[
-    Do[
-      filename=updates[[i]];
-      image=Import[cloudPath<>"images/"<>filename];
-      Export[dataPath<>"Images/"<>filename,image];
-      meta=Association@Import[cloudPath<>"images/"<>StringReplace[filename,"."~~__->".json"]];
-      If[KeyExistsQ[imageData,filename],
-        imageData[[filename]]=meta,
-        AppendTo[imageData,filename->meta]
-      ],
-    {i,Length@updates}];
-    Export[dataPath <>"Image.json", imageData],
-    (* monitor *)
-    MonitorDisplay[Column[{
-      "Downloading images from the internet ......",
-      Graphics[progressBar[(i - 1) / Length[updates], 24], ImageSize -> {400, 20}],
-      Row[{
-        "Loading: ", Spacer[2],
-        updates[[i]], Spacer[6],
-        "(", i, "/", Length[updates], ")"
-      }]
-    }, Alignment -> Center]]
-  ];
-];
-
-
-updateBuffer := Block[
-  {
-    updates={}, song, filename, hash, audio, bufferList,
-    bufferHash = Association @ Import[dataPath <> "Buffer.json"]
-  },
-  SetDirectory[dataPath];
-  bufferList=StringReplace["\\"->"/"]/@StringTake[FileNames["*.buffer","buffer",Infinity],{8,-8}];
-  DeleteFile[dataPath<>"Buffer/"<>#<>".buffer"]&/@Complement[bufferList,Keys@Thulium`SongIndex];
-  Do[
-    filename=localPath<>"Songs/"<>song<>".tm";
-    hash=IntegerString[FileHash[filename],32];
-    If[KeyExistsQ[bufferHash,song],
-      If[bufferHash[[song]]==hash && FileExistsQ[dataPath<>"Buffer/"<>song<>".buffer"],
-        Continue[],
-        bufferHash[[song]]=hash;
-        AppendTo[updates,song];
-      ],
-      AppendTo[bufferHash,song->hash];
-      AppendTo[updates,song];
-    ],
-  {song,Keys@Thulium`SongIndex}];
-  If[updates=={},Return[]];
-  Monitor[
-    Do[
-      song=updates[[i]];
-      filename=localPath<>"Songs/"<>song<>".tm";
-      Check[
-        audio=AudioAdapt[Parse[filename]];
-        Export[dataPath<>"Buffer/"<>song<>".buffer",audio,"MP3"],
-        Delete[bufferHash, song];
-      ],
-    {i,Length@updates}];
-    Export[dataPath<>"Buffer.json",bufferHash[[Intersection[Keys@bufferHash,Keys@Thulium`SongIndex]]]];
-    ResetDirectory[],
-    (* monitor *)
-    MonitorDisplay[Column[{
-      "Generating music buffer ......",
-      Graphics[progressBar[(i - 1) / Length[updates], 24], ImageSize -> {400, 20}],
-      Row[{
-        "Loading: ", Spacer[2],
-        updates[[i]], Spacer[6],
-        "(", i, "/", Length[updates], ")"
-      }]
-    }, Alignment -> Center]]
-  ];
-];
-
-
-update := (
-  If[!Thulium`$Parser, Thulium`InitializeParser];
-updateIndex; updateImage; updateBuffer);
-
-
 MonitorDisplay[content_] := Style[
   Framed[
     Pane[content,
@@ -134,24 +33,28 @@ MonitorDisplay[content_] := Style[
 MessageDisplay[cells_] := Block[{msgCells},
   SelectionMove[First @ Cells[CellTags -> "$monitor"], After, Cell, AutoScroll -> False];
   NotebookWrite[EvaluationNotebook[], cells];
-  msgCells = Cells[CellTags -> "$msg"];
-  If[Length @ msgCells > 3, NotebookDelete[Drop[msgCells, 3]]];
   NotebookLocate["$title"];
 ];
 
+CleanMessages[maxCount_] := With[{msgCells = Cells[CellTags -> "$msg"]},
+  If[Length @ msgCells > maxCount, NotebookDelete[Drop[msgCells, maxCount]]];
+];
 
-Thulium`MenuCell = Cell[BoxData @ RowBox[{
+RawDisplay[text_] := FormBox[StyleBox["\"" <> text <> "\"", FontFamily -> "Calibri"], "InputForm"];
+
+
+Thulium`MenuCell = Cell[BoxData @ RowBox[{(*
   TemplateBox[{4}, "Spacer1"],
   TemplateBox[{
     "Start Kernel",
     "Click to initialize the Thulium Kernel.",
     Unevaluated @ Thulium`InitializeParser
-  }, "TextButtonMonitored"],
+  }, "TextButtonMonitored"],*)
   TemplateBox[{4}, "Spacer1"],
   TemplateBox[{
     "Check Update",
     "Click to update the songs and playlists.",
-    Unevaluated @ update
+    Unevaluated @ Thulium`CheckUpdate
   }, "TextButtonMonitored"],
   TemplateBox[{4}, "Spacer1"],
   TemplateBox[{
@@ -167,6 +70,7 @@ Thulium`MenuCell = Cell[BoxData @ RowBox[{
 
 
 Thulium`InitializePackage := Block[{paclets, packages, length},
+  CleanMessages[2];
   SetDirectory[localPath <> "library"];
   Monitor[
     paclets = FileNames["*.wl", "Paclet", Infinity];
@@ -187,7 +91,15 @@ Thulium`InitializePackage := Block[{paclets, packages, length},
   ];
   Get["Preload.wl"];
   MessageDisplay[Cell[BoxData @ TemplateBox[{
-    "Succeed: Initializing Thulium Kernel"
+    RowBox[{
+      "Succeed: Initializing Thulium Kernel ",
+      TemplateBox[{"(details)",
+        GridBox[{
+          {"Version: ", RawDisplay[Thulium`$Version]},
+          If[Thulium`$Commit =!= "", {"Commit: ", RawDisplay[Thulium`$Commit]}, Nothing]
+        }, ColumnAlignments -> {Center, Left}, ColumnSpacings -> 0],
+      0.1}, "<Tooltip>"]
+    }]
   }, "SuccessMessage"], "MessageCell", CellTags -> "$msg"]];
   ResetDirectory[];
 ];
@@ -195,22 +107,24 @@ Thulium`InitializePackage := Block[{paclets, packages, length},
 
 Thulium`InitializeParser := Block[{result, succeed, msgCells},
   If[!Thulium`$Init, Thulium`InitializePackage];
-  Off[General::shdw];
-  If[!userInfo[["NodeJS"]],
-    If[Length @ FindExternalEvaluators["NodeJS"] == 0,
-      (* FIXME: to be optimized *)
-      CreateDialog[{
-        TextCell["Thulium Music Player requires Node.js as external evaluator."],
-        TextCell["Please follow the guide to install Node.js and Zeromq first."],
-        DefaultButton[]
-      }];
-      Abort[],
-      userInfo[["NodeJS"]] = True;
-      Export[userPath <> "Default.json", userInfo];
-    ];
-  ];
+  CleanMessages[2];
   Monitor[
-    Get[localPath <> "library/Adapter.wl"];
+    Off[General::shdw];
+    
+    If[!userInfo[["NodeJS"]],
+      If[Length @ FindExternalEvaluators["NodeJS"] == 0,
+        (* FIXME: to be optimized *)
+        CreateDialog[{
+          TextCell["Thulium Music Player requires Node.js as external evaluator."],
+          TextCell["Please follow the guide to install Node.js and Zeromq first."],
+          DefaultButton[]
+        }];
+        Abort[],
+        userInfo[["NodeJS"]] = True;
+        Export[userPath <> "Default.json", userInfo];
+      ];
+    ];
+    
     succeed = Check[
       System`JS = StartExternalSession["NodeJS"];
       result = ExternalEvaluate[System`JS, File[localPath <> "library/Thulium.js"]];
@@ -218,27 +132,23 @@ Thulium`InitializeParser := Block[{result, succeed, msgCells},
       True,
       $MessageList
     ];
+    
+    On[General::shdw];
+    Get[localPath <> "library/Adapter.wl"];
     Thulium`$Parser = True,
-    MonitorDisplay["Initializing Node.js as external evaluator ......"]
-  ];
-  On[General::shdw];
+  MonitorDisplay["Initializing Node.js as external evaluator ......"]];
+  
   MessageDisplay[If[succeed === True,
     Cell[BoxData @ TemplateBox[{
       RowBox[{
         "Secceed: Start External Session ",
         TemplateBox[{"(details)",
           GridBox[{
-            {"System: ", FormBox[StyleBox[
-              "\"" <> System`JS["System"] <> " " <> System`JS["Version"] <> "\"",
-            FontFamily -> "Calibri"], "InputForm"]},
-            {"Path: ", FormBox[StyleBox[
-              "\"" <> StringReplace[System`JS["Executable"], "\\" -> "\\\\"] <> "\"",
-            FontFamily -> "Calibri"], "InputForm"]},
-            {"UUID: ", FormBox[StyleBox[
-              "\"" <> Level[System`JS, 1][[1]] <> "\"",
-            FontFamily -> "Calibri"], "InputForm"]}
-          }, ColumnAlignments -> {Center, Center}],
-        0.1}, "TooltipTemplate"]
+            {"System: ", RawDisplay[System`JS["System"] <> " " <> System`JS["Version"]]},
+            {"Path: ", RawDisplay[StringReplace[System`JS["Executable"], "\\" -> "\\\\"]]},
+            {"UUID: ", RawDisplay[Level[System`JS, 1][[1]]]}
+          }, ColumnAlignments -> {Center, Left}],
+        0.1}, "<Tooltip>"]
       }]
     }, "SuccessMessage"], "MessageCell", CellTags -> "$msg"],
     Cell[BoxData @ TemplateBox[{
@@ -248,23 +158,72 @@ Thulium`InitializeParser := Block[{result, succeed, msgCells},
 ];
 
 
-updateIndex := Block[
+playlistTemplate = <|
+  "Type" -> "", "Path" -> "", "Title" -> "", "Abstract" -> "",
+  "Comment" -> "", "SongList" -> {}, "IndexWidth" -> 0
+|>;
+
+Thulium`UpdateIndex := Block[
   {
-    metaTree, songList, dirList, imageDirList,
+    oldSongs = Keys @ Thulium`SongIndex,
+    oldImages = Keys @ Thulium`ImageIndex,
+    oldPlaylists = Keys @ Thulium`PlaylistIndex,
+    metaTree, songList, dirList, 
+    imageList, imageDirList,
+    bufferList, fileName, fileHash,
     playlists = Association /@ Import[localPath <> "playlist.json"],
     playlistData = <||>, songsClassified = {}, playlistInfo
   },
+  
   Monitor[
     SetDirectory[localPath <> "Meta"];
     metaTree = StringReplace["\\" -> "/"] /@ FileNames["*", "", Infinity];
     ResetDirectory[];
     songList = StringDrop[Select[metaTree, StringEndsQ[".json"]], -5];
     dirList = Select[metaTree, !StringEndsQ[#, ".json"]&];
-    Scan[If[!DirectoryQ[dataPath <> "buffer/" <> #], CreateDirectory[dataPath <> "buffer/" <> #]]&, dirList];
+    Scan[If[!DirectoryQ[#], CreateDirectory[#]]&[dataPath <> "buffer/" <> #]&, dirList];
     Thulium`SongIndex = AssociationMap[Association @ Import[localPath <> "Meta/" <> # <> ".json"]&, songList];
-    imageDirList = DeleteDuplicates[DeleteCases[DirectoryName /@ Values @ Thulium`SongIndex[[All, "Image"]], ""]];
-    Scan[If[!DirectoryQ[dataPath <> "images/" <> #], CreateDirectory[dataPath <> "images/" <> #]]&, imageDirList];
     
+    SetDirectory[dataPath];
+    bufferList = StringReplace["\\" -> "/"] /@ StringTake[FileNames["*.buffer", "Buffer", Infinity], {8, -8}];
+    Scan[DeleteFile[# <> ".buffer"]&, Complement[ToLowerCase /@ bufferList, ToLowerCase /@ songList]];
+    imageList = DeleteCases[Values @ Thulium`SongIndex[[All, "Image"]], ""];
+    imageDirList = DeleteDuplicates[DirectoryName /@ imageList];
+    Scan[If[!DirectoryQ[#], CreateDirectory[#]]&["images/" <> #]&, imageDirList];
+    (* FIXME: delete unused images *)
+    ResetDirectory[];
+    
+    Thulium`update`NewImages = {};
+    Thulium`update`DelImages = Complement[oldImages, imageList];
+    Do[
+      If[
+        Or[
+          !FileExistsQ[dataPath <> "Images/" <> image],
+          !MemberQ[oldImages, image]
+        ],
+        AppendTo[Thulium`update`NewImages, image]
+      ],
+    {image, imageList}];
+    KeyDropFrom[Thulium`ImageIndex, Thulium`update`DelImages];
+    
+    Thulium`update`NewSongs = {};
+    Thulium`update`DelSongs = Complement[oldSongs, songList];
+    Do[
+      fileName = localPath <> "Songs/" <> song <> ".tm";
+      fileHash = IntegerString[FileHash[fileName], 32];
+      If[
+        Or[
+          !KeyExistsQ[Thulium`update`BufferHash, song],
+          Thulium`update`BufferHash[[song]] != fileHash,
+          !FileExistsQ[dataPath <> "Buffer/" <> song <> ".buffer"]
+        ],
+        If[!MemberQ[oldSongs, song], AppendTo[Thulium`update`DelSongs, song]];
+        AppendTo[Thulium`update`NewSongs, song];
+        AssociateTo[Thulium`update`BufferHash, song -> fileHash];
+      ],
+    {song, songList}];
+    KeyDropFrom[Thulium`update`BufferHash, Thulium`update`DelSongs];
+      
     Do[
       playlistInfo = Append[<|"Type" -> "Playlist"|>, Import[localPath <> "Playlists/" <> playlist, "JSON"]];
       songList = playlistInfo[["Path"]] <> #Song &/@ Association /@ playlistInfo[["SongList"]];
@@ -302,13 +261,91 @@ updateIndex := Block[
       }]
     }];
     
+    Thulium`update`NewPlaylists = Complement[Keys @ playlistData, oldPlaylists];
+    Thulium`update`DelPlaylists = Complement[oldPlaylists, Keys @ playlistData];
     Thulium`PlaylistIndex = playlistData;
-    Thulium`PageIndex = Prepend[AssociationMap[1&, Keys @ playlistData], {"Main" -> 1}];
-    DumpSave[dataPath <> "Index.mx", {Thulium`SongIndex, Thulium`PlaylistIndex}],
-    (* monitor *)
-    MonitorDisplay["Constructing music index ......"]
-  ]
+    Thulium`PageIndex = Prepend[AssociationMap[1&, Keys @ playlistData], {"Main" -> 1}],
+  MonitorDisplay["Constructing music index ......"]];
 ];
 
 
-Thulium`$Version = "2.3";
+Thulium`UpdateImage := With[{updates = Thulium`update`NewSongs}, Block[{filename, metaFileName},
+  If[Length[updates] === 0, Return[]];
+  Monitor[
+    Do[
+      filename = updates[[i]];
+      metaFileName = StringReplace[filename, RegularExpression["\\.[^\\.]+$"] -> ".json"];
+      CopyFile[cloudPath <> "images/" <> filename, dataPath <> "Images/" <> filename];
+      AssociateTo[Thulium`ImageIndex, filename -> Association @ Import[cloudPath <> "images/" <> metaFileName]],
+    {i, Length @ updates}],
+    MonitorDisplay[Column[{
+      "Downloading images from the internet ......",
+      Graphics[progressBar[(i - 1) / Length[updates], 24], ImageSize -> {400, 20}],
+      Row[{
+        "Loading: ", Spacer[2],
+        updates[[i]], Spacer[6],
+        "(", i, "/", Length[updates], ")"
+      }]
+    }, Alignment -> Center]]
+  ];
+]];
+
+
+Thulium`UpdateBuffer := With[{updates = Thulium`update`NewSongs}, Block[{song, audio},
+  If[Length[updates] === 0, Return[]];
+  Monitor[
+    Do[
+      song = updates[[i]];
+      Check[
+        audio = AudioAdapt[Parse[localPath <> "Songs/" <> song <> ".tm"]];
+        Export[dataPath <> "Buffer/" <> song <> ".buffer", audio, "MP3"],
+        KeyDropFrom[Thulium`update`BufferHash, song];
+      ],
+    {i, Length @ updates}];
+    Export[dataPath <> "Buffer.json", Thulium`update`BufferHash[[
+      Intersection[Keys @ Thulium`update`BufferHash, Keys @ Thulium`SongIndex]
+    ]]],
+    MonitorDisplay[Column[{
+      "Generating music buffer ......",
+      Graphics[progressBar[(i - 1) / Length[updates], 24], ImageSize -> {400, 20}],
+      Row[{
+        "Loading: ", Spacer[2],
+        updates[[i]], Spacer[6],
+        "(", i, "/", Length[updates], ")"
+      }]
+    }, Alignment -> Center]]
+  ];
+]];
+
+
+Thulium`CheckUpdate := With[
+  {
+    UpdateDisplay = Function[RawDisplay[StringJoin[
+      ToString[Length[#1]], " (Add: ",
+      ToString[Length[#2]], ", Delete: ",
+      ToString[Length[#3]], ")"
+    ]]]
+  },
+  If[!Thulium`$Parser, Thulium`InitializeParser];
+  CleanMessages[2];
+  Thulium`UpdateIndex;
+  Thulium`UpdateImage;
+  Thulium`UpdateBuffer;
+  DumpSave[dataPath <> "Index.mx", {
+    Thulium`SongIndex,
+    Thulium`ImageIndex,
+    Thulium`PlaylistIndex
+  }];
+  MessageDisplay[Cell[BoxData @ TemplateBox[{
+    RowBox[{
+      "Succeed: Update Music Library ",
+      TemplateBox[{"(details)",
+        GridBox[{
+          {"Songs: ", UpdateDisplay[Thulium`SongIndex, Thulium`update`NewSongs, Thulium`update`DelSongs]},
+          {"Images: ", UpdateDisplay[Thulium`ImageIndex, Thulium`update`NewImages, Thulium`update`DelImages]},
+          {"Playlists: ", UpdateDisplay[Thulium`PlaylistIndex, Thulium`update`NewPlaylists, Thulium`update`DelPlaylists]}
+        }, ColumnAlignments -> {Center, Left}, ColumnSpacings -> 0],
+      0.1}, "<Tooltip>"]
+    }]
+  }, "SuccessMessage"], "MessageCell", CellTags -> "$msg"]];
+];

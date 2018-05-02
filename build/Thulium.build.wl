@@ -160,7 +160,7 @@ With[
         FontSize -> 1,
         FontColor -> RGBColor[0, 0, 0, 0],
         CellSize -> {Inherited, 1},
-        CellMargins -> {{24, 24}, {20, 0}},
+        CellMargins -> {{24, 24}, {10, 10}},
         CellElementSpacings -> {"CellMinHeight" -> 1},
         Background -> Inherited,
         Evaluatable -> True,
@@ -323,7 +323,6 @@ With[
     Saveable -> False,
     Evaluatable -> False,
     Editable -> False,
-    Deployed -> True,
     DynamicEvaluationTimeout -> 30
   ];
   

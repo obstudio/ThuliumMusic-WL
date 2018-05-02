@@ -49,11 +49,11 @@ instList = Keys @ instDict;
 percList = Keys @ percDict;
 
 (* local data *)
-colorData=Association@Import[localPath<>"library/Assets/color.json"];                               (* colors *)
+colorData=Association@Import[localPath<>"library/Assets/Controls/color.json"];                               (* colors *)
 styleColor=RGBColor/@Association@colorData[["StyleColor"]];
 buttonColor=RGBColor/@#&/@Association/@Association@colorData[["ButtonColor"]];
 pageSelectorColor=RGBColor/@#&/@Association/@Association@colorData[["PageSelectorColor"]];
-styleData=Association/@Association@Import[localPath<>"library/Assets/style.json"];                  (* styles *)
+styleData=Association/@Association@Import[localPath<>"library/Assets/Controls/style.json"];                  (* styles *)
 styleDict=Normal@Module[{outcome={}},
 	If[KeyExistsQ[#,"Size"],AppendTo[outcome,FontSize->#[["Size"]]]];
 	If[KeyExistsQ[#,"Family"],AppendTo[outcome,FontFamily->#[["Family"]]]];
@@ -119,6 +119,9 @@ If[!FileExistsQ[dataPath <> "Index.mx"],
     Thulium`SongIndex, Thulium`PlaylistIndex, Thulium`ImageIndex
   }],
   Get[dataPath <> "Index.mx"];
+  If[Head[Thulium`SongIndex] =!= Association, Thulium`SongIndex = <||>];
+  If[Head[Thulium`ImageIndex] =!= Association, Thulium`ImageIndex = <||>];
+  If[Head[Thulium`PlaylistIndex] =!= Association, Thulium`PlaylistIndex = <||>];
   Thulium`PageIndex = Prepend[
     AssociationMap[1&, Keys @ Thulium`PlaylistIndex],
     {"Main" -> 1}

@@ -1,13 +1,16 @@
 [submodule "docs"]
 	path = docs
-	url=https://github.com/obstudio/ThuliumMusic-Documents.git
+	url=git@github.com:obstudio/ThuliumMusic-Documents.git
 	branch = master
 [submodule "library/Parser"]
 	path = library/Parser
-	url = https://github.com/obstudio/ThuliumMusic-Parser.git
+	url = git@github.com:obstudio/ThuliumMusic-Parser.git
 [submodule "library/Detok"]
-	path = library/Detok
-	url = https://github.com/obstudio/ThuliumMusic-Detokenizer.git
+	path = library/Linter
+	url = git@github.com:obstudio/ThuliumMusic-Linter.git
 [submodule "library/Token"]
 	path = library/Token
-	url = https://github.com/obstudio/ThuliumMusic-Tokenizer.git
+	url = git@github.com:obstudio/ThuliumMusic-Tokenizer.git
+[submodule "library/Linter"]
+	path = library/Linter
+	url = https://github.com/obstudio/ThuliumMusic-Linter.git

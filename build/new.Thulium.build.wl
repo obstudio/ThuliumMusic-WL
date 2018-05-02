@@ -2,6 +2,8 @@
 
 With[
   {
+    ThuliumVersion = Thulium`$Version,
+    
     LogoCloud = FilledCurveBox[{BezierCurve[{
       {836.15, -454.53}, {926.4, -472.85}, {994.36, -552.64}, {994.36, -648.321},
       {994.36, -757.541}, {905.82, -846.05}, {796.61, -846.05}, {228.11, -846.05}, 
@@ -38,9 +40,6 @@ With[
       ];
       Thulium`$Init = False;
       Thulium`$Parser = False;
-      Thulium`WelcomeCell = Cell[BoxData @ TemplateBox[
-        {"Welcome to Thulium Music!"}, "Tip"
-      ], "Tip", CellTags -> {"$msg"}];
       localPath = StringReplace[NotebookDirectory[], "\\"->"/"];
       SetDirectory[localPath];
       (* FIXME: no use *)
@@ -58,7 +57,9 @@ With[
       NotebookWrite[EvaluationNotebook[], {
         Thulium`MenuCell,
         Cell[BoxData @ Null, "Hidden", CellTags -> "$monitor"],
-        Thulium`WelcomeCell
+        Cell[BoxData @ TemplateBox[{
+          "Welcome to Thulium Music!"
+        }, "SuccessMessage"], "MessageCell", CellTags -> "$msg"]
       }];
       NotebookLocate["$title"];
     ]
@@ -73,7 +74,7 @@ With[
           FontColor -> RGBColor[0.1, 0.4, 0.7]
         ],
         TemplateBox[{1}, "Spacer1"],
-        StyleBox[FormBox["\"v2.3\"", InputForm],
+        StyleBox[FormBox["\"" <> ThuliumVersion <> "\"", InputForm],
           FontFamily -> "Source Sans Pro",
           FontSize -> 24,
           FontColor -> RGBColor[0.3, 0.5, 0.8]
@@ -84,7 +85,7 @@ With[
         TemplateBox[{4}, "Spacer1"],
         TemplateBox[{
           "Start Thulium",
-          "Click to initialize the kernel.",
+          "Click to Start Thulium Music.",
           InitializeThulium
         }, "LogoButton"],
         TemplateBox[{4}, "Spacer1"]
@@ -136,15 +137,22 @@ With[
         ]}
       ],
       
-      Cell[StyleData["Tip"],
+      Cell[StyleData["MessageCell"],
+        FontColor -> RGBColor[0, 0, 0],
         CellMargins -> {{60, 60}, {8, 4}},
         Deployed -> True,
-        Copyable -> False,
-        ShowCellBracket -> False,
-        TextAlignment -> Center,
-        ShowCellLabel -> False,
+        TextAlignment -> Center
+      ],
+      
+      Cell[StyleData["SuccessMessage"],
         TemplateBoxOptions -> {DisplayFunction -> Function[
           TemplateBox[{#1, "\[LightBulb]", RGBColor[0.98, 1, 0.96]}, "MessageTemplate"]
+        ]}
+      ],
+      
+      Cell[StyleData["FailureMessage"],
+        TemplateBoxOptions -> {DisplayFunction -> Function[
+          TemplateBox[{#1, "\[WarningSign]", RGBColor[1, 0.96, 0.98]}, "MessageTemplate"]
         ]}
       ],
       
@@ -176,7 +184,7 @@ With[
               RoundingRadius -> {8, 8},
               ContentPadding -> True
             ],
-            TooltipDelay -> 0.2,
+            TooltipDelay -> #3,
             TooltipStyle -> {
               CellFrame -> {{0, 0}, {0, 0}},
               Background -> RGBColor[0, 0, 0, 0]
@@ -231,7 +239,7 @@ With[
                   }, Dynamic @ CurrentValue["MouseButtonTest"]],
                 EventHandlerTag @ {"MouseClicked" :> ReleaseHold @ #4}],
               MouseAppearanceTag @ "LinkHand"],
-              #5
+              #5, 0.2
             }, "TooltipTemplate"],
             False -> #1
           }, Dynamic @ CurrentValue["MouseOver"]]
@@ -293,15 +301,6 @@ With[
         ]&)}
       ],
       
-      (* Enhancement for cell style - Output *)
-      Cell[StyleData["Output", StyleDefinitions -> "Output"],
-        FontFamily -> "Calibri",
-        FontSize -> 16,
-        TextAlignment -> Center,
-        CellMargins -> {{60, 60}, {8, 4}},
-        Deployed -> True
-      ],
-      
       (* Enhancement for cell style - PrintTemporary *)
       Cell[StyleData["PrintTemporary", StyleDefinitions -> "PrintTemporary"],
         FontFamily -> "Calibri",
@@ -317,7 +316,7 @@ With[
     ShowCellBracket -> False,
     CellGrouping -> Manual,
     Background -> RGBColor[1, 1, 1],
-    WindowTitle -> " Thulium Music Player 2.3",
+    WindowTitle -> " Thulium Music Player " <> ThuliumVersion,
     WindowElements -> {},
     WindowFrameElements -> {"CloseBox", "MinimizeBox", "ZoomBox"},
     WindowSize -> {1440, 900},

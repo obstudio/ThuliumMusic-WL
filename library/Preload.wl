@@ -81,23 +81,6 @@ favorite = Import[userPath <> "Favorite.json"];
 If[!FileExistsQ[userPath <> "WorkBench.nb"], Export[userPath <> "WorkBench.nb", WorkBenchTemplate]];
 
 
-(* Find Node.js as external evaluator *)
-If[!userInfo[["NodeJS"]],
-	Off[General::shdw];
-	If[Length @ FindExternalEvaluators["NodeJS"] == 0,
-		CreateDialog[{
-			TextCell["Thulium Music Player requires Node.js as external evaluator."],
-			TextCell["Please follow the guide to install Node.js and Zeromq first."],
-			DefaultButton[]
-		}];
-		Abort[],
-		userInfo[["NodeJS"]] = True;
-		Export[userPath <> "Default.json", userInfo];
-	];
-	On[General::shdw];
-];
-
-
 (* program data *)
 dataPath = userInfo[["DataPath"]];
 dirCreate[dataPath];
@@ -106,11 +89,14 @@ dirCreate[dataPath <> "images/"];
 jsonCreate[dataPath <> "Buffer.json"];
 jsonCreate[dataPath <> "Image.json"];
 If[!FileExistsQ[dataPath <> "Index.mx"],
-	index = <||>;
-	DumpSave[dataPath <> "Index.mx", index],
-	Get[dataPath <> "Index.mx"]
+	Thulium`SongIndex = <||>;
+	Thulium`PlaylistIndex = <||>;
+	Thulium`PageIndex = <|"Main" -> 1|>;
+	DumpSave[dataPath <> "Index.mx", {Thulium`SongIndex, Thulium`PlaylistIndex}],
+	Get[dataPath <> "Index.mx"];
+	Thulium`PageIndex = Prepend[
+      AssociationMap[1&, Keys @ Thulium`PlaylistIndex],
+      {"Main" -> 1}
+    ];
 ];
 imageData = Association /@ Association @ Import[dataPath <> "image.json"];
-
-
-Thulium`$Init = True;

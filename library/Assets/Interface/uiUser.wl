@@ -200,7 +200,7 @@ homepage:=DynamicModule[{playlist},
 		uiPageSelector,
 		Spacer[{40,40}]
 	},Center,ItemSize->Full],
-	WindowTitle->text[["Thulium"]],Background->styleColor[["Background"]](*,WindowFrame\[Rule]"Frameless"*)];
+	WindowTitle->text[["Thulium"]],Background->styleColor[["Background"]]];
 ];
 
 
@@ -208,49 +208,54 @@ homepage:=DynamicModule[{playlist},
 (*homepage;*)
 
 
-uiPlaylist[playlist_]:=Block[{playlistInfo,songList,songListPaged},
-	If[!MemberQ[Keys@Thulium`PlaylistIndex,playlist],Return[]];
-	currentPlaylist=playlist;
-	playlistInfo=Thulium`PlaylistIndex[[playlist]];
-	songList=If[playlistInfo[["IndexWidth"]]>0,
-		<|"Song"->playlistInfo[["Path"]]<>#Song,"Index"->#Index|>&/@Association/@playlistInfo[["SongList"]],
-		<|"Song"->playlistInfo[["Path"]]<>#Song|>&/@Association/@playlistInfo[["SongList"]]
-	];
-	pageCount=Ceiling[Length@songList/16];
-	songListPaged=Partition[songList,UpTo@Ceiling[Length@songList/pageCount]];
-	If[Thulium`PageIndex[[playlist]]>pageCount,Thulium`PageIndex[[playlist]]=pageCount];
-	page=Thulium`PageIndex[[playlist]];
-DynamicModule[{song},
-	CreateDialog[Column[{Spacer[{40,40}],
-		Row[{
-			Row[{
-				Spacer[40],caption[playlistInfo[["Title"]],"BigTitle"]
-			},Alignment->Left,ImageSize->480],
-			Row[{
-				button["Play",DialogReturn[Thulium`PageIndex[[playlist]]=page;uiPlayer[song]]],
-				Spacer[10],
-				If[userInfo[["Developer"]]&&playlist=="All",Row[{
-					button["Modify",DialogReturn[Thulium`PageIndex[[playlist]]=page;uiModifySong[song]]],
-					Spacer[10],
-					button["Add",DialogReturn[Thulium`PageIndex[[playlist]]=page;uiAddSong]],
-					Spacer[10]}],
-				Nothing],
-				button["ArrowL",DialogReturn[Thulium`PageIndex[[playlist]]=page;homepage]],
-			Spacer[40]},Alignment->Right,ImageSize->{480,56}]
-		}],
-		If[playlistInfo[["Comment"]]!="",
-			Row[{Spacer[40],caption[playlistInfo[["Comment"]],"Subtitle"]},Alignment->Left,ImageSize->960],
-			Nothing
-		],
-		Spacer[1],
+Thulium`PlaylistIndex["All","SongList"]
+
+
+uiPlaylist[playlist_]:=Block[{info, songList, songListPaged},
+  currentPlaylist = playlist;
+  info = Thulium`PlaylistIndex[[playlist]];
+  songList=If[info[["IndexWidth"]]>0,
+    <|"Song" -> info["Path"] <> #Song, "Index" -> #Index|>& /@ Association /@ info["SongList"],
+    <|"Song" -> info["Path"] <> #Song|>& /@ Association /@ info["SongList"]
+  ];
+  pageCount = Ceiling[Length @ songList / 16];
+  songListPaged = Partition[songList, UpTo @ Ceiling[Length @ songList / pageCount]];
+  If[Thulium`PageIndex[[playlist]] > pageCount, Thulium`PageIndex[[playlist]] = pageCount];
+  page = Thulium`PageIndex[[playlist]];
+  
+  DynamicModule[{song},
+    CreateDialog[Column[{
+      Spacer[{40, 40}],
+      Row[{
+        Row[{
+          Spacer[40], caption[info[["Title"]], "BigTitle"]
+        },Alignment->Left,ImageSize->480],
+      Row[{
+        button["Play",DialogReturn[Thulium`PageIndex[[playlist]]=page;uiPlayer[song]]],
+        Spacer[10],
+        If[userInfo[["Developer"]]&&playlist=="All",Row[{
+          button["Modify",DialogReturn[Thulium`PageIndex[[playlist]]=page;uiModifySong[song]]],
+          Spacer[10],
+          button["Add",DialogReturn[Thulium`PageIndex[[playlist]]=page;uiAddSong]],
+          Spacer[10]}],
+        Nothing],
+        button["ArrowL",DialogReturn[Thulium`PageIndex[[playlist]]=page;homepage]],
+        Spacer[40]},Alignment->Right,ImageSize->{480,56}]
+      }],
+      If[info[["Comment"]]!="",
+        Row[{Spacer[40],caption[info[["Comment"]],"Subtitle"]},Alignment->Left,ImageSize->960],
+        Nothing
+      ],
+      Spacer[1],
+      With[{info=info, songListPaged=songListPaged},
 		Dynamic@Row[{Spacer[60],SetterBar[Dynamic@song,
 			#[["Song"]]->Row[{
 				Spacer[8],
-				If[playlistInfo[["IndexWidth"]]>0,
+				If[info[["IndexWidth"]]>0,
 					Row[{
 						caption[#[["Index"]],"SongIndex"],
 						Spacer[16]
-					},ImageSize->playlistInfo[["IndexWidth"]],Alignment->Center],
+					},ImageSize->info[["IndexWidth"]],Alignment->Center],
 					Spacer[4]
 				],
 				If[MemberQ[Thulium`SongIndex[[#[["Song"]],"Tags"]],"$INCOMP"],
@@ -270,12 +275,12 @@ DynamicModule[{song},
 				]
 			},ImageSize->{960,30}]&/@songListPaged[[page]],
 			Appearance->"Vertical"
-		],Spacer[60]}],
+		],Spacer[60]}]],
 		Spacer[1],
 		uiPageSelector,
 		Spacer[{40,40}]
 	},Center,ItemSize->Full],
-	WindowTitle->tagName[[playlistInfo[["Type"]]]]<>" - "<>playlistInfo[["Title"]],Background->styleColor[["Background"]]]
+	WindowTitle->tagName[[info[["Type"]]]]<>" - "<>info[["Title"]],Background->styleColor[["Background"]]]
 ]];
 
 

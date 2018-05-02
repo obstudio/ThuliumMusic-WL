@@ -10,10 +10,10 @@
 NotebookFileLineBreakTest
 NotebookFileLineBreakTest
 NotebookDataPosition[       158,          7]
-NotebookDataLength[     11634,        292]
+NotebookDataLength[     11680,        294]
 NotebookOptionsPosition[      2678,         78]
-NotebookOutlinePosition[     11547,        291]
-CellTagsIndexPosition[     11454,        285]
+NotebookOutlinePosition[     11593,        293]
+CellTagsIndexPosition[     11500,        287]
 WindowTitle-> Thulium Music Player 2.3
 WindowFrame->ModelessDialog*)
 
@@ -32,7 +32,7 @@ Cell[BoxData[
    FontFamily->"Source Sans Pro",
    FontSize->24,
    FontColor->RGBColor[0.3, 0.5, 0.8]]}]], "Title",
- CellTags->"$title",ExpressionUUID->"95ddda03-b373-4d5d-a383-1b95e13bb6ec"],
+ CellTags->"$title",ExpressionUUID->"729f9ff1-4f21-4853-8442-df8d9f759cda"],
 
 Cell[BoxData[
  RowBox[{
@@ -74,7 +74,7 @@ Cell[BoxData[
    "LogoButton"], 
   TemplateBox[{4},
    "Spacer1"]}]], "Init",
- CellTags->"$init",ExpressionUUID->"e6015db5-c49b-4467-ac8b-e71c03b429fa"]
+ CellTags->"$init",ExpressionUUID->"06ec6970-9b2e-45f0-9b87-5b6d9b2b7f59"]
 },
 Editable->False,
 Saveable->False,
@@ -97,8 +97,10 @@ WindowElements->{},
 WindowFrameElements->{"CloseBox", "MinimizeBox", "ZoomBox"},
 WindowTitle->" Thulium Music Player 2.3",
 ShowCellBracket->False,
+Deployed->True,
 Evaluatable->False,
 CellContext->"Global`",
+DynamicEvaluationTimeout->30,
 ShowCellLabel->False,
 ShowCellTags->False,
 Magnification->2,
@@ -275,24 +277,24 @@ NBVD3HugwQGs7ydUv2AjJLw1Sg6AlMnFN0LsC8NMr5TyAWtplCQ=
 (*CellTagsOutline
 CellTagsIndex->{
  "$title"->{
-  Cell[605, 21, 420, 13, 140, "Title",ExpressionUUID->"95ddda03-b373-4d5d-a383-1b95e13bb6ec",
+  Cell[605, 21, 420, 13, 140, "Title",ExpressionUUID->"729f9ff1-4f21-4853-8442-df8d9f759cda",
    CellTags->"$title"]},
  "$init"->{
-  Cell[1028, 36, 1646, 40, 140, "Init",ExpressionUUID->"e6015db5-c49b-4467-ac8b-e71c03b429fa",
+  Cell[1028, 36, 1646, 40, 140, "Init",ExpressionUUID->"06ec6970-9b2e-45f0-9b87-5b6d9b2b7f59",
    CellTags->"$init"]}
  }
 *)
 (*CellTagsIndex
 CellTagsIndex->{
- {"$title", 11181, 276},
- {"$init", 11312, 279}
+ {"$title", 11227, 278},
+ {"$init", 11358, 281}
  }
 *)
 (*NotebookFileOutline
 Notebook[{
-Cell[605, 21, 420, 13, 140, "Title",ExpressionUUID->"95ddda03-b373-4d5d-a383-1b95e13bb6ec",
+Cell[605, 21, 420, 13, 140, "Title",ExpressionUUID->"729f9ff1-4f21-4853-8442-df8d9f759cda",
  CellTags->"$title"],
-Cell[1028, 36, 1646, 40, 140, "Init",ExpressionUUID->"e6015db5-c49b-4467-ac8b-e71c03b429fa",
+Cell[1028, 36, 1646, 40, 140, "Init",ExpressionUUID->"06ec6970-9b2e-45f0-9b87-5b6d9b2b7f59",
  CellTags->"$init"]
 }
 ]

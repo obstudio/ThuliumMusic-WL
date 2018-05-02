@@ -322,7 +322,9 @@ With[
     Magnification -> 2,
     Saveable -> False,
     Evaluatable -> False,
-    Editable -> False
+    Editable -> False,
+    Deployed -> True,
+    DynamicEvaluationTimeout -> 30
   ];
   
   NotebookSave[Thulium`MainNotebook, localPath <> "Thulium.nb"];

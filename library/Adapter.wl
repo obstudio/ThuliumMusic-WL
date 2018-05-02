@@ -96,7 +96,7 @@ Parse[origin_,partspec_]:=Block[
 ];
 
 
-(* ::Subsubsection:: *)
+(* ::Subsubsection::Closed:: *)
 (*Constructor*)
 
 
@@ -329,7 +329,7 @@ AudioAdapt[rawData_,OptionsPattern[AdaptingOptions]]:=Block[
 (* ::Input:: *)
 (*AudioStop[];AudioPlay[#[[2]]]&@*)
 (*EchoFunction["time: ",#[[1]]&]@*)
-(*Timing[AudioAdapt[Parse[localPath<>"Songs/Touhou/Oriental_Blood.tm"],"Rate"->1]];*)
+(*Timing[AudioAdapt[Parse[localPath<>"Songs/Touhou/test.tm",{2,3}],"Rate"->1]];*)
 
 
 (* ::Input:: *)

@@ -42,7 +42,6 @@ With[
       Thulium`$Parser = False;
       localPath = StringReplace[NotebookDirectory[], "\\"->"/"];
       SetDirectory[localPath];
-      (* FIXME: no use *)
       If[!MemberQ[
         CurrentValue[$FrontEnd, {"NotebookSecurityOptions", "TrustedPath"}],
         FrontEnd`FileName[{$RootDirectory}, Evaluate @ NotebookDirectory[]]
@@ -50,7 +49,7 @@ With[
         CurrentValue[$FrontEnd, {"NotebookSecurityOptions", "TrustedPath"}],
         FrontEnd`FileName[{$RootDirectory}, Evaluate @ NotebookDirectory[]]
       ]];
-      Scan[Get, FileNames["*.wl", "library/Paclet", Infinity]];
+      Scan[Get, FileNames[".*.wl", "library/Paclet", Infinity]];
       Get[localPath <> "library/initialization.wl"];
       NotebookDelete[Cells[CellTags -> "$init"]];
       SelectionMove[First @ Cells[CellTags -> "$title"], After, Cell, AutoScroll -> False];
@@ -74,7 +73,7 @@ With[
           FontColor -> RGBColor[0.1, 0.4, 0.7]
         ],
         TemplateBox[{1}, "Spacer1"],
-        StyleBox[FormBox["\"" <> ThuliumVersion <> "\"", InputForm],
+        StyleBox[FormBox["\"v" <> ThuliumVersion <> "\"", InputForm],
           FontFamily -> "Source Sans Pro",
           FontSize -> 24,
           FontColor -> RGBColor[0.3, 0.5, 0.8]
@@ -314,7 +313,7 @@ With[
     ShowCellBracket -> False,
     CellGrouping -> Manual,
     Background -> RGBColor[1, 1, 1],
-    WindowTitle -> " Thulium Music Player " <> ThuliumVersion,
+    WindowTitle -> "Thulium Music Player " <> ThuliumVersion,
     WindowElements -> {},
     WindowFrameElements -> {"CloseBox", "MinimizeBox", "ZoomBox"},
     WindowSize -> {1440, 900},

@@ -76,7 +76,7 @@ uiPlayerControlsNew := With[{StatusAlias = StatusAlias}, {
 }];
 
 
-uiPageSelector:=Row[{
+uiPageSelector[Dynamic[page_], pageCount_] := Row[{
 	Dynamic@If[page<=1,pageSelectorDisplay["Prev","Disabled"],
 	DynamicModule[{style="Default"},
 		EventHandler[Dynamic@pageSelectorDisplay["Prev",style],{
@@ -102,7 +102,7 @@ uiPageSelector:=Row[{
 			"MouseUp":>(style="Default";page++;)
 		}]
 	]]
-},ImageSize->{500,60},Alignment->Center];
+}, ImageSize->{500,60}, Alignment -> Center];
 
 
 SetAttributes[button,HoldRest];

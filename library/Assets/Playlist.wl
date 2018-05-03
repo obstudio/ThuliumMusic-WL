@@ -11,7 +11,7 @@ Thulium`Interface`Playlist[playlist_] := Block[
   Module[
     {page = Thulium`PageIndex[playlist], index = 1},
     CreateDialog[
-      Thulium`Assets`Container[With[
+      Container[With[
         {
           songList = songList, pageCount = pageCount, indexList = indexList,
           indexWidth = info["IndexWidth"],
@@ -35,7 +35,7 @@ Thulium`Interface`Playlist[playlist_] := Block[
           ],
           Spacer[20],
           Dynamic @ With[{
-            data = Table[1
+            data = Table[
               Row[{
                 Row[{
                   Spacer[8],
@@ -55,8 +55,8 @@ Thulium`Interface`Playlist[playlist_] := Block[
           PageSelector[Dynamic[page], pageCount]
         }, Center]
       ], 100, 40],
-      WindowTitle -> tagName[info["Type"]] <> " - " <> info["Title"],
-      Background -> Thulium`Assets`Color["Window"]
+      WindowTitle -> TagName[info["Type"]] <> " - " <> info["Title"],
+      Background -> ColorDict["WindowBackground"]
     ];
   ];
 ];

@@ -41,6 +41,10 @@ With[
       Thulium`$Init = False;
       Thulium`$Parser = False;
       localPath = StringReplace[NotebookDirectory[], "\\"->"/"];
+      BeginPackage["Thulium`System`"];
+      $LocalPath = StringReplace[NotebookDirectory[], "\\"->"/"];
+      EndPackage[];
+      DeclarePackage["Thulium`System`", {"$LocalPath", "$UserPath", "$CloudPath", "$DataPath"}];
       SetDirectory[localPath];
       If[!MemberQ[
         CurrentValue[$FrontEnd, {"NotebookSecurityOptions", "TrustedPath"}],

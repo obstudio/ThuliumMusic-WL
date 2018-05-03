@@ -70,6 +70,7 @@ Thulium`MenuCell = Cell[BoxData @ RowBox[{(*
 
 Thulium`InitializePackage := Block[{packages},
   CleanMessages[2];
+  DeclarePackage["Thulium`System`", {"UserInfo"}];
   SetDirectory[localPath <> "library"];
   Monitor[
     packages = Join[

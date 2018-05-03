@@ -10,10 +10,10 @@
 NotebookFileLineBreakTest
 NotebookFileLineBreakTest
 NotebookDataPosition[       158,          7]
-NotebookDataLength[     11665,        293]
-NotebookOptionsPosition[      2679,         78]
-NotebookOutlinePosition[     11578,        292]
-CellTagsIndexPosition[     11485,        286]
+NotebookDataLength[     11916,        298]
+NotebookOptionsPosition[      2930,         83]
+NotebookOutlinePosition[     11829,        297]
+CellTagsIndexPosition[     11736,        291]
 WindowTitle->Thulium Music Player 2.3
 WindowFrame->ModelessDialog*)
 
@@ -32,7 +32,7 @@ Cell[BoxData[
    FontFamily->"Source Sans Pro",
    FontSize->24,
    FontColor->RGBColor[0.3, 0.5, 0.8]]}]], "Title",
- CellTags->"$title",ExpressionUUID->"6832af91-3c6f-4e7b-b40d-23a2aa738064"],
+ CellTags->"$title",ExpressionUUID->"722e89db-6b7b-4c4d-8799-d84d97ac1887"],
 
 Cell[BoxData[
  RowBox[{
@@ -43,7 +43,12 @@ Cell[BoxData[
        PacletManager`PacletUpdate["QuantityUnits"]; Quit[]; Null]; 
      Thulium`$Init = False; 
      Thulium`$Parser = False; $CellContext`localPath = StringReplace[
-        NotebookDirectory[], "\\" -> "/"]; 
+        NotebookDirectory[], "\\" -> "/"]; BeginPackage["Thulium`System`"]; 
+     Thulium`System`$LocalPath = StringReplace[
+        NotebookDirectory[], "\\" -> "/"]; EndPackage[]; 
+     DeclarePackage[
+      "Thulium`System`", {
+       "$LocalPath", "$UserPath", "$CloudPath", "$DataPath"}]; 
      SetDirectory[$CellContext`localPath]; If[
        Not[
         MemberQ[
@@ -74,7 +79,7 @@ Cell[BoxData[
    "LogoButton"], 
   TemplateBox[{4},
    "Spacer1"]}]], "Init",
- CellTags->"$init",ExpressionUUID->"f3a958bc-56fe-4be1-a838-88427490b3af"]
+ CellTags->"$init",ExpressionUUID->"89a40a3b-7b02-4d69-9803-e13c668911e5"]
 },
 Editable->False,
 Saveable->False,
@@ -276,24 +281,24 @@ NBVD3HugwQGs7ydUv2AjJLw1Sg6AlMnFN0LsC8NMr5TyAWtplCQ=
 (*CellTagsOutline
 CellTagsIndex->{
  "$title"->{
-  Cell[604, 21, 421, 13, 140, "Title",ExpressionUUID->"6832af91-3c6f-4e7b-b40d-23a2aa738064",
+  Cell[604, 21, 421, 13, 140, "Title",ExpressionUUID->"722e89db-6b7b-4c4d-8799-d84d97ac1887",
    CellTags->"$title"]},
  "$init"->{
-  Cell[1028, 36, 1647, 40, 140, "Init",ExpressionUUID->"f3a958bc-56fe-4be1-a838-88427490b3af",
+  Cell[1028, 36, 1898, 45, 140, "Init",ExpressionUUID->"89a40a3b-7b02-4d69-9803-e13c668911e5",
    CellTags->"$init"]}
  }
 *)
 (*CellTagsIndex
 CellTagsIndex->{
- {"$title", 11212, 277},
- {"$init", 11343, 280}
+ {"$title", 11463, 282},
+ {"$init", 11594, 285}
  }
 *)
 (*NotebookFileOutline
 Notebook[{
-Cell[604, 21, 421, 13, 140, "Title",ExpressionUUID->"6832af91-3c6f-4e7b-b40d-23a2aa738064",
+Cell[604, 21, 421, 13, 140, "Title",ExpressionUUID->"722e89db-6b7b-4c4d-8799-d84d97ac1887",
  CellTags->"$title"],
-Cell[1028, 36, 1647, 40, 140, "Init",ExpressionUUID->"f3a958bc-56fe-4be1-a838-88427490b3af",
+Cell[1028, 36, 1898, 45, 140, "Init",ExpressionUUID->"89a40a3b-7b02-4d69-9803-e13c668911e5",
  CellTags->"$init"]
 }
 ]

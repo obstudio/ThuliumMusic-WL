@@ -72,7 +72,10 @@ Thulium`InitializePackage := Block[{packages},
   CleanMessages[2];
   SetDirectory[localPath <> "library"];
   Monitor[
-    packages = Complement[FileNames["*.wl", "*", Infinity], FileNames["*.wl", "Paclet", Infinity]];
+    packages = Join[
+      Complement[FileNames["*.wl", "Paclet", Infinity], FileNames[".*.wl", "Paclet", Infinity]],
+      Complement[FileNames["*.wl", "*", Infinity], FileNames["*.wl", "Paclet", Infinity]]
+    ];
     Do[Get[packages[[i]]], {i, Length @ packages}],
   ProgressDisplay[packages, i, "Loading packages from library ......"]];
   Get["Preload.wl"];

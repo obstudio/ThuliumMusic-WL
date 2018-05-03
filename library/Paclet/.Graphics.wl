@@ -1,6 +1,6 @@
 (* ::Package:: *)
 
-BeginPackage["graphics`"];
+BeginPackage["Thulium`Graphics`"];
 
 SVGPathD::usage = "SVGPathD parses a svg path command.";
 CurveMerge::usage = "CurveMerge merges a Bezier curve from segments.";
@@ -149,7 +149,7 @@ EndPackage[];
 
 
 
-DeclarePackage["graphics`",{
+DeclarePackage["Thulium`Graphics`",{
 	"SVGPathD",
 	"CurveMerge",
 	"VertexAssign",

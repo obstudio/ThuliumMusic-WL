@@ -44,8 +44,8 @@ With[
       BeginPackage["Thulium`System`"];
       $LocalPath = StringReplace[NotebookDirectory[], "\\"->"/"];
       EndPackage[];
-      DeclarePackage["Thulium`System`", {"$LocalPath", "$UserPath", "$CloudPath", "$DataPath"}];
-      SetDirectory[localPath];
+      DeclarePackage["Thulium`System`", {"$LocalPath"}];
+      SetDirectory[$LocalPath];
       If[!MemberQ[
         CurrentValue[$FrontEnd, {"NotebookSecurityOptions", "TrustedPath"}],
         FrontEnd`FileName[{$RootDirectory}, Evaluate @ NotebookDirectory[]]
@@ -53,7 +53,7 @@ With[
         CurrentValue[$FrontEnd, {"NotebookSecurityOptions", "TrustedPath"}],
         FrontEnd`FileName[{$RootDirectory}, Evaluate @ NotebookDirectory[]]
       ]];
-      Scan[Get, FileNames[".*.wl", "library/Paclet", Infinity]];
+      Scan[Get, FileNames[".*.mx", "library/Paclet", Infinity]];
       Get[localPath <> "library/initialization.wl"];
       NotebookDelete[Cells[CellTags -> "$init"]];
       SelectionMove[First @ Cells[CellTags -> "$title"], After, Cell, AutoScroll -> False];

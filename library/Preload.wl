@@ -10,28 +10,15 @@ If[DirectoryQ[localPath <> ".git"],
 
 
 Switch[$VersionNumber,
-	11.2, StatusAlias = "State",
-	11.3, StatusAlias = "Status",
-	_,
-		CreateDialog[{
-			TextCell["Sorry, but your Mathematica isn't updated enough."],
-			TextCell["Try to install Mathematica with version no less than 11.2."],
-			DefaultButton[]
-		}];
-		Abort[];
-];
-
-
-dirCreate[path_] := If[!DirectoryQ[path], CreateDirectory[path]];
-jsonCreate[path_] := If[!FileExistsQ[path], Export[path, {}]];
-
-
-refreshLanguage := With[
-  {langDataPath=localPath<>"language/"<>userInfo[["Language"]]<>"/"},
-  tagName=Association@Import[langDataPath<>"GeneralTags.json"];
-  instrName=Association@Import[langDataPath<>"Instruments.json"];
-  text=Association@Import[langDataPath<>"GeneralTexts.json"];
-  msgData=Association@Import[langDataPath<>"Messages.json"];
+  11.2, StatusAlias = "State",
+  11.3, StatusAlias = "Status",
+  _,
+  CreateDialog[{
+    TextCell["Sorry, but your Mathematica isn't updated enough."],
+    TextCell["Try to install Mathematica with version no less than 11.2."],
+    DefaultButton[]
+  }];
+  Abort[];
 ];
 
 
@@ -78,33 +65,43 @@ userInfoTemplate=<|
 |>;
 
 
-userPath = StringReplace[FileNameDrop[$UserBaseDirectory], {"\\" -> "/", "Roaming"~~EndOfString -> "Local"}] <> "/ObStudio/Thulium/";
-If[!DirectoryQ[userPath] || !FileExistsQ[userPath <> "Default.json"],
+Begin["Thulium`System`"];
+
+$UserPath = StringReplace[FileNameDrop[$UserBaseDirectory], {
+  "\\" -> "/",
+  RegularExpression["Roaming$"] -> "Local"
+}] <> "/ObStudio/Thulium/";
+If[!DirectoryQ[$UserPath] || !FileExistsQ[$UserPath <> "Default.json"],
 	(* initial use *)
-	Quiet @ CreateDirectory[userPath];
-	userInfo = userInfoTemplate;
-	refreshLanguage;
+	Quiet @ CreateDirectory[$UserPath];
+	UserInfo = userInfoTemplate;
+	RefreshLanguage;
 	uiSetPath;
-	Export[userPath <> "Default.json", userInfo],
+	Export[$UserPath <> "Default.json", UserInfo],
 	(* general case *)
-	userInfo = Association @ Import[userPath <> "Default.json"];
-	refreshLanguage;
-	If[userInfo[["Version"]] < version,
+	UserInfo = Association @ Import[$UserPath <> "Default.json"];
+	RefreshLanguage;
+	If[UserInfo["Version"] < version,
 		Scan[
-			If[!KeyExistsQ[userInfo, #], AppendTo[userInfo, # -> userInfoTemplate[[#]]]]&,
+			If[!KeyExistsQ[UserInfo, #], AppendTo[UserInfo, # -> userInfoTemplate[[#]]]]&,
 			Keys @ userInfoTemplate
 		];
-		userInfo[["Version"]] = version;
-		Export[userPath <> "Default.json", userInfo];
+		UserInfo["Version"] = version;
+		Export[$UserPath <> "Default.json", UserInfo];
 	];
 ];
-If[!FileExistsQ[userPath <> "Favorite.json"], Export[userPath <> "Favorite.json", {}]];
-favorite = Import[userPath <> "Favorite.json"];
-If[!FileExistsQ[userPath <> "WorkBench.nb"], Export[userPath <> "WorkBench.nb", WorkBenchTemplate]];
+If[!FileExistsQ[$UserPath <> "Favorite.json"], Export[$UserPath <> "Favorite.json", {}]];
+favorite = Import[$UserPath <> "Favorite.json"];
+
+End[];
+
+
+dirCreate[path_] := If[!DirectoryQ[path], CreateDirectory[path]];
+jsonCreate[path_] := If[!FileExistsQ[path], Export[path, {}]];
 
 
 (* program data *)
-dataPath = userInfo[["DataPath"]];
+dataPath = Thulium`System`UserInfo[["DataPath"]];
 dirCreate[dataPath];
 dirCreate[dataPath <> "buffer/"];
 dirCreate[dataPath <> "images/"];

@@ -124,3 +124,6 @@ EndPackage[];
 
 
 DeclarePackage["Thulium`PageSelector`", {"PageSelector"}];
+
+
+DumpSave[$LocalPath <> "/library/Paclet/PageSelector.mx", "Thulium`PageSelector`"];

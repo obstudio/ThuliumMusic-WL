@@ -158,3 +158,6 @@ DeclarePackage["Thulium`Graphics`",{
 	"progressLocate",
 	"squareRounded"
 }]
+
+
+DumpSave[$LocalPath <> "/library/Paclet/.Graphics.mx", "Thulium`Graphics`"];

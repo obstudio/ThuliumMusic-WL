@@ -25,7 +25,7 @@ uiSetPath:=DynamicModule[{path=defaultDataPath},
 					ContinuousAction->True
 				],
 				Spacer[8],
-				button["Tick",userInfo[["DataPath"]]=path;DialogReturn[]]
+				button["Tick",Thulium`System`UserInfo[["DataPath"]]=path;DialogReturn[]]
 			},ImageSize->{512,48},Alignment->Center,ImageMargins->4],
 			Spacer[{48,48}]
 		},Alignment->Center],
@@ -58,8 +58,8 @@ uiSettings:=DynamicModule[{choices},
 		Row[{
 			Button[text[["Save"]],
 				userInfo=choices;
-				Export[userPath<>"Default.json",Normal@userInfo];
-				refreshLanguage;
+				Export[Thulium`System`$UserPath<>"Default.json",Thulium`System`UserInfo];
+				RefreshLanguage;
 				DialogReturn[homepage],
 			ImageSize->150],
 			Spacer[10],

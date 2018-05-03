@@ -80,6 +80,9 @@ EndPackage[];
 DeclarePackage["Thulium`SetterList`", {"SetterList"}];
 
 
+DumpSave[$LocalPath <> "/library/Paclet/SetterList.mx", "Thulium`SetterList`"];
+
+
 (* ::Input:: *)
 (*tmpsel = 1;*)
 

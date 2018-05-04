@@ -2,7 +2,7 @@
 
 Thulium`Interface`Playlist[playlist_] := Block[
   {info, length, songList, indexList, pageCount},
-  info = Thulium`PlaylistIndex[playlist];
+  info = PlaylistIndex[playlist];
   length = Length @ info["SongList"];
   pageCount = Ceiling[length / $ListSize];
   songList = Partition["Song" /. info["SongList"], UpTo @ Ceiling[length / pageCount]];
@@ -46,7 +46,7 @@ Thulium`Interface`Playlist[playlist_] := Block[
                     }, ImageSize -> indexWidth, Alignment -> Center],
                     Spacer[4]
                   ],
-                  Caption[Thulium`SongIndex[songList[[page, id]], "SongName"], "SongName"]
+                  Caption[SongIndex[songList[[page, id]], "SongName"], "SongName"]
                 }, Alignment -> Left, ImageSize -> 480],
                 Row[{
                   Row[{"Right"}, Alignment -> Center],

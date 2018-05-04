@@ -56,11 +56,11 @@ WindowTitle->TextDict[["About"]],Background->WindowBackground];
 (*uiAbout;*)
 
 
-homepage:=Block[{pageCount, playlistsPaged},
-  pageCount=Ceiling[Length@Keys@Thulium`PlaylistIndex/16];
+Thulium`homepage:=Block[{pageCount, playlistsPaged},
+  pageCount=Ceiling[Length@Keys@PlaylistIndex/16];
   If[Thulium`PageIndex[["Main"]]>pageCount,Thulium`PageIndex[["Main"]]=pageCount];
-  playlistsPaged=Partition[Keys@Thulium`PlaylistIndex,UpTo@Ceiling[Length@Keys@Thulium`PlaylistIndex/pageCount]];
-  Module[{playlist = Keys[Thulium`PlaylistIndex][[1]], page = Thulium`PageIndex[["Main"]]},
+  playlistsPaged=Partition[Keys@PlaylistIndex,UpTo@Ceiling[Length@Keys@PlaylistIndex/pageCount]];
+  Module[{playlist = Keys[PlaylistIndex][[1]], page = Thulium`PageIndex[["Main"]]},
     CreateDialog[With[{playlistsPaged = playlistsPaged},
       Column[{Spacer[{40,40}],
         Row[{
@@ -82,11 +82,11 @@ homepage:=Block[{pageCount, playlistsPaged},
           Dynamic[With[{playlists = playlistsPaged[[page]]},SetterBar[Dynamic@playlist,
             #->Row[{
               Row[{
-                Caption[TagName[[Thulium`PlaylistIndex[[#,"Type"]]]],"SongComment"]
+                Caption[TagName[[PlaylistIndex[[#,"Type"]]]],"SongComment"]
               },Alignment->{Center,Top},ImageSize->{80,38}],
-              Caption[Thulium`PlaylistIndex[[#,"Title"]],"SongName"],
+              Caption[PlaylistIndex[[#,"Title"]],"SongName"],
               Spacer[24],
-              Caption[Thulium`PlaylistIndex[[#,"Comment"]],"SongComment"]				
+              Caption[PlaylistIndex[[#,"Comment"]],"SongComment"]				
             },ImageSize->{720,30}]&/@playlists,
             Appearance->"Vertical"
           ]],TrackedSymbols:>{page}],Spacer[60]
@@ -103,12 +103,12 @@ homepage:=Block[{pageCount, playlistsPaged},
 
 
 (* ::Input:: *)
-(*homepage;*)
+(*Thulium`homepage;*)
 
 
 uiPlaylist[playlist_] := Block[{info, songList, songListPaged, pageCount},
   currentPlaylist = playlist;
-  info = Thulium`PlaylistIndex[[playlist]];
+  info = PlaylistIndex[[playlist]];
   songList = If[info[["IndexWidth"]]>0,
     <|"Song" -> info["Path"] <> #Song, "Index" -> #Index|>& /@ Association /@ info["SongList"],
     <|"Song" -> info["Path"] <> #Song|>& /@ Association /@ info["SongList"]
@@ -154,9 +154,9 @@ uiPlaylist[playlist_] := Block[{info, songList, songListPaged, pageCount},
                 },ImageSize -> indexWidth,Alignment->Center],
                 Spacer[4]
               ],
-              Caption[Thulium`SongIndex[[#[["Song"]], "SongName"]], "SongName"],
-              If[KeyExistsQ[Thulium`SongIndex[[#[["Song"]]]], "Comment"],
-                Row[{Spacer[24], Caption[Thulium`SongIndex[[#[["Song"]], "Comment"]], "SongComment"]}],
+              Caption[SongIndex[[#[["Song"]], "SongName"]], "SongName"],
+              If[KeyExistsQ[SongIndex[[#[["Song"]]]], "Comment"],
+                Row[{Spacer[24], Caption[SongIndex[[#[["Song"]], "Comment"]], "SongComment"]}],
                 Nothing
               ]
             }, ImageSize -> {960, 30}]& /@ songs,

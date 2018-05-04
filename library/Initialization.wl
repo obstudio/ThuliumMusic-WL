@@ -1,5 +1,36 @@
 (* ::Package:: *)
 
+BeginPackage["Thulium`System`", {"Thulium`Graphics`"}];
+
+$$Version::usage = "Thulium Music Version";
+$$Commit::usage = "Thulium Music Commit Code";
+$$Build::usage = "Thulium Music Build version";
+
+$LocalPath::usage = "Thulium Music Repository Path";
+$UserPath::usage = "Thulium Music User Path";
+$CloudPath::usage = "Thulium Music Cloud Path";
+$DataPath::usage = "Thulium Music Data Path";
+
+SongIndex::usage = "song index";
+ImageIndex::usage = "image index";
+PlaylistIndex::usage = "playlist index";
+
+UserInfo::usage = "Thulium Music User Information";
+MenuCell::usage = "Thulium Music Menu Cell";
+StatusAlias::usage = "alias for \"Status\" as a property of AudioStream";
+
+InitializePackage::usage = "initialize all packages";
+InitializeParser::usage = "initialize Thulium Music parser";
+
+CleanMessages::usage = "clean messages on the screen";
+MessageDisplay::usage = "display a message on the screen";
+RawDisplay::usage = "display input form of string instead of output form";
+MonitorDisplay::usage = "display a monitor during an evaluating process";
+ProgressDisplay::usage = "display a progress indicator in a monitored process";
+
+Begin["`Private`"];
+
+
 MonitorDisplay[content_] := Style[
   Framed[
     Pane[content,
@@ -42,7 +73,7 @@ CleanMessages[maxCount_] := With[{msgCells = Cells[CellTags -> "$msg"]},
 RawDisplay[text_] := FormBox[StyleBox["\"" <> text <> "\"", FontFamily -> "Calibri"], "InputForm"];
 
 
-Thulium`MenuCell = Cell[BoxData @ RowBox[{(*
+MenuCell = Cell[BoxData @ RowBox[{(*
   TemplateBox[{4}, "Spacer1"],
   TemplateBox[{
     "Start Kernel",
@@ -53,24 +84,26 @@ Thulium`MenuCell = Cell[BoxData @ RowBox[{(*
   TemplateBox[{
     "Check Update",
     "Click to update the songs and playlists.",
-    Unevaluated @ Thulium`CheckUpdate
+    Unevaluated[
+      If[!$Parser, InitializeParser];
+      Thulium`Update`CheckUpdate
+    ]
   }, "TextButtonMonitored"],
   TemplateBox[{4}, "Spacer1"],
   TemplateBox[{
     "Quick Start",
     "Click to start Thulium Music Player.",
-    Hold[
-      If[!Thulium`$Init, Thulium`InitializePackage];
-      homepage;
+    Unevaluated[
+      If[!$Init, InitializePackage];
+      Thulium`homepage;
     ]
-  }, "TextButton"],
+  }, "TextButtonMonitored"],
   TemplateBox[{4}, "Spacer1"]
 }], "Menu", CellTags -> "$menu"];
 
 
-Thulium`InitializePackage := Block[{packages},
+InitializePackage := Block[{packages},
   CleanMessages[2];
-  DeclarePackage["Thulium`System`", {"UserInfo", "$UserPath", "$CloudPath", "$DataPath"}];
   SetDirectory[$LocalPath <> "library"];
   Monitor[
     packages = Join[
@@ -81,14 +114,14 @@ Thulium`InitializePackage := Block[{packages},
     Do[Get[packages[[i]]], {i, Length @ packages}],
   ProgressDisplay[packages, i, "Loading packages from library ......"]];
   Get["Preload.wl"];
-  Thulium`$Init = True;
+  $Init = True;
   MessageDisplay[Cell[BoxData @ TemplateBox[{
     RowBox[{
       "Succeed: Initializing Thulium Kernel ",
       TemplateBox[{"(details)",
         GridBox[{
-          {"Version: ", RawDisplay[Thulium`System`$$Version]},
-          If[Thulium`$Commit =!= "", {"Commit: ", RawDisplay[Thulium`System`$$Commit]}, Nothing]
+          {"Version: ", RawDisplay[$$Version]},
+          If[$$Commit =!= "", {"Commit: ", RawDisplay[$$Commit]}, Nothing]
         }, ColumnAlignments -> {Center, Left}, ColumnSpacings -> 0],
       0.1}, "<Tooltip>"]
     }]
@@ -97,13 +130,13 @@ Thulium`InitializePackage := Block[{packages},
 ];
 
 
-Thulium`InitializeParser := Block[{result, succeed, msgCells},
-  If[!Thulium`$Init, Thulium`InitializePackage];
+InitializeParser := Block[{result, succeed, msgCells},
+  If[!$Init, InitializePackage];
   CleanMessages[2];
   Monitor[
     Off[General::shdw];
     
-    If[!Thulium`System`UserInfo[["NodeJS"]],
+    If[!UserInfo[["NodeJS"]],
       If[Length @ FindExternalEvaluators["NodeJS"] == 0,
         (* FIXME: to be optimized *)
         CreateDialog[{
@@ -112,8 +145,8 @@ Thulium`InitializeParser := Block[{result, succeed, msgCells},
           DefaultButton[]
         }];
         Abort[],
-        Thulium`System`UserInfo[["NodeJS"]] = True;
-        Export[Thulium`System`$UserPath <> "Default.json", Thulium`System`UserInfo];
+        UserInfo[["NodeJS"]] = True;
+        Export[$UserPath <> "Default.json", UserInfo];
       ];
     ];
     
@@ -127,7 +160,7 @@ Thulium`InitializeParser := Block[{result, succeed, msgCells},
     
     On[General::shdw];
     Get[$LocalPath <> "library/Adapter.wl"];
-    Thulium`$Parser = True,
+    $Parser = True,
   MonitorDisplay["Initializing Node.js as external evaluator ......"]];
   
   MessageDisplay[If[succeed === True,
@@ -150,34 +183,12 @@ Thulium`InitializeParser := Block[{result, succeed, msgCells},
 ];
 
 
-Thulium`CheckUpdate := With[
-  {
-    UpdateDisplay = Function[RawDisplay[StringJoin[
-      ToString[Length[#1]], " (Add: ",
-      ToString[Length[#2]], ", Delete: ",
-      ToString[Length[#3]], ")"
-    ]]]
-  },
-  If[!Thulium`$Parser, Thulium`InitializeParser];
-  CleanMessages[2];
-  Thulium`UpdateIndex;
-  Thulium`UpdateImage;
-  Thulium`UpdateBuffer;
-  DumpSave[$DataPath <> "Index.mx", {
-    Thulium`SongIndex,
-    Thulium`ImageIndex,
-    Thulium`PlaylistIndex
-  }];
-  MessageDisplay[Cell[BoxData @ TemplateBox[{
-    RowBox[{
-      "Succeed: Update Music Library ",
-      TemplateBox[{"(details)",
-        GridBox[{
-          {"Songs: ", UpdateDisplay[Thulium`SongIndex, Thulium`update`NewSongs, Thulium`update`DelSongs]},
-          {"Images: ", UpdateDisplay[Thulium`ImageIndex, Thulium`update`NewImages, Thulium`update`DelImages]},
-          {"Playlists: ", UpdateDisplay[Thulium`PlaylistIndex, Thulium`update`NewPlaylists, Thulium`update`DelPlaylists]}
-        }, ColumnAlignments -> {Center, Left}, ColumnSpacings -> 0],
-      0.1}, "<Tooltip>"]
-    }]
-  }, "SuccessMessage"], "MessageCell", CellTags -> "$msg"]];
-];
+End[];
+
+EndPackage[];
+
+DeclarePackage["Thulium`System`", {
+  "$UserPath", "$CloudPath", "$DataPath", "UserInfo",
+  "$$Version", "$$Commit", "$$Build", "StatusAlias",
+  "SongIndex", "ImageIndex", "PlaylistIndex"
+}];

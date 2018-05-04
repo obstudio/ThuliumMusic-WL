@@ -61,9 +61,9 @@ uiPlayer[song_]:=Block[
         Return[uiPlaylist[currentPlaylist]],
 	Import::nffil];
 	AudioStop[];
-	If[Thulium`SongIndex[[song,"Image"]]!="",
+	If[SongIndex[[song,"Image"]]!="",
 		imageExist=True;
-		image=Import[$DataPath<>"Images/"<>Thulium`SongIndex[[song,"Image"]]];
+		image=Import[$DataPath<>"Images/"<>SongIndex[[song,"Image"]]];
 		aspectRatio=ImageAspectRatio[image];
 	];
 	$CurrentDuration=Duration[audio];
@@ -76,9 +76,9 @@ uiPlayer[song_]:=Block[
 					{{Automatic,400},aspectRatio<=1&&aspectRatio>1/2},
 					{{360,Automatic},aspectRatio>1&&aspectRatio<2}
 				}]],{"FadedFrame"}],
-				If[Thulium`ImageIndex[[Thulium`SongIndex[[song,"Image"]]]]!=<||>,
-					Column[If[KeyExistsQ[Thulium`ImageIndex[[Thulium`SongIndex[[song,"Image"]]]],#],
-						TagName[[#]]<>": "<>Thulium`ImageIndex[[Thulium`SongIndex[[song,"Image"]],#]],
+				If[ImageIndex[[SongIndex[[song,"Image"]]]]!=<||>,
+					Column[If[KeyExistsQ[ImageIndex[[SongIndex[[song,"Image"]]]],#],
+						TagName[[#]]<>": "<>ImageIndex[[SongIndex[[song,"Image"]],#]],
 						Nothing
 					]&/@imageTags],
 					TextDict[["NoImageInfo"]]
@@ -86,23 +86,23 @@ uiPlayer[song_]:=Block[
 			],
 		Spacer[{40,40}]}]}],Nothing],Spacer[48],
 		Column[Join[{Spacer[{60,60}],
-			If[Thulium`SongIndex[[song,"Comment"]]!="",
-				If[TextLength@Thulium`SongIndex[[song,"Comment"]]>16,
+			If[SongIndex[[song,"Comment"]]!="",
+				If[TextLength@SongIndex[[song,"Comment"]]>16,
 					Column,Row
 				][{
-					Caption[Thulium`SongIndex[[song,"SongName"]],"Title"],
-					Caption[" ("<>Thulium`SongIndex[[song,"Comment"]]<>")","TitleCmt"]
+					Caption[SongIndex[[song,"SongName"]],"Title"],
+					Caption[" ("<>SongIndex[[song,"Comment"]]<>")","TitleCmt"]
 				},Alignment->Center],
-				Caption[Thulium`SongIndex[[song,"SongName"]],"Title"]
+				Caption[SongIndex[[song,"SongName"]],"Title"]
 			],
 			Spacer[1],
-			Column[If[Thulium`SongIndex[[song,#]]!="",
-				Caption[TagName[[#]]<>": "<>Thulium`SongIndex[[song,#]],"Text"],
+			Column[If[SongIndex[[song,#]]!="",
+				Caption[TagName[[#]]<>": "<>SongIndex[[song,#]],"Text"],
 				Nothing
 			]&/@{"Origin","Composer","Lyricist","Adapter"},Alignment->Center],
 			Spacer[1],
-			If[Thulium`SongIndex[[song,"Abstract"]]!="",
-				Column[Caption[#,"Text"]&/@StringSplit[Thulium`SongIndex[[song,"Abstract"]],"\n"],Center],
+			If[SongIndex[[song,"Abstract"]]!="",
+				Column[Caption[#,"Text"]&/@StringSplit[SongIndex[[song,"Abstract"]],"\n"],Center],
 				Nothing
 			],
 			Spacer[1]},
@@ -110,7 +110,7 @@ uiPlayer[song_]:=Block[
 			{Spacer[{60,60}]}
 		],Alignment->Center,ItemSize->Full],
 	Spacer[48]},Alignment->Center,ImageSize->Full],
-	Background->WindowBackground,WindowTitle->TextDict[["Playing"]]<>": "<>Thulium`SongIndex[[song,"SongName"]]];
+	Background->WindowBackground,WindowTitle->TextDict[["Playing"]]<>": "<>SongIndex[[song,"SongName"]]];
 ];
 
 

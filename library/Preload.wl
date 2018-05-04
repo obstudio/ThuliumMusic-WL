@@ -16,15 +16,6 @@ percList = Keys @ percDict;
 
 Begin["Thulium`System`"];
 
-$$Version::usage = "Thulium Version";
-$$Commit::usage = "Git commit hash";
-$$Build::usage = "Build version";
-$LocalPath::usage = "Thulium Music local path";
-$UserPath::usage = "Thulium Music user path";
-$CloudPath::usage = "Thulium Music cloud path";
-$DataPath::usage = "Thulium Music data path";
-StatusAlias::usage = "StatusAlias";
-
 Begin["`Private`"];
 
 $$Version = "2.3";
@@ -120,19 +111,8 @@ favorite = Import[$UserPath <> "Favorite.json"];
 
 $DataPath = UserInfo["DataPath"];
 
-End[];
-
-End[];
-
-DeclarePackage["Thulium`System`", {
-  "$$Version", "$$Commit", "$$Build", "StatusAlias"
-}]
-
-
 dirCreate[path_] := If[!DirectoryQ[path], CreateDirectory[path]];
 jsonCreate[path_] := If[!FileExistsQ[path], Export[path, {}]];
-
-
 (* program data *)
 dirCreate[$DataPath];
 dirCreate[$DataPath <> "buffer/"];
@@ -140,22 +120,24 @@ dirCreate[$DataPath <> "images/"];
 jsonCreate[$DataPath <> "Buffer.json"];
 jsonCreate[$DataPath <> "Image.json"];
 If[!FileExistsQ[$DataPath <> "Index.mx"],
-  Thulium`SongIndex = <||>;
-  Thulium`PlaylistIndex = <||>;
-  Thulium`ImageIndex = <||>;
+  SongIndex = <||>;
+  PlaylistIndex = <||>;
+  ImageIndex = <||>;
   Thulium`PageIndex = <|"Main" -> 1|>;
   DumpSave[$DataPath <> "Index.mx", {
-    Thulium`SongIndex, Thulium`PlaylistIndex, Thulium`ImageIndex
+    SongIndex, PlaylistIndex, ImageIndex
   }],
   Get[$DataPath <> "Index.mx"];
-  If[Head[Thulium`SongIndex] =!= Association, Thulium`SongIndex = <||>];
-  If[Head[Thulium`ImageIndex] =!= Association, Thulium`ImageIndex = <||>];
-  If[Head[Thulium`PlaylistIndex] =!= Association, Thulium`PlaylistIndex = <||>];
+  If[Head[SongIndex] =!= Association, SongIndex = <||>];
+  If[Head[ImageIndex] =!= Association, ImageIndex = <||>];
+  If[Head[PlaylistIndex] =!= Association, PlaylistIndex = <||>];
   Thulium`PageIndex = Prepend[
-    AssociationMap[1&, Keys @ Thulium`PlaylistIndex],
+    AssociationMap[1&, Keys @ PlaylistIndex],
     {"Main" -> 1}
   ];
 ];
 
+End[];
 
-Thulium`update`BufferHash = Association @ Import[$DataPath <> "Buffer.json"];
+End[];
+

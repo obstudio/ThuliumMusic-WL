@@ -11,7 +11,7 @@ MusicStop[]:=(Sound`StopMIDI[]; AudioStop[]);
 MusicPlay[music_Audio]:=AudioPlay[music];
 MusicPlay[music_Sound`MIDISequence]:=MIDIPlay[music];
 
-Parse::usage = "\!\(\*RowBox[{\"Parse\",\"[\",RowBox[{
+Thulium`Parse::usage = "\!\(\*RowBox[{\"Parse\",\"[\",RowBox[{
 StyleBox[\"filepath\",\"TI\"],\",\",StyleBox[\"partspec\",\"TI\"]
 }],\"]\"}]\)\n\!\(\*RowBox[{\"Parse\",\"[\",RowBox[{
 StyleBox[\"tokenizer\",\"TI\"],\",\",StyleBox[\"partspec\",\"TI\"]
@@ -33,16 +33,16 @@ parse from \!\(\*StyleBox[\"m\",\"TI\"]\)\!\(\*SuperscriptBox[\"\[Null]\", \"th\
 to \!\(\*StyleBox[\"n\",\"TI\"]\)\!\(\*SuperscriptBox[\"\[Null]\", \"th\"]\) section.
 The default value of partspec is \!\(\*RowBox[{\"{\",\"1\",\",\",\"-1\",\"}\"}]\).";
 
-Parse::type = "The first argument should be a filename or a tokenizer.";
-Parse::nfound = "Cannot find file `1`.";
-Parse::ext1 = "Cannot Parse file with extension `1`.";
-Parse::ext2 = "Cannot Parse file with no extension.";
-Parse::failure = "A failure occured in the process.";
-Parse::invspec = "Part specification `1` is invalid.";
-Parse::nosect = "No section was found through part specification `1`.";
+Thulium`Parse::type = "The first argument should be a filename or a tokenizer.";
+Thulium`Parse::nfound = "Cannot find file `1`.";
+Thulium`Parse::ext1 = "Cannot Parse file with extension `1`.";
+Thulium`Parse::ext2 = "Cannot Parse file with no extension.";
+Thulium`Parse::failure = "A failure occured in the process.";
+Thulium`Parse::invspec = "Part specification `1` is invalid.";
+Thulium`Parse::nosect = "No section was found through part specification `1`.";
 
-Parse[origin_]:=Parse[origin,{1,-1}];
-Parse[origin_,partspec_]:=Block[
+Thulium`Parse[origin_]:=Thulium`Parse[origin,{1,-1}];
+Thulium`Parse[origin_,partspec_]:=Block[
 	{
 		filepath,tempFile,rawData,
 		sectCount,abspec,startSect,endSect
@@ -51,7 +51,7 @@ Parse[origin_,partspec_]:=Block[
 	Switch[origin,
 		_String,
 			If[!FileExistsQ[origin],
-				Message[Parse::nfound,origin];Return[];
+				Message[Thulium`Parse::nfound,origin];Return[];
 			];
 			Switch[ToLowerCase@FileExtension[origin],
 				(*"json",
@@ -59,16 +59,16 @@ Parse[origin_,partspec_]:=Block[
 				"tm",
 					rawData=ExternalEvaluate[System`JS, "new Thulium('"<>StringReplace[origin, "'"->"\\'"]<>"').parse()"],
 				"",
-					Message[Parse::ext2];Return[],
+					Message[Thulium`Parse::ext2];Return[],
 				_,
-					Message[Parse::ext1,FileExtension[origin]];Return[];
+					Message[Thulium`Parse::ext1,FileExtension[origin]];Return[];
 			],
 		_,
-			Message[Parse::type];Return[];
+			Message[Thulium`Parse::type];Return[];
 	];
 	
 	If[FailureQ[rawData],
-		Message[Parse::failure];
+		Message[Thulium`Parse::failure];
 		Echo[Level[Level[rawData,1][[2,"StackTrace"]],1][[1]]];
 		Return[];
 	];
@@ -85,11 +85,11 @@ Parse[origin_,partspec_]:=Block[
         _?(Negative[#]&&IntegerQ[#]&),
             startSect=sectCount+1+partspec;endSect=sectCount,
         _,
-            Message[Parse::invspec,partspec]
+            Message[Thulium`Parse::invspec,partspec]
     ];
     
     If[startSect>endSect,
-		Message[Parse::nosect,partspec];Return[],
+		Message[Thulium`Parse::nosect,partspec];Return[],
 		Return[rawData[[startSect;;endSect]]];
     ];
 	
@@ -180,18 +180,18 @@ The contents of \!\(\*StyleBox[\"options\",\"TI\"]\) can be the following:
 \!\(\*RowBox[{\"\t\",\"Format\",\"\t\",\"\t\",\"Audio\",\"\t\",\"\t\",\"Adapting format\"}]\)";
 
 Adapt[rawData_,OptionsPattern[AdaptingOptions]]:=Switch[OptionValue["Format"],
-	"MIDI",MIDIAdapt[rawData,OptionValue[Keys@AdaptingOptions]],
-	"Audio",AudioAdapt[rawData,OptionValue[Keys@AdaptingOptions]],
+	"MIDI",Thulium`MIDIAdapt[rawData,OptionValue[Keys@AdaptingOptions]],
+	"Audio",Thulium`AudioAdapt[rawData,OptionValue[Keys@AdaptingOptions]],
 	_,Message[Adapt::format,OptionValue["Format"]];Return[];
 ];
 
 MusicPlay[rawData_,OptionsPattern[AdaptingOptions]]:=Switch[OptionValue["Format"],
-	"MIDI",Sound`EmitMIDI@MIDIAdapt[rawData,OptionValue[Keys@AdaptingOptions]],
-	"Audio",AudioPlay@AudioAdapt[rawData,OptionValue[Keys@AdaptingOptions]],
+	"MIDI",Sound`EmitMIDI@Thulium`MIDIAdapt[rawData,OptionValue[Keys@AdaptingOptions]],
+	"Audio",AudioPlay@Thulium`AudioAdapt[rawData,OptionValue[Keys@AdaptingOptions]],
 	_,Message[Adapt::format,OptionValue["Format"]];Return[];
 ];
 
-MIDIAdapt[rawData_,OptionsPattern[AdaptingOptions]]:=Block[
+Thulium`MIDIAdapt[rawData_,OptionsPattern[AdaptingOptions]]:=Block[
     {
 		duration=0,musicClip={}
     },
@@ -208,7 +208,7 @@ MIDIAdapt[rawData_,OptionsPattern[AdaptingOptions]]:=Block[
 	Return[MIDIConstruct[Flatten@musicClip,OptionValue["Rate"]]];
 ];
 
-AudioAdapt[rawData_,OptionsPattern[AdaptingOptions]]:=Block[
+Thulium`AudioAdapt[rawData_,OptionsPattern[AdaptingOptions]]:=Block[
     {
 		duration=0,groups,
 		musicClips={},targetClip,
@@ -266,23 +266,6 @@ AudioAdapt[rawData_,OptionsPattern[AdaptingOptions]]:=Block[
 
 
 (* ::Input:: *)
-(*Parse[localPath<>"Research/test.tm"]*)
-
-
-(* ::Input:: *)
-(*data=Parse[localPath<>"Research/test.tm"];Diagnose[data]*)
-
-
-(* ::Input:: *)
-(*data=Parse[localPath<>"Songs/Touhou/TH11-Chireiden/3rd_Eye.tm"];*)
-(*Diagnose[data]*)
-
-
-(* ::Input:: *)
-(*MIDIPlay@MIDIAdapt[Parse[localPath<>"src/test/test.tm"]]*)
-
-
-(* ::Input:: *)
 (*EmitSound@Sound@SoundNote[5,1,"ElectricBass"]*)
 
 
@@ -291,7 +274,7 @@ AudioAdapt[rawData_,OptionsPattern[AdaptingOptions]]:=Block[
 
 
 (* ::Input:: *)
-(*Thulium`InitializeParser;*)
+(*InitializeParser;*)
 
 
 (* ::Subsubsection:: *)
@@ -305,17 +288,17 @@ AudioAdapt[rawData_,OptionsPattern[AdaptingOptions]]:=Block[
 (* ::Input:: *)
 (*MIDIStop[];MIDIPlay[#[[2]]]&@*)
 (*EchoFunction["time: ",#[[1]]&]@*)
-(*Timing[MIDIAdapt[Parse[localPath<>"Songs/Hovering_Strange_Melody.tm", {3,3}],Rate->1]];*)
+(*Timing[Thulium`MIDIAdapt[Thulium`Parse[$LocalPath<>"Songs/Hovering_Strange_Melody.tm", {3,3}],Rate->1]];*)
 
 
 (* ::Input:: *)
 (*MIDIStop[];MIDIPlay[#[[2]]]&@*)
 (*EchoFunction["time: ",#[[1]]&]@*)
-(*Timing[MIDIAdapt[Parse[localPath<>"Songs/Touhou/test.tm"]]];*)
+(*Timing[Thulium`MIDIAdapt[Thulium`Parse[$LocalPath<>"Songs/Touhou/test.tm"]]];*)
 
 
 (* ::Input:: *)
-(*Parse[localPath<>"Songs/test.tm"][[1,"Tracks",1,"Content"]]*)
+(*Thulium`Parse[localPath<>"Songs/test.tm"][[1,"Tracks",1,"Content"]]*)
 
 
 (* ::Subsubsection:: *)
@@ -329,20 +312,20 @@ AudioAdapt[rawData_,OptionsPattern[AdaptingOptions]]:=Block[
 (* ::Input:: *)
 (*AudioStop[];AudioPlay[#[[2]]]&@*)
 (*EchoFunction["time: ",#[[1]]&]@*)
-(*Timing[AudioAdapt[Parse[localPath<>"Songs/Porcelain_Actor.tm"],"Rate"->1]];*)
+(*Timing[Thulium`AudioAdapt[Thulium`Parse[$LocalPath<>"Songs/Porcelain_Actor.tm"],"Rate"->1]];*)
 
 
 (* ::Input:: *)
-(*Export[localPath<>"test.mp3",AudioAdapt[Parse[localPath<>"Songs/Touhou/Oriental_Blood.tm"]]];*)
-
-
-(* ::Input:: *)
-(*AudioStop[];AudioPlay[#[[2]]]&@*)
-(*EchoFunction["time: ",#[[1]]&]@*)
-(*Timing[AudioAdapt[Parse[localPath<>"Songs/If_you_Were_By_My_Side.tm"],"Rate"->1]];*)
+(*Export[localPath<>"test.mp3",Thulium`AudioAdapt[Thulium`Parse[$LocalPath<>"Songs/Touhou/Oriental_Blood.tm"]]];*)
 
 
 (* ::Input:: *)
 (*AudioStop[];AudioPlay[#[[2]]]&@*)
 (*EchoFunction["time: ",#[[1]]&]@*)
-(*Timing[AudioAdapt[Parse[localPath<>"Songs/test.tm"],"Rate"->1]];*)
+(*Timing[Thulium`AudioAdapt[Thulium`Parse[$LocalPath<>"Songs/If_you_Were_By_My_Side.tm"],"Rate"->1]];*)
+
+
+(* ::Input:: *)
+(*AudioStop[];AudioPlay[#[[2]]]&@*)
+(*EchoFunction["time: ",#[[1]]&]@*)
+(*Timing[Thulium`AudioAdapt[Thulium`Parse[$LocalPath<>"Songs/test.tm"],"Rate"->1]];*)

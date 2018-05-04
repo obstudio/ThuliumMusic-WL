@@ -1,6 +1,6 @@
 (* ::Package:: *)
 
-uiPlayerControlsOld := With[{StatusAlias = StatusAlias}, {
+uiPlayerControlsOld := With[{StatusAlias = Thulium`System`Private`StatusAlias}, {
 	Row[{
 		Dynamic[Style[timeDisplay[$CurrentStream["Position"]],20]],
 		Spacer[8],
@@ -10,8 +10,8 @@ uiPlayerControlsOld := With[{StatusAlias = StatusAlias}, {
 	}],Spacer[1],
 	Row[{Button[
 		Dynamic[Switch[$CurrentStream[StatusAlias],
-			"Playing",text[["Pause"]],
-			"Paused"|"Stopped",text[["Play"]]
+			"Playing",TextDict[["Pause"]],
+			"Paused"|"Stopped",TextDict[["Play"]]
 		]],
 		Switch[$CurrentStream[StatusAlias],
 			"Playing",$CurrentStream[StatusAlias]="Paused",
@@ -19,14 +19,14 @@ uiPlayerControlsOld := With[{StatusAlias = StatusAlias}, {
 		],
 		ImageSize->80],
 		Spacer[20],
-		Button[text[["Stop"]],$CurrentStream[StatusAlias]="Stopped",ImageSize->80],
+		Button[TextDict[["Stop"]],$CurrentStream[StatusAlias]="Stopped",ImageSize->80],
 		Spacer[20],
-		Button[text[["Return"]],AudioStop[];DialogReturn[uiPlaylist[currentPlaylist]],ImageSize->80]			
+		Button[TextDict[["Return"]],AudioStop[];DialogReturn[uiPlaylist[currentPlaylist]],ImageSize->80]			
 	}]
 }];
 
 
-uiPlayerControlsNew := With[{StatusAlias = StatusAlias}, {
+uiPlayerControlsNew := With[{StatusAlias = Thulium`System`Private`StatusAlias}, {
 	Row[{
 		Column[{Style[Dynamic[timeDisplay[$CurrentStream["Position"]]],20],Spacer[1]}],
 		Spacer[8],
@@ -45,11 +45,11 @@ uiPlayerControlsNew := With[{StatusAlias = StatusAlias}, {
 	Row[{
 		DynamicModule[{style="Default"},
 			Dynamic@Switch[$CurrentStream[StatusAlias],
-				"Playing",EventHandler[button["Pause",style],{
+				"Playing",EventHandler[SmartButton["Pause",style],{
 					"MouseDown":>(style="Clicked"),
 					"MouseUp":>(style="Default";$CurrentStream[StatusAlias]="Paused")
 				}],
-				"Paused"|"Stopped",EventHandler[button["Play",style],{
+				"Paused"|"Stopped",EventHandler[SmartButton["Play",style],{
 					"MouseDown":>(style="Clicked"),
 					"MouseUp":>(style="Default";$CurrentStream[StatusAlias]="Playing")
 				}]
@@ -57,14 +57,14 @@ uiPlayerControlsNew := With[{StatusAlias = StatusAlias}, {
 		],
 		Spacer[20],
 		DynamicModule[{style="Default"},
-			EventHandler[Dynamic@button["Stop",style],{
+			EventHandler[Dynamic@SmartButton["Stop",style],{
 				"MouseDown":>(style="Clicked"),
 				"MouseUp":>(style="Default";$CurrentStream[StatusAlias]="Stopped";$CurrentStream["Position"]=0)
 			}]
 		],
 		Spacer[20],
 		DynamicModule[{style="Default"},
-			EventHandler[Dynamic@button["ArrowL",style],{
+			EventHandler[Dynamic@SmartButton["ArrowL",style],{
 				"MouseDown":>(style="Clicked";),
 				"MouseUp":>(style="Default";
 					AudioStop[];
@@ -74,41 +74,3 @@ uiPlayerControlsNew := With[{StatusAlias = StatusAlias}, {
 		]		
 	},ImageSize->{300,60},Alignment->Center]
 }];
-
-
-uiPageSelector[Dynamic[page_], pageCount_] := Row[{
-	Dynamic@If[page<=1,pageSelectorDisplay["Prev","Disabled"],
-	DynamicModule[{style="Default"},
-		EventHandler[Dynamic@pageSelectorDisplay["Prev",style],{
-			"MouseDown":>(style="Clicked"),
-			"MouseUp":>(style="Default";page--;)
-		}]
-	]],
-	Spacer[20],
-	Row[Flatten@Array[{
-		Dynamic@If[page==#,pageSelectorDisplay[#,"Current",32],
-		DynamicModule[{style="Default"},
-			EventHandler[Dynamic@pageSelectorDisplay[#,style,32],{
-				"MouseDown":>(style="Clicked"),
-				"MouseUp":>(style="Default";page=#;)
-			}]
-		]
-	],Spacer[6]}&,pageCount]],
-	Spacer[14],
-	Dynamic@If[page>=pageCount,pageSelectorDisplay["Next","Disabled"],
-	DynamicModule[{style="Default"},
-		EventHandler[Dynamic@pageSelectorDisplay["Next",style],{
-			"MouseDown":>(style="Clicked"),
-			"MouseUp":>(style="Default";page++;)
-		}]
-	]]
-}, ImageSize->{500,60}, Alignment -> Center];
-
-
-SetAttributes[button,HoldRest];
-button[buttonName_,action_]:=DynamicModule[{style="Default"},
-	EventHandler[Dynamic@buttonDisplay[buttonName,style],{
-		"MouseDown":>(style="Clicked"),
-		"MouseUp":>(style="Default";action;)
-	}]
-]

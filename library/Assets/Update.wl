@@ -13,20 +13,20 @@ Thulium`UpdateIndex := Block[
     metaTree, songList, dirList, 
     imageList, imageDirList,
     bufferList, fileName, fileHash,
-    playlists = Association /@ Import[localPath <> "playlist.json"],
+    playlists = Association /@ Import[$LocalPath <> "playlist.json"],
     playlistData = <||>, songsClassified = {}, playlistInfo
   },
   
   Monitor[
-    SetDirectory[localPath <> "Meta"];
+    SetDirectory[$LocalPath <> "Meta"];
     metaTree = StringReplace["\\" -> "/"] /@ FileNames["*", "", Infinity];
     ResetDirectory[];
     songList = StringDrop[Select[metaTree, StringEndsQ[".json"]], -5];
     dirList = Select[metaTree, !StringEndsQ[#, ".json"]&];
-    Scan[If[!DirectoryQ[#], CreateDirectory[#]]&[dataPath <> "buffer/" <> #]&, dirList];
-    Thulium`SongIndex = AssociationMap[Association @ Import[localPath <> "Meta/" <> # <> ".json"]&, songList];
+    Scan[If[!DirectoryQ[#], CreateDirectory[#]]&[$DataPath <> "buffer/" <> #]&, dirList];
+    Thulium`SongIndex = AssociationMap[Association @ Import[$LocalPath <> "Meta/" <> # <> ".json"]&, songList];
     
-    SetDirectory[dataPath];
+    SetDirectory[$DataPath];
     bufferList = StringReplace["\\" -> "/"] /@ StringTake[FileNames["*.buffer", "Buffer", Infinity], {8, -8}];
     Scan[DeleteFile[# <> ".buffer"]&, Complement[ToLowerCase /@ bufferList, ToLowerCase /@ songList]];
     imageList = DeleteCases[Values @ Thulium`SongIndex[[All, "Image"]], ""];
@@ -40,7 +40,7 @@ Thulium`UpdateIndex := Block[
     Do[
       If[
         Or[
-          !FileExistsQ[dataPath <> "Images/" <> image],
+          !FileExistsQ[$DataPath <> "Images/" <> image],
           !MemberQ[oldImages, image]
         ],
         AppendTo[Thulium`update`NewImages, image]
@@ -51,13 +51,13 @@ Thulium`UpdateIndex := Block[
     Thulium`update`NewSongs = {};
     Thulium`update`DelSongs = Complement[oldSongs, songList];
     Do[
-      fileName = localPath <> "Songs/" <> song <> ".tm";
+      fileName = $LocalPath <> "Songs/" <> song <> ".tm";
       fileHash = IntegerString[FileHash[fileName], 32];
       If[
         Or[
           !KeyExistsQ[Thulium`update`BufferHash, song],
           Thulium`update`BufferHash[[song]] != fileHash,
-          !FileExistsQ[dataPath <> "Buffer/" <> song <> ".buffer"]
+          !FileExistsQ[$DataPath <> "Buffer/" <> song <> ".buffer"]
         ],
         If[!MemberQ[oldSongs, song], AppendTo[Thulium`update`DelSongs, song]];
         AppendTo[Thulium`update`NewSongs, song];
@@ -67,7 +67,7 @@ Thulium`UpdateIndex := Block[
     KeyDropFrom[Thulium`update`BufferHash, Thulium`update`DelSongs];
       
     Do[
-      playlistInfo = Append[<|"Type" -> "Playlist"|>, Import[localPath <> "Playlists/" <> playlist, "JSON"]];
+      playlistInfo = Append[<|"Type" -> "Playlist"|>, Import[$LocalPath <> "Playlists/" <> playlist, "JSON"]];
       songList = playlistInfo[["Path"]] <> #Song &/@ Association /@ playlistInfo[["SongList"]];
       AppendTo[playlistData, {playlist -> playlistInfo}];
       AppendTo[songsClassified, songList],
@@ -77,10 +77,10 @@ Thulium`UpdateIndex := Block[
       songList = Select[Keys @ Thulium`SongIndex, MemberQ[Thulium`SongIndex[#, "Tags"], "Touhou"]&];
       playlistInfo = ReplacePart[playlistTemplate, {
         "Type" -> "Tag",
-        "Title" -> If[KeyExistsQ[tagDict, tag],
-          If[KeyExistsQ[tagDict[[tag]], UserInfo[["Language"]]],
-            tagDict[[tag, UserInfo[["Language"]]]],
-            tagDict[[tag, tagDict[[tag, "Origin"]]]]
+        "Title" -> If[KeyExistsQ[TagDict, tag],
+          If[KeyExistsQ[TagDict[[tag]], UserInfo[["Language"]]],
+            TagDict[[tag, UserInfo[["Language"]]]],
+            TagDict[[tag, TagDict[[tag, "Origin"]]]]
           ],
           tag
         ],
@@ -117,8 +117,8 @@ Thulium`UpdateImage := With[{updates = Thulium`update`NewSongs}, Block[{filename
     Do[
       filename = updates[[i]];
       metaFileName = StringReplace[filename, RegularExpression["\\.[^\\.]+$"] -> ".json"];
-      CopyFile[cloudPath <> "images/" <> filename, dataPath <> "Images/" <> filename];
-      AssociateTo[Thulium`ImageIndex, filename -> Association @ Import[cloudPath <> "images/" <> metaFileName]],
+      CopyFile[$CloudPath <> "images/" <> filename, $DataPath <> "Images/" <> filename];
+      AssociateTo[Thulium`ImageIndex, filename -> Association @ Import[$CloudPath <> "images/" <> metaFileName]],
     {i, Length @ updates}],
   ProgressDisplay[updates, i, "Downloading images from the internet ......"]];
 ]];
@@ -130,12 +130,12 @@ Thulium`UpdateBuffer := With[{updates = Thulium`update`NewSongs}, Block[{song, a
     Do[
       song = updates[[i]];
       Check[
-        audio = AudioAdapt[Parse[localPath <> "Songs/" <> song <> ".tm"]];
-        Export[dataPath <> "Buffer/" <> song <> ".buffer", audio, "MP3"],
+        audio = AudioAdapt[Parse[$LocalPath <> "Songs/" <> song <> ".tm"]];
+        Export[$DataPath <> "Buffer/" <> song <> ".buffer", audio, "MP3"],
         KeyDropFrom[Thulium`update`BufferHash, song];
       ],
     {i, Length @ updates}];
-    Export[dataPath <> "Buffer.json", Thulium`update`BufferHash[[
+    Export[$DataPath <> "Buffer.json", Thulium`update`BufferHash[[
       Intersection[Keys @ Thulium`update`BufferHash, Keys @ Thulium`SongIndex]
     ]]],
   ProgressDisplay[updates, i, "Generating music buffer ......"]];

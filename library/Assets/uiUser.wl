@@ -1,39 +1,5 @@
 (* ::Package:: *)
 
-(* ::Input:: *)
-(*uiSetPath;*)
-
-
-uiSetPath:=DynamicModule[{path=defaultDataPath},
-	CreateDialog[Row[{
-		Spacer[96],
-		Column[{
-			Spacer[{48,48}],
-			Graphics[{logo},ImageSize->{512,Automatic}],
-			Spacer[1],
-			Caption[TextDict["ChooseBasePath"],"Title"],
-			Row[{
-				FileNameSetter[Dynamic[path],"Directory",
-					Appearance->buttonDisplay["Browse","Default"],
-					WindowTitle->TextDict[["ChooseBasePath"]]
-				],
-				Spacer[8],
-				InputField[
-					Dynamic[path],String,
-					BaseStyle->{FontSize->20},
-					ImageSize->{384,40},
-					ContinuousAction->True
-				],
-				Spacer[8],
-				button["Tick",Thulium`System`UserInfo[["DataPath"]]=path;DialogReturn[]]
-			},ImageSize->{512,48},Alignment->Center,ImageMargins->4],
-			Spacer[{48,48}]
-		},Alignment->Center],
-		Spacer[96]
-	}],WindowTitle->TextDict[["BasicSettings"]],Background->styleColor[["Background"]]];
-];
-
-
 uiSettings:=DynamicModule[{choices},
 	choices=UserInfo;
 	CreateDialog[Column[{Spacer[{40,40}],
@@ -52,7 +18,7 @@ uiSettings:=DynamicModule[{choices},
 				}]
 			},
 			{Caption[TextDict["ChooseLanguage"],"Text"],
-				RadioButtonBar[Dynamic@choices[["Language"]],langDict]}
+				RadioButtonBar[Dynamic@choices[["Language"]],LangDict]}
 			}
 		],Spacer[40]}],Spacer[1],
 		Row[{
@@ -66,7 +32,7 @@ uiSettings:=DynamicModule[{choices},
 			Button[TextDict[["Return"]],DialogReturn[homepage],ImageSize->150]
 		}],Spacer[{40,40}]
 	},Center,ItemSize->Full],
-	Background->styleColor[["Background"]],WindowTitle->TextDict[["Settings"]]]
+	Background->WindowBackground,WindowTitle->TextDict[["Settings"]]]
 ];
 
 
@@ -85,13 +51,13 @@ uiPlayer[song_]:=Block[
 		aspectRatio
 	},
 	Quiet @ Check[
-		audio=Import[dataPath<>"Buffer/"<>song<>".buffer","MP3"],
+		audio=Import[$DataPath<>"Buffer/"<>song<>".buffer","MP3"],
         Return[uiPlaylist[currentPlaylist]],
 	Import::nffil];
 	AudioStop[];
 	If[Thulium`SongIndex[[song,"Image"]]!="",
 		imageExist=True;
-		image=Import[dataPath<>"Images/"<>Thulium`SongIndex[[song,"Image"]]];
+		image=Import[$DataPath<>"Images/"<>Thulium`SongIndex[[song,"Image"]]];
 		aspectRatio=ImageAspectRatio[image];
 	];
 	$CurrentDuration=Duration[audio];
@@ -141,7 +107,7 @@ uiPlayer[song_]:=Block[
 			{Spacer[{60,60}]}
 		],Alignment->Center,ItemSize->Full],
 	Spacer[48]},Alignment->Center,ImageSize->Full],
-	Background->styleColor[["Background"]],WindowTitle->TextDict[["Playing"]]<>": "<>Thulium`SongIndex[[song,"SongName"]]];
+	Background->WindowBackground,WindowTitle->TextDict[["Playing"]]<>": "<>Thulium`SongIndex[[song,"SongName"]]];
 ];
 
 
@@ -160,7 +126,7 @@ uiAbout:=CreateDialog[Column[{Spacer[{40,40}],
 	Spacer[{20,20}],
 	Button[TextDict[["Return"]],DialogReturn[homepage],ImageSize->100],
 Spacer[{40,40}]},Center,ItemSize->Full],
-WindowTitle->TextDict[["About"]],Background->styleColor[["Background"]]];
+WindowTitle->TextDict[["About"]],Background->WindowBackground];
 
 
 (* ::Input:: *)
@@ -177,13 +143,13 @@ homepage:=Block[{pageCount, playlistsPaged},
         Row[{
           Row[{Spacer[40],Caption[TextDict["Thulium"],"BigTitle"]},Alignment->Left,ImageSize->320],
           Row[{
-            button["EnterPlaylist",DialogReturn[Thulium`PageIndex[["Main"]]=page;playlist;uiPlaylist[playlist]]],
+            SmartButton["EnterPlaylist",DialogReturn[Thulium`PageIndex[["Main"]]=page;playlist;uiPlaylist[playlist]]],
             Spacer[10],
-            button["About",DialogReturn[Thulium`PageIndex[["Main"]]=page;uiAbout]],
+            SmartButton["About",DialogReturn[Thulium`PageIndex[["Main"]]=page;uiAbout]],
             Spacer[10],
-            button["Settings",DialogReturn[Thulium`PageIndex[["Main"]]=page;uiSettings]],
+            SmartButton["Settings",DialogReturn[Thulium`PageIndex[["Main"]]=page;uiSettings]],
             Spacer[10],
-            button["Exit",DialogReturn[Thulium`PageIndex[["Main"]]=page;]],
+            SmartButton["Exit",DialogReturn[Thulium`PageIndex[["Main"]]=page;]],
             Spacer[40]
           },Alignment->Right,ImageSize->{400,60}]
         }],
@@ -203,11 +169,11 @@ homepage:=Block[{pageCount, playlistsPaged},
           ]],TrackedSymbols:>{page}],Spacer[60]
         }],
         Spacer[1],
-        uiPageSelector[Dynamic[page], pageCount],
+        PageSelector[Dynamic[page], pageCount],
         Spacer[{40,40}]
       }, Center, ItemSize->Full]],
       WindowTitle->TextDict[["Thulium"]],
-      Background->styleColor[["Background"]]
+      Background->WindowBackground
     ];
   ]
 ];
@@ -237,15 +203,15 @@ uiPlaylist[playlist_] := Block[{info, songList, songListPaged, pageCount},
             Spacer[40], Caption[info[["Title"]], "BigTitle"]
           }, Alignment -> Left, ImageSize -> 480],
           Row[{
-            button["Play", DialogReturn[Thulium`PageIndex[[playlist]] = page; uiPlayer[song]]],
+            SmartButton["Play", DialogReturn[Thulium`PageIndex[[playlist]] = page; uiPlayer[song]]],
             Spacer[10],
             If[UserInfo[["Developer"]] && playlist == "All", Row[{
-              button["Modify", DialogReturn[Thulium`PageIndex[[playlist]] = page; uiModifySong[song]]],
+              SmartButton["Modify", DialogReturn[Thulium`PageIndex[[playlist]] = page; uiModifySong[song]]],
               Spacer[10],
-              button["Add", DialogReturn[Thulium`PageIndex[[playlist]] = page; uiAddSong]],
+              SmartButton["Add", DialogReturn[Thulium`PageIndex[[playlist]] = page; uiAddSong]],
               Spacer[10]}],
             Nothing],
-            button["ArrowL", DialogReturn[Thulium`PageIndex[[playlist]] = page; homepage]],
+            SmartButton["ArrowL", DialogReturn[Thulium`PageIndex[[playlist]] = page; homepage]],
             Spacer[40]
           }, Alignment -> Right, ImageSize -> {480, 56}]
         }],
@@ -275,11 +241,11 @@ uiPlaylist[playlist_] := Block[{info, songList, songListPaged, pageCount},
           ]], TrackedSymbols :> {page}
         ], Spacer[60]}],
         Spacer[1],
-        uiPageSelector[Dynamic[page], pageCount],
+        PageSelector[Dynamic[page], pageCount],
         Spacer[{40, 40}]
       }, Center, ItemSize -> Full]],
       WindowTitle -> TagName[[info[["Type"]]]]<>" - "<>info[["Title"]],
-      Background -> styleColor[["Background"]]
+      Background -> WindowBackground
     ]
   ];
 ];

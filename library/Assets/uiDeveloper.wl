@@ -18,7 +18,7 @@ uiModifySong[song_]:=DynamicModule[{textInfo},
 			Button[TextDict[["Return"]],DialogReturn[refresh;uiPlaylist["All"]],ImageSize->150]}
 		}],Spacer[{20,20}]
 	},Center,ItemSize->Full,Spacings->1],
-	Background->styleColor[["Background"]],WindowTitle->TextDict[["ModifySong"]]];
+	Background->WindowBackground,WindowTitle->TextDict[["ModifySong"]]];
 ];
 
 
@@ -71,7 +71,7 @@ uiAddSong:=DynamicModule[{songPath,textInfo,candidates},
 		Spacer[20],
 		Button[TextDict[["Return"]],DialogReturn[refresh;uiPlaylist["All"]],ImageSize->150]}],
 	Spacer[{40,40}]},Center,ItemSize->Full,Spacings->1],
-	Background->styleColor[["Background"]],WindowTitle->TextDict[["AddSong"]]]
+	Background->WindowBackground,WindowTitle->TextDict[["AddSong"]]]
 ];
 
 
@@ -87,4 +87,4 @@ uiDeleteSong[song_]:=CreateDialog[Column[{"",
 		Button[TextDict[["Return"]],DialogReturn[uiModifySong[song]],ImageSize->100]			
 	}],""
 },Center,ItemSize->36],
-Background->styleColor[["Background"]],WindowTitle->TextDict[["DeleteSong"]]];
+Background->WindowBackground,WindowTitle->TextDict[["DeleteSong"]]];

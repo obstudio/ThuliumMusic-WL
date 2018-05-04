@@ -7,8 +7,13 @@ TagName::usage = "TagName";
 InstName::usage = "InstName";
 TextDict::usage = "TextDict";
 MsgDict::usage = "MsgDict";
+LangDict::usage = "LangDict";
+TagDict::usage = "TagDict";
 
 Begin["`Private`"];
+
+LangDict = Association @ Import[$LocalPath <> "language/Languages.json"];
+TagDict = Association /@ Association @ Import[$LocalPath <> "Tags.json"];
 
 RefreshLanguage := With[
   {langDataPath = $LocalPath <> "language/" <> UserInfo["Language"] <> "/"},
@@ -23,14 +28,14 @@ End[];
 EndPackage[];
 
 DeclarePackage["Thulium`Language`", {
-  "RefreshLanguage",
+  "RefreshLanguage", "LangDict", "TagDict",
   "TagName", "InstName", "TextDict", "MsgDict"
 }];
 
 
 BeginPackage["Thulium`Assets`", {"Thulium`System`"}];
 
-ColorDict::usage = "Thulium front end color settings.";
+WindowBackground::usage = "Thulium front end window background";
 Caption::usage = "Thulium front end captions.";
 Container::usage = "Dialog container framework.";
 $ListSize::usage = "ListSize";
@@ -38,7 +43,7 @@ $ListSize::usage = "ListSize";
 Begin["`Private`"];
 
 $ListSize = 16;
-ColorDict["WindowBackground"] = RGBColor[1, 1, 1];
+WindowBackground = RGBColor[1, 1, 1];
 
 StyleFont = If[$OperatingSystem === "MacOSX", "\:82f9\:65b9", "\:5fae\:8f6f\:96c5\:9ed1"];
 
@@ -79,5 +84,5 @@ End[];
 EndPackage[];
 
 DeclarePackage["Thulium`Assets`", {
-  "ColorDict", "Container", "Caption", "$ListSize"
+  "WindowBackground", "Container", "Caption", "$ListSize"
 }];

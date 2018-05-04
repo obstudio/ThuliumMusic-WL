@@ -87,8 +87,8 @@ Thulium`InitializePackage := Block[{packages},
       "Succeed: Initializing Thulium Kernel ",
       TemplateBox[{"(details)",
         GridBox[{
-          {"Version: ", RawDisplay[Thulium`$Version]},
-          If[Thulium`$Commit =!= "", {"Commit: ", RawDisplay[Thulium`$Commit]}, Nothing]
+          {"Version: ", RawDisplay[Thulium`System`$$Version]},
+          If[Thulium`$Commit =!= "", {"Commit: ", RawDisplay[Thulium`System`$$Commit]}, Nothing]
         }, ColumnAlignments -> {Center, Left}, ColumnSpacings -> 0],
       0.1}, "<Tooltip>"]
     }]
@@ -163,7 +163,7 @@ Thulium`CheckUpdate := With[
   Thulium`UpdateIndex;
   Thulium`UpdateImage;
   Thulium`UpdateBuffer;
-  DumpSave[dataPath <> "Index.mx", {
+  DumpSave[$DataPath <> "Index.mx", {
     Thulium`SongIndex,
     Thulium`ImageIndex,
     Thulium`PlaylistIndex

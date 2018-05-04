@@ -71,7 +71,7 @@ Thulium`MenuCell = Cell[BoxData @ RowBox[{(*
 Thulium`InitializePackage := Block[{packages},
   CleanMessages[2];
   DeclarePackage["Thulium`System`", {"UserInfo", "$UserPath", "$CloudPath", "$DataPath"}];
-  SetDirectory[localPath <> "library"];
+  SetDirectory[$LocalPath <> "library"];
   Monitor[
     packages = Join[
       Complement[FileNames["*.mx", "Paclet", Infinity], FileNames[".*.mx", "Paclet", Infinity]],
@@ -119,14 +119,14 @@ Thulium`InitializeParser := Block[{result, succeed, msgCells},
     
     succeed = Check[
       System`JS = StartExternalSession["NodeJS"];
-      result = ExternalEvaluate[System`JS, File[localPath <> "library/Thulium.js"]];
+      result = ExternalEvaluate[System`JS, File[$LocalPath <> "library/Thulium.js"]];
       DeleteObject[Drop[ExternalSessions[], -1]];
       True,
       $MessageList
     ];
     
     On[General::shdw];
-    Get[localPath <> "library/Adapter.wl"];
+    Get[$LocalPath <> "library/Adapter.wl"];
     Thulium`$Parser = True,
   MonitorDisplay["Initializing Node.js as external evaluator ......"]];
   

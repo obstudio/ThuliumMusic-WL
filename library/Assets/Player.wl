@@ -2,7 +2,7 @@
 
 uiPlayerControls := With[{StatusAlias = StatusAlias}, {
 	Row[{
-		Column[{Style[Dynamic[timeDisplay[$CurrentStream["Position"]]],20],Spacer[1]}],
+		Column[{Style[Dynamic[TimeDisplay[$CurrentStream["Position"]]],20],Spacer[1]}],
 		Spacer[8],
 		Magnify[
 			EventHandler[Dynamic@Graphics[{
@@ -14,7 +14,7 @@ uiPlayerControls := With[{StatusAlias = StatusAlias}, {
 			)}],
 		3.6],
 		Spacer[8],
-		Column[{Style[timeDisplay[$CurrentDuration],20],Spacer[1]}]
+		Column[{Style[TimeDisplay[$CurrentDuration],20],Spacer[1]}]
 	},ImageSize->Full,Alignment->Center],
 	Row[{
 		Module[{style="Default"},
@@ -87,7 +87,7 @@ uiPlayer[song_]:=Block[
 		Spacer[{40,40}]}]}],Nothing],Spacer[48],
 		Column[Join[{Spacer[{60,60}],
 			If[Thulium`SongIndex[[song,"Comment"]]!="",
-				If[textLength@Thulium`SongIndex[[song,"Comment"]]>16,
+				If[TextLength@Thulium`SongIndex[[song,"Comment"]]>16,
 					Column,Row
 				][{
 					Caption[Thulium`SongIndex[[song,"SongName"]],"Title"],

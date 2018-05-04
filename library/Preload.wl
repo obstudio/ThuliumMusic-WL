@@ -8,8 +8,8 @@ aboutTags = {"Version", "Producer", "Website"};
 langList = {"chs", "eng"};
 
 (* instruments *)
-instDict = Association @ Import[localPath <> "library/Config/Instrument.json"];
-percDict = Association @ Import[localPath <> "library/Config/Percussion.json"];
+instDict = Association @ Import[$LocalPath <> "library/Config/Instrument.json"];
+percDict = Association @ Import[$LocalPath <> "library/Config/Percussion.json"];
 instList = Keys @ instDict;
 percList = Keys @ percDict;
 

@@ -10,10 +10,10 @@
 NotebookFileLineBreakTest
 NotebookFileLineBreakTest
 NotebookDataPosition[       158,          7]
-NotebookDataLength[     11864,        296]
-NotebookOptionsPosition[      2878,         81]
-NotebookOutlinePosition[     11777,        295]
-CellTagsIndexPosition[     11684,        289]
+NotebookDataLength[     11699,        294]
+NotebookOptionsPosition[      2713,         79]
+NotebookOutlinePosition[     11612,        293]
+CellTagsIndexPosition[     11519,        287]
 WindowTitle->Thulium Music Player 2.3
 WindowFrame->ModelessDialog*)
 
@@ -32,20 +32,18 @@ Cell[BoxData[
    FontFamily->"Source Sans Pro",
    FontSize->24,
    FontColor->RGBColor[0.3, 0.5, 0.8]]}]], "Title",
- CellTags->"$title",ExpressionUUID->"5c17b153-5964-4a12-a5f3-270830a6c2a6"],
+ CellTags->"$title",ExpressionUUID->"e924c2a9-873d-45f4-8c64-59e61fb59337"],
 
 Cell[BoxData[
  RowBox[{
   TemplateBox[{4},
    "Spacer1"], 
-  TemplateBox[{"Start Thulium","Click to Start Thulium Music.",Hold[If[Length[
-         PacletManager`PacletCheckUpdate["QuantityUnits"]] != 0, 
-       PacletManager`PacletUpdate["QuantityUnits"]; Quit[]; Null]; 
-     Thulium`$Init = False; 
-     Thulium`$Parser = False; $CellContext`localPath = StringReplace[
-        NotebookDirectory[], "\\" -> "/"]; BeginPackage["Thulium`System`"]; 
+  TemplateBox[{
+   "Start Thulium","Click to Start Thulium Music.",Hold[
+    Thulium`$Init = False; Thulium`$Parser = False; 
      Thulium`System`$LocalPath = StringReplace[
-        NotebookDirectory[], "\\" -> "/"]; EndPackage[]; 
+        NotebookDirectory[], "\\" -> "/"]; BeginPackage["Thulium`System`"]; 
+     Thulium`System`$$LocalPath = Thulium`System`$LocalPath; EndPackage[]; 
      DeclarePackage["Thulium`System`", {"$LocalPath"}]; 
      SetDirectory[Thulium`System`$LocalPath]; If[
        Not[
@@ -60,7 +58,7 @@ Cell[BoxData[
          Evaluate[
           NotebookDirectory[]]]]]; Scan[Get, 
        FileNames[".*.mx", "library/Paclet", Infinity]]; Get[
-       StringJoin[$CellContext`localPath, "library/initialization.wl"]]; 
+       StringJoin[Thulium`System`$LocalPath, "library/initialization.wl"]]; 
      NotebookDelete[
        Cells[CellTags -> "$init"]]; SelectionMove[
        First[
@@ -77,7 +75,7 @@ Cell[BoxData[
    "LogoButton"], 
   TemplateBox[{4},
    "Spacer1"]}]], "Init",
- CellTags->"$init",ExpressionUUID->"cadb0c28-1d97-415c-9cf1-ed79039ae03c"]
+ CellTags->"$init",ExpressionUUID->"86f648b2-d8a3-44d6-833e-4b833913ebc7"]
 },
 Editable->False,
 Saveable->False,
@@ -279,24 +277,24 @@ NBVD3HugwQGs7ydUv2AjJLw1Sg6AlMnFN0LsC8NMr5TyAWtplCQ=
 (*CellTagsOutline
 CellTagsIndex->{
  "$title"->{
-  Cell[604, 21, 421, 13, 140, "Title",ExpressionUUID->"5c17b153-5964-4a12-a5f3-270830a6c2a6",
+  Cell[604, 21, 421, 13, 140, "Title",ExpressionUUID->"e924c2a9-873d-45f4-8c64-59e61fb59337",
    CellTags->"$title"]},
  "$init"->{
-  Cell[1028, 36, 1846, 43, 140, "Init",ExpressionUUID->"cadb0c28-1d97-415c-9cf1-ed79039ae03c",
+  Cell[1028, 36, 1681, 41, 140, "Init",ExpressionUUID->"86f648b2-d8a3-44d6-833e-4b833913ebc7",
    CellTags->"$init"]}
  }
 *)
 (*CellTagsIndex
 CellTagsIndex->{
- {"$title", 11411, 280},
- {"$init", 11542, 283}
+ {"$title", 11246, 278},
+ {"$init", 11377, 281}
  }
 *)
 (*NotebookFileOutline
 Notebook[{
-Cell[604, 21, 421, 13, 140, "Title",ExpressionUUID->"5c17b153-5964-4a12-a5f3-270830a6c2a6",
+Cell[604, 21, 421, 13, 140, "Title",ExpressionUUID->"e924c2a9-873d-45f4-8c64-59e61fb59337",
  CellTags->"$title"],
-Cell[1028, 36, 1846, 43, 140, "Init",ExpressionUUID->"cadb0c28-1d97-415c-9cf1-ed79039ae03c",
+Cell[1028, 36, 1681, 41, 140, "Init",ExpressionUUID->"86f648b2-d8a3-44d6-833e-4b833913ebc7",
  CellTags->"$init"]
 }
 ]

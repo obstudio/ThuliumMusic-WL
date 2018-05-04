@@ -10,21 +10,6 @@ ListSow[list_List, tag_String] := Scan[Sow[#, tag]&, list];
 ExternSheet[sheet_String] := Sequence @@ First @ StyleSheet[sheet];
 
 
-(* some functions *)
-completeText[raw_,arg_]:=StringReplace[raw,{
-	"&"~~i:DigitCharacter:>ToString[arg[[ToExpression@i]],FormatType->InputForm],
-	"$"~~i:DigitCharacter:>"\""<>arg[[ToExpression@i]]<>"\"",
-	"#"~~i:DigitCharacter:>StringRiffle[ToString[#,FormatType->InputForm]&/@arg[[ToExpression@i]],", "]
-}];
-caption[string_String]:=caption[string,"None",{}];
-caption[string_String,argument_List]:=caption[string,"None",argument];
-caption[string_String,style_String]:=caption[string,style,{}];
-caption[string_String,style_String,argument_List]:=Style[completeText[Which[
-	StringLength@string>0&&StringPart[string,1]=="_",text[[StringDrop[string,1]]],
-	True,string
-],argument],styleDict[[style]]];
-
-
 RenderLanguage[text_String, style_String] := RowBox @ StringCases[text, {
 	text$$__?(First @ ToCharacterCode[#, "Unicode"] < 8000&) :> StyleBox[text$$, style],
 	text$$__?(First @ ToCharacterCode[#, "Unicode"] >= 8000&) :> StyleBox[text$$, style <> "-chs"]
@@ -93,16 +78,4 @@ StringToDashing[str_] := With[
 		_,
 			Return @ {}
 	];
-];
-
-
-textLength[str_String] := 2 StringLength[str] - StringCount[str, Alternatives @ CharacterRange[32, 127]];
-timeDisplay[time_Quantity, levelspec_Integer:2] := With[
-	{sec = Floor[QuantityMagnitude[UnitConvert[time, "Seconds"]]]},
-	StringRiffle[{
-		If[StringLength[#] == 1, "0" <> #, #]&[IntegerString[Floor[sec / (60 ^ (levelspec - 1))], 10]],
-		Sequence @@ Table[
-			IntegerString[Floor[Mod[sec / (60 ^ (level - 1)), 60]], 10, 2],
-		{level, levelspec - 1, 1, -1}]
-	}, ":"]
 ];

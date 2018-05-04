@@ -33,18 +33,13 @@ With[
     }]}],
     
     InitializeThulium = Hold[
-      (* FIXME: to be optimized *)
-      If[Length[PacletCheckUpdate["QuantityUnits"]] != 0,
-        PacletUpdate["QuantityUnits"];
-        Quit[];
-      ];
       Thulium`$Init = False;
       Thulium`$Parser = False;
-      localPath = StringReplace[NotebookDirectory[], "\\"->"/"];
-      BeginPackage["Thulium`System`"];
       $LocalPath = StringReplace[NotebookDirectory[], "\\"->"/"];
+      BeginPackage["Thulium`System`"];
+      $$LocalPath = $LocalPath;
       EndPackage[];
-      DeclarePackage["Thulium`System`", {"$LocalPath"}];
+      DeclarePackage["Thulium`System`", {"$$LocalPath"}];
       SetDirectory[$LocalPath];
       If[!MemberQ[
         CurrentValue[$FrontEnd, {"NotebookSecurityOptions", "TrustedPath"}],
@@ -54,7 +49,7 @@ With[
         FrontEnd`FileName[{$RootDirectory}, Evaluate @ NotebookDirectory[]]
       ]];
       Scan[Get, FileNames[".*.mx", "library/Paclet", Infinity]];
-      Get[localPath <> "library/initialization.wl"];
+      Get[$LocalPath <> "library/initialization.wl"];
       NotebookDelete[Cells[CellTags -> "$init"]];
       SelectionMove[First @ Cells[CellTags -> "$title"], After, Cell, AutoScroll -> False];
       NotebookWrite[EvaluationNotebook[], {
@@ -329,8 +324,8 @@ With[
     DynamicEvaluationTimeout -> 30
   ];
   
-  NotebookSave[Thulium`MainNotebook, localPath <> "Thulium.nb"];
+  NotebookSave[Thulium`MainNotebook, $LocalPath <> "Thulium.nb"];
   NotebookClose[Thulium`MainNotebook];
-  NotebookOpen[localPath <> "Thulium.nb"];
+  NotebookOpen[$LocalPath <> "Thulium.nb"];
 ]
 

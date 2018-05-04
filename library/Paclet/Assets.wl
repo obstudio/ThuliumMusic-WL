@@ -12,11 +12,11 @@ TagDict::usage = "TagDict";
 
 Begin["`Private`"];
 
-LangDict = Association @ Import[$LocalPath <> "language/Languages.json"];
-TagDict = Association /@ Association @ Import[$LocalPath <> "Tags.json"];
+LangDict = Association @ Import[$$LocalPath <> "language/Languages.json"];
+TagDict = Association /@ Association @ Import[$$LocalPath <> "Tags.json"];
 
 RefreshLanguage := With[
-  {langDataPath = $LocalPath <> "language/" <> UserInfo["Language"] <> "/"},
+  {langDataPath = $$LocalPath <> "language/" <> UserInfo["Language"] <> "/"},
   TagName = Association @ Import[langDataPath <> "GeneralTags.json"];
   InstName = Association @ Import[langDataPath <> "Instruments.json"];
   TextDict = Association @ Import[langDataPath <> "GeneralTexts.json"];
@@ -38,11 +38,13 @@ BeginPackage["Thulium`Assets`", {"Thulium`System`"}];
 WindowBackground::usage = "Thulium front end window background";
 Caption::usage = "Thulium front end captions.";
 Container::usage = "Dialog container framework.";
-$ListSize::usage = "ListSize";
+TextLength::usage = "TextLength";
+TimeDisplay::usage = "TimeDisplay";
+ListSize::usage = "ListSize";
 
 Begin["`Private`"];
 
-$ListSize = 16;
+ListSize = 16;
 WindowBackground = RGBColor[1, 1, 1];
 
 StyleFont = If[$OperatingSystem === "MacOSX", "\:82f9\:65b9", "\:5fae\:8f6f\:96c5\:9ed1"];
@@ -79,10 +81,28 @@ Container[content_, {l_, r_}, {b_, t_}] := Column[{
   Spacer[{1, t}]
 }];
 
+(* Using CJK Unified Ideographs from Unicode 5.0 *)
+(* Full-width characters range: \u2E80 - \uFE4F *)
+TextLength[str_String] := With[
+  {charCode = ToCharacterCode[str, "Unicode"]},
+  Length[charCode] + Length @ Select[charCode, 11904 <= # <= 65103&]
+];
+
+TimeDisplay[time_Quantity, levelspec_Integer:2] := With[
+  {sec = Floor[QuantityMagnitude[time, "Seconds"]]},
+  StringRiffle[{
+  If[StringLength[#] == 1, "0" <> #, #]&[IntegerString[Floor[sec / (60 ^ (levelspec - 1))], 10]],
+    Sequence @@ Table[
+      IntegerString[Floor[Mod[sec / (60 ^ (level - 1)), 60]], 10, 2],
+    {level, levelspec - 1, 1, -1}]
+  }, ":"]
+];
+
 End[];
 
 EndPackage[];
 
 DeclarePackage["Thulium`Assets`", {
-  "WindowBackground", "Container", "Caption", "$ListSize"
+  "WindowBackground", "Container", "Caption", "$ListSize",
+  "TextLength", "TimeDisplay"
 }];

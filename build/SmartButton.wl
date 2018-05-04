@@ -154,10 +154,26 @@ SmartButtonData = <|
 |>;
 
 SmartButtonColor = <|
-  "Basic" -> <|"Grounding"->RGBColor[0.9764705882352941, 0.9764705882352941, 0.9764705882352941],"Margin"->RGBColor[0., 0.6862745098039216, 0.9411764705882353],"Body"->RGBColor[0., 0.6862745098039216, 0.9411764705882353]|>,
-  "Clicked" -> <|"Grounding"->RGBColor[0., 0.6862745098039216, 0.9411764705882353],"Margin"->RGBColor[0., 0.6862745098039216, 0.9411764705882353],"Body"->RGBColor[0.9764705882352941, 0.9764705882352941, 0.9764705882352941]|>,
-  "Mouseover" -> <|"Grounding"->RGBColor[0.6666666666666666, 0.9098039215686274, 1.],"Margin"->RGBColor[0., 0.6862745098039216, 0.9411764705882353],"Body"->RGBColor[0., 0.6862745098039216, 0.9411764705882353]|>,
-  "Disabled" -> <|"Grounding"->RGBColor[0.9764705882352941, 0.9764705882352941, 0.9764705882352941],"Margin"->RGBColor[0.7843137254901961, 0.7843137254901961, 0.7843137254901961],"Body"->RGBColor[0.7843137254901961, 0.7843137254901961, 0.7843137254901961]|>
+  "Basic" -> <|
+    "Grounding" -> RGBColor[1, 1, 1],
+    "Margin" -> RGBColor[0, 0.7, 0.94],
+    "Body" -> RGBColor[0, 0.7, 0.94]
+  |>,
+  "Clicked" -> <|
+    "Grounding" -> RGBColor[0, 0.7, 0.94],
+    "Margin" -> RGBColor[0, 0.7, 0.94],
+    "Body" -> RGBColor[1, 1, 1]
+  |>,
+  "Mouseover" -> <|
+    "Grounding" -> RGBColor[0.7, 0.9, 1],
+    "Margin" -> RGBColor[0, 0.7, 0.94],
+    "Body" -> RGBColor[0, 0.7, 0.94]
+  |>,
+  "Disabled" -> <|
+    "Grounding" -> RGBColor[1, 1, 1],
+    "Margin" -> RGBColor[0.6, 0.6, 0.6],
+    "Body" -> RGBColor[0.8, 0.8, 0.8]
+  |>
 |>;
 
 SmartButtonDisplay[name_, style_] := If[style == "Default",

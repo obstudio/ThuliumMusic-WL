@@ -72,16 +72,4 @@ EndPackage[];
 DeclarePackage["Thulium`SetterList`", {"SetterList"}];
 
 
-DumpSave[$LocalPath <> "/library/Paclet/SetterList.mx", "Thulium`SetterList`"];
-
-
-(* ::Input:: *)
-(*Thulium`SetterList`Private`ListItemDisplay[111111,"Default",0]//Graphics*)
-
-
-(* ::Input:: *)
-(*tmpsel = 1;*)
-
-
-(* ::Input:: *)
-(*Pane[SetterList[Dynamic@tmpsel, {Row[{StringRepeat["123",10]}],StringRepeat["345",10],StringRepeat["567",10]}],BaseStyle->Background->White]*)
+DumpSave[$LocalPath <> "library/Paclet/SetterList.mx", "Thulium`SetterList`"];

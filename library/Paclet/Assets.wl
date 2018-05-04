@@ -12,11 +12,11 @@ TagDict::usage = "TagDict";
 
 Begin["`Private`"];
 
-LangDict = Association @ Import[$$LocalPath <> "language/Languages.json"];
-TagDict = Association /@ Association @ Import[$$LocalPath <> "Tags.json"];
+LangDict = Association @ Import[$LocalPath <> "language/Languages.json"];
+TagDict = Association /@ Association @ Import[$LocalPath <> "Tags.json"];
 
 RefreshLanguage := With[
-  {langDataPath = $$LocalPath <> "language/" <> UserInfo["Language"] <> "/"},
+  {langDataPath = $LocalPath <> "language/" <> UserInfo["Language"] <> "/"},
   TagName = Association @ Import[langDataPath <> "GeneralTags.json"];
   InstName = Association @ Import[langDataPath <> "Instruments.json"];
   TextDict = Association @ Import[langDataPath <> "GeneralTexts.json"];

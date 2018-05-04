@@ -1,6 +1,6 @@
 (* ::Package:: *)
 
-(* ::Subsubsection::Closed:: *)
+(* ::Subsubsection:: *)
 (*Parser*)
 
 
@@ -166,7 +166,7 @@ MIDIConstruct[musicClip_,rate_]:=Block[
 ];
 
 
-(* ::Subsubsection::Closed:: *)
+(* ::Subsubsection:: *)
 (*Adapter*)
 
 

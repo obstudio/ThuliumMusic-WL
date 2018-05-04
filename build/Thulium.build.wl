@@ -33,13 +33,12 @@ With[
     }]}],
     
     InitializeThulium = Hold[
-      Thulium`$Init = False;
-      Thulium`$Parser = False;
-      $LocalPath = StringReplace[NotebookDirectory[], "\\"->"/"];
       BeginPackage["Thulium`System`"];
-      $$LocalPath = $LocalPath;
+      Thulium`System`$Init = False;
+      Thulium`System`$Parser = False;
+      Thulium`System`$LocalPath = StringReplace[NotebookDirectory[], "\\"->"/"];
       EndPackage[];
-      DeclarePackage["Thulium`System`", {"$$LocalPath"}];
+      DeclarePackage["Thulium`System`", {"$LocalPath"}];
       SetDirectory[$LocalPath];
       If[!MemberQ[
         CurrentValue[$FrontEnd, {"NotebookSecurityOptions", "TrustedPath"}],
@@ -53,7 +52,7 @@ With[
       NotebookDelete[Cells[CellTags -> "$init"]];
       SelectionMove[First @ Cells[CellTags -> "$title"], After, Cell, AutoScroll -> False];
       NotebookWrite[EvaluationNotebook[], {
-        Thulium`MenuCell,
+        MenuCell,
         Cell[BoxData @ Null, "Hidden", CellTags -> "$monitor"],
         Cell[BoxData @ TemplateBox[{
           "Welcome to Thulium Music!"
@@ -328,4 +327,7 @@ With[
   NotebookClose[Thulium`MainNotebook];
   NotebookOpen[$LocalPath <> "Thulium.nb"];
 ]
+
+
+
 

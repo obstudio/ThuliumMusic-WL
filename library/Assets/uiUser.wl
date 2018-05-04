@@ -11,12 +11,6 @@ uiSettings:=DynamicModule[{choices},
 					True->Caption[TextDict["Developer"],"Text"]
 				}]
 			},
-			{Caption[TextDict["ChoosePlayer"],"Text"],
-				RadioButtonBar[Dynamic@choices[["Player"]],{
-					"Old"->Caption[TextDict["OldVersion"],"Text"],
-					"New"->Caption[TextDict["NewVersion"],"Text"]
-				}]
-			},
 			{Caption[TextDict["ChooseLanguage"],"Text"],
 				RadioButtonBar[Dynamic@choices[["Language"]],LangDict]}
 			}
@@ -38,77 +32,6 @@ uiSettings:=DynamicModule[{choices},
 
 (* ::Input:: *)
 (*uiSettings;*)
-
-
-(* ::Input:: *)
-(*uiPlayer["Touhou/TH11-Chireiden/3rd_Eye"]*)
-
-
-uiPlayer[song_]:=Block[
-	{
-		image, audio,
-		imageExist=False,
-		aspectRatio
-	},
-	Quiet @ Check[
-		audio=Import[$DataPath<>"Buffer/"<>song<>".buffer","MP3"],
-        Return[uiPlaylist[currentPlaylist]],
-	Import::nffil];
-	AudioStop[];
-	If[Thulium`SongIndex[[song,"Image"]]!="",
-		imageExist=True;
-		image=Import[$DataPath<>"Images/"<>Thulium`SongIndex[[song,"Image"]]];
-		aspectRatio=ImageAspectRatio[image];
-	];
-	$CurrentDuration=Duration[audio];
-	$CurrentStream=AudioPlay[audio];
-	CreateDialog[Row[{
-		If[imageExist,Row[{Spacer[48],Column[{Spacer[{40,40}],
-			Tooltip[ImageEffect[Image[image,ImageSize->Piecewise[{
-					{{Automatic,600},aspectRatio>2},
-					{{480,Automatic},aspectRatio<1/2},
-					{{Automatic,400},aspectRatio<=1&&aspectRatio>1/2},
-					{{360,Automatic},aspectRatio>1&&aspectRatio<2}
-				}]],{"FadedFrame"}],
-				If[Thulium`ImageIndex[[Thulium`SongIndex[[song,"Image"]]]]!=<||>,
-					Column[If[KeyExistsQ[Thulium`ImageIndex[[Thulium`SongIndex[[song,"Image"]]]],#],
-						TagName[[#]]<>": "<>Thulium`ImageIndex[[Thulium`SongIndex[[song,"Image"]],#]],
-						Nothing
-					]&/@imageTags],
-					TextDict[["NoImageInfo"]]
-				]
-			],
-		Spacer[{40,40}]}]}],Nothing],Spacer[48],
-		Column[Join[{Spacer[{60,60}],
-			If[Thulium`SongIndex[[song,"Comment"]]!="",
-				If[textLength@Thulium`SongIndex[[song,"Comment"]]>16,
-					Column,Row
-				][{
-					Caption[Thulium`SongIndex[[song,"SongName"]],"Title"],
-					Caption[" ("<>Thulium`SongIndex[[song,"Comment"]]<>")","TitleCmt"]
-				},Alignment->Center],
-				Caption[Thulium`SongIndex[[song,"SongName"]],"Title"]
-			],
-			Spacer[1],
-			Column[If[Thulium`SongIndex[[song,#]]!="",
-				Caption[TagName[[#]]<>": "<>Thulium`SongIndex[[song,#]],"Text"],
-				Nothing
-			]&/@{"Origin","Composer","Lyricist","Adapter"},Alignment->Center],
-			Spacer[1],
-			If[Thulium`SongIndex[[song,"Abstract"]]!="",
-				Column[Caption[#,"Text"]&/@StringSplit[Thulium`SongIndex[[song,"Abstract"]],"\n"],Center],
-				Nothing
-			],
-			Spacer[1]},
-			Switch[UserInfo[["Player"]],
-				"Old",uiPlayerControlsOld,
-				"New",uiPlayerControlsNew
-			],
-			{Spacer[{60,60}]}
-		],Alignment->Center,ItemSize->Full],
-	Spacer[48]},Alignment->Center,ImageSize->Full],
-	Background->WindowBackground,WindowTitle->TextDict[["Playing"]]<>": "<>Thulium`SongIndex[[song,"SongName"]]];
-];
 
 
 uiAbout:=CreateDialog[Column[{Spacer[{40,40}],

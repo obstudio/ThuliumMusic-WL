@@ -23,6 +23,7 @@ $LocalPath::usage = "Thulium Music local path";
 $UserPath::usage = "Thulium Music user path";
 $CloudPath::usage = "Thulium Music cloud path";
 $DataPath::usage = "Thulium Music data path";
+StatusAlias::usage = "StatusAlias";
 
 Begin["`Private`"];
 
@@ -55,39 +56,38 @@ userInfoTemplate=<|
   "NodeJS" -> False,
   "Language" -> "chs",
   "Developer" -> False,
-  "Player" -> "New",
   "DataPath" -> defaultDataPath
 |>;
 
 uiSetPath := Module[{path = defaultDataPath},
-	CreateDialog[Row[{
-		Spacer[96],
-		Column[{
-			Spacer[{48,48}],
-			Graphics[{logo},ImageSize->{512,Automatic}],
-			Spacer[1],
-			Caption[TextDict["ChooseBasePath"],"Title"],
-			Row[{
-				FileNameSetter[Dynamic[path],"Directory",
-					Appearance -> Thulium`SmartButton`Private`SmartButtonDisplay["Browse","Default"],
-					WindowTitle -> TextDict[["ChooseBasePath"]]
-				],
-				Spacer[8],
-				InputField[
-					Dynamic[path],String,
-					BaseStyle->{FontSize->20},
-					ImageSize->{384,40},
-					ContinuousAction->True
-				],
-				Spacer[8],
-				SmartButton["Tick",UserInfo[["DataPath"]]=path;DialogReturn[]]
-			},ImageSize->{512,48},Alignment->Center,ImageMargins->4],
-			Spacer[{48,48}]
-		},Alignment->Center],
-		Spacer[96]
-	}],
-	WindowTitle->TextDict[["BasicSettings"]],
-	Background->Thulium`Assets`WindowBackground];
+  CreateDialog[Row[{
+    Spacer[96],
+    Column[{
+      Spacer[{48,48}],
+      Graphics[{logo},ImageSize->{512,Automatic}],
+      Spacer[1],
+      Caption[TextDict["ChooseBasePath"],"Title"],
+      Row[{
+        FileNameSetter[Dynamic[path],"Directory",
+          Appearance -> Thulium`SmartButton`Private`SmartButtonDisplay["Browse","Default"],
+          WindowTitle -> TextDict[["ChooseBasePath"]]
+        ],
+        Spacer[8],
+        InputField[
+          Dynamic[path],String,
+          BaseStyle->{FontSize->20},
+          ImageSize->{384,40},
+          ContinuousAction->True
+        ],
+        Spacer[8],
+        SmartButton["Tick",UserInfo[["DataPath"]]=path;DialogReturn[]]
+      },ImageSize->{512,48},Alignment->Center,ImageMargins->4],
+      Spacer[{48,48}]
+    },Alignment->Center],
+    Spacer[96]
+  }],
+  WindowTitle->TextDict[["BasicSettings"]],
+  Background->Thulium`Assets`WindowBackground];
 ];
 
 $UserPath = StringReplace[FileNameDrop[$UserBaseDirectory], {
@@ -125,7 +125,7 @@ End[];
 End[];
 
 DeclarePackage["Thulium`System`", {
-  "$$Version", "$$Commit", "$$Build"
+  "$$Version", "$$Commit", "$$Build", "StatusAlias"
 }]
 
 

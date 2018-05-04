@@ -4,7 +4,7 @@ Thulium`Interface`Playlist[playlist_] := Block[
   {info, length, songList, indexList, pageCount},
   info = Thulium`PlaylistIndex[playlist];
   length = Length @ info["SongList"];
-  pageCount = Ceiling[length / 16];
+  pageCount = Ceiling[length / $ListSize];
   songList = Partition["Song" /. info["SongList"], UpTo @ Ceiling[length / pageCount]];
   indexList = Partition["Index" /. info["SongList"], UpTo @ Ceiling[length / pageCount]];
   If[Thulium`PageIndex[playlist] > pageCount, Thulium`PageIndex[playlist] = pageCount];
@@ -34,23 +34,27 @@ Thulium`Interface`Playlist[playlist_] := Block[
             }, Alignment -> Left, ImageSize -> 800]
           ],
           Spacer[20],
-          Dynamic @ With[{
-            data = Table[
+          Dynamic[
+            SetterList[Dynamic[index], Table[
               Row[{
                 Row[{
                   Spacer[8],
                   If[indexWidth > 0,
                     Row[{
-                      caption[indexList[[page, id]], "SongIndex"],
+                      Caption[indexList[[page, id]], "SongIndex"],
                       Spacer[16]
                     }, ImageSize -> indexWidth, Alignment -> Center],
                     Spacer[4]
                   ],
-                  caption[Thulium`SongIndex[songList[[page, id]], "SongName"], "SongName"]
-                }]
-              }, Alignment -> Center, ImageSize -> {880, 20}],
-            {id, Length @ songList[[page]]}]
-          }, SetterList[Dynamic[index], data]],
+                  Caption[Thulium`SongIndex[songList[[page, id]], "SongName"], "SongName"]
+                }, Alignment -> Left, ImageSize -> 480],
+                Row[{
+                  Row[{"Right"}, Alignment -> Center],
+                  Spacer[8]
+                }, Alignment -> Right, ImageSize -> 480]
+              }, Alignment -> Center, ImageSize -> {960, 32}],
+            {id, Length @ songList[[page]]}]],
+          TrackedSymbols :> {page}],
           Spacer[20],
           PageSelector[Dynamic[page], pageCount]
         }, Center]

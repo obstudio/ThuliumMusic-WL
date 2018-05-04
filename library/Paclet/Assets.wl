@@ -33,9 +33,11 @@ BeginPackage["Thulium`Assets`", {"Thulium`System`"}];
 ColorDict::usage = "Thulium front end color settings.";
 Caption::usage = "Thulium front end captions.";
 Container::usage = "Dialog container framework.";
+$ListSize::usage = "ListSize";
 
 Begin["`Private`"];
 
+$ListSize = 16;
 ColorDict["WindowBackground"] = RGBColor[1, 1, 1];
 
 StyleFont = If[$OperatingSystem === "MacOSX", "\:82f9\:65b9", "\:5fae\:8f6f\:96c5\:9ed1"];
@@ -77,5 +79,5 @@ End[];
 EndPackage[];
 
 DeclarePackage["Thulium`Assets`", {
-  "ColorDict", "Container", "Caption"
+  "ColorDict", "Container", "Caption", "$ListSize"
 }];

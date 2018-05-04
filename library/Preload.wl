@@ -1,40 +1,5 @@
 (* ::Package:: *)
 
-Thulium`$Version = "2.3";
-If[DirectoryQ[localPath <> ".git"], 
-  With[{ref = StringCases[Import[localPath <> ".git/HEAD"], RegularExpression["^ref: (.+)$"] :> "$1"]},
-    Thulium`$Commit = StringTake[Import[localPath <> ".git/" <> ref], 7];
-  ],
-  Thulium`$Commit = "";
-];
-
-
-Switch[$VersionNumber,
-	11.2, StatusAlias = "State",
-	11.3, StatusAlias = "Status",
-	_,
-		CreateDialog[{
-			TextCell["Sorry, but your Mathematica isn't updated enough."],
-			TextCell["Try to install Mathematica with version no less than 11.2."],
-			DefaultButton[]
-		}];
-		Abort[];
-];
-
-
-dirCreate[path_] := If[!DirectoryQ[path], CreateDirectory[path]];
-jsonCreate[path_] := If[!FileExistsQ[path], Export[path, {}]];
-
-
-refreshLanguage := With[
-  {langDataPath=localPath<>"language/"<>userInfo[["Language"]]<>"/"},
-  tagName=Association@Import[langDataPath<>"GeneralTags.json"];
-  instrName=Association@Import[langDataPath<>"Instruments.json"];
-  text=Association@Import[langDataPath<>"GeneralTexts.json"];
-  msgData=Association@Import[langDataPath<>"Messages.json"];
-];
-
-
 (* tags *)
 textInfoTags = {"SongName", "Lyricist", "Composer", "Adapter", "Comment", "Abstract", "Origin"};
 otherInfoTags = {"Image", "Uploader", "Tags"};
@@ -43,90 +8,136 @@ aboutTags = {"Version", "Producer", "Website"};
 langList = {"chs", "eng"};
 
 (* instruments *)
-instDict = Association @ Import[localPath <> "library/Config/Instrument.json"];
-percDict = Association @ Import[localPath <> "library/Config/Percussion.json"];
+instDict = Association @ Import[$LocalPath <> "library/Config/Instrument.json"];
+percDict = Association @ Import[$LocalPath <> "library/Config/Percussion.json"];
 instList = Keys @ instDict;
 percList = Keys @ percDict;
 
-(* local data *)
-colorData=Association@Import[localPath<>"library/Assets/Controls/color.json"];                               (* colors *)
-styleColor=RGBColor/@Association@colorData[["StyleColor"]];
-buttonColor=RGBColor/@#&/@Association/@Association@colorData[["ButtonColor"]];
-pageSelectorColor=RGBColor/@#&/@Association/@Association@colorData[["PageSelectorColor"]];
-styleData=Association/@Association@Import[localPath<>"library/Assets/Controls/style.json"];                  (* styles *)
-styleDict=Normal@Module[{outcome={}},
-	If[KeyExistsQ[#,"Size"],AppendTo[outcome,FontSize->#[["Size"]]]];
-	If[KeyExistsQ[#,"Family"],AppendTo[outcome,FontFamily->#[["Family"]]]];
-	If[KeyExistsQ[#,"Weight"],AppendTo[outcome,FontWeight->ToExpression@#[["Weight"]]]];
-	If[KeyExistsQ[#,"Color"],AppendTo[outcome,FontColor->styleColor[[#[["Color"]]]]]];
-outcome]&/@styleData;
-langDict=Association@Import[localPath<>"language/Languages.json"];                      (* languages *)
-tagDict=Association/@Association@Import[localPath<>"Tags.json"];
 
+Begin["Thulium`System`"];
 
-version = 509;
-cloudPath = "http://qymp.ob-studio.cn/assets/";
+Begin["`Private`"];
+
+$$Version = "2.3";
+$$Build = 701;
+If[DirectoryQ[$LocalPath <> ".git"], 
+  With[{ref = StringCases[Import[$LocalPath <> ".git/HEAD"], RegularExpression["^ref: (.+)$"] :> "$1"]},
+    $$Commit = StringTake[Import[$LocalPath <> ".git/" <> ref], 7];
+  ],
+  $$Commit = "";
+];
+
+Switch[$VersionNumber,
+  11.2, StatusAlias = "State",
+  11.3, StatusAlias = "Status",
+  _,
+  CreateDialog[{
+    TextCell["Sorry, but your Mathematica isn't updated enough."],
+    TextCell["Try to install Mathematica with version no less than 11.2."],
+    DefaultButton[]
+  }];
+  Abort[];
+];
+
+$CloudPath = "http://qymp.ob-studio.cn/assets/";
 defaultDataPath = StringReplace[FileNameDrop[$BaseDirectory], "\\" -> "/"] <> "/ObStudio/QYMP/";
 If[!DirectoryQ[defaultDataPath], CreateDirectory[defaultDataPath]];
 userInfoTemplate=<|
-	"Version" -> version,
-	"NodeJS" -> False,
-	"Language" -> "chs",
-	"Developer" -> False,
-	"Player" -> "New",
-	"DataPath" -> defaultDataPath
+  "Version" -> $$Build,
+  "NodeJS" -> False,
+  "Language" -> "chs",
+  "Developer" -> False,
+  "DataPath" -> defaultDataPath
 |>;
 
-
-userPath = StringReplace[FileNameDrop[$UserBaseDirectory], {"\\" -> "/", "Roaming"~~EndOfString -> "Local"}] <> "/ObStudio/Thulium/";
-If[!DirectoryQ[userPath] || !FileExistsQ[userPath <> "Default.json"],
-	(* initial use *)
-	Quiet @ CreateDirectory[userPath];
-	userInfo = userInfoTemplate;
-	refreshLanguage;
-	uiSetPath;
-	Export[userPath <> "Default.json", userInfo],
-	(* general case *)
-	userInfo = Association @ Import[userPath <> "Default.json"];
-	refreshLanguage;
-	If[userInfo[["Version"]] < version,
-		Scan[
-			If[!KeyExistsQ[userInfo, #], AppendTo[userInfo, # -> userInfoTemplate[[#]]]]&,
-			Keys @ userInfoTemplate
-		];
-		userInfo[["Version"]] = version;
-		Export[userPath <> "Default.json", userInfo];
-	];
-];
-If[!FileExistsQ[userPath <> "Favorite.json"], Export[userPath <> "Favorite.json", {}]];
-favorite = Import[userPath <> "Favorite.json"];
-If[!FileExistsQ[userPath <> "WorkBench.nb"], Export[userPath <> "WorkBench.nb", WorkBenchTemplate]];
-
-
-(* program data *)
-dataPath = userInfo[["DataPath"]];
-dirCreate[dataPath];
-dirCreate[dataPath <> "buffer/"];
-dirCreate[dataPath <> "images/"];
-jsonCreate[dataPath <> "Buffer.json"];
-jsonCreate[dataPath <> "Image.json"];
-If[!FileExistsQ[dataPath <> "Index.mx"],
-  Thulium`SongIndex = <||>;
-  Thulium`PlaylistIndex = <||>;
-  Thulium`ImageIndex = <||>;
-  Thulium`PageIndex = <|"Main" -> 1|>;
-  DumpSave[dataPath <> "Index.mx", {
-    Thulium`SongIndex, Thulium`PlaylistIndex, Thulium`ImageIndex
+uiSetPath := Module[{path = defaultDataPath},
+  CreateDialog[Row[{
+    Spacer[96],
+    Column[{
+      Spacer[{48,48}],
+      Graphics[{logo},ImageSize->{512,Automatic}],
+      Spacer[1],
+      Caption[TextDict["ChooseBasePath"],"Title"],
+      Row[{
+        FileNameSetter[Dynamic[path],"Directory",
+          Appearance -> Thulium`SmartButton`Private`SmartButtonDisplay["Browse","Default"],
+          WindowTitle -> TextDict[["ChooseBasePath"]]
+        ],
+        Spacer[8],
+        InputField[
+          Dynamic[path],String,
+          BaseStyle->{FontSize->20},
+          ImageSize->{384,40},
+          ContinuousAction->True
+        ],
+        Spacer[8],
+        SmartButton["Tick",UserInfo[["DataPath"]]=path;DialogReturn[]]
+      },ImageSize->{512,48},Alignment->Center,ImageMargins->4],
+      Spacer[{48,48}]
+    },Alignment->Center],
+    Spacer[96]
   }],
-  Get[dataPath <> "Index.mx"];
-  If[Head[Thulium`SongIndex] =!= Association, Thulium`SongIndex = <||>];
-  If[Head[Thulium`ImageIndex] =!= Association, Thulium`ImageIndex = <||>];
-  If[Head[Thulium`PlaylistIndex] =!= Association, Thulium`PlaylistIndex = <||>];
+  WindowTitle->TextDict[["BasicSettings"]],
+  Background->Thulium`Assets`WindowBackground];
+];
+
+$UserPath = StringReplace[FileNameDrop[$UserBaseDirectory], {
+  "\\" -> "/",
+  RegularExpression["Roaming$"] -> "Local"
+}] <> "/ObStudio/Thulium/";
+
+If[!DirectoryQ[$UserPath] || !FileExistsQ[$UserPath <> "Default.json"],
+  (* initial use *)
+  Quiet @ CreateDirectory[$UserPath];
+  UserInfo = userInfoTemplate;
+  RefreshLanguage;
+  uiSetPath;
+  Export[$UserPath <> "Default.json", UserInfo],
+  (* general case *)
+  UserInfo = Association @ Import[$UserPath <> "Default.json"];
+  RefreshLanguage;
+  If[UserInfo["Version"] < $$Build,
+    Scan[
+      If[!KeyExistsQ[UserInfo, #], AppendTo[UserInfo, # -> userInfoTemplate[[#]]]]&,
+      Keys @ userInfoTemplate
+    ];
+    UserInfo["Version"] = $$Build;
+    Export[$UserPath <> "Default.json", UserInfo];
+  ];
+];
+
+If[!FileExistsQ[$UserPath <> "Favorite.json"], Export[$UserPath <> "Favorite.json", {}]];
+favorite = Import[$UserPath <> "Favorite.json"];
+
+$DataPath = UserInfo["DataPath"];
+
+dirCreate[path_] := If[!DirectoryQ[path], CreateDirectory[path]];
+jsonCreate[path_] := If[!FileExistsQ[path], Export[path, {}]];
+(* program data *)
+dirCreate[$DataPath];
+dirCreate[$DataPath <> "buffer/"];
+dirCreate[$DataPath <> "images/"];
+jsonCreate[$DataPath <> "Buffer.json"];
+jsonCreate[$DataPath <> "Image.json"];
+If[!FileExistsQ[$DataPath <> "Index.mx"],
+  SongIndex = <||>;
+  PlaylistIndex = <||>;
+  ImageIndex = <||>;
+  Thulium`PageIndex = <|"Main" -> 1|>;
+  DumpSave[$DataPath <> "Index.mx", {
+    SongIndex, PlaylistIndex, ImageIndex
+  }],
+  Get[$DataPath <> "Index.mx"];
+  If[Head[SongIndex] =!= Association, SongIndex = <||>];
+  If[Head[ImageIndex] =!= Association, ImageIndex = <||>];
+  If[Head[PlaylistIndex] =!= Association, PlaylistIndex = <||>];
   Thulium`PageIndex = Prepend[
-    AssociationMap[1&, Keys @ Thulium`PlaylistIndex],
+    AssociationMap[1&, Keys @ PlaylistIndex],
     {"Main" -> 1}
   ];
 ];
 
+End[];
 
-Thulium`update`BufferHash = Association @ Import[dataPath <> "Buffer.json"];
+End[];
+

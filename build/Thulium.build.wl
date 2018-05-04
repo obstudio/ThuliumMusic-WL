@@ -2,7 +2,7 @@
 
 With[
   {
-    ThuliumVersion = Thulium`$Version,
+    ThuliumVersion = $$Version,
     
     LogoCloud = FilledCurveBox[{BezierCurve[{
       {836.15, -454.53}, {926.4, -472.85}, {994.36, -552.64}, {994.36, -648.321},
@@ -33,16 +33,13 @@ With[
     }]}],
     
     InitializeThulium = Hold[
-      (* FIXME: to be optimized *)
-      If[Length[PacletCheckUpdate["QuantityUnits"]] != 0,
-        PacletUpdate["QuantityUnits"];
-        Quit[];
-      ];
-      Thulium`$Init = False;
-      Thulium`$Parser = False;
-      localPath = StringReplace[NotebookDirectory[], "\\"->"/"];
-      SetDirectory[localPath];
-      (* FIXME: no use *)
+      BeginPackage["Thulium`System`"];
+      Thulium`System`$Init = False;
+      Thulium`System`$Parser = False;
+      Thulium`System`$LocalPath = StringReplace[NotebookDirectory[], "\\"->"/"];
+      EndPackage[];
+      DeclarePackage["Thulium`System`", {"$LocalPath"}];
+      SetDirectory[$LocalPath];
       If[!MemberQ[
         CurrentValue[$FrontEnd, {"NotebookSecurityOptions", "TrustedPath"}],
         FrontEnd`FileName[{$RootDirectory}, Evaluate @ NotebookDirectory[]]
@@ -50,12 +47,12 @@ With[
         CurrentValue[$FrontEnd, {"NotebookSecurityOptions", "TrustedPath"}],
         FrontEnd`FileName[{$RootDirectory}, Evaluate @ NotebookDirectory[]]
       ]];
-      Scan[Get, FileNames["*.wl", "library/Paclet", Infinity]];
-      Get[localPath <> "library/initialization.wl"];
+      Scan[Get, FileNames[".*.mx", "library/Paclet", Infinity]];
+      Get[$LocalPath <> "library/initialization.wl"];
       NotebookDelete[Cells[CellTags -> "$init"]];
       SelectionMove[First @ Cells[CellTags -> "$title"], After, Cell, AutoScroll -> False];
       NotebookWrite[EvaluationNotebook[], {
-        Thulium`MenuCell,
+        MenuCell,
         Cell[BoxData @ Null, "Hidden", CellTags -> "$monitor"],
         Cell[BoxData @ TemplateBox[{
           "Welcome to Thulium Music!"
@@ -74,7 +71,7 @@ With[
           FontColor -> RGBColor[0.1, 0.4, 0.7]
         ],
         TemplateBox[{1}, "Spacer1"],
-        StyleBox[FormBox["\"" <> ThuliumVersion <> "\"", InputForm],
+        StyleBox[FormBox["\"v" <> ThuliumVersion <> "\"", InputForm],
           FontFamily -> "Source Sans Pro",
           FontSize -> 24,
           FontColor -> RGBColor[0.3, 0.5, 0.8]
@@ -314,7 +311,7 @@ With[
     ShowCellBracket -> False,
     CellGrouping -> Manual,
     Background -> RGBColor[1, 1, 1],
-    WindowTitle -> " Thulium Music Player " <> ThuliumVersion,
+    WindowTitle -> "Thulium Music Player " <> ThuliumVersion,
     WindowElements -> {},
     WindowFrameElements -> {"CloseBox", "MinimizeBox", "ZoomBox"},
     WindowSize -> {1440, 900},
@@ -326,8 +323,11 @@ With[
     DynamicEvaluationTimeout -> 30
   ];
   
-  NotebookSave[Thulium`MainNotebook, localPath <> "Thulium.nb"];
+  NotebookSave[Thulium`MainNotebook, $LocalPath <> "Thulium.nb"];
   NotebookClose[Thulium`MainNotebook];
-  NotebookOpen[localPath <> "Thulium.nb"];
+  NotebookOpen[$LocalPath <> "Thulium.nb"];
 ]
+
+
+
 

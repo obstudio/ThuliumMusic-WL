@@ -32,7 +32,7 @@ Cell[BoxData[
    FontFamily->"Source Sans Pro",
    FontSize->24,
    FontColor->RGBColor[0.3, 0.5, 0.8]]}]], "Title",
- CellTags->"$title",ExpressionUUID->"e37ffb59-e999-4c86-acd5-72da38038ff7"],
+ CellTags->"$title",ExpressionUUID->"e720d4a4-6247-43f4-a4dd-f6b4c5c322e2"],
 
 Cell[BoxData[
  RowBox[{
@@ -74,7 +74,7 @@ Cell[BoxData[
    "LogoButton"], 
   TemplateBox[{4},
    "Spacer1"]}]], "Init",
- CellTags->"$init",ExpressionUUID->"269fbc61-61ab-42b9-a1ed-00cba9df53a3"]
+ CellTags->"$init",ExpressionUUID->"3a296a77-e5b8-43de-926d-ea2043efeb92"]
 },
 Editable->False,
 Saveable->False,
@@ -263,10 +263,10 @@ NBVD3HugwQGs7ydUv2AjJLw1Sg6AlMnFN0LsC8NMr5TyAWtplCQ=
 (*CellTagsOutline
 CellTagsIndex->{
  "$title"->{
-  Cell[604, 21, 421, 13, 140, "Title",ExpressionUUID->"e37ffb59-e999-4c86-acd5-72da38038ff7",
+  Cell[604, 21, 421, 13, 140, "Title",ExpressionUUID->"e720d4a4-6247-43f4-a4dd-f6b4c5c322e2",
    CellTags->"$title"]},
  "$init"->{
-  Cell[1028, 36, 1640, 40, 140, "Init",ExpressionUUID->"269fbc61-61ab-42b9-a1ed-00cba9df53a3",
+  Cell[1028, 36, 1640, 40, 140, "Init",ExpressionUUID->"3a296a77-e5b8-43de-926d-ea2043efeb92",
    CellTags->"$init"]}
  }
 *)
@@ -278,9 +278,9 @@ CellTagsIndex->{
 *)
 (*NotebookFileOutline
 Notebook[{
-Cell[604, 21, 421, 13, 140, "Title",ExpressionUUID->"e37ffb59-e999-4c86-acd5-72da38038ff7",
+Cell[604, 21, 421, 13, 140, "Title",ExpressionUUID->"e720d4a4-6247-43f4-a4dd-f6b4c5c322e2",
  CellTags->"$title"],
-Cell[1028, 36, 1640, 40, 140, "Init",ExpressionUUID->"269fbc61-61ab-42b9-a1ed-00cba9df53a3",
+Cell[1028, 36, 1640, 40, 140, "Init",ExpressionUUID->"3a296a77-e5b8-43de-926d-ea2043efeb92",
  CellTags->"$init"]
 }
 ]

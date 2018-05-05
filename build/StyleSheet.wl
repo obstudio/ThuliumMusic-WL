@@ -1,6 +1,6 @@
 (* ::Package:: *)
 
-BeginPackage["Thulium`Template`"];
+BeginPackage["Thulium`StyleSheet`"];
 
 Include = <||>;
 
@@ -93,3 +93,6 @@ AssignTemplate["Message", Function[
 End[];
 
 EndPackage[];
+
+
+DumpSave[$LocalPath <> "library/Paclet/StyleSheet.mx", {"Thulium`StyleSheet`"}];

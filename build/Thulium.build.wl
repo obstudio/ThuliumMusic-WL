@@ -62,9 +62,9 @@ With[
     ],
     
     Prototype = {
-      Thulium`Template`Include["Tooltip"],
-      Thulium`Template`Include["Button"],
-      Thulium`Template`Include["Message"]
+      Thulium`StyleSheet`Include["Tooltip"],
+      Thulium`StyleSheet`Include["Button"],
+      Thulium`StyleSheet`Include["Message"]
     }
   },
   

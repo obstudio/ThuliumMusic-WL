@@ -1,0 +1,60 @@
+// TM Benzene Package - Template
+// Updated: 2018.4.13.
+
+# Function
+
+function Call(template, subtrack) {
+	// Alias: ${0:sub}?=${1:sub}
+	this.Libraries.Track.this = subtrack.Content;
+	return this.ParseTrack(template);
+}
+
+function Map(template, subtrack) {
+	// Alias: ${0:sub}?*${1:sub}
+	const temp = this.ParseTrack(template, { Settings: this.newSettings() });
+	const src = this.ParseTrack(subtrack);
+	const content = [];
+	src.Content.forEach(sNote => {
+		const sStart = sNote.StartTime * temp.Meta.Duration;
+		temp.Content.forEach(tNote => {
+			const tStart = tNote.StartTime * sNote.Duration;
+			content.push({
+				Type: 'Note',
+				Pitch: sNote.Pitch + tNote.Pitch,
+				Volume: sNote.Volume * tNote.Volume,
+				Duration: sNote.Duration * tNote.Duration,
+				StartTime: sStart + tStart
+			});
+		});
+	});
+	const beatCount = src.Meta.BeatCount * temp.Meta.BeatCount;
+	Object.assign(src.Meta, {
+		Duration: src.Meta.Duration * temp.Meta.Duration,
+		BeatCount: beatCount,
+		BarCount: Math.floor(beatCount / this.Settings.Bar),
+		BarFirst: this.Settings.Bar,
+		BarLast: beats % this.Settings.Bar
+	});
+	return src;
+}
+
+function Apply(template, subtrack) {
+	// Alias: ${0:sub}?:${1:sub}
+	const temp = this.ParseTrack(template, { Settings: this.newSettings() });
+	const src = this.ParseTrack(subtrack);
+	const scale = temp.Settings.Speed / src.Settings.Speed;
+	const proto = this.Library._zoom_(temp.Content, scale);
+	const content = [];
+	src.Content.forEach(sNote => {
+		const filler = this.Library._fill_(proto, temp.Meta.Duration * scale, sNote.Duration);
+		content.push(...filler.map(note => Object.assign(note, {
+			Pitch: note.Pitch + sNote.Pitch,
+			StartTime: note.StartTime + sNote.StartTime,
+			StartBeat: note.StartBeat + sNote.StartBeat,
+			Volume: note.Volume * sNote.Volume
+		})));
+	});
+	return Object.assign(src, {Content: content});
+}
+
+# End

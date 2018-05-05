@@ -6,28 +6,6 @@
 class Repeat {
   constructor() {
     this.syntax = {
-      volta: [
-        {
-          patt: /^(\d+)~(\d+)/,
-          token(match) {
-            const result = []
-            for (let i = parseInt(match[1]); i <= parseInt(match[2]); i++) {
-              result.push(i)
-            }
-            return result
-          }
-        },
-        {
-          patt: /^\d+/,
-          token: match => parseInt(match[0])
-        },
-        {
-          patt: /^, */
-        },
-        {
-          patt: /^\. */
-        }
-      ],
       section: [
         FSM.item('RepeatEndBegin', /^:\|\|:/),
         FSM.item('RepeatBegin', /^\|\|:/),
@@ -37,7 +15,7 @@ class Repeat {
           push: FSM.next('volta', /^\]/),
           token(match, content) {
             return {
-              Type: 'volta',
+              Type: 'Volta',
               Order: [].concat(...content)
             }
           }
@@ -51,6 +29,48 @@ class Repeat {
         FSM.item('DaSegno', /^DS/),
         FSM.item('Fine', /^Fine/)
       ]
+    }
+
+    this.detok = {
+      Volta(token) {
+        const order = token.Order.sort((x, y) => x - y)
+        let result = ''
+        let i = 0
+        while (i < order.length) {
+          let j = i + 1
+          while (j < order.length && order[j] === order[j - 1] + 1) j += 1;
+          if (j === i + 1) {
+            result += `${order[i]}.`
+          } else if (j === i + 2) {
+            result += `${order[i]}.`, `${order[i + 1]}.`
+          } else {
+            result += `${order[i]}~${order[j - 1]}.`
+          }
+          i = j
+        }
+        return '[' + result + ']'
+      },
+
+      Coda(token) {
+        if (this.Settings.FullName) {
+          // FIXME: Coda or ToCoda
+          return 'Coda'
+        } else {
+          return '+'
+        }
+      },
+
+      Segno(token) {
+        if (this.Settings.FullName) {
+          return 'Segno'
+        } else {
+          return 's'
+        }
+      },
+
+      DaCapo: 'DC',
+      DaSegno: 'DS',
+      Fine: 'Fine'
     }
   }
 

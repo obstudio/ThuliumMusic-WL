@@ -6,7 +6,7 @@ uiSettings:=DynamicModule[{choices},
 		Caption[TextDict["Settings"],"Title"],Spacer[1],
 		Row[{Spacer[40],Grid[{
 			{Caption[TextDict["ChooseIdentity"],"Text"],
-				RadioButtonBar[Dynamic@choices[["Developer"]],{
+				RadioButtonBar[Dynamic @ choices["Developer"],{
 					False->Caption[TextDict["NormalUser"],"Text"],
 					True->Caption[TextDict["Developer"],"Text"]
 				}]
@@ -18,12 +18,12 @@ uiSettings:=DynamicModule[{choices},
 		Row[{
 			Button[TextDict[["Save"]],
 				UserInfo=choices;
-				Export[Thulium`System`$UserPath<>"Default.json",UserInfo];
+				Export[$UserPath<>"Default.json",UserInfo];
 				RefreshLanguage;
-				DialogReturn[homepage],
+				DialogReturn[Thulium`homepage],
 			ImageSize->150],
 			Spacer[10],
-			Button[TextDict[["Return"]],DialogReturn[homepage],ImageSize->150]
+			Button[TextDict["Return"],DialogReturn[Thulium`homepage],ImageSize->150]
 		}],Spacer[{40,40}]
 	},Center,ItemSize->Full],
 	Background->WindowBackground,WindowTitle->TextDict[["Settings"]]]
@@ -41,13 +41,13 @@ uiAbout:=CreateDialog[Column[{Spacer[{40,40}],
 		Caption[TextDict["Thulium"],"Subtitle"],
 		Spacer[4],
 		Grid[{
-			{Caption[TagName[["Version"]],"Text"],Caption["2.3","Text"]},
+			{Caption[TagName[["Version"]],"Text"],Caption[$$Version,"Text"]},
 			{Caption[TagName[["Producer"]],"Text"],Caption[TextDict["Obstudio"],"Text"]},
 			{Caption[TagName[["Website"]],"Text"],Caption["qymp.ob-studio.cn","Text"]}
 		},Alignment->Left]
 	},Alignment->Left,ItemSize->Full],Spacer[60]}],
 	Spacer[{20,20}],
-	Button[TextDict[["Return"]],DialogReturn[homepage],ImageSize->100],
+	Button[TextDict[["Return"]],DialogReturn[Thulium`homepage],ImageSize->100],
 Spacer[{40,40}]},Center,ItemSize->Full],
 WindowTitle->TextDict[["About"]],Background->WindowBackground];
 
@@ -134,7 +134,7 @@ uiPlaylist[playlist_] := Block[{info, songList, songListPaged, pageCount},
               SmartButton["Add", DialogReturn[Thulium`PageIndex[[playlist]] = page; uiAddSong]],
               Spacer[10]}],
             Nothing],
-            SmartButton["ArrowL", DialogReturn[Thulium`PageIndex[[playlist]] = page; homepage]],
+            SmartButton["ArrowL", DialogReturn[Thulium`PageIndex[[playlist]] = page; Thulium`homepage]],
             Spacer[40]
           }, Alignment -> Right, ImageSize -> {480, 56}]
         }],

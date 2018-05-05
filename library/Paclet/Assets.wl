@@ -88,7 +88,7 @@ TextLength[str_String] := With[
   Length[charCode] + Length @ Select[charCode, 11904 <= # <= 65103&]
 ];
 
-TimeDisplay[time_Quantity, levelspec_Integer:2] := With[
+TimeDisplay[time_Quantity, levelspec_Integer: 2] := With[
   {sec = Floor[QuantityMagnitude[time, "Seconds"]]},
   StringRiffle[{
   If[StringLength[#] == 1, "0" <> #, #]&[IntegerString[Floor[sec / (60 ^ (levelspec - 1))], 10]],

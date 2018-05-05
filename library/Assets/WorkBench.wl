@@ -48,7 +48,7 @@ Thulium`WorkBench[config_] := Block[
     ShowCellBracket -> False,
     CellGrouping -> Manual,
     Background -> RGBColor[1, 1, 1],
-    WindowTitle -> title <> " - Thulium Music " <> Thulium`$Version,
+    WindowTitle -> title <> " - Thulium Music " <> $Version,
     WindowElements -> {},
     WindowFrameElements -> {"CloseBox", "MinimizeBox", "ZoomBox"},
     WindowSize -> {1440, 900},
@@ -68,4 +68,4 @@ Thulium`WorkBench[config_] := Block[
 
 
 (* ::Input:: *)
-(*tmptoken = ExternalEvaluate[System`JS, "new Thulium('"<>localPath<>"Songs/Touhou/Oriental_Blood"<>".tm').Sections"];*)
+(*tmptoken = ExternalEvaluate[System`JS, "new Thulium('"<>$LocalPath<>"Songs/Touhou/Oriental_Blood"<>".tm').Sections"];*)

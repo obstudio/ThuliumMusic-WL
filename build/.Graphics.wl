@@ -160,4 +160,4 @@ DeclarePackage["Thulium`Graphics`",{
 }]
 
 
-DumpSave[$LocalPath <> "library/Paclet/.Graphics.mx", "Thulium`Graphics`"];
+DumpSave[$LocalPath <> "library/Package/.Graphics.mx", "Thulium`Graphics`"];

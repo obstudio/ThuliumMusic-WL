@@ -12,11 +12,11 @@ TagDict::usage = "TagDict";
 
 Begin["`Private`"];
 
-LangDict = Association @ Import[$LocalPath <> "language/Languages.json"];
-TagDict = Association /@ Association @ Import[$LocalPath <> "Tags.json"];
+LangDict = Association @ Import[$LocalPath <> "build/language/Languages.json"];
+TagDict = Association /@ Association @ Import[$LocalPath <> "build/Tags.json"];
 
 RefreshLanguage := With[
-  {langDataPath = $LocalPath <> "language/" <> UserInfo["Language"] <> "/"},
+  {langDataPath = $LocalPath <> "build/language/" <> UserInfo["Language"] <> "/"},
   TagName = Association @ Import[langDataPath <> "GeneralTags.json"];
   InstName = Association @ Import[langDataPath <> "Instruments.json"];
   TextDict = Association @ Import[langDataPath <> "GeneralTexts.json"];
@@ -47,9 +47,9 @@ Begin["`Private`"];
 ListSize = 16;
 WindowBackground = RGBColor[1, 1, 1];
 
-StyleFont = If[$OperatingSystem === "MacOSX", "\:82f9\:65b9", "\:5fae\:8f6f\:96c5\:9ed1"];
+StyleFont := If[$OperatingSystem === "MacOSX", "\:82f9\:65b9", "\:5fae\:8f6f\:96c5\:9ed1"];
 
-StyleDict = <|
+StyleDict := <|
   "None" -> {},
   "Text" -> {FontSize -> 20}, 
   "Title" -> {FontSize -> 32, FontFamily -> StyleFont, FontWeight -> Bold},
@@ -72,7 +72,8 @@ RenderTemplate[template_, arguments_] := StringReplace[template, {
 
 Caption[string_String, style_String: "None", arguments_List: {}] := Style[
   RenderTemplate[string, arguments],
-StyleDict[style]];
+  StyleDict[style]
+];
 
 Container[content_, lr_, bt_] := Container[content, {lr, lr}, {bt, bt}];
 Container[content_, {l_, r_}, {b_, t_}] := Column[{
@@ -91,7 +92,7 @@ TextLength[str_String] := With[
 TimeDisplay[time_Quantity, levelspec_Integer: 2] := With[
   {sec = Floor[QuantityMagnitude[time, "Seconds"]]},
   StringRiffle[{
-  If[StringLength[#] == 1, "0" <> #, #]&[IntegerString[Floor[sec / (60 ^ (levelspec - 1))], 10]],
+    IntegerString[Floor[sec / (60 ^ (levelspec - 1))], 10, 2],
     Sequence @@ Table[
       IntegerString[Floor[Mod[sec / (60 ^ (level - 1)), 60]], 10, 2],
     {level, levelspec - 1, 1, -1}]
@@ -103,6 +104,12 @@ End[];
 EndPackage[];
 
 DeclarePackage["Thulium`Assets`", {
-  "WindowBackground", "Container", "Caption", "$ListSize",
+  "WindowBackground", "Container", "Caption", "ListSize",
   "TextLength", "TimeDisplay"
+}];
+
+
+DumpSave[$LocalPath <> "library/Package/Assets.mx", {
+  "Thulium`Assets`",
+  "Thulium`Language`"
 }];

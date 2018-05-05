@@ -47,7 +47,7 @@ With[
         CurrentValue[$FrontEnd, {"NotebookSecurityOptions", "TrustedPath"}],
         FrontEnd`FileName[{$RootDirectory}, Evaluate @ NotebookDirectory[]]
       ]];
-      Scan[Get, FileNames[".*.mx", "library/Paclet", Infinity]];
+      Scan[Get, FileNames[".*.mx", "library/Package", Infinity]];
       Get[$LocalPath <> "library/initialization.wl"];
       NotebookDelete[Cells[CellTags -> "$init"]];
       SelectionMove[First @ Cells[CellTags -> "$title"], After, Cell, AutoScroll -> False];

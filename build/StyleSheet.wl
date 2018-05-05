@@ -95,4 +95,4 @@ End[];
 EndPackage[];
 
 
-DumpSave[$LocalPath <> "library/Paclet/StyleSheet.mx", {"Thulium`StyleSheet`"}];
+DumpSave[$LocalPath <> "library/Package/StyleSheet.mx", {"Thulium`StyleSheet`"}];

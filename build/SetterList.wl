@@ -72,4 +72,4 @@ EndPackage[];
 DeclarePackage["Thulium`SetterList`", {"SetterList"}];
 
 
-DumpSave[$LocalPath <> "library/Paclet/SetterList.mx", "Thulium`SetterList`"];
+DumpSave[$LocalPath <> "library/Package/SetterList.mx", "Thulium`SetterList`"];

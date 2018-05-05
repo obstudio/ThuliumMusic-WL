@@ -107,9 +107,9 @@ InitializePackage := Block[{packages},
   SetDirectory[$LocalPath <> "library"];
   Monitor[
     packages = Join[
-      Complement[FileNames["*.mx", "Paclet", Infinity], FileNames[".*.mx", "Paclet", Infinity]],
-      FileNames["*.wl", "Paclet", Infinity],
-      Complement[FileNames["*.wl", "*", Infinity], FileNames["*.wl", "Paclet", Infinity]]
+      Complement[FileNames["*.mx", "Package", Infinity], FileNames[".*.mx", "Package", Infinity]],
+      FileNames["*.wl", "Package", Infinity],
+      Complement[FileNames["*.wl", "*", Infinity], FileNames["*.wl", "Package", Infinity]]
     ];
     Do[Get[packages[[i]]], {i, Length @ packages}],
   ProgressDisplay[packages, i, "Loading packages from library ......"]];

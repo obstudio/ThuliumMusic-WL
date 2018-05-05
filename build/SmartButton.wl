@@ -203,7 +203,7 @@ EndPackage[];
 DeclarePackage["Thulium`SmartButton`", {"SmartButton"}];
 
 
-DumpSave[$LocalPath <> "library/Paclet/SmartButton.mx", {"Thulium`SmartButton`"}];
+DumpSave[$LocalPath <> "library/Package/SmartButton.mx", {"Thulium`SmartButton`"}];
 
 
 (* ::Input:: *)

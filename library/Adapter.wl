@@ -297,10 +297,6 @@ Thulium`AudioAdapt[rawData_,OptionsPattern[AdaptingOptions]]:=Block[
 (*Timing[Thulium`MIDIAdapt[Thulium`Parse[$LocalPath<>"Songs/Touhou/test.tm"]]];*)
 
 
-(* ::Input:: *)
-(*Thulium`Parse[localPath<>"Songs/test.tm"][[1,"Tracks",1,"Content"]]*)
-
-
 (* ::Subsubsection:: *)
 (*Audio*)
 
@@ -312,11 +308,11 @@ Thulium`AudioAdapt[rawData_,OptionsPattern[AdaptingOptions]]:=Block[
 (* ::Input:: *)
 (*AudioStop[];AudioPlay[#[[2]]]&@*)
 (*EchoFunction["time: ",#[[1]]&]@*)
-(*Timing[Thulium`AudioAdapt[Thulium`Parse[$LocalPath<>"Songs/Porcelain_Actor.tm"],"Rate"->1]];*)
+(*Timing[Thulium`AudioAdapt[Thulium`Parse[$LocalPath<>"Songs/Touhou/test.tm",{3}],"Rate"->1]];*)
 
 
 (* ::Input:: *)
-(*Export[localPath<>"test.mp3",Thulium`AudioAdapt[Thulium`Parse[$LocalPath<>"Songs/Touhou/Oriental_Blood.tm"]]];*)
+(*Export[$LocalPath<>"test.mp3",Thulium`AudioAdapt[Thulium`Parse[$LocalPath<>"Songs/Touhou/Oriental_Blood.tm"]]];*)
 
 
 (* ::Input:: *)

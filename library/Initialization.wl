@@ -166,7 +166,7 @@ InitializeParser := Block[{result, succeed, msgCells},
   MessageDisplay[If[succeed === True,
     Cell[BoxData @ TemplateBox[{
       RowBox[{
-        "Secceed: Start External Session ",
+        "Succeed: Start External Session ",
         TemplateBox[{"(details)",
           GridBox[{
             {"System: ", RawDisplay[System`JS["System"] <> " " <> System`JS["Version"]]},

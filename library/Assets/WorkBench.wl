@@ -1,7 +1,7 @@
 (* ::Package:: *)
 
 BeginPackage["Thulium`WorkBench`", {
-  "Thulium`System`", "Thulium`Graphics`", "Thulium`Template`"
+  "Thulium`System`", "Thulium`Graphics`"
 }];
 
 WorkBench::usage = "Thulium Music WorkBench";
@@ -10,7 +10,13 @@ WorkBenchVersion = "1.0";
 Begin["`Private`"];
 
 WorkBench[song_: None] := Module[
-  {filepath, title = "", info = <|"Status" -> "None"|>, workbench, stream},
+  {
+    filepath, title = "",
+    info = <|"Status" -> "None"|>,
+    workbench, stream,
+    LoadingDisplay, MoveAfter
+  },
+  
   If[song =!= None,
     title = StringReplace[FileBaseName[song], "_" -> " "] <> " - ";
     filepath = $LocalPath <> "Songs/" <> song <> ".tm";
@@ -21,48 +27,45 @@ WorkBench[song_: None] := Module[
       Cell[BoxData @ RowBox[{
         StyleBox["Thulium Music WorkBench",
           FontFamily -> "Source Sans Pro",
-          FontSize -> 28,
+          FontSize -> 24,
           FontColor -> RGBColor[0.1, 0.4, 0.7]
         ],
-        TemplateBox[{1}, "Spacer1"],
+        TemplateBox[{4}, "Spacer1"],
         StyleBox[FormBox["\"v" <> WorkBenchVersion <> "\"", InputForm],
           FontFamily -> "Source Sans Pro",
-          FontSize -> 20,
+          FontSize -> 18,
           FontColor -> RGBColor[0.3, 0.5, 0.8]
         ]
       }], "Title", CellTags -> "title"],
-      
-      Cell[BoxData @ "", "Hidden", CellTags -> "hidden"]
+      Cell[BoxData @ "", "Separator", CellTags -> "separator"]
     },
     
     StyleDefinitions -> Notebook[{
       Thulium`Template`Include["Tooltip"],
       Thulium`Template`Include["Button"],
+      Thulium`Template`Include["Pane"],
       
       Cell[StyleData["Title"],
-        TextAlignment -> Left,
-        ShowStringCharacters -> False,
-        CellMargins -> {{40, 40}, {16, 32}},
-        Deletable -> False,
-        Deployed -> True
-      ],
-      
-      Cell[StyleData["Menu"],
-        CellMargins -> {{24, 24}, {8, 8}},
         TextAlignment -> Center,
-        Deletable -> False,
-        Deployed -> True
+        ShowStringCharacters -> False,
+        CellMargins -> {{32, 32}, {12, 20}},
+        Deletable -> False
       ],
       
-      Cell[StyleData["Hidden"],
+      Cell[StyleData["Separator"],
         FontSize -> 1,
         FontColor -> RGBColor[0, 0, 0, 0],
         CellSize -> {Inherited, 1},
-        CellMargins -> {{24, 24}, {0, 0}},
+        CellMargins -> {{16, 16}, {8, 0}},
         CellFrame -> {{0, 0}, {0, 2}},
         CellFrameMargins -> 0,
-        CellFrameColor -> RGBColor[0.6, 0.7, 0.7],
+        CellFrameColor -> RGBColor[0.5, 0.6, 0.7],
         CellElementSpacings -> {"CellMinHeight" -> 1}
+      ],
+      
+      Cell[StyleData["Menu"],
+        CellMargins -> {{16, 16}, {8, 8}},
+        TextAlignment -> Center
       ],
       
       Cell[StyleData["TextButtonDisplay"],
@@ -73,7 +76,7 @@ WorkBench[song_: None] := Module[
               AdjustmentBox[
                 StyleBox[#1,
                   FontFamily -> "Sitka Text",
-                  FontSize -> 15,
+                  FontSize -> 12,
                   FontColor -> #2
                 ],
                 BoxBaselineShift -> 0.2
@@ -100,6 +103,11 @@ WorkBench[song_: None] := Module[
             #3, #2
           }, "<Button>"]
         ]}
+      ],
+      
+      Cell[StyleData["Monitor"],
+        TextAlignment -> Center,
+        CellMargins -> {{4, 4}, {8, 4}}
       ]
     }],
     
@@ -110,43 +118,100 @@ WorkBench[song_: None] := Module[
     Background -> RGBColor[1, 1, 1],
     WindowTitle -> title <> "Thulium Music WorkBench " <> WorkBenchVersion,
     WindowElements -> {},
-    WindowFrameElements -> {"CloseBox", "MinimizeBox", "ZoomBox"},
-    WindowSize -> {1440, 900},
+    WindowFrameElements -> {"CloseBox", "MinimizeBox"},
+    WindowSize -> {800, 600},
     WindowFrame -> "ModelessDialog",
     Magnification -> 2,
     Saveable -> False,
     Evaluatable -> False,
     Editable -> False,
+    Deployed -> True,
     DynamicEvaluationTimeout -> 60
   ];
   
+  MoveAfter[tag_] := SelectionMove[Last @ Cells[workbench, CellTags -> tag], After, Cell, AutoScroll -> False];
+  LoadingDisplay[content_, tag_] := (
+    NotebookWrite[workbench, Cell[BoxData @ TemplateBox[{
+      content, RGBColor[0.96, 0.98, 1], 320
+    }, "<Pane>"], "Monitor", CellTags -> tag]];
+    NotebookLocate["title"];
+  );
+  
+  MoveAfter["separator"];
+  LoadingDisplay["Initializing ...", ".init"];
+  
   SessionSubmit[
     ExternalEvaluate[System`JS, "new Thulium('" <> filepath <> "').information"],
-    HandlerFunctions -> <|"TaskFinished" :> (
+    HandlerFunctions -> <|"TaskFinished" :> Function[
       info = #EvaluationResult;
-      SelectionMove[First @ Cells[workbench, CellTags -> "hidden"], After, Cell, AutoScroll -> False];
-      NotebookWrite[workbench, Cell[BoxData @ RowBox[{
-        TemplateBox[{1}, "Spacer1"],
-        TemplateBox[{
-          "Play",
-          "Click to play the song",
-          Unevaluated @ If[song =!= None, SessionSubmit[
-            AudioPlay @ Thulium`AudioAdapt @ info["MusicClips"],
-            HandlerFunctions -> <|"TaskFinished" :> (stream = #EvaluationResult&)|>,
-            HandlerFunctionsKeys -> {"EvaluationResult"}
-          ]]
-        }, "TextButton"],
-        TemplateBox[{1}, "Spacer1"],
-        TemplateBox[{
-          "Stop",
-          "Click to stop the playback",
-          Unevaluated @ AudioStop[]
-        }, "TextButton"],
-        TemplateBox[{1}, "Spacer1"]
-      }], "Menu", CellTags -> "menu"]];
-    &)|>,
+      NotebookDelete[Cells[workbench, CellTags -> ".init"]];
+      MoveAfter["separator"];
+      NotebookWrite[workbench, Cell[BoxData @ TemplateBox[{
+        GridBox[{
+          {"Sections:", Length @ info["Sections"]},
+          {"MusicClips:", Length @ info["MusicClips"]}
+        }, ColumnAlignments -> {Center, Left}],
+        RGBColor[0.98, 1, 0.96], 320
+      }, "<Pane>"], "Monitor", CellTags -> "info"]];
+      LoadingDisplay["Generating Music ...", ".gen"];
+      
+      SessionSubmit[
+        AudioStream @ Thulium`AudioAdapt @ info["MusicClips"],
+        HandlerFunctions -> <|"TaskFinished" :> Function[
+          stream = #EvaluationResult;
+          NotebookDelete[Cells[workbench, CellTags -> ".gen"]];
+          MoveAfter["info"];
+          NotebookWrite[workbench, Cell[BoxData @ RowBox[{
+            TemplateBox[{1}, "Spacer1"],
+            TemplateBox[{
+              "Play",
+              "Click to play the song",
+              Unevaluated @ AudioPlay[stream]
+            }, "TextButton"],
+            TemplateBox[{1}, "Spacer1"],
+            TemplateBox[{
+              "Stop",
+              "Click to stop the playback",
+              Unevaluated @ AudioStop[]
+            }, "TextButton"],
+            TemplateBox[{1}, "Spacer1"]
+          }], "Menu", CellTags -> "menu"]];
+        ]|>,
+        HandlerFunctionsKeys -> {"EvaluationResult"}
+      ];
+    ]|>,
     HandlerFunctionsKeys -> {"EvaluationResult"}
   ];
+];
+
+WorkBenchInitialize[workbench_, filepath_] := Module[{info, stream},
+  Monitor[
+    info = ExternalEvaluate[System`JS, "new Thulium('" <> filepath <> "').information"],
+    WorkBenchMonitor["Initializing ..."]
+  ];
+  NotebookDelete[Cells[CellTags -> "monitor"]];
+  SelectionMove[First @ Cells[CellTags -> "separator"], After, Cell, AutoScroll -> False];
+  NotebookWrite[EvaluationNotebook[], With[{info = info}, Cell[BoxData @ RowBox[{
+    TemplateBox[{1}, "Spacer1"],
+    TemplateBox[{
+      "Play",
+      "Click to play the song",
+      Unevaluated @ SessionSubmit[
+        Thulium`AudioAdapt @ info["MusicClips"],
+        HandlerFunctions -> <|"TaskFinished" :> Function[
+          stream = AudioStream[#EvaluationResult]; AudioPlay[stream];
+        ]|>,
+        HandlerFunctionsKeys -> {"EvaluationResult"}
+      ]
+    }, "TextButton"],
+    TemplateBox[{1}, "Spacer1"],
+    TemplateBox[{
+      "Stop",
+      "Click to stop the playback",
+      Unevaluated @ AudioStop[]
+    }, "TextButton"],
+    TemplateBox[{1}, "Spacer1"]
+  }], "Menu", CellTags -> "menu"]]];
 ];
 
 FileSelector[directory_] := Block[
@@ -179,4 +244,4 @@ DeclarePackage["Thulium`WorkBench`", {"WorkBench"}];
 
 
 (* ::Input:: *)
-(*CurrentValue[{StyleDefinitions,"FileNameSetterBoxes"}]*)
+(*CurrentValue[{StyleDefinitions,"Panel"}]*)

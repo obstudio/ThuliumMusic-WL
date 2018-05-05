@@ -10,10 +10,10 @@
 NotebookFileLineBreakTest
 NotebookFileLineBreakTest
 NotebookDataPosition[       158,          7]
-NotebookDataLength[     11658,        293]
+NotebookDataLength[     11014,        280]
 NotebookOptionsPosition[      2672,         78]
-NotebookOutlinePosition[     11571,        292]
-CellTagsIndexPosition[     11478,        286]
+NotebookOutlinePosition[     10927,        279]
+CellTagsIndexPosition[     10834,        273]
 WindowTitle->Thulium Music Player 2.3
 WindowFrame->ModelessDialog*)
 
@@ -32,7 +32,7 @@ Cell[BoxData[
    FontFamily->"Source Sans Pro",
    FontSize->24,
    FontColor->RGBColor[0.3, 0.5, 0.8]]}]], "Title",
- CellTags->"$title",ExpressionUUID->"f25375d2-3f8d-4c3f-b67e-19dde4c1c9f6"],
+ CellTags->"$title",ExpressionUUID->"e37ffb59-e999-4c86-acd5-72da38038ff7"],
 
 Cell[BoxData[
  RowBox[{
@@ -74,7 +74,7 @@ Cell[BoxData[
    "LogoButton"], 
   TemplateBox[{4},
    "Spacer1"]}]], "Init",
- CellTags->"$init",ExpressionUUID->"76a44fd0-ed8e-48b6-951c-12123d6736ae"]
+ CellTags->"$init",ExpressionUUID->"269fbc61-61ab-42b9-a1ed-00cba9df53a3"]
 },
 Editable->False,
 Saveable->False,
@@ -107,17 +107,33 @@ Background->RGBColor[1, 1, 1],
 FrontEndVersion->"11.3 for Microsoft Windows (64-bit) (March 6, 2018)",
 StyleDefinitions->Notebook[{
    Cell[
-    StyleData[StyleDefinitions -> "Default.nb"]], 
+    StyleData["<Tooltip>"], 
+    TemplateBoxOptions -> {DisplayFunction -> (TooltipBox[#, 
+        FrameBox[
+         AdjustmentBox[
+          
+          StyleBox[#2, FontFamily -> "Calibri", FontSize -> 24, FontColor -> 
+           RGBColor[0, 0, 0]], BoxMargins -> {{0.4, 0.4}, {0.2, 0.4}}], 
+         Background -> RGBColor[1, 1, 0.9, 0.8], FrameStyle -> {1, 
+           RGBColor[0.8, 0.8, 0.7, 0.2]}, RoundingRadius -> {8, 8}, 
+         ContentPadding -> True], TooltipDelay -> #3, 
+        TooltipStyle -> {
+         CellFrame -> {{0, 0}, {0, 0}}, Background -> 
+          RGBColor[0, 0, 0, 0]}]& )}], 
    Cell[
-    StyleData["Title"], Deletable -> False, 
-    CellMargins -> {{40, 40}, {16, 32}}, Deployed -> True, Evaluatable -> 
-    False, TextAlignment -> Center, ShowStringCharacters -> False], 
-   Cell[
-    StyleData["Init"], CellMargins -> {{24, 24}, {60, 60}}, Deployed -> True, 
-    TextAlignment -> Center], 
-   Cell[
-    StyleData["Menu"], Deletable -> False, CellMargins -> {{24, 24}, {8, 8}}, 
-    Deployed -> True, TextAlignment -> Center], 
+    StyleData["<Button>"], 
+    TemplateBoxOptions -> {
+     DisplayFunction -> (PaneSelectorBox[{True -> TemplateBox[{
+            TagBox[
+             TagBox[
+              PaneSelectorBox[{True -> #2, False -> #3}, 
+               Dynamic[
+                CurrentValue["MouseButtonTest"]]], 
+              EventHandlerTag[{"MouseClicked" :> ReleaseHold[#4]}]], 
+             MouseAppearanceTag["LinkHand"]], #5, 0.2}, "<Tooltip>"], 
+         False -> #}, 
+        Dynamic[
+         CurrentValue["MouseOver"]]]& )}], 
    Cell[
     StyleData["<Message>"], 
     TemplateBoxOptions -> {DisplayFunction -> (FrameBox[
@@ -129,6 +145,16 @@ StyleDefinitions->Notebook[{
          BoxBaselineShift -> 0, BoxMargins -> {{2, 2}, {2, 2}}], 
         Background -> #3, RoundingRadius -> {8, 8}, ContentPadding -> True, 
         FrameStyle -> None]& )}], 
+   Cell[
+    StyleData["Title"], Deletable -> False, 
+    CellMargins -> {{40, 40}, {16, 32}}, Deployed -> True, Evaluatable -> 
+    False, TextAlignment -> Center, ShowStringCharacters -> False], 
+   Cell[
+    StyleData["Init"], CellMargins -> {{24, 24}, {60, 60}}, Deployed -> True, 
+    TextAlignment -> Center], 
+   Cell[
+    StyleData["Menu"], Deletable -> False, CellMargins -> {{24, 24}, {8, 8}}, 
+    Deployed -> True, TextAlignment -> Center], 
    Cell[
     StyleData["MessageCell"], CellMargins -> {{60, 60}, {8, 4}}, Deployed -> 
     True, TextAlignment -> Center, FontColor -> RGBColor[0, 0, 0]], 
@@ -146,20 +172,6 @@ StyleDefinitions->Notebook[{
     CellElementSpacings -> {"CellMinHeight" -> 1}, Evaluatable -> True, 
     CellGroupingRules -> "InputGrouping", CellSize -> {Inherited, 1}, 
     FontSize -> 1, FontColor -> RGBColor[0, 0, 0, 0]], 
-   Cell[
-    StyleData["<Tooltip>"], 
-    TemplateBoxOptions -> {DisplayFunction -> (TooltipBox[#, 
-        FrameBox[
-         AdjustmentBox[
-          
-          StyleBox[#2, FontFamily -> "Calibri", FontSize -> 24, FontColor -> 
-           RGBColor[0, 0, 0]], BoxMargins -> {{0.4, 0.4}, {0.2, 0.4}}], 
-         Background -> RGBColor[1, 1, 0.9, 0.8], FrameStyle -> {1, 
-           RGBColor[0.8, 0.8, 0.7, 0.2]}, RoundingRadius -> {8, 8}, 
-         ContentPadding -> True], TooltipDelay -> #3, 
-        TooltipStyle -> {
-         CellFrame -> {{0, 0}, {0, 0}}, Background -> 
-          RGBColor[0, 0, 0, 0]}]& )}], 
    Cell[
     StyleData["LogoButtonDisplay"], 
     TemplateBoxOptions -> {DisplayFunction -> (GraphicsBox[{#3, 
@@ -201,20 +213,6 @@ NBVD3HugwQGs7ydUv2AjJLw1Sg6AlMnFN0LsC8NMr5TyAWtplCQ=
         BoxFrame -> {{0, 0}, {0, 0}}, RoundingRadius -> {8, 8}, 
         ContentPadding -> True, BaselinePosition -> 1]& )}], 
    Cell[
-    StyleData["<Button>"], 
-    TemplateBoxOptions -> {
-     DisplayFunction -> (PaneSelectorBox[{True -> TemplateBox[{
-            TagBox[
-             TagBox[
-              PaneSelectorBox[{True -> #2, False -> #3}, 
-               Dynamic[
-                CurrentValue["MouseButtonTest"]]], 
-              EventHandlerTag[{"MouseClicked" :> ReleaseHold[#4]}]], 
-             MouseAppearanceTag["LinkHand"]], #5, 0.2}, "<Tooltip>"], 
-         False -> #}, 
-        Dynamic[
-         CurrentValue["MouseOver"]]]& )}], 
-   Cell[
     StyleData["TextButton"], 
     TemplateBoxOptions -> {DisplayFunction -> (TemplateBox[{
          TemplateBox[{#, 
@@ -253,17 +251,6 @@ NBVD3HugwQGs7ydUv2AjJLw1Sg6AlMnFN0LsC8NMr5TyAWtplCQ=
             EvaluationNotebook[]]; NotebookLocate["$title"]; Null]}, 
         "TextButton"]& )}], 
    Cell[
-    StyleData["Status"], Deletable -> False, 
-    CellMargins -> {{24, 24}, {8, 8}}, Deployed -> True, TextAlignment -> 
-    Center, TemplateBoxOptions -> {DisplayFunction -> (FrameBox[
-        PaneBox[#, Scrollbars -> False, Alignment -> {Center, Center}, 
-         ImageMargins -> {{4, 4}, {4, 4}}, ImageSize -> {
-           Dynamic[Part[
-               CurrentValue[
-                EvaluationNotebook[], WindowSize], 1]/2 - 200], 160}], 
-        Background -> RGBColor[0.96, 0.98, 1], RoundingRadius -> {8, 8}, 
-        ContentPadding -> True, FrameStyle -> None]& )}], 
-   Cell[
     StyleData["PrintTemporary", StyleDefinitions -> "PrintTemporary"], 
     CellMargins -> {{60, 60}, {8, 4}}, Deployed -> True, TextAlignment -> 
     Center, FontFamily -> "Calibri", FontSize -> 16]}, Visible -> False, 
@@ -276,24 +263,24 @@ NBVD3HugwQGs7ydUv2AjJLw1Sg6AlMnFN0LsC8NMr5TyAWtplCQ=
 (*CellTagsOutline
 CellTagsIndex->{
  "$title"->{
-  Cell[604, 21, 421, 13, 140, "Title",ExpressionUUID->"f25375d2-3f8d-4c3f-b67e-19dde4c1c9f6",
+  Cell[604, 21, 421, 13, 140, "Title",ExpressionUUID->"e37ffb59-e999-4c86-acd5-72da38038ff7",
    CellTags->"$title"]},
  "$init"->{
-  Cell[1028, 36, 1640, 40, 140, "Init",ExpressionUUID->"76a44fd0-ed8e-48b6-951c-12123d6736ae",
+  Cell[1028, 36, 1640, 40, 140, "Init",ExpressionUUID->"269fbc61-61ab-42b9-a1ed-00cba9df53a3",
    CellTags->"$init"]}
  }
 *)
 (*CellTagsIndex
 CellTagsIndex->{
- {"$title", 11205, 277},
- {"$init", 11336, 280}
+ {"$title", 10561, 264},
+ {"$init", 10692, 267}
  }
 *)
 (*NotebookFileOutline
 Notebook[{
-Cell[604, 21, 421, 13, 140, "Title",ExpressionUUID->"f25375d2-3f8d-4c3f-b67e-19dde4c1c9f6",
+Cell[604, 21, 421, 13, 140, "Title",ExpressionUUID->"e37ffb59-e999-4c86-acd5-72da38038ff7",
  CellTags->"$title"],
-Cell[1028, 36, 1640, 40, 140, "Init",ExpressionUUID->"76a44fd0-ed8e-48b6-951c-12123d6736ae",
+Cell[1028, 36, 1640, 40, 140, "Init",ExpressionUUID->"269fbc61-61ab-42b9-a1ed-00cba9df53a3",
  CellTags->"$init"]
 }
 ]

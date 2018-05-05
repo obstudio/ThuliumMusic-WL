@@ -59,7 +59,13 @@ With[
         }, "SuccessMessage"], "MessageCell", CellTags -> "$msg"]
       }];
       NotebookLocate["$title"];
-    ]
+    ],
+    
+    Prototype = {
+      Thulium`Template`Include["Tooltip"],
+      Thulium`Template`Include["Button"],
+      Thulium`Template`Include["Message"]
+    }
   },
   
   Thulium`MainNotebook = CreateDialog[
@@ -90,8 +96,8 @@ With[
     },
     
     StyleDefinitions -> Notebook[{
-      Cell[StyleData[StyleDefinitions -> "Default.nb"]],
-      
+      Sequence @@ Prototype,
+                  
       Cell[StyleData["Title"],
         TextAlignment -> Center,
         ShowStringCharacters -> False,
@@ -112,26 +118,6 @@ With[
         TextAlignment -> Center,
         Deletable -> False,
         Deployed -> True
-      ],
-      
-      Cell[StyleData["<Message>"],
-        TemplateBoxOptions -> {DisplayFunction -> Function[
-          FrameBox[
-            AdjustmentBox[
-              RowBox[{
-                StyleBox[#2, FontSize -> 18],
-                TemplateBox[{4}, "Spacer1"],
-                StyleBox[#1, FontFamily -> "Calibri", FontSize -> 16]
-              }],
-              BoxBaselineShift -> 0,
-              BoxMargins -> {{2, 2}, {2, 2}}
-            ],
-            Background -> #3,
-            RoundingRadius -> {8, 8},
-            ContentPadding -> True,
-            FrameStyle -> None
-          ]
-        ]}
       ],
       
       Cell[StyleData["MessageCell"],
@@ -164,32 +150,6 @@ With[
         CellGroupingRules -> "InputGrouping"
       ],
       
-      Cell[StyleData["<Tooltip>"],
-        TemplateBoxOptions -> {DisplayFunction -> Function[
-          TooltipBox[#1,
-            FrameBox[
-              AdjustmentBox[
-                StyleBox[#2,
-                  FontFamily -> "Calibri",
-                  FontSize -> 24,
-                  FontColor -> RGBColor[0, 0, 0]
-                ],
-                BoxMargins -> {{0.4, 0.4}, {0.2, 0.4}}
-              ],
-              Background -> RGBColor[1, 1, 0.9, 0.8],
-              FrameStyle -> {1, RGBColor[0.8, 0.8, 0.7, 0.2]},
-              RoundingRadius -> {8, 8},
-              ContentPadding -> True
-            ],
-            TooltipDelay -> #3,
-            TooltipStyle -> {
-              CellFrame -> {{0, 0}, {0, 0}},
-              Background -> RGBColor[0, 0, 0, 0]
-            }
-          ]
-        ]}
-      ],
-      
       Cell[StyleData["LogoButtonDisplay"],
         TemplateBoxOptions -> {DisplayFunction -> Function[
           GraphicsBox[{#3, LogoCloud, RGBColor[1, 1, 1], LogoNote}, ImageSize -> 240]
@@ -219,25 +179,6 @@ With[
             ContentPadding -> True,
             BaselinePosition -> 1
           ]
-        ]}
-      ],
-      
-      Cell[StyleData["<Button>"],
-        TemplateBoxOptions -> {DisplayFunction -> Function[
-          PaneSelectorBox[{
-            True -> TemplateBox[{
-              TagBox[
-                TagBox[
-                  PaneSelectorBox[{
-                    True -> #2,
-                    False -> #3
-                  }, Dynamic @ CurrentValue["MouseButtonTest"]],
-                EventHandlerTag @ {"MouseClicked" :> ReleaseHold @ #4}],
-              MouseAppearanceTag @ "LinkHand"],
-              #5, 0.2
-            }, "<Tooltip>"],
-            False -> #1
-          }, Dynamic @ CurrentValue["MouseOver"]]
         ]}
       ],
       
@@ -275,25 +216,6 @@ With[
             NotebookLocate["$title"];
           ]}, "TextButton"]
         ]}
-      ],
-      
-      Cell[StyleData["Status"],
-        CellMargins -> {{24, 24}, {8, 8}},
-        TextAlignment -> Center,
-        Deletable -> False,
-        Deployed -> True,
-        TemplateBoxOptions -> {DisplayFunction -> (FrameBox[
-          PaneBox[#1,
-            Scrollbars -> False,
-            Alignment -> {Center, Center},
-            ImageMargins -> {{4, 4}, {4, 4}},
-            ImageSize -> {Dynamic[CurrentValue[EvaluationNotebook[], WindowSize][[1]] / 2 - 200], 160}
-          ],
-          Background -> RGBColor[0.96, 0.98, 1],
-          RoundingRadius -> {8, 8},
-          ContentPadding -> True,
-          FrameStyle -> None
-        ]&)}
       ],
       
       (* Enhancement for cell style - PrintTemporary *)

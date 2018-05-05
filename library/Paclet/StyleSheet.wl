@@ -56,6 +56,40 @@ AssignTemplate["Button", Function[
   }, Dynamic @ CurrentValue["MouseOver"]]
 ]];
 
+AssignTemplate["Pane", Function[
+  FrameBox[
+    PaneBox[
+      StyleBox[#1, FontFamily -> "Calibri", FontSize -> 16],
+      Scrollbars -> False,
+      Alignment -> {Center, Center},
+      ImageMargins -> {{2, 2}, {2, 2}},
+      ImageSize -> {#3, Automatic}
+    ],
+    Background -> #2,
+    RoundingRadius -> {8, 8},
+    ContentPadding -> True,
+    FrameStyle -> None
+  ]
+]];
+
+AssignTemplate["Message", Function[
+  FrameBox[
+    AdjustmentBox[
+      RowBox[{
+         StyleBox[#2, FontSize -> 18],
+         TemplateBox[{4}, "Spacer1"],
+         StyleBox[#1, FontFamily -> "Calibri", FontSize -> 16]
+      }],
+      BoxBaselineShift -> 0,
+      BoxMargins -> {{2, 2}, {2, 2}}
+    ],
+    Background -> #3,
+    RoundingRadius -> {8, 8},
+    ContentPadding -> True,
+    FrameStyle -> None
+  ]
+]];
+      
 End[];
 
 EndPackage[];

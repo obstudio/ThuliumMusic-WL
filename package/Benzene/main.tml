@@ -1,6 +1,8 @@
 // TM Benzene Package
 // Updated: 2018.4.13.
 
+# Include ./template
+
 # Chord
 
 D		duo+			[], 2
@@ -43,39 +45,14 @@ function _adjust_(matrix, source) {
 }
 
 function Arpeggiando(subtrack) {
-    // alias: $~${0:sub}
-    const src = this.ParseTrack(subtrack);
-    const scale = src.Meta.Duration / src.Content.length;
-    src.Content.forEach((note, index) => {
-        note.StartTime = index * scale;
-        note.Duration = scale;
-    });
-    return src;
-}
-
-function Call(template, subtrack) {
-    // Alias: ${0:sub}?=${1:sub}
-    this.Libraries.Track.this = subtrack.Content;
-    return this.ParseTrack(template);
-}
-
-function Only() {
-	// Alias: Clear
-	const settings = {};
-	for (property of arguments) {
-		settings[property] = this.Settings[property];
-		if (settings[property] instanceof Array) {
-			settings[property] = settings[property].slice();
-		}
-	}
-	Object.assign(this.Settings, this.newSettings(settings));
-}
-
-function Except() {
-	const settings = this.newSettings();
-	for (property of arguments) {
-		this.Settings[property] = settings[property];
-	}
+	// alias: $~${0:sub}
+	const src = this.ParseTrack(subtrack);
+	const scale = src.Meta.Duration / src.Content.length;
+	src.Content.forEach((note, index) => {
+		note.StartTime = index * scale;
+		note.Duration = scale;
+	});
+	return src;
 }
 
 function Extend(subtrack, beats) {
@@ -85,26 +62,12 @@ function Extend(subtrack, beats) {
 		note.Duration = beats * 60 / this.Settings.Speed
 	});
 	Object.assign(src.Meta, {
-		Duration: ((a, b) => a > b ? a : b)(beats * 60 / this.Settings.Speed, src.Meta.Duration),
+		Duration: Math.max(beats * 60 / this.Settings.Speed, src.Meta.Duration),
 		BeatCount: beats,
 		BarCount: Math.floor(beats / this.Settings.Bar),
 		BarFirst: this.Settings.Bar,
 		BarLast: beats % this.Settings.Bar
 	});
-	return src;
-}
-
-function Preset(subtrack) {
-	const src = this.ParseTrack(subtrack);
-	this.Meta.PitchQueue.push(...src.Meta.PitchQueue);
-}
-
-function ReplaceRight(subtrack, replacement) {
-	const src = this.ParseTrack(subtrack);
-	const repl = this.ParseTrack(replacement);
-	if (beats < 0) {
-		src.Content = this.Library._take_(src.Content, 0, src.Meta.Duration + beats * 60 / src.Settings.Speed);
-	}
 	return src;
 }
 
@@ -146,52 +109,6 @@ function Fill(subtrack, bars) {
 		}),
 		Settings: src.Settings
 	});
-}
-
-function Map(template, subtrack) {
-	const temp = this.ParseTrack(template);
-	const src = this.ParseTrack(subtrack);
-	const content = [];
-	src.Content.forEach(sNote => {
-		const sStart = sNote.StartTime * temp.Meta.Duration;
-		temp.Content.forEach(tNote => {
-			const tStart = tNote.StartTime * sNote.Duration;
-			const tempo = 0;
-			content.push({
-				Type: 'Note',
-				Pitch: sNote.Pitch + tNote.Pitch,
-				Volume: sNote.Volume * tNote.Volume,
-				Duration: sNote.Duration * tNote.Duration,
-				StartTime: sStart + tStart
-			});
-		});
-	});
-	return this.Library._adjust_(this, {
-		Content: content,
-		Meta: Object.assign(src.Meta, {
-			BarCount: Math.ceil(1)
-		}),
-		Settings: src.Settings
-	});
-}
-
-function Apply(template, subtrack) {
-	// Alias: ${0:sub}?:${1:sub}
-	const temp = this.ParseTrack(template, { Settings: this.newSettings() });
-	const src = this.ParseTrack(subtrack);
-	const scale = temp.Settings.Speed / src.Settings.Speed;
-	const proto = this.Library._zoom_(temp.Content, scale);
-	const content = [];
-	src.Content.forEach(sNote => {
-		const filler = this.Library._fill_(proto, temp.Meta.Duration * scale, sNote.Duration);
-		content.push(...filler.map(note => Object.assign(note, {
-			Pitch: note.Pitch + sNote.Pitch,
-			StartTime: note.StartTime + sNote.StartTime,
-			StartBeat: note.StartBeat + sNote.StartBeat,
-			Volume: note.Volume * sNote.Volume
-		})));
-	});
-	return Object.assign(src, {Content: content});
 }
 
 function OctShift(delta) {

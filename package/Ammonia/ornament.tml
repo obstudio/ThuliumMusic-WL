@@ -1,0 +1,198 @@
+// TM Ammonia Package - Oranments
+// Updated: 2018.4.3.
+
+# Function
+
+function _zoom_(origin, scale, start = 0) {
+    return origin.map(note => Object.assign({}, note, {
+        StartTime: note.StartTime * scale + start,
+        Duration: note.Duration * scale
+    }));
+}
+
+function _rebeat_(origin, scale, start = 0) {
+    return origin.map(note => Object.assign({}, note, {
+        Beat: note.Beat * scale,
+        StartTime: note.StartTime * scale + start,
+        Duration: note.Duration * scale
+    }));
+}
+
+function _fill_(origin, duration, total) {
+    const result = [];
+    for (i = 0; i < total; i += duration) {
+        result.push(...this._zoom_(origin, 1, i));
+    }
+    return result.filter(note => note.StartTime + note.Duration <= total);
+}
+
+function Tremolo1(expr, subtrack) {
+    // alias: (${0:exp}-)${1:sub}
+    const src = this.ParseTrack(subtrack);
+    const time = Math.pow(2, -expr) * 60 / this.Settings.Speed;
+    const scale = time / src.Meta.Duration;
+    const content = this.Library._rebeat_(src.Content, scale);
+    return Object.assign(src, {
+        Content: this.Library._fill_(content, time, src.Meta.Duration)
+    });
+}
+
+function Tremolo2(expr, subtrack1, subtrack2) {
+    // alias: ${1:sub}(${0:exp}=)${2:sub}
+    const src1 = this.ParseTrack(subtrack1);
+    const src2 = this.ParseTrack(subtrack2);
+    const time = Math.pow(2, -expr) * 60 / this.Settings.Speed;
+    const scale1 = time / src1.Meta.Duration;
+    const scale2 = time / src2.Meta.Duration;
+    const content = [].concat(
+        this.Library._rebeat_(src1.Content, scale1),
+        this.Library._rebeat_(src2.Content, scale2, time)
+        );
+    return Object.assign(src2, {
+        Content: this.Library._fill_(content, 2 * time, src2.Meta.Duration)
+    });
+}
+
+function Tuplet(expr, subtrack) {
+    // alias: (${0:exp}~)${1:sub}
+    const scale = Math.pow(2, Math.floor(Math.log2(expr))) / expr;
+    const src = this.ParseTrack(subtrack, {
+        Settings: { Bar: this.Settings.Bar / scale }
+    });
+    src.Content = this.Library._rebeat_(src.Content, scale);
+    src.Meta.Duration *= scale;
+    src.Meta.BarFirst *= scale;
+    src.Meta.BarLast *= scale;
+    return src;
+}
+
+function Portamento(subtrack1, subtrack2) {
+    // alias: ${0:sub}~${1:sub}
+    const src1 = this.ParseTrack(subtrack1);
+    const src2 = this.ParseTrack(subtrack2);
+    const note1 = src1.Content.pop();
+    const note2 = src2.Content[0];
+    const duration = src1.Meta.Duration - note1.StartTime;
+    const port = this.Settings.getOrSetDefault('Port', 6);
+    const num = duration * port * this.Settings.Speed / 60;
+    const pitchStep = (note2.Pitch - note1.Pitch) / (num - 1);
+    const volumeStep = (note2.Volume - note1.Volume) / (num - 1);
+
+    if (Math.abs(pitchStep) < 1) {
+        this.ReportError('Undersize', {
+            StartPitch: note1.Pitch,
+            EndPitch: note2.Pitch,
+            PitchCount: num
+        });
+    }
+
+    for (let i = 0; i < num; i++) {
+        src1.Content.push({
+            Type: 'Note',
+            Pitch: Math.round(note1.Pitch + pitchStep * i),
+            Volume: note1.Volume + volumeStep * i,
+            Duration: 60 / this.Settings.Speed / port,
+            StartTime: 60 / this.Settings.Speed / port * i
+        });
+    }
+
+    return this.JoinTrack(src1, src2);
+}
+
+function GraceNote(subtrack1, subtrack2) {
+    // alias: (${0:notes}^)${1:sub}
+    const src1 = this.ParseTrack(subtrack1);
+    const src2 = this.ParseTrack(subtrack2);
+    const seg = this.Settings.getOrSetDefault('Seg', 1 / 4)
+    const scale = seg / Math.max(src1.Content.length, 4);
+    const duration = src1.Meta.Duration * scale;
+    const content = this.Library._rebeat_(src1.Content, scale);
+
+    src2.Content.forEach(note => {
+        if (note.StartTime < duration) {
+            if (note.Duration + note.StartTime > duration) {
+                content.push(Object.assign({}, note, {
+                    StartTime: duration,
+                    Duration: note.Duration + note.StartTime - duration
+                }));
+            } else {
+                this.ReportError('Overlong', {
+                    Duration: duration,
+                    Encounter: note
+                });
+            }
+        } else {
+            content.push(note);
+        }
+    });
+
+    return Object.assign(src2, { Content: content });
+}
+
+function Appoggiatura(subtrack1, subtrack2) {
+    // alias: ${0:sub}(^${1:notes})
+    const src1 = this.ParseTrack(subtrack1);
+    const src2 = this.ParseTrack(subtrack2);
+    const seg = this.Settings.getOrSetDefault('Seg', 1 / 4)
+    const scale = seg / Math.max(src2.Content.length, 4);
+    const start = src1.Meta.Duration - src2.Meta.Duration * scale;
+    const content = this.Library._rebeat_(src2.Content, scale, start);
+
+    src1.Content.forEach(note => {
+        if (note.StartTime + note.Duration > start) {
+            if (note.StartTime < start) {
+                content.push(Object.assign({}, note, {
+                    Duration: start - note.StartTime
+                }));
+            } else {
+                this.ReportError('Overlong', {
+                    Duration: duration,
+                    Encounter: note
+                });
+            }
+        } else {
+            content.push(note);
+        }
+    });
+
+    return Object.assign(src1, { Content: content });
+}
+
+function Fermata(subtrack) {
+    // alias: (.)${0:sub}
+    const src = this.ParseTrack(subtrack);
+    const ferm = this.Settings.getOrSetDefault('Ferm', 2);
+    src.Content = this.Library._rebeat_(src.Content, ferm);
+    src.Meta.Duration *= ferm;
+    return src;
+}
+
+function Arpeggio(subtrack) {
+    // alias: $${0:sub}
+    const src = this.ParseTrack(subtrack);
+    const seg = this.Settings.getOrSetDefault('Seg', 1 / 4)
+    const scale = seg / Math.max(src.Content.length, 4);
+    src.Content.forEach((note, index) => {
+        if (note.StartTime == 0) {
+            note.StartTime = scale * index;
+            note.Duration -= scale * index;
+        }
+    });
+    src.Content.unshift({ Type: 'PedalPress', StartTime: 0 });
+    src.Content.push({ Type: 'PedalRelease', StartTime: src.Meta.Duration });
+    return src;
+}
+
+function Seg(r) {
+    this.Settings.assignSetting('Seg', r, (r) => r > 0)
+}
+
+function Port(r) {
+    this.Settings.assignSetting('Port', r, (r) => r > 0)
+}
+
+function Ferm(ferm) {
+    this.Settings.assignSetting('Ferm', ferm, (ferm) => ferm > 1)
+}
+
+# End

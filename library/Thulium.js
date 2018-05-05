@@ -69,12 +69,26 @@ class Thulium {
 	}
 
 	get Tokenizer() {
-		return this.attributes([
-			'Comment',
-			'Library',
-			'Sections',
-			'Warnings'
-		]);
+		return this.attributes(['Comment', 'Library', 'Sections', 'Warnings']);
+	}
+
+	get information() {
+		const clips = this.parse(true);
+		const comment = this.Comment.map(line => {
+			const result = [];
+			line = line.trim();
+			for (let i = 0; i < line.length; i++) {
+				result.push(line.charCodeAt(i));
+			}
+			return result;
+		});
+		return {
+			Status: 'Succeed',
+			Comment: comment,
+			Sections: this.Sections,
+			Warnings: this.Warnings,
+			MusicClips: clips
+		}
 	}
 }
 

@@ -1,0 +1,43 @@
+// TM Ammonia Package - Tie Notations
+// Updated: 2018.5.6.
+
+# Notation
+
+class TieNotation {
+  constructor() {
+    this.syntax = {
+      default: [
+        FSM.item('Tie', /^\^/)
+      ]
+    }
+
+    this.attributes = {
+      Tie: {
+        detok: '^',
+        preserve: false
+      }
+    }
+  }
+
+  proMerge(result1, result2) {
+    // 当执行音轨整合前调用，包括跨乐章的整合
+    if (result1.Meta.After.Tie) {
+      if ( /*有音符可以相接*/ ) {
+        // 处理音符
+      }
+    }
+  },
+
+  epiNote() {
+    // 当解析完音符后调用
+    // this 是一个 TmNote 对象
+    const PrevNote = []
+    if (this.Meta.After.Tie) {
+      // 对音符和前音符进行处理
+    }
+    this.Meta.User.PrevNote = PrevNote.concat(this.result)
+    // After 和 User 属性都被默认设置为 Readable, Writable
+  }
+}
+
+# End

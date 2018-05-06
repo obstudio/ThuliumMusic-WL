@@ -31,46 +31,53 @@ class Repeat {
       ]
     }
 
-    this.detok = {
-      Volta(token) {
-        const order = token.Order.sort((x, y) => x - y)
-        let result = ''
-        let i = 0
-        while (i < order.length) {
-          let j = i + 1
-          while (j < order.length && order[j] === order[j - 1] + 1) j += 1;
-          if (j === i + 1) {
-            result += `${order[i]}.`
-          } else if (j === i + 2) {
-            result += `${order[i]}.`, `${order[i + 1]}.`
-          } else {
-            result += `${order[i]}~${order[j - 1]}.`
+    this.attributes = {
+      Volta: {
+        detok(token) {
+          const order = token.Order.sort((x, y) => x - y)
+          let result = ''
+          let i = 0
+          while (i < order.length) {
+            let j = i + 1
+            while (j < order.length && order[j] === order[j - 1] + 1) j += 1;
+            if (j === i + 1) {
+              result += `${order[i]}.`
+            } else if (j === i + 2) {
+              result += `${order[i]}.${order[i + 1]}.`
+            } else {
+              result += `${order[i]}~${order[j - 1]}.`
+            }
+            i = j
           }
-          i = j
-        }
-        return '[' + result + ']'
-      },
-
-      Coda(token) {
-        if (this.Settings.FullName) {
-          // FIXME: Coda or ToCoda
-          return 'Coda'
-        } else {
-          return '+'
+          return '[' + result + ']'
         }
       },
 
-      Segno(token) {
-        if (this.Settings.FullName) {
-          return 'Segno'
-        } else {
-          return 's'
+      Coda: {
+        detok() {
+          if (this.Settings.FullName) {
+            // FIXME: Coda or ToCoda
+            return 'Coda'
+          } else {
+            return '+'
+          }
         }
       },
 
-      DaCapo: 'DC',
-      DaSegno: 'DS',
-      Fine: 'Fine'
+      Segno: {
+        detok() {
+          if (this.Settings.FullName) {
+            return 'Segno'
+          } else {
+            return 's'
+          }
+        }
+      },
+      
+      DaCapo: { detok: () => 'DC' },
+      DaSegno: { detok: () => 'DS' },
+      RepeatBegin: { detok: () => '||:' },
+      RepeatEnd: { detok: () => ':||' }
     }
   }
 

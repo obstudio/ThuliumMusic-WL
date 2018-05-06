@@ -2,7 +2,7 @@ const fs = require('fs');
 const path = require('path');
 const Parser = require('./Parser/Parser');
 const Tokenizer = require('./Token/Tokenizer');
-const Detokenizer = require('./Linter/Detokenizer');
+const Linter = require('./Linter/Linter');
 
 const packagePath = __dirname + '/../package';
 const packageInfo = require(packagePath + '/index.json');
@@ -59,7 +59,7 @@ class Thulium {
 	}
 
 	detokenize() {
-		return new Detokenizer(this.Tokenizer, this.Syntax).detokenize();
+		return new Linter(this.Tokenizer, this.Syntax).detokenize();
 	}
 
 	attributes(attrs) {

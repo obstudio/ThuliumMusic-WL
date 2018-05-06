@@ -1,0 +1,62 @@
+// TM Ammonia Package - Pedal Notations
+// Updated: 2018.5.6.
+
+# Notation
+
+class Pedal {
+  constructor() {
+    this.syntax = {
+      default: [
+        FSM.item('PedalPress', /^&/),
+        FSM.item('PedalRelease', /^\*/)
+      ]
+    }
+
+    this.attributes = {
+      PedalPress: { detok: () => '&' },
+      PedalRelease: { detok: () => '*' }
+    }
+  }
+
+  proMerge(result1, result2) {
+  }
+
+  epiTrack(subtrack) {
+    const pedals = subtrack.Pedal.sort((tok1, tok2) => {
+      if (tok1.Time === tok2.Time) {
+        return tok1.Type < tok2.Type ? -1 : 1;
+      } else {
+        return tok1.Time - tok2.Time;
+      }
+    });
+
+    // status -1 stands for released
+    // status t stands for pressed at start time t
+    let index = 0, status = -1;
+    const result = [];
+    while (index <= pedals.length) {
+      if (status > -1) {
+        content.filter(note => {
+          return note.StartTime >= status && note.StartTime + note.Duration < pedals[index].Time;
+        }).forEach(note => {
+          note.Duration = pedals[index].Time - note.StartTime;
+        });
+      } else if (pedals[index].Type === 'PedalRelease') {
+        if (index > 0) {
+          // Error: DupPedalRelease
+        } else {
+          result.push(pedals[index]);
+        }
+      }
+      if (pedals[index].Type === 'PedalRelease') {
+        status = -1;
+      } else {
+        status = pedals[index].Time;
+      }
+    }
+    if (status > -1) result.push(pedals[pedals.length] - 1);
+    subtrack.Pedal = result;
+  }
+}
+
+# End

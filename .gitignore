@@ -11,3 +11,4 @@
 test*.*
 test/*.*
 buffer.json
+node_modules/

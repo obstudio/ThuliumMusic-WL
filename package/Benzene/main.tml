@@ -74,7 +74,7 @@ function Extend(subtrack, beats) {
 function Take(subtrack, beats) {
 	const src = this.ParseTrack(subtrack);
 	if (beats > 0) {
-		this.Library._take_(src.Content, 0, beats * 60 / this.Settings.Speed);
+		this.Function._take_(src.Content, 0, beats * 60 / this.Settings.Speed);
 		if (src.Meta.BarCount === 0) {
 			src.Meta.BarFirst -= beats;
 		} else {
@@ -82,7 +82,7 @@ function Take(subtrack, beats) {
 			src.Meta.BarFirst = (beats - src.Meta.BarFirst) % this.Settings.Bar;
 		}
 	} else if (beats < 0) {
-		this.Library._take_(src.Content, beats * 60 / src.Settings.Speed, src.Meta.Duration);
+		this.Function._take_(src.Content, beats * 60 / src.Settings.Speed, src.Meta.Duration);
 		if (src.Meta.BarCount === 0) {
 			src.Meta.BarFirst -= beats;
 		} else {
@@ -99,8 +99,8 @@ function Take(subtrack, beats) {
 function Fill(subtrack, bars) {
 	const src = this.ParseTrack(subtrack);
 	const time = bars * this.Settings.Bar * 60 / this.Settings.Speed;
-	const content = this.Library._fill_(src.Content, src.Meta.Duration, time);
-	return this.Library._adjust_(this, {
+	const content = this.Function._fill_(src.Content, src.Meta.Duration, time);
+	return this.Function._adjust_(this, {
 		Content: content,
 		Meta: Object.assign(src.Meta, {
 			BarCount: bars,

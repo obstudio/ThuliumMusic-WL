@@ -18,8 +18,8 @@ class Pedal {
     }
   }
 
-  epiTrack(subtrack) {
-    const pedals = subtrack.Notation.Pedal.sort((tok1, tok2) => {
+  epiTrack() {
+    const pedals = this.Notation.Pedal.sort((tok1, tok2) => {
       if (tok1.Time === tok2.Time) {
         return tok1.Type < tok2.Type ? -1 : 1;
       } else {
@@ -33,7 +33,7 @@ class Pedal {
     const result = [];
     while (index < pedals.length) {
       if (status > -1) {
-        subtrack.Result.filter(note => {
+        this.Result.filter(note => {
           return note.StartTime >= status && note.StartTime + note.Duration < pedals[index].Time;
         }).forEach(note => {
           note.Duration = pedals[index].Time - note.StartTime;
@@ -52,7 +52,7 @@ class Pedal {
       }
     }
     if (status > -1) result.push(pedals[pedals.length] - 1);
-    subtrack.Notation.Pedal = result;
+    this.Notation.Pedal = result;
   }
 }
 

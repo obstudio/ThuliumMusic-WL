@@ -4,6 +4,7 @@
 # Include ./ornament
 # Include ./repeat
 # Include ./pedal
+# Include ./tie
 
 # Chord
 
@@ -22,70 +23,50 @@ j		2nd inversion	[2:], [:1]+12
 
 function Con(octave, scale = 1) {
     if (octave === 0) {
-        this.Settings.Key = [this.Settings.Key[0]]
-        this.Settings.Volume = [this.Settings.Volume[0]]
+        for (const name in this.Library.Pitch) {
+            if (this.Library.Pitch[name].Generated) {
+                this.Library.Pitch[name].splice(1)
+            }
+        }
     } else {
-        this.Settings.Key = [this.Settings.Key[0], this.Settings.Key[0] + octave * 12]
-        this.Settings.Volume = [this.Settings.Volume[0], this.Settings.Volume[0] * scale]
+        for (const name in this.Library.Pitch) {
+            if (this.Library.Pitch[name].Generated && '1' <= name && name <= '9') {
+                const source = this.Library.Pitch[name][0]
+                this.Library.Pitch[name].splice(1)
+                this.Library.Pitch[name].push({
+                    Pitch: source.Pitch + octave * 12,
+                    Volume: scale
+                })
+            }
+        }
     }
 }
 
 function Vol(volume) {
     // alias: (${0:uns}%)
-    if (volume instanceof Array) {
-        this.Settings.Volume = volume
-    } else {
-        const delta = (volume / 100) / this.Settings.Volume[0]
-        for (var i = 0, length = this.Settings.Volume.length; i < length; i++) {
-            this.Settings.Volume[i] *= delta
-        }
-    }
+    this.Settings.assignSetting('Volume', volume / 100, (volume) => volume > 0)
 }
 
 function Key(key) {
     // alias: (1=${0:str})
-    let delta
     if (typeof key === 'string') {
         const match = arguments[0].match(/^((#|b)\2*)?([A-G])(('|,)\5*)?/)
-        const Tonality = {
-            'C': 0,
-            'G': 7,
-            'D': 2,
-            'A': 9,
-            'E': 4,
-            'B': -1,
-            'F': 5
-        }
-        delta = Tonality[match[3]] + (match[2] === undefined ? 0 : (match[2] === '#' ? match[1].length : -match[1].length)) +
-                (match[5] === undefined ? 0 : (match[5] === '\'' ? (12 * match[4].length) : (-12 * match[4].length))) - this.Settings.Key[0]
+        this.Settings.Key = { C: 0, G: 7, D: 2, A: 9, E: 4, B: -1, F: 5 }[match[3]]
+        this.Settings.Key += (!match[2]) ? 0 : (match[2] === 'b' ? -1 : 1) * match[1].length
+        this.Settings.Key += (!match[5]) ? 0 : (match[5] === ',' ? -12 : 12) * match[4].length
     } else {
-        delta = key - this.Settings.Key[0]
+        this.Settings.Key = key
     }
-    for (var i = 0, length = this.Settings.Key.length; i < length; i++) {
-        this.Settings.Key[i] += delta
-    }
-        // this.Settings.assignSetting('Key', key, (key) => Number.isInteger(key))
 }
 
 function KeyShift(delta) {
     // alias: (${0:sig})
-    for (var i = 0, length = this.Settings.Key.length; i < length; i++) {
-        this.Settings.Key[i] += delta
-    }
+    this.Settings.Key += delta
 }
 
-function Oct() {
-    if (arguments.length === 0) return
-    if (!(arguments[0] instanceof Array)) {
-        const delta = (arguments[0] - Math.floor((this.Settings.Key[0] + 2) / 12)) * 12
-        for (let i = 0, length = this.Settings.Key.length; i < length; i++) {
-            this.Settings.Key[i] += delta
-        }
-    } else {
-        const tonality = (this.Settings.Key[0] - 2) % 12
-        this.Settings.Key = arguments[0].map((oct) => tonality + oct * 12)
-        if (arguments.length >= 2) this.Settings.Volume = arguments[1]
-    }
+function Oct(octave) {
+    const tonality = (this.Settings.Key - 2) % 12
+    this.Settings.Key = tonality + octave * 12
 }
 
 function Spd(speed) {
@@ -100,7 +81,7 @@ function BarBeat(bar, beat) {
 }
 
 function Dur(scale) {
-    this.Settings.assignSetting('Duration', scale, () => true)
+    this.Settings.assignSetting('Duration', scale, (scale) => scale > 0)
 }
 
 function Acct(scale) {

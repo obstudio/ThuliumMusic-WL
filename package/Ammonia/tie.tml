@@ -1,5 +1,5 @@
 // TM Ammonia Package - Tie Notations
-// Updated: 2018.5.6.
+// Updated: 2018.5.9.
 
 # Notation
 
@@ -17,26 +17,47 @@ class TieNotation {
         preserve: false
       }
     }
+
+    this.meta = {
+      LastNotes: [],
+      FirstNotes: []
+    }
   }
 
-  proMerge(result1, result2) {
-    // 当执行音轨整合前调用，包括跨乐章的整合
-    if (result1.Meta.After.Tie) {
-      if ( /*有音符可以相接*/ ) {
-        // 处理音符
-      }
-    }
-  },
-
   epiNote() {
-    // 当解析完音符后调用
-    // this 是一个 TmNote 对象
-    const PrevNote = []
-    if (this.Meta.After.Tie) {
-      // 对音符和前音符进行处理
+    if (this.Result.length > 0 && this.Meta.FirstNotes.length === 0) {
+      this.Meta.FirstNotes = this.Result
     }
-    this.Meta.User.PrevNote = PrevNote.concat(this.result)
-    // After 和 User 属性都被默认设置为 Readable, Writable
+    const lastNotes = []
+    if (this.Meta.After.Tie) {
+      this.Meta.After.Tie = false
+      this.Meta.LastNotes.forEach(lastNote => {
+        const index = this.Result.findIndex(note => {
+          return lastNote.Pitch === note.Pitch && lastNote.Volume === note.Volume
+        })
+        if (index === -1) return
+        const currNote = this.Result[index]
+        lastNotes.push(lastNote)
+        lastNote.Duration = currNote.StartTime + currNote.Duration - lastNote.StartTime
+        this.Result.splice(index, 1)
+      })
+    }
+    this.Meta.LastNotes = lastNotes.concat(this.Result)
+  }
+
+  proMerge(subtrack1, subtrack2) {
+    if (subtrack1.Meta.After.Tie) {
+      subtrack1.Meta.LastNotes.forEach(lastNote => {
+        const index = subtrack2.Meta.FirstNotes.findIndex(note => {
+          return lastNote.Pitch === note.Pitch && lastNote.Volume === note.Volume
+        })
+        if (index === -1) return
+        const firstNote = subtrack2.Meta.FirstNotes[index]
+        lastNotes.push(lastNote)
+        lastNote.Duration = firstNote.StartTime + firstNote.Duration + subtrack1.Meta.Duration - firstNote.StartTime
+        subtrack2.Meta.FirstNotes.splice(index, 1)
+      })
+    }
   }
 }
 

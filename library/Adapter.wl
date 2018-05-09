@@ -166,7 +166,7 @@ MIDIConstruct[musicClip_,rate_]:=Block[
 ];
 
 
-(* ::Subsubsection::Closed:: *)
+(* ::Subsubsection:: *)
 (*Adapter*)
 
 
@@ -221,12 +221,12 @@ Thulium`AudioAdapt[rawData_,OptionsPattern[AdaptingOptions]]:=Block[
 	];
 	Do[
 		clipUsed={};
-		groups=GatherBy[sectionData[["Tracks"]],#Meta[[{"FadeIn","FadeOut"}]]&];
+		groups=GatherBy[sectionData["Tracks"],#Effects[{"FadeIn","FadeOut"}]&];
 		Do[
 			compactData=Flatten@Table[
 				EventConstruct[trackData,duration],
 			{trackData,group}];
-			targetClip=If[group[[1,"Meta","FadeIn"]]==0,
+			targetClip=If[group[[1,"Effects","FadeIn"]]==0,
 				LengthWhile[Range@Length@musicClips,Or[
 					musicClips[[#,"FadeOut"]]>0,
 					MemberQ[clipUsed,#]
@@ -236,17 +236,17 @@ Thulium`AudioAdapt[rawData_,OptionsPattern[AdaptingOptions]]:=Block[
 			AppendTo[clipUsed,targetClip];
 			If[targetClip>Length@musicClips,
 				AppendTo[musicClips,<|
-					"FadeIn"->group[[1,"Meta","FadeIn"]],
-					"FadeOut"->group[[1,"Meta","FadeOut"]],
+					"FadeIn"->group[[1,"Effects","FadeIn"]],
+					"FadeOut"->group[[1,"Effects","FadeOut"]],
 					"Events"->{compactData}
 				|>],
-				musicClips[[targetClip,"FadeOut"]]=group[[1,"Meta","FadeOut"]];
+				musicClips[[targetClip,"FadeOut"]]=group[[1,"Effects","FadeOut"]];
 				AppendTo[musicClips[[targetClip,"Events"]],compactData];
 			],
 		{group,groups}];
 		duration+=Max[sectionData[["Tracks",All,"Meta","Duration"]]],
 	{sectionData,rawData}];
-	
+
 	output=Total@Table[
 		AudioFade[
 			Sound@MIDIConstruct[Flatten@musicClip[["Events"]],OptionValue["Rate"]],
@@ -308,7 +308,7 @@ Thulium`AudioAdapt[rawData_,OptionsPattern[AdaptingOptions]]:=Block[
 (* ::Input:: *)
 (*AudioStop[];AudioPlay[#[[2]]]&@*)
 (*EchoFunction["time: ",#[[1]]&]@*)
-(*Timing[Thulium`AudioAdapt[Thulium`Parse[$LocalPath<>"Songs/Touhou/test.tm",{3}],"Rate"->1]];*)
+(*Timing[Thulium`AudioAdapt[Thulium`Parse[$LocalPath<>"Songs/Touhou/Oriental_Blood.tm",{1}],"Rate"->1]];*)
 
 
 (* ::Input:: *)
@@ -325,3 +325,7 @@ Thulium`AudioAdapt[rawData_,OptionsPattern[AdaptingOptions]]:=Block[
 (*AudioStop[];AudioPlay[#[[2]]]&@*)
 (*EchoFunction["time: ",#[[1]]&]@*)
 (*Timing[Thulium`AudioAdapt[Thulium`Parse[$LocalPath<>"Songs/test.tm"],"Rate"->1]];*)
+
+
+(* ::Input:: *)
+(*Thulium`Parse[$LocalPath<>"Songs/Touhou/Oriental_Blood.tm",{1}]*)

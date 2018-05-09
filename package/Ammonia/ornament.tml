@@ -28,7 +28,7 @@ function _fill_(origin, duration, total) {
 
 function Tremolo1(expr, subtrack) {
     // alias: (${0:exp}-)${1:sub}
-    const src = this.ParseTrack(subtrack);
+    const src = this.ParsePlainTrack(subtrack);
     const time = Math.pow(2, -expr) * 60 / this.Settings.Speed;
     const scale = time / src.Meta.Duration;
     const content = this.Function._rebeat_(src.Content, scale);
@@ -39,8 +39,8 @@ function Tremolo1(expr, subtrack) {
 
 function Tremolo2(expr, subtrack1, subtrack2) {
     // alias: ${1:sub}(${0:exp}=)${2:sub}
-    const src1 = this.ParseTrack(subtrack1);
-    const src2 = this.ParseTrack(subtrack2);
+    const src1 = this.ParsePlainTrack(subtrack1);
+    const src2 = this.ParsePlainTrack(subtrack2);
     const time = Math.pow(2, -expr) * 60 / this.Settings.Speed;
     const scale1 = time / src1.Meta.Duration;
     const scale2 = time / src2.Meta.Duration;
@@ -56,7 +56,7 @@ function Tremolo2(expr, subtrack1, subtrack2) {
 function Tuplet(expr, subtrack) {
     // alias: (${0:exp}~)${1:sub}
     const scale = Math.pow(2, Math.floor(Math.log2(expr))) / expr;
-    const src = this.ParseTrack(subtrack, {
+    const src = this.ParsePlainTrack(subtrack, {
         Settings: { Bar: this.Settings.Bar / scale }
     });
     src.Content = this.Function._rebeat_(src.Content, scale);
@@ -68,8 +68,8 @@ function Tuplet(expr, subtrack) {
 
 function Portamento(subtrack1, subtrack2) {
     // alias: ${0:sub}~${1:sub}
-    const src1 = this.ParseTrack(subtrack1);
-    const src2 = this.ParseTrack(subtrack2);
+    const src1 = this.ParsePlainTrack(subtrack1);
+    const src2 = this.ParsePlainTrack(subtrack2);
     const note1 = src1.Content.pop();
     const note2 = src2.Content[0];
     const duration = src1.Meta.Duration - note1.StartTime;
@@ -101,8 +101,8 @@ function Portamento(subtrack1, subtrack2) {
 
 function GraceNote(subtrack1, subtrack2) {
     // alias: (${0:notes}^)${1:sub}
-    const src1 = this.ParseTrack(subtrack1);
-    const src2 = this.ParseTrack(subtrack2);
+    const src1 = this.ParsePlainTrack(subtrack1);
+    const src2 = this.ParsePlainTrack(subtrack2);
     const seg = this.Settings.getOrSetDefault('Seg', 1 / 4)
     const scale = seg / Math.max(src1.Content.length, 4);
     const duration = src1.Meta.Duration * scale;
@@ -131,8 +131,8 @@ function GraceNote(subtrack1, subtrack2) {
 
 function Appoggiatura(subtrack1, subtrack2) {
     // alias: ${0:sub}(^${1:notes})
-    const src1 = this.ParseTrack(subtrack1);
-    const src2 = this.ParseTrack(subtrack2);
+    const src1 = this.ParsePlainTrack(subtrack1);
+    const src2 = this.ParsePlainTrack(subtrack2);
     const seg = this.Settings.getOrSetDefault('Seg', 1 / 4)
     const scale = seg / Math.max(src2.Content.length, 4);
     const start = src1.Meta.Duration - src2.Meta.Duration * scale;
@@ -146,7 +146,7 @@ function Appoggiatura(subtrack1, subtrack2) {
                 }));
             } else {
                 this.ReportError('Overlong', {
-                    Duration: duration,
+                    // FIXME: duration
                     Encounter: note
                 });
             }
@@ -160,7 +160,7 @@ function Appoggiatura(subtrack1, subtrack2) {
 
 function Fermata(subtrack) {
     // alias: (.)${0:sub}
-    const src = this.ParseTrack(subtrack);
+    const src = this.ParsePlainTrack(subtrack);
     const ferm = this.Settings.getOrSetDefault('Ferm', 2);
     src.Content = this.Function._rebeat_(src.Content, ferm);
     src.Meta.Duration *= ferm;
@@ -169,7 +169,7 @@ function Fermata(subtrack) {
 
 function Arpeggio(subtrack) {
     // alias: $${0:sub}
-    const src = this.ParseTrack(subtrack);
+    const src = this.ParsePlainTrack(subtrack);
     const seg = this.Settings.getOrSetDefault('Seg', 1 / 4)
     const scale = seg / Math.max(src.Content.length, 4);
     src.Content.forEach((note, index) => {

@@ -81,9 +81,9 @@ class Repeat {
     }
   }
 
-  proGlobal(parser) {
+  proGlobal() {
     const result = []
-    const source = parser.Sections
+    const source = this.Sections
     const length = source.length
     let pointer = 0
     let repeatBeginIndex = [] // 用数组存储嵌套反复每次开始的位置
@@ -192,7 +192,7 @@ class Repeat {
       }
       pointer += 1
     }
-    parser.Sections = result
+    this.Sections = result
   }
 }
 

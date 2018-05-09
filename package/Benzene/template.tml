@@ -6,13 +6,13 @@
 function Call(template, subtrack) {
 	// Alias: ${0:sub}?=${1:sub}
 	this.Libraries.Track.this = subtrack.Content;
-	return this.ParseTrack(template);
+	return this.ParsePlainTrack(template);
 }
 
 function Map(template, subtrack) {
 	// Alias: ${0:sub}?*${1:sub}
-	const temp = this.ParseTrack(template, { Settings: this.newSettings() });
-	const src = this.ParseTrack(subtrack);
+	const temp = this.ParsePlainTrack(template, { Settings: this.newSettings() });
+	const src = this.ParsePlainTrack(subtrack);
 	const content = [];
 	src.Content.forEach(sNote => {
 		const sStart = sNote.StartTime * temp.Meta.Duration;
@@ -40,8 +40,8 @@ function Map(template, subtrack) {
 
 function Apply(template, subtrack) {
 	// Alias: ${0:sub}?:${1:sub}
-	const temp = this.ParseTrack(template, { Settings: this.newSettings() });
-	const src = this.ParseTrack(subtrack);
+	const temp = this.ParsePlainTrack(template, { Settings: this.newSettings() });
+	const src = this.ParsePlainTrack(subtrack);
 	const scale = temp.Settings.Speed / src.Settings.Speed;
 	const proto = this.Function._zoom_(temp.Content, scale);
 	const content = [];

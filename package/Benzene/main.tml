@@ -46,7 +46,7 @@ function _adjust_(matrix, source) {
 
 function Arpeggiando(subtrack) {
 	// alias: $~${0:sub}
-	const src = this.ParseTrack(subtrack);
+	const src = this.ParsePlainTrack(subtrack);
 	const scale = src.Meta.Duration / src.Content.length;
 	src.Content.forEach((note, index) => {
 		note.StartTime = index * scale;
@@ -57,7 +57,7 @@ function Arpeggiando(subtrack) {
 
 function Extend(subtrack, beats) {
 	// Alias: Rest(${1:int})
-	const src = this.ParseTrack(subtrack);
+	const src = this.ParsePlainTrack(subtrack);
 	src.Content.forEach(note => {
 		note.Duration = beats * 60 / this.Settings.Speed
 	});
@@ -72,7 +72,7 @@ function Extend(subtrack, beats) {
 }
 
 function Take(subtrack, beats) {
-	const src = this.ParseTrack(subtrack);
+	const src = this.ParsePlainTrack(subtrack);
 	if (beats > 0) {
 		this.Function._take_(src.Content, 0, beats * 60 / this.Settings.Speed);
 		if (src.Meta.BarCount === 0) {
@@ -97,7 +97,7 @@ function Take(subtrack, beats) {
 }
 
 function Fill(subtrack, bars) {
-	const src = this.ParseTrack(subtrack);
+	const src = this.ParsePlainTrack(subtrack);
 	const time = bars * this.Settings.Bar * 60 / this.Settings.Speed;
 	const content = this.Function._fill_(src.Content, src.Meta.Duration, time);
 	return this.Function._adjust_(this, {

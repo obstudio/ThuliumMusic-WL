@@ -115,6 +115,8 @@ InitializePackage := Block[{packages},
   ProgressDisplay[packages, i, "Loading packages from library ......"]];
   Get["Preload.wl"];
   $Init = True;
+  ResetDirectory[];
+  If[CurrentValue[{StyleDefinitions, "<Tooltip>"}] == {}, Return[]];
   MessageDisplay[Cell[BoxData @ TemplateBox[{
     RowBox[{
       "Succeed: Initializing Thulium Kernel ",
@@ -126,7 +128,6 @@ InitializePackage := Block[{packages},
       0.1}, "<Tooltip>"]
     }]
   }, "SuccessMessage"], "MessageCell", CellTags -> "$msg"]];
-  ResetDirectory[];
 ];
 
 
@@ -163,6 +164,7 @@ InitializeParser := Block[{result, succeed, msgCells},
     $Parser = True,
   MonitorDisplay["Initializing Node.js as external evaluator ......"]];
   
+  If[CurrentValue[{StyleDefinitions, "<Tooltip>"}] == {}, Return[]];
   MessageDisplay[If[succeed === True,
     Cell[BoxData @ TemplateBox[{
       RowBox[{

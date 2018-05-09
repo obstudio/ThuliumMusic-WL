@@ -65,8 +65,8 @@ function KeyShift(delta) {
 }
 
 function Oct(octave) {
-    const tonality = (this.Settings.Key - 2) % 12
-    this.Settings.Key = tonality + octave * 12
+    const tonality = (this.Settings.Key + 2) % 12
+    this.Settings.Key = tonality - 2 + octave * 12
 }
 
 function Spd(speed) {

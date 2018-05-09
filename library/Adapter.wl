@@ -166,7 +166,7 @@ MIDIConstruct[musicClip_,rate_]:=Block[
 ];
 
 
-(* ::Subsubsection:: *)
+(* ::Subsubsection::Closed:: *)
 (*Adapter*)
 
 
@@ -308,7 +308,7 @@ Thulium`AudioAdapt[rawData_,OptionsPattern[AdaptingOptions]]:=Block[
 (* ::Input:: *)
 (*AudioStop[];AudioPlay[#[[2]]]&@*)
 (*EchoFunction["time: ",#[[1]]&]@*)
-(*Timing[Thulium`AudioAdapt[Thulium`Parse[$LocalPath<>"Songs/Touhou/Oriental_Blood.tm",{1}],"Rate"->1]];*)
+(*Timing[Thulium`AudioAdapt[Thulium`Parse[$LocalPath<>"Songs/Touhou/Oriental_Blood.tm",{2,4}],"Rate"->1]];*)
 
 
 (* ::Input:: *)

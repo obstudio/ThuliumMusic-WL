@@ -7,12 +7,6 @@ imageTags = {"Title", "Painter", "PainterID", "IllustID", "Source", "URL"};
 aboutTags = {"Version", "Producer", "Website"};
 langList = {"chs", "eng"};
 
-(* instruments *)
-instDict = Association @ Import[$LocalPath <> "library/Config/Instrument.json"];
-percDict = Association @ Import[$LocalPath <> "library/Config/Percussion.json"];
-instList = Keys @ instDict;
-percList = Keys @ percDict;
-
 
 Begin["Thulium`System`"];
 
@@ -21,10 +15,12 @@ Begin["`Private`"];
 $$Version = "2.3";
 $$Build = 701;
 If[DirectoryQ[$LocalPath <> ".git"], 
-  With[{ref = StringCases[Import[$LocalPath <> ".git/HEAD"], RegularExpression["^ref: (.+)$"] :> "$1"]},
+  With[{ref = StringCases[Import[$LocalPath <> ".git/HEAD"], RegularExpression["^ref: (.+)$"] :> "$1"][[1]]},
     $$Commit = StringTake[Import[$LocalPath <> ".git/" <> ref], 7];
+    $$Branch = StringCases[ref, RegularExpression["/([a-zA-Z0-9-]+)$"] :> "$1"][[1]];
   ],
   $$Commit = "";
+  $$Branch = "";
 ];
 
 Switch[$VersionNumber,

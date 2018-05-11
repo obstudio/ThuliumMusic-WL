@@ -1,93 +1,37 @@
 (* ::Package:: *)
 
-uiSettings:=DynamicModule[{choices},
-	choices=UserInfo;
-	CreateDialog[Column[{Spacer[{40,40}],
-		Caption[TextDict["Settings"],"Title"],Spacer[1],
-		Row[{Spacer[40],Grid[{
-			{Caption[TextDict["ChooseIdentity"],"Text"],
-				RadioButtonBar[Dynamic @ choices["Developer"],{
-					False->Caption[TextDict["NormalUser"],"Text"],
-					True->Caption[TextDict["Developer"],"Text"]
-				}]
-			},
-			{Caption[TextDict["ChooseLanguage"],"Text"],
-				RadioButtonBar[Dynamic@choices["Language"],LangDict]}
-			}
-		],Spacer[40]}],Spacer[1],
-		Row[{
-			Button[TextDict["Save"],
-				UserInfo=choices;
-				Export[$UserPath<>"Default.json",UserInfo];
-				RefreshLanguage;
-				DialogReturn[Thulium`homepage],
-			ImageSize->150],
-			Spacer[10],
-			Button[TextDict["Return"],DialogReturn[Thulium`homepage],ImageSize->150]
-		}],Spacer[{40,40}]
-	},Center,ItemSize->Full],
-	Background->WindowBackground,WindowTitle->TextDict["Settings"]]
-];
-
-
-(* ::Input:: *)
-(*uiSettings;*)
-
-
-uiAbout:=CreateDialog[Column[{Spacer[{40,40}],
-	Caption[TextDict["About"],"Title"],
-	Spacer[{20,20}],
-	Row[{Spacer[60],Column[{
-		Caption[TextDict["Thulium"],"Subtitle"],
-		Spacer[4],
-		Grid[{
-			{Caption[TagName["Version"],"Text"],Caption[$$Version,"Text"]},
-			{Caption[TagName["Producer"],"Text"],Caption[TextDict["Obstudio"],"Text"]},
-			{Caption[TagName["Website"],"Text"],Caption["qymp.ob-studio.cn","Text"]}
-		},Alignment->Left]
-	},Alignment->Left,ItemSize->Full],Spacer[60]}],
-	Spacer[{20,20}],
-	Button[TextDict["Return"],DialogReturn[Thulium`homepage],ImageSize->100],
-Spacer[{40,40}]},Center,ItemSize->Full],
-WindowTitle->TextDict["About"],Background->WindowBackground];
-
-
-(* ::Input:: *)
-(*uiAbout;*)
-
-
-Thulium`homepage:=Block[{pageCount, playlistsPaged},
-  pageCount=Ceiling[Length@Keys@PlaylistIndex/16];
-  If[PageIndex["Main"]>pageCount,PageIndex["Main"]=pageCount];
-  playlistsPaged=Partition[Keys@PlaylistIndex,UpTo@Ceiling[Length@Keys@PlaylistIndex/pageCount]];
+Thulium`homepage := Block[{pageCount, playlistsPaged},
+  pageCount = Ceiling[Length @ Keys @ PlaylistIndex / 16];
+  If[PageIndex["Main"] > pageCount, PageIndex["Main"] = pageCount];
+  playlistsPaged = Partition[Keys @ PlaylistIndex, UpTo @ Ceiling[Length @ Keys @ PlaylistIndex / pageCount]];
   Module[{playlist = Keys[PlaylistIndex][[1]], page = PageIndex["Main"]},
     CreateDialog[With[{playlistsPaged = playlistsPaged},
-      Column[{Spacer[{40,40}],
+      Column[{Spacer[{40, 40}],
         Row[{
-          Row[{Spacer[40],Caption[TextDict["Thulium"],"BigTitle"]},Alignment->Left,ImageSize->320],
+          Row[{Spacer[40], Caption[TextDict["Thulium"], "BigTitle"]}, Alignment -> Left, ImageSize -> 320],
           Row[{
-            SmartButton["EnterPlaylist",DialogReturn[PageIndex["Main"]=page;playlist;uiPlaylist[playlist]]],
+            SmartButton["EnterPlaylist", DialogReturn[PageIndex["Main"] = page; playlist; uiPlaylist[playlist]]],
             Spacer[10],
-            SmartButton["About",DialogReturn[PageIndex["Main"]=page;uiAbout]],
+            SmartButton["About", DialogReturn[PageIndex["Main"] = page; uiAbout[]]],
             Spacer[10],
-            SmartButton["Settings",DialogReturn[PageIndex["Main"]=page;uiSettings]],
+            SmartButton["Settings", DialogReturn[PageIndex["Main"] = page; uiSettings[]]],
             Spacer[10],
-            SmartButton["Exit",DialogReturn[PageIndex["Main"]=page;]],
+            SmartButton["Exit", DialogReturn[PageIndex["Main"] = page]],
             Spacer[40]
-          },Alignment->Right,ImageSize->{400,60}]
+          }, Alignment -> Right, ImageSize -> {400, 60}]
         }],
         Spacer[1],
-        Dynamic@Row[{
+        Dynamic @ Row[{
           Spacer[60],
-          Dynamic[With[{playlists = playlistsPaged[[page]]},SetterBar[Dynamic@playlist,
+          Dynamic[With[{playlists = playlistsPaged[[page]]}, SetterBar[Dynamic@playlist,
             #->Row[{
               Row[{
                 Caption[TagName[[PlaylistIndex[[#,"Type"]]]],"SongComment"]
               },Alignment->{Center,Top},ImageSize->{80,38}],
-              Caption[PlaylistIndex[[#,"Title"]],"SongName"],
+              Caption[PlaylistIndex[[#,"Title"]], "SongName"],
               Spacer[24],
-              Caption[PlaylistIndex[[#,"Comment"]],"SongComment"]				
-            },ImageSize->{720,30}]&/@playlists,
+              Caption[PlaylistIndex[[#,"Comment"]], "SongComment"]				
+            },ImageSize->{720,30}]& /@ playlists,
             Appearance->"Vertical"
           ]],TrackedSymbols:>{page}],Spacer[60]
         }],
@@ -180,7 +124,3 @@ uiPlaylist[playlist_] := Block[{info, songList, songListPaged, pageCount},
 
 (* ::Input:: *)
 (*uiPlaylist["All"];*)
-
-
-(* ::Input:: *)
-(*uiPageSelector[Dynamic[page], pageCount]*)

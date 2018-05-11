@@ -1,10 +1,21 @@
 (* ::Package:: *)
 
-Thulium`Interface`Playlist[playlist_] := Block[
+BeginPackage["Thulium`Interface`newPlaylist`", {
+  "Thulium`System`",
+  "Thulium`Assets`",
+  "Thulium`SmartButton`",
+  "Thulium`PageSelector`"
+}];
+
+newPlaylist::usage = "newPlaylist";
+
+Begin["`Private`"];
+
+newPlaylist[playlist_] := Block[
   {info, length, songList, indexList, pageCount},
   info = PlaylistIndex[playlist];
   length = Length @ info["SongList"];
-  pageCount = Ceiling[length / $ListSize];
+  pageCount = Ceiling[length / ListSize];
   songList = Partition["Song" /. info["SongList"], UpTo @ Ceiling[length / pageCount]];
   indexList = Partition["Index" /. info["SongList"], UpTo @ Ceiling[length / pageCount]];
   If[Thulium`PageIndex[playlist] > pageCount, Thulium`PageIndex[playlist] = pageCount];
@@ -20,17 +31,17 @@ Thulium`Interface`Playlist[playlist_] := Block[
         Column[{
           Row[{
             Row[{
-              caption[info[["Title"]], "BigTitle"]
+              Caption[info[["Title"]], "BigTitle"]
             }, Alignment -> Left, ImageSize -> 400],
             Row[{
-              button["Play", DialogReturn[$Epi; uiPlayer[songList[[page, index]]]]],
+              SmartButton["Play", DialogReturn[$Epi; Thulium`Player[songList[[page, index]]]]],
               Spacer[10],
-              button["ArrowL", DialogReturn[$Epi; homepage]]
+              SmartButton["ArrowL", DialogReturn[$Epi; Thulium`homepage]]
             }, Alignment -> Right, ImageSize -> {400, 60}]
           }],
           If[info["Comment"] == "", Nothing,
             Row[{
-              caption[info[["Comment"]], "Subtitle"]
+              Caption[info[["Comment"]], "Subtitle"]
             }, Alignment -> Left, ImageSize -> 800]
           ],
           Spacer[20],
@@ -60,11 +71,15 @@ Thulium`Interface`Playlist[playlist_] := Block[
         }, Center]
       ], 100, 40],
       WindowTitle -> TagName[info["Type"]] <> " - " <> info["Title"],
-      Background -> ColorDict["WindowBackground"]
+      Background -> WindowBackground
     ];
   ];
 ];
 
+End[];
+
+EndPackage[];
+
 
 (* ::Input:: *)
-(*Thulium`Interface`Playlist["All"];*)
+(*Thulium`Interface`newPlaylist`newPlaylist["All"];*)

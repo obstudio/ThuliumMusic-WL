@@ -1,6 +1,6 @@
 (* ::Package:: *)
 
-BeginPackage["Thulium`Player`", {
+BeginPackage["Thulium`Interface`Player`", {
   "Thulium`System`",
   "Thulium`Assets`",
   "Thulium`Graphics`",
@@ -20,17 +20,13 @@ PlayerControls[audio_] := Module[
   With[{StatusAlias = StatusAlias}, Column[{
   Row[{
     Column[{Style[Dynamic[TimeDisplay[time]], 20], Spacer[1]}],
+    Spacer[7],
+    Magnify[EventHandler[
+      Dynamic[Graphics[{progressSlider[time / duration, 16]}]],
+      {"MouseDragged" :> (stream["Position"] = duration * progressLocate[16])}
+    ], 3.6],
     Spacer[8],
-    Magnify[
-      EventHandler[Dynamic @ Graphics[{
-        progressSlider[time / duration, 16]
-      }],
-      {"MouseDragged" :> (
-        stream["Position"] = duration * progressLocate[CurrentValue[{"MousePosition","Graphics"}][[1]],16]
-      )}],
-    3.6],
-    Spacer[8],
-    Column[{Style[TimeDisplay[duration], 20], Spacer[1]}]
+    Column[{Style[TimeDisplay[time], 20], Spacer[1]}]
   }, ImageSize -> Full, Alignment -> Center],
   Row[{
     Module[{style = "Default"},
@@ -65,19 +61,17 @@ PlayerControls[audio_] := Module[
 
 Player[song_]:=Block[
   {
-    image, audio,
-    imageExist=False,
-    aspectRatio
+    image, audio, imageExist=False, aspectRatio
   },
   Quiet @ Check[
-    audio=Import[$DataPath<>"Buffer/"<>song<>".buffer","MP3"],
+    audio = Import[$DataPath <> "Buffer/" <> song <> ".buffer", "MP3"],
     Return[uiPlaylist[currentPlaylist]],
   Import::nffil];
   AudioStop[];
-  If[SongIndex[[song,"Image"]]!="",
-    imageExist=True;
-    image=Import[$DataPath<>"Images/"<>SongIndex[[song,"Image"]]];
-    aspectRatio=ImageAspectRatio[image];
+  If[SongIndex[song, "Image"] != "",
+    imageExist = True;
+    image = Import[$DataPath <> "Images/" <> SongIndex[song, "Image"]];
+    aspectRatio = ImageAspectRatio[image];
   ];
   CreateDialog[Row[{
     If[imageExist,Row[{Spacer[48],Column[{Spacer[{40,40}],
@@ -129,7 +123,7 @@ End[];
 
 EndPackage[];
 
-Thulium`Player = Thulium`Player`Player;
+Thulium`Player = Thulium`Interface`Player`Player;
 
 
 (* ::Input:: *)

@@ -5,6 +5,7 @@ BeginPackage["Thulium`System`", {"Thulium`Graphics`"}];
 $$Version::usage = "Thulium Music Version";
 $$Commit::usage = "Thulium Music Commit Code";
 $$Build::usage = "Thulium Music Build version";
+$$Branch::usage = "Thulium Music Current Branch";
 
 $LocalPath::usage = "Thulium Music Repository Path";
 $UserPath::usage = "Thulium Music User Path";
@@ -124,7 +125,8 @@ InitializePackage := Block[{packages},
       TemplateBox[{"(details)",
         GridBox[{
           {"Version: ", RawDisplay[$$Version]},
-          If[$$Commit =!= "", {"Commit: ", RawDisplay[$$Commit]}, Nothing]
+          If[$$Commit =!= "", {"Commit: ", RawDisplay[$$Commit]}, Nothing],
+          If[$$Branch =!= "", {"Branch: ", RawDisplay[$$Branch]}, Nothing]
         }, ColumnAlignments -> {Center, Left}, ColumnSpacings -> 0],
       0.1}, "<Tooltip>"]
     }]
@@ -192,6 +194,5 @@ EndPackage[];
 
 DeclarePackage["Thulium`System`", {
   "$UserPath", "$CloudPath", "$DataPath", "UserInfo",
-  "$$Version", "$$Commit", "$$Build", "StatusAlias",
   "PageIndex", "SongIndex", "ImageIndex", "PlaylistIndex"
 }];

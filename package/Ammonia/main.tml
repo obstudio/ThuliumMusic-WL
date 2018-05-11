@@ -81,7 +81,7 @@ function BarBeat(bar, beat) {
 }
 
 function Dur(scale) {
-    this.Settings.assignSetting('Duration', scale, (scale) => scale > 0)
+    this.Settings.assignSetting('Duration', scale, () => true)
 }
 
 function Acct(scale) {

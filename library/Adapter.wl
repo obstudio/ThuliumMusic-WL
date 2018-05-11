@@ -221,7 +221,7 @@ Thulium`AudioAdapt[rawData_,OptionsPattern[AdaptingOptions]]:=Block[
 	];
 	Do[
 		clipUsed={};
-		groups=GatherBy[sectionData["Tracks"],#Effects[{"FadeIn","FadeOut"}]&];
+		groups=GatherBy[sectionData["Tracks"],#Effects[[{"FadeIn","FadeOut"}]]&];
 		Do[
 			compactData=Flatten@Table[
 				EventConstruct[trackData,duration],

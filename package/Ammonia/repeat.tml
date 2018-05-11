@@ -74,10 +74,10 @@ class Repeat {
         }
       },
       
-      DaCapo: { detok: () => 'DC' },
-      DaSegno: { detok: () => 'DS' },
-      RepeatBegin: { detok: () => '||:' },
-      RepeatEnd: { detok: () => ':||' }
+      DaCapo: { detok: 'DC' },
+      DaSegno: { detok: 'DS' },
+      RepeatBegin: { detok: '||:' },
+      RepeatEnd: { detok: ':||' }
     }
   }
 

@@ -13,8 +13,14 @@ class Pedal {
     }
 
     this.attributes = {
-      PedalPress: { detok: () => '&' },
-      PedalRelease: { detok: () => '*' }
+      PedalPress: {
+        detok: '&',
+        preserve: true
+      },
+      PedalRelease: {
+        detok: '*',
+        preserve: true
+      }
     }
   }
 
@@ -35,7 +41,7 @@ class Pedal {
       }
     }
     let previous = []
-    const result = [];
+    const result = []
     for (let index = 0; index < pedals.length; index++) {
       if (previous.length > 0) {
         for (const pedal of previous) {
@@ -100,7 +106,7 @@ class Pedal {
             ? this.Content.filter(note => {
                 return note.StartTime >= pedals[pedals.length - 1].Time
               }).concat(...inherit)
-            : [].concat(...pedals[pedals.length - 1].map(pedal => pedal.Notes))
+            : [].concat(...pedals[pedals.length - 1].Pedals.map(pedal => pedal.Notes))
         }, pedals[pedals.length - 1]))
       }
 

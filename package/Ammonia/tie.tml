@@ -3,7 +3,7 @@
 
 # Notation
 
-class TieNotation {
+class Tie {
   constructor() {
     this.syntax = {
       default: [
@@ -13,8 +13,7 @@ class TieNotation {
 
     this.attributes = {
       Tie: {
-        detok: '^',
-        preserve: false
+        detok: '^'
       }
     }
 
@@ -54,6 +53,7 @@ class TieNotation {
         lastNotes.push(lastNote)
         this.Result.splice(index, 1)
       })
+      this.Meta.TiedNotes = []
       this.Meta.LastNotes = lastNotes.concat(this.Result)
     }
   }

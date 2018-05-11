@@ -18,46 +18,71 @@ class TieNotation {
       }
     }
 
-    this.meta = {
-      LastNotes: [],
-      FirstNotes: []
+    this.metaAttributes = {
+      LastNotes: {
+        initial: []
+      },
+      TiedNotes: {
+        initial: []
+      }
     }
   }
 
   epiNote() {
-    if (this.Result.length > 0 && this.Meta.FirstNotes.length === 0) {
-      this.Meta.FirstNotes = this.Result
-    }
-    const lastNotes = []
-    if (this.Meta.After.Tie) {
-      this.Meta.After.Tie = false
-      this.Meta.LastNotes.forEach(lastNote => {
+    if (this.Result.length > 0) {
+      if (!this.Meta.FirstNotes) {
+        this.Meta.FirstNotes = this.Result
+        if (this.Meta.After.Tie) {
+          this.Meta.TieLeft = true
+        }
+      }
+      const lastNotes = []
+      const tiedNotes = this.Meta.TiedNotes
+      if (this.Meta.After.Tie) {
+        this.Meta.After.Tie = false
+        tiedNotes.push(...this.Meta.LastNotes)
+      }
+      tiedNotes.forEach(lastNote => {
         const index = this.Result.findIndex(note => {
           return lastNote.Pitch === note.Pitch && lastNote.Volume === note.Volume
         })
         if (index === -1) return
-        const currNote = this.Result[index]
+        const endTime = this.Result[index].StartTime + this.Result[index].Duration
+        if (lastNote.Duration < endTime - lastNote.StartTime) {
+          lastNote.Duration = endTime - lastNote.StartTime
+        }
         lastNotes.push(lastNote)
-        lastNote.Duration = currNote.StartTime + currNote.Duration - lastNote.StartTime
         this.Result.splice(index, 1)
       })
+      this.Meta.LastNotes = lastNotes.concat(this.Result)
     }
-    this.Meta.LastNotes = lastNotes.concat(this.Result)
   }
 
-  proMerge(subtrack1, subtrack2) {
-    if (subtrack1.Meta.After.Tie) {
-      subtrack1.Meta.LastNotes.forEach(lastNote => {
-        const index = subtrack2.Meta.FirstNotes.findIndex(note => {
-          return lastNote.Pitch === note.Pitch && lastNote.Volume === note.Volume
+  proMerge(...subtracks) {
+    const lastNotes = [], tiedNotes = []
+    for (const subtrack of subtracks) {
+      if ((this.Meta.After.Tie || subtrack.Meta.TieLeft) && subtrack.Meta.FirstNotes) {
+        this.Meta.LastNotes.forEach(lastNote => {
+          const firstNote = subtrack.Meta.FirstNotes.find(note => {
+            return lastNote.Pitch === note.Pitch && lastNote.Volume === note.Volume
+          })
+          if (!firstNote) return
+          const endTime = firstNote.StartTime + firstNote.Duration + this.Meta.Duration
+          if (lastNote.Duration < endTime - lastNote.StartTime) {
+            lastNote.Duration = endTime - lastNote.StartTime
+          }
+          lastNotes.push(lastNote)
+          subtrack.Content.splice(subtrack.Content.indexOf(firstNote), 1)
         })
-        if (index === -1) return
-        const firstNote = subtrack2.Meta.FirstNotes[index]
-        lastNotes.push(lastNote)
-        lastNote.Duration = firstNote.StartTime + firstNote.Duration + subtrack1.Meta.Duration - firstNote.StartTime
-        subtrack2.Meta.FirstNotes.splice(index, 1)
-      })
+      }
+      if (subtrack.Meta.After.Tie) {
+        tiedNotes.push(...subtrack.Meta.LastNotes)
+      } else {
+        lastNotes.push(...subtrack.Meta.LastNotes)
+      }
     }
+    this.Meta.LastNotes = lastNotes
+    this.Meta.TiedNotes = tiedNotes
   }
 }
 

@@ -25,34 +25,102 @@ class Pedal {
       } else {
         return tok1.Time - tok2.Time;
       }
-    });
-
-    // status -1 stands for released
-    // status t stands for pressed at start time t
-    let index = 0, status = -1;
+    })
+    if (pedals.length > 0) {
+      this.Meta.FirstPedal = pedals[0]
+      if (pedals[pedals.length - 1].Type !== 'PedalRelease') {
+        this.Meta.LastPedal = Object.assign({
+          Notes: this.Content.filter(note => note.StartTime >= pedals[pedals.length - 1].Time)
+        }, pedals[pedals.length - 1])
+      }
+    }
+    let previous = []
     const result = [];
-    while (index < pedals.length) {
-      if (status > -1) {
-        this.Result.filter(note => {
-          return note.StartTime >= status && note.StartTime + note.Duration < pedals[index].Time;
-        }).forEach(note => {
-          note.Duration = pedals[index].Time - note.StartTime;
-        });
-      } else if (pedals[index].Type === 'PedalRelease') {
-        if (index > 0) {
-          // Error: DupPedalRelease
-        } else {
-          result.push(pedals[index]);
+    for (let index = 0; index < pedals.length; index++) {
+      if (previous.length > 0) {
+        for (const pedal of previous) {
+          let notes
+          if (pedal.Notes) {
+            notes = pedal.Notes
+            notes.push(...this.Content.filter(note => note.StartTime >= pedal.EndTime))
+          } else {
+            notes = this.Content.filter(note => note.StartTime >= pedal.Time)
+          }
+          for (const note of notes) {
+            if (note.StartTime + note.Duration < pedals[index].Time) {
+              note.Duration = pedals[index].Time - note.StartTime
+            }
+          }
         }
       }
       if (pedals[index].Type === 'PedalRelease') {
-        status = -1;
-      } else {
-        status = pedals[index].Time;
+        previous = []
+      } else if (pedals[index].Type === 'PedalPress') {
+        previous = [pedals[index]]
+      } else { // PedalPressGroup
+        previous = pedals[index].Pedals
       }
     }
-    if (status > -1) result.push(pedals[pedals.length] - 1);
-    this.Notation.Pedal = result;
+  }
+
+  proMerge(...subtracks) {
+    const pedals = this.Notation.Pedal
+    const endTime = this.Meta.Duration + Math.max(...subtracks.map(sub => sub.Meta.Duration))
+    let maxDur = 0, inherit = []
+    const lastPedal = {
+      Type: 'PedalPressGroup',
+      Pedals: []
+    }
+    for (const subtrack of subtracks) {
+      if (subtrack.Meta.FirstPedal) {
+        if (maxDur < subtrack.Meta.FirstPedal.Time) {
+          maxDur = subtrack.Meta.FirstPedal.Time
+        }
+        for (const note of subtrack.Content) {
+          if (note.StartTime + note.Duration < subtrack.Meta.FirstPedal.Time) {
+            note.Duration = subtrack.Meta.FirstPedal.Time - note.StartTime
+          }
+        }
+      } else {
+        inherit.flag = true
+        inherit.push(...subtrack.Content)
+      }
+      if (subtrack.Meta.LastPedal) {
+        lastPedal.Pedals.push(Object.assign({
+          EndTime: endTime
+        }, subtrack.Meta.LastPedal))
+      }
+    }
+
+    if (pedals.length > 0 && pedals[pedals.length - 1].Type !== 'PedalRelease') {
+      if (inherit.flag) {
+        lastPedal.Pedals.push(Object.assign({
+          EndTime: endTime,
+          Notes: pedals[pedals.length - 1].Type === 'PedalPress'
+            ? this.Content.filter(note => {
+                return note.StartTime >= pedals[pedals.length - 1].Time
+              }).concat(...inherit)
+            : [].concat(...pedals[pedals.length - 1].map(pedal => pedal.Notes))
+        }, pedals[pedals.length - 1]))
+      }
+
+      let notes
+      if (pedals[pedals.length - 1].Type === 'PedalPress') {
+        notes = this.Content.filter(note => note.StartTime >= pedals[pedals.length - 1].Time)
+      } else {
+        notes = [].concat(...pedals[pedals.length - 1].Pedals.map(pedal => pedal.Notes))
+      }
+      for (const note of notes) {
+        if (note.StartTime + note.Duration < this.Meta.Duration + maxDur) {
+          note.Duration = this.Meta.Duration + maxDur - note.StartTime
+        }
+      }
+    }
+    if (pedals.length > 0) {
+      pedals[pedals.length - 1] = lastPedal
+    } else {
+      pedals.push(lastPedal)
+    }
   }
 }
 

@@ -2,7 +2,7 @@
 
 With[
   {
-    ThuliumVersion = $$Version,
+    ThuliumVersion = Thulium`System`$$Version,
     
     LogoCloud = FilledCurveBox[{BezierCurve[{
       {836.15, -454.53}, {926.4, -472.85}, {994.36, -552.64}, {994.36, -648.321},

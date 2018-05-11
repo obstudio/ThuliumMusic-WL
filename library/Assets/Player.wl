@@ -52,7 +52,7 @@ PlayerControls[audio_] := Module[
     Module[{style = "Default"},
       EventHandler[Dynamic@SmartButton["ArrowL", style], {
         "MouseDown" :> (style = "Clicked"),
-        "MouseUp" :> (style = "Default"; AudioStop[]; DialogReturn[uiPlaylist[currentPlaylist]])
+        "MouseUp" :> (style = "Default"; AudioStop[]; DialogReturn[Thulium`Playlist[Thulium`CurrentPlaylist]])
       }]
     ]   
   }, ImageSize -> {300, 60}, Alignment -> Center]
@@ -65,7 +65,7 @@ Player[song_]:=Block[
   },
   Quiet @ Check[
     audio = Import[$DataPath <> "Buffer/" <> song <> ".buffer", "MP3"],
-    Return[uiPlaylist[currentPlaylist]],
+    Return[Thulium`Playlist[Thulium`CurrentPlaylist]],
   Import::nffil];
   AudioStop[];
   If[SongIndex[song, "Image"] != "",

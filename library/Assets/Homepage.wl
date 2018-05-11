@@ -1,6 +1,19 @@
 (* ::Package:: *)
 
-Thulium`homepage := Block[{pageCount, playlistsPaged},
+(*BeginPackage["Thulium`Interface`Homepage`", {
+  "Thulium`System`",
+  "Thulium`Assets`",
+  "Thulium`SmartButton`",
+  "Thulium`PageSelector`"
+}];
+
+Homepage::usage = "Thulium Music Homepage Interface";
+Playlist::usage = "Thulium Music Playlist Interface";
+
+Begin["`Private`"];*)
+
+
+Thulium`Homepage[] := Block[{pageCount, playlistsPaged},
   pageCount = Ceiling[Length @ Keys @ PlaylistIndex / 16];
   If[PageIndex["Main"] > pageCount, PageIndex["Main"] = pageCount];
   playlistsPaged = Partition[Keys @ PlaylistIndex, UpTo @ Ceiling[Length @ Keys @ PlaylistIndex / pageCount]];
@@ -10,11 +23,11 @@ Thulium`homepage := Block[{pageCount, playlistsPaged},
         Row[{
           Row[{Spacer[40], Caption[TextDict["Thulium"], "BigTitle"]}, Alignment -> Left, ImageSize -> 320],
           Row[{
-            SmartButton["EnterPlaylist", DialogReturn[PageIndex["Main"] = page; playlist; uiPlaylist[playlist]]],
+            SmartButton["EnterPlaylist", DialogReturn[PageIndex["Main"] = page; playlist; Thulium`Playlist[playlist]]],
             Spacer[10],
-            SmartButton["About", DialogReturn[PageIndex["Main"] = page; uiAbout[]]],
+            SmartButton["About", DialogReturn[PageIndex["Main"] = page; Thulium`About[]]],
             Spacer[10],
-            SmartButton["Settings", DialogReturn[PageIndex["Main"] = page; uiSettings[]]],
+            SmartButton["Settings", DialogReturn[PageIndex["Main"] = page; Thulium`Settings[]]],
             Spacer[10],
             SmartButton["Exit", DialogReturn[PageIndex["Main"] = page]],
             Spacer[40]
@@ -47,21 +60,21 @@ Thulium`homepage := Block[{pageCount, playlistsPaged},
 
 
 (* ::Input:: *)
-(*Thulium`homepage;*)
+(*Thulium`Homepage;*)
 
 
-uiPlaylist[playlist_] := Block[{info, songList, songListPaged, pageCount},
-  currentPlaylist = playlist;
-  info = PlaylistIndex[[playlist]];
-  songList = If[info["IndexWidth"]>0,
+Thulium`Playlist[playlist_] := Block[{info, songList, songListPaged, pageCount},
+  Thulium`CurrentPlaylist = playlist;
+  info = PlaylistIndex[playlist];
+  songList = If[info["IndexWidth"] > 0,
     <|"Song" -> info["Path"] <> #Song, "Index" -> #Index|>& /@ Association /@ info["SongList"],
     <|"Song" -> info["Path"] <> #Song|>& /@ Association /@ info["SongList"]
   ];
   pageCount = Ceiling[Length @ songList / 16];
   songListPaged = Partition[songList, UpTo @ Ceiling[Length @ songList / pageCount]];
-  If[PageIndex[[playlist]] > pageCount, PageIndex[[playlist]] = pageCount];
+  If[PageIndex[[playlist]] > pageCount, PageIndex[playlist] = pageCount];
   
-  Module[{song = songList[[1, "Song"]], page = PageIndex[[playlist]]},
+  Module[{song = songList[[1, "Song"]], page = PageIndex[playlist]},
     CreateDialog[With[{songListPaged = songListPaged, info = info},
       Column[{
         Spacer[{40, 40}],
@@ -73,12 +86,12 @@ uiPlaylist[playlist_] := Block[{info, songList, songListPaged, pageCount},
             SmartButton["Play", DialogReturn[PageIndex[[playlist]] = page; Thulium`Player[song]]],
             Spacer[10],
             If[UserInfo["Developer"] && playlist == "All", Row[{
-              SmartButton["Modify", DialogReturn[PageIndex[[playlist]] = page; uiModifySong[song]]],
+              SmartButton["Modify", DialogReturn[PageIndex[[playlist]] = page; Thulium`ModifySong[song]]],
               Spacer[10],
-              SmartButton["Add", DialogReturn[PageIndex[[playlist]] = page; uiAddSong]],
+              SmartButton["Add", DialogReturn[PageIndex[[playlist]] = page; Thulium`AddSong[]]],
               Spacer[10]}],
             Nothing],
-            SmartButton["ArrowL", DialogReturn[PageIndex[[playlist]] = page; Thulium`homepage]],
+            SmartButton["ArrowL", DialogReturn[PageIndex[[playlist]] = page; Thulium`Homepage[]]],
             Spacer[40]
           }, Alignment -> Right, ImageSize -> {480, 56}]
         }],
@@ -118,9 +131,21 @@ uiPlaylist[playlist_] := Block[{info, songList, songListPaged, pageCount},
 ];
 
 
-(* ::Input:: *)
-(*uiPlaylist["TH15-Kanjuden.qyl"];*)
+(*End[];
+
+EndPackage[];
+
+Thulium`Homepage = Thulium`Interface`Homepage`Homepage;
+Thulium`Playlist = Thulium`Interface`Homepage`Playlist;*)
 
 
 (* ::Input:: *)
-(*uiPlaylist["All"];*)
+(*Thulium`Homepage[];*)
+
+
+(* ::Input:: *)
+(*Thulium`Playlist["TH15-Kanjuden.qyl"];*)
+
+
+(* ::Input:: *)
+(*Thulium`Playlist["All"];*)

@@ -8,6 +8,13 @@ aboutTags = {"Version", "Producer", "Website"};
 langList = {"chs", "eng"};
 
 
+(* instruments *)
+instDict = Association @ Import[$LocalPath <> "library/Config/Instrument.json"];
+percDict = Association @ Import[$LocalPath <> "library/Config/Percussion.json"];
+instList = Keys @ instDict;
+percList = Keys @ percDict;
+
+
 Begin["Thulium`System`"];
 
 Begin["`Private`"];

@@ -63,6 +63,7 @@ ProgressDisplay[items_, index_, title_] := MonitorDisplay[
 ];
 
 MessageDisplay[cells_] := Block[{msgCells},
+  If[CurrentValue[{StyleDefinitions, "<Tooltip>"}] == {}, Return[]];
   SelectionMove[First @ Cells[CellTags -> "$monitor"], After, Cell, AutoScroll -> False];
   NotebookWrite[EvaluationNotebook[], cells];
   NotebookLocate["$title"];
@@ -97,7 +98,7 @@ MenuCell = Cell[BoxData @ RowBox[{(*
     "Click to start Thulium Music Player.",
     Unevaluated[
       If[!$Init, InitializePackage];
-      Thulium`homepage;
+      Thulium`Homepage[];
     ]
   }, "TextButtonMonitored"],
   TemplateBox[{4}, "Spacer1"]
@@ -118,7 +119,6 @@ InitializePackage := Block[{packages},
   Get["Preload.wl"];
   $Init = True;
   ResetDirectory[];
-  If[CurrentValue[{StyleDefinitions, "<Tooltip>"}] == {}, Return[]];
   MessageDisplay[Cell[BoxData @ TemplateBox[{
     RowBox[{
       "Succeed: Initializing Thulium Kernel ",

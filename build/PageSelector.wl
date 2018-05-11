@@ -103,7 +103,8 @@ PageSelector[Dynamic[page_], pageCount_] := Block[{},
             "MouseUp" :> (style = "Default"; page = #)
           }]
         ]
-    ], Spacer[6]}&, pageCount]],
+      ], Spacer[6]}&, pageCount]
+    ],
 	Spacer[14],
     Dynamic @ If[page >= pageCount,
       PageSelectorButton["Next", "Disabled"],

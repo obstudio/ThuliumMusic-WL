@@ -58,21 +58,21 @@ WindowTitle->TextDict["About"],Background->WindowBackground];
 
 Thulium`homepage:=Block[{pageCount, playlistsPaged},
   pageCount=Ceiling[Length@Keys@PlaylistIndex/16];
-  If[Thulium`PageIndex["Main"]>pageCount,Thulium`PageIndex["Main"]=pageCount];
+  If[PageIndex["Main"]>pageCount,PageIndex["Main"]=pageCount];
   playlistsPaged=Partition[Keys@PlaylistIndex,UpTo@Ceiling[Length@Keys@PlaylistIndex/pageCount]];
-  Module[{playlist = Keys[PlaylistIndex][[1]], page = Thulium`PageIndex["Main"]},
+  Module[{playlist = Keys[PlaylistIndex][[1]], page = PageIndex["Main"]},
     CreateDialog[With[{playlistsPaged = playlistsPaged},
       Column[{Spacer[{40,40}],
         Row[{
           Row[{Spacer[40],Caption[TextDict["Thulium"],"BigTitle"]},Alignment->Left,ImageSize->320],
           Row[{
-            SmartButton["EnterPlaylist",DialogReturn[Thulium`PageIndex["Main"]=page;playlist;uiPlaylist[playlist]]],
+            SmartButton["EnterPlaylist",DialogReturn[PageIndex["Main"]=page;playlist;uiPlaylist[playlist]]],
             Spacer[10],
-            SmartButton["About",DialogReturn[Thulium`PageIndex["Main"]=page;uiAbout]],
+            SmartButton["About",DialogReturn[PageIndex["Main"]=page;uiAbout]],
             Spacer[10],
-            SmartButton["Settings",DialogReturn[Thulium`PageIndex["Main"]=page;uiSettings]],
+            SmartButton["Settings",DialogReturn[PageIndex["Main"]=page;uiSettings]],
             Spacer[10],
-            SmartButton["Exit",DialogReturn[Thulium`PageIndex["Main"]=page;]],
+            SmartButton["Exit",DialogReturn[PageIndex["Main"]=page;]],
             Spacer[40]
           },Alignment->Right,ImageSize->{400,60}]
         }],
@@ -115,9 +115,9 @@ uiPlaylist[playlist_] := Block[{info, songList, songListPaged, pageCount},
   ];
   pageCount = Ceiling[Length @ songList / 16];
   songListPaged = Partition[songList, UpTo @ Ceiling[Length @ songList / pageCount]];
-  If[Thulium`PageIndex[[playlist]] > pageCount, Thulium`PageIndex[[playlist]] = pageCount];
+  If[PageIndex[[playlist]] > pageCount, PageIndex[[playlist]] = pageCount];
   
-  Module[{song = songList[[1, "Song"]], page = Thulium`PageIndex[[playlist]]},
+  Module[{song = songList[[1, "Song"]], page = PageIndex[[playlist]]},
     CreateDialog[With[{songListPaged = songListPaged, info = info},
       Column[{
         Spacer[{40, 40}],
@@ -126,15 +126,15 @@ uiPlaylist[playlist_] := Block[{info, songList, songListPaged, pageCount},
             Spacer[40], Caption[info["Title"], "BigTitle"]
           }, Alignment -> Left, ImageSize -> 480],
           Row[{
-            SmartButton["Play", DialogReturn[Thulium`PageIndex[[playlist]] = page; uiPlayer[song]]],
+            SmartButton["Play", DialogReturn[PageIndex[[playlist]] = page; Thulium`Player[song]]],
             Spacer[10],
             If[UserInfo["Developer"] && playlist == "All", Row[{
-              SmartButton["Modify", DialogReturn[Thulium`PageIndex[[playlist]] = page; uiModifySong[song]]],
+              SmartButton["Modify", DialogReturn[PageIndex[[playlist]] = page; uiModifySong[song]]],
               Spacer[10],
-              SmartButton["Add", DialogReturn[Thulium`PageIndex[[playlist]] = page; uiAddSong]],
+              SmartButton["Add", DialogReturn[PageIndex[[playlist]] = page; uiAddSong]],
               Spacer[10]}],
             Nothing],
-            SmartButton["ArrowL", DialogReturn[Thulium`PageIndex[[playlist]] = page; Thulium`homepage]],
+            SmartButton["ArrowL", DialogReturn[PageIndex[[playlist]] = page; Thulium`homepage]],
             Spacer[40]
           }, Alignment -> Right, ImageSize -> {480, 56}]
         }],

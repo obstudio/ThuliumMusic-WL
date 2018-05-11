@@ -34,8 +34,8 @@ FadeOut(2)
 <Strings(48%)> Oct(1) Light(7/8)
 0---|0---|0---|0---|
 [6,3]::---|[6,1]:---|[6,3b]---|[4,1]_0.--|
-[46]::---{3:---|1'---|2'---/
-          5#:-7-|6:-5-|4#-2-}
+[46]::---{5#:-7-|1'---|2'---/
+          3:---|6:-5-|4#-2-}
 
 <CrashCymbal(52%)>
 0---|0---|0---|0---|
@@ -400,5 +400,5 @@ momomomo|momomomo|momomomo|momomomo|
 momomomo|momomomo|momomomo|momomomo|
 momomomo|momomomo|momomomo|momomomo|
 
-FadeOut(8)
+!FadeOut(8)
 

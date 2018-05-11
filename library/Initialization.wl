@@ -11,9 +11,10 @@ $UserPath::usage = "Thulium Music User Path";
 $CloudPath::usage = "Thulium Music Cloud Path";
 $DataPath::usage = "Thulium Music Data Path";
 
-SongIndex::usage = "song index";
-ImageIndex::usage = "image index";
-PlaylistIndex::usage = "playlist index";
+PageIndex::usage = "Thulium Music Page Index";
+SongIndex::usage = "Thulium Music Song Index";
+ImageIndex::usage = "Thulium Music Image Index";
+PlaylistIndex::usage = "Thulium Music Playlist Index";
 
 UserInfo::usage = "Thulium Music User Information";
 MenuCell::usage = "Thulium Music Menu Cell";
@@ -192,5 +193,5 @@ EndPackage[];
 DeclarePackage["Thulium`System`", {
   "$UserPath", "$CloudPath", "$DataPath", "UserInfo",
   "$$Version", "$$Commit", "$$Build", "StatusAlias",
-  "SongIndex", "ImageIndex", "PlaylistIndex"
+  "PageIndex", "SongIndex", "ImageIndex", "PlaylistIndex"
 }];

@@ -1,6 +1,6 @@
 (* ::Package:: *)
 
-BeginPackage["Thulium`Update`", {"Thulium`System`", "Thulium`Language`"}];
+BeginPackage["Thulium`Update`", {"Thulium`System`", "Thulium`Assets`"}];
 
 CheckUpdate::usage = "CheckUpdate";
 
@@ -120,7 +120,7 @@ CheckUpdate := Block[
     newPlaylists = Complement[Keys @ playlistData, oldPlaylists];
     delPlaylists = Complement[oldPlaylists, Keys @ playlistData];
     PlaylistIndex = playlistData;
-    Thulium`PageIndex = Prepend[AssociationMap[1&, Keys @ playlistData], {"Main" -> 1}],
+    PageIndex = Prepend[AssociationMap[1&, Keys @ playlistData], {"Main" -> 1}],
   MonitorDisplay["Constructing music index ......"]];
   
   If[Length[newImages] =!= 0, Monitor[

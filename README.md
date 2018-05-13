@@ -1,6 +1,8 @@
 # Thulium Music Player (Wolfram Language Version)
 
-![Logo](https://github.com/obstudio/ThuliumMusicPlayer-WL/blob/master/changes/Logo.svg)
+<div width="50%" style="overflow-x: auto;">
+  <img src="https://github.com/obstudio/ThuliumMusicPlayer-WL/blob/master/changes/Logo.svg"/>
+<div>
 
 Thulium Music Player is a simple program aimed to play textualized music on any platforms or devices.    
 铥铥播放器是一个旨在在任何平台和设备上播放文本化音乐的程序。

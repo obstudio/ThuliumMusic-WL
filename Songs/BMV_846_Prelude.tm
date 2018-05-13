@@ -15,8 +15,8 @@ E	0, 2, 6
 
 function Distribute(template, subtrack) {
 	// Alias: ${0:sub}->${1:sub}
-	const temp = this.ParseTrack(template);
-	const src = this.ParseTrack(subtrack, { Settings: this.newSettings() });
+	const temp = this.ParsePlainTrack(template);
+	const src = this.ParsePlainTrack(subtrack, { Settings: this.newSettings() });
 	const content = [];
 	temp.Content.forEach(tNote => {
 		const scale = tNote.Duration / src.Meta.Duration;

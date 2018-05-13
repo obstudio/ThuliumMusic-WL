@@ -166,9 +166,15 @@ MIDIConstruct[musicClip_,rate_]:=Block[
 ];
 
 
-(* ::Subsubsection::Closed:: *)
+(* ::Subsubsection:: *)
 (*Adapter*)
 
+
+(* instruments *)
+instDict = Association @ Import[$LocalPath <> "library/Config/Instrument.json"];
+percDict = Association @ Import[$LocalPath <> "library/Config/Percussion.json"];
+instList = Keys @ instDict;
+percList = Keys @ percDict;
 
 AdaptingOptions = {"Rate"->1.0,"Format"->"Audio"};
 Adapt::format = "`1` is not a adaptable format.";
@@ -308,11 +314,11 @@ Thulium`AudioAdapt[rawData_,OptionsPattern[AdaptingOptions]]:=Block[
 (* ::Input:: *)
 (*AudioStop[];AudioPlay[#[[2]]]&@*)
 (*EchoFunction["time: ",#[[1]]&]@*)
-(*Timing[Thulium`AudioAdapt[Thulium`Parse[$LocalPath<>"Songs/Touhou/Oriental_Blood.tm",{2,4}],"Rate"->1]];*)
+(*Timing[Thulium`AudioAdapt[Thulium`Parse[$LocalPath<>"Songs/Those_Years.tm",{1,2}],"Rate"->1.2]];*)
 
 
 (* ::Input:: *)
-(*Export[$LocalPath<>"test.mp3",Thulium`AudioAdapt[Thulium`Parse[$LocalPath<>"Songs/Touhou/Oriental_Blood.tm"]]];*)
+(*Export[$LocalPath<>"test.mp3",Thulium`AudioAdapt[Thulium`Parse[$LocalPath<>"Songs/PVZ/Grasswalk.tm"]]];*)
 
 
 (* ::Input:: *)

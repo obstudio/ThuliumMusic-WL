@@ -1,20 +1,5 @@
 (* ::Package:: *)
 
-(* tags *)
-textInfoTags = {"SongName", "Lyricist", "Composer", "Adapter", "Comment", "Abstract", "Origin"};
-otherInfoTags = {"Image", "Uploader", "Tags"};
-imageTags = {"Title", "Painter", "PainterID", "IllustID", "Source", "URL"};
-aboutTags = {"Version", "Producer", "Website"};
-langList = {"chs", "eng"};
-
-
-(* instruments *)
-instDict = Association @ Import[$LocalPath <> "library/Config/Instrument.json"];
-percDict = Association @ Import[$LocalPath <> "library/Config/Percussion.json"];
-instList = Keys @ instDict;
-percList = Keys @ percDict;
-
-
 Begin["Thulium`System`"];
 
 Begin["`Private`"];

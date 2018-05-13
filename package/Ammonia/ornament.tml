@@ -178,8 +178,8 @@ function Arpeggio(subtrack) {
             note.Duration -= scale * index;
         }
     });
-    src.Content.unshift({ Type: 'PedalPress', StartTime: 0 });
-    src.Content.push({ Type: 'PedalRelease', StartTime: src.Meta.Duration });
+    src.Notation.Pedal.unshift({ Type: 'PedalPress', Time: 0 });
+    src.Notation.Pedal.push({ Type: 'PedalRelease', Time: src.Meta.Duration });
     return src;
 }
 

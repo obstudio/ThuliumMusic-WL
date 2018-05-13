@@ -5,7 +5,7 @@
 
 function Call(template, subtrack) {
 	// Alias: ${0:sub}?=${1:sub}
-	this.Libraries.Track.this = subtrack.Content;
+	this.Library.Track.this = subtrack.Content;
 	return this.ParsePlainTrack(template);
 }
 

@@ -17,6 +17,13 @@ MsgDict::usage = "MsgDict";
 LangDict::usage = "LangDict";
 TagDict::usage = "TagDict";
 
+(* tags *)
+textInfoTags = {"SongName", "Lyricist", "Composer", "Adapter", "Comment", "Abstract", "Origin"};
+otherInfoTags = {"Image", "Uploader", "Tags"};
+imageTags = {"Title", "Painter", "PainterID", "IllustID", "Source", "URL"};
+aboutTags = {"Version", "Producer", "Website"};
+langList = {"chs", "eng"};
+
 Begin["`Private`"];
 
 ListSize = 16;
@@ -90,7 +97,8 @@ DeclarePackage["Thulium`Assets`", {
   "RefreshLanguage", "LangDict", "TagDict",
   "TagName", "InstName", "TextDict", "MsgDict",
   "WindowBackground", "Container", "Caption", "ListSize",
-  "TextLength", "TimeDisplay"
+  "TextLength", "TimeDisplay",
+  "textInfoTags", "otherInfoTags", "imageTags", "aboutTags", "langList"
 }];
 
 

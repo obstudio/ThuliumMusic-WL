@@ -26,7 +26,7 @@ PlayerControls[audio_] := Module[
       {"MouseDragged" :> (stream["Position"] = duration * progressLocate[16])}
     ], 3.6],
     Spacer[8],
-    Column[{Style[TimeDisplay[time], 20], Spacer[1]}]
+    Column[{Style[TimeDisplay[duration], 20], Spacer[1]}]
   }, ImageSize -> Full, Alignment -> Center],
   Row[{
     Module[{style = "Default"},

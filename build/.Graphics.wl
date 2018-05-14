@@ -2,8 +2,7 @@
 
 BeginPackage["Thulium`Graphics`"];
 
-SVGPathD::usage = "SVGPathD parses a svg path command.";
-CurveMerge::usage = "CurveMerge merges a Bezier curve from segments.";
+SVGPath::usage = "SVGPath parses a svg path command.";
 VertexAssign::usage = "VertexAssign assigns vertices with a coordinate.";
 progressBar::usage = "Draw a progress bar.";
 progressSlider::usage = "Draw a progress slider.";
@@ -12,89 +11,69 @@ squareRounded::usage = "Draw a rounded square.";
 
 Begin["`Private`"];
 
-SVGPathD[string_]:=Block[
+SVGPath[string_] := Block[
   {
-    commands,
-    prev={0,0},this,ctrl,
-    init={0,0},move,
-    segments={},points={{0,0}},
-    components={Line[{{0,0}}]}
+    commands, move,
+    prev = {0, 0}, this = {0, 0},
+    init = {0, 0}, controls,
+    segment = {}, result = {}
   },
-  commands=StringCases[string,
-    cmd:LetterCharacter~~n:(NumberString|","|WhitespaceCharacter)...:><|
-      "Name"->cmd,
-      "Args"->ToExpression/@StringCases[n,NumberString]
+  commands = StringCases[string,
+    name: LetterCharacter ~~ args: RegularExpression["[-.,\\d\\s]*"] :> <|
+      "Name" -> name,
+      "Args" -> ToExpression /@ StringCases[args, NumberString]
     |>
   ];
   Do[
-    move=If[UpperCaseQ@command[["Name"]],Set,AddTo];
-    Switch[ToUpperCase@command[["Name"]],
+    move = If[UpperCaseQ @ command["Name"], Set, AddTo];
+    Switch[ToUpperCase @ command["Name"],
       "M",
-        move[this,command[["Args"]]];
-        init=this;
-        If[!MatchQ[components,{Line[{_}]}],
-          AppendTo[segments,<|
-            "Points"->points,
-            "Segment"->components
-          |>];
-        ];
-        points={};components={},
+        move[this, command[["Args"]]];
+        init = this;
+        If[Length @ segment > 0,
+          AppendTo[result, Flatten[segment, 1]];
+          segment = {};
+        ],
       "H",
-        move[this,{command[["Args",1]],0}],
+        move[this, {command[["Args", 1]], 0}],
       "V",
-        move[this,{0,command[["Args",1]]}],
+        move[this, {0, command[["Args", 1]]}],
       "Z",
-        this=init,
+        this = init,
       "L",
-        move[this,command[["Args"]]],
+        move[this, command[["Args"]]],
       "C",
-        move[this,command[["Args",5;;6]]];
-        ctrl=If[UpperCaseQ@command[["Name"]],0,prev]+#&/@Partition[command[["Args"]],2],
-      _,
-        Echo@command[["Name"]];
+        move[this, command[["Args", 5 ;; 6]]];
+        controls = Map[
+          If[UpperCaseQ @ command["Name"], 0, prev] + #&,
+          Partition[command[["Args"]], 2]
+        ];
     ];
-    If[MemberQ[Characters["MmZzLlHhVv"],command[["Name"]]],
-      AppendTo[points,this];
-      AppendTo[components,Line[{this}]],
-      points=Join[points,ctrl];
-      AppendTo[components,BezierCurve[ctrl]];
+    If[MemberQ[Characters["MmZzLlHhVv"], command["Name"]],
+      If[Length @ segment > 0,
+        AppendTo[segment, {this, this, this}],
+        AppendTo[segment, {this}]
+      ],
+      AppendTo[segment, controls]
     ];
-    prev=this,
-  {command,commands}];
-  If[!MatchQ[components,{Line[{_}]}],
-    AppendTo[segments,<|
-      "Points"->points,
-      "Segment"->components
-    |>];
-  ];
-  Return[segments];
+    prev = this,
+  {command, commands}];
+  If[Length @ segment > 0, AppendTo[result, Flatten[segment, 1]]];
+  Return[result];
 ];
 
-CurveMerge[segment_]:=Block[
-  {pts={Level[segment[[1]],1]}},
-  Do[
-    Switch[Head[component],
-      Line,
-        AppendTo[pts,ConstantArray[Level[component,{2}],3]],
-      BezierCurve,
-        AppendTo[pts,Level[component,1]]
-    ],
-  {component,Drop[segment,1]}];
-  Return[Flatten[pts,2]];
-];
+VertexAssign[vertices_, {pt1x_, pt1y_} -> pos1_, {pt2x_, pt2y_} -> pos2_] := {
+  ((pos1 - pos2) * ((pt1x - pt2x) * #[[1]] + (pt1y - pt2y) * #[[2]])
+   + pos1 * (-pt1x * pt2x + pt2x ^ 2 - pt1y * pt2y +  pt2y ^ 2)
+   + pos2 * (pt1x ^ 2 - pt1x * pt2x + pt1y ^ 2 - pt1y * pt2y)
+  )/((pt1x - pt2x) ^ 2 + (pt1y - pt2y) ^ 2),
+0}& /@ vertices;
 
-VertexAssign[vertices_,{pt1x_,pt1y_}->pos1_,{pt2x_,pt2y_}->pos2_]:={
-  ((pos1-pos2)*((pt1x-pt2x)*#[[1]]+(pt1y-pt2y)*#[[2]])
-   +pos1*(-pt1x*pt2x+pt2x^2-pt1y*pt2y+pt2y^2)
-   +pos2*(pt1x^2-pt1x*pt2x+pt1y^2-pt1y*pt2y)
-  )/((pt1x-pt2x)^2+(pt1y-pt2y)^2),
-0}&/@vertices;
-
-progressBarShape[l_,r_,t_]:={
-  {l,1},{l-t,1},{l-1,t},{l-1,0},
-  {l-1,-t},{l-t,-1},{l,-1},{l,-1},
-  {r,-1},{r,-1},{r+t,-1},{r+1,-t},
-  {r+1,0},{r+1,t},{r+t,1},{r,1}
+progressBarShape[l_, r_, t_] := {
+  {l, 1}, {l - t, 1}, {l - 1, t}, {l - 1, 0},
+  {l - 1, -t}, {l - t, -1}, {l, -1}, {l, -1},
+  {r, -1}, {r, -1}, {r + t, -1}, {r + 1, -t},
+  {r + 1, 0}, {r + 1, t}, {r + t, 1}, {r, 1}
 };
 
 progressBar[pro_,len_]:=With[
@@ -154,8 +133,7 @@ EndPackage[];
 
 
 DeclarePackage["Thulium`Graphics`",{
-  "SVGPathD",
-  "CurveMerge",
+  "SVGPath",
   "VertexAssign",
   "progressBar",
   "progressSlider",
@@ -164,3 +142,6 @@ DeclarePackage["Thulium`Graphics`",{
 }]
 
 DumpSave[$LocalPath <> "library/Package/.Graphics.mx", "Thulium`Graphics`"];
+
+
+Clear["Thulium`Graphics`*"]

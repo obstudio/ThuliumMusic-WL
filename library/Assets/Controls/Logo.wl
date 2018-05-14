@@ -14,9 +14,9 @@ c22.98,0.39,59.32,7.82,69.48,10.78C555.89,325.38,569.07,330.54,569.07,330.54z";
 
 logo=Scale[{
 	RGBColor["#00A0E9"],
-	FilledCurve[{BezierCurve[CurveMerge[#Segment]]}]&[SVGPathD[LogoCloud][[1]]],
+	FilledCurve[{BezierCurve[SVGPath[LogoCloud][[1]]]}],
 	RGBColor["#FFFFFF"],
-	FilledCurve[{BezierCurve[CurveMerge[#Segment]]}]&[SVGPathD[LogoNote][[1]]]
+	FilledCurve[{BezierCurve[SVGPath[LogoNote][[1]]]}]
 },{1,-1}];
 
 

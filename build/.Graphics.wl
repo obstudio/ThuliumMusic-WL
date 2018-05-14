@@ -31,7 +31,7 @@ SVGPath[string_] := Block[
         move[this, command[["Args"]]];
         init = this;
         If[Length @ segment > 0,
-          AppendTo[result, Flatten[segment, 1]];
+          AppendTo[result, {#[[1]], -#[[2]]}& /@ Flatten[ segment, 1]];
           segment = {};
         ],
       "H",
@@ -58,7 +58,7 @@ SVGPath[string_] := Block[
     ];
     prev = this,
   {command, commands}];
-  If[Length @ segment > 0, AppendTo[result, Flatten[segment, 1]]];
+  If[Length @ segment > 0, AppendTo[result, {#[[1]], -#[[2]]}& /@ Flatten[segment, 1]]];
   Return[result];
 ];
 
@@ -142,6 +142,3 @@ DeclarePackage["Thulium`Graphics`",{
 }]
 
 DumpSave[$LocalPath <> "library/Package/.Graphics.mx", "Thulium`Graphics`"];
-
-
-Clear["Thulium`Graphics`*"]

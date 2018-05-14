@@ -10,10 +10,10 @@
 NotebookFileLineBreakTest
 NotebookFileLineBreakTest
 NotebookDataPosition[       158,          7]
-NotebookDataLength[     11015,        280]
+NotebookDataLength[     11069,        282]
 NotebookOptionsPosition[      2673,         78]
-NotebookOutlinePosition[     10928,        279]
-CellTagsIndexPosition[     10835,        273]
+NotebookOutlinePosition[     10982,        281]
+CellTagsIndexPosition[     10889,        275]
 WindowTitle->Thulium Music Player 2.3
 WindowFrame->ModelessDialog*)
 
@@ -32,7 +32,7 @@ Cell[BoxData[
    FontFamily->"Source Sans Pro",
    FontSize->24,
    FontColor->RGBColor[0.3, 0.5, 0.8]]}]], "Title",
- CellTags->"$title",ExpressionUUID->"0ac06cd2-7247-475f-9f50-5d0787550bb2"],
+ CellTags->"$title",ExpressionUUID->"bb513db8-850e-4e80-9c57-eb6a067fd565"],
 
 Cell[BoxData[
  RowBox[{
@@ -74,7 +74,7 @@ Cell[BoxData[
    "LogoButton"], 
   TemplateBox[{4},
    "Spacer1"]}]], "Init",
- CellTags->"$init",ExpressionUUID->"1344fc7e-8fda-455e-b7da-8c528a24bd82"]
+ CellTags->"$init",ExpressionUUID->"9d1acba6-0342-4166-a503-865c1f660819"]
 },
 Editable->False,
 Saveable->False,
@@ -177,27 +177,29 @@ StyleDefinitions->Notebook[{
     TemplateBoxOptions -> {DisplayFunction -> (GraphicsBox[{#3, 
          FilledCurveBox[{
            BezierCurve[CompressedData["
-1:eJxTTMoPSmViYGBQAmIQbQwCil0OIuvcH1Zl1BwA8z/3OMyaCQS9tQeqQRJC
-/Q6trwN3yLk2wvmKG4oyJjq1wPniN899D17TfuDwV42Yfr8ehzQQKOiCyD/p
-gPPfAI1pbc4hmt9/CGigfxScD3bXTDGI+4Lb4Xx5kANrmuF8zRigzpKGAyBv
-ibwLgOg/VH2g0Jbr+mKPZIfriwtsuW5XQtQ7JjuAxWdUHgCrs0uGmB+K4AcB
-nfVaEI3fWXAASjtAxSH2CVXC+WD/nK6D88H+edoIsa8i8wDYnVbNEH5MIUT+
-e7MDyNjAhIIDDCBwq8WBC+TgWfkQ+862wvng+IrtgPPBdEGXgwfQGes+F8P5
-MPfD+GB77KsO/LtS8VItBMqPrz4ADhek9AAATHMBgw==
+1:eJxTTMoPSmViYGBQAmIQbQwCil0OIuvcH1Zl1BwA8z/3OMwEgd7aA9UgCaF+
+h9bXgTvkXBvhfIUNRRkTnVrgfLGb574Hr2k/cPirRky/X49DGggUdEHkn3TA
++W+AxrQ25xDNn3AIaKB/FJy/AOwwMYj7gtvhfDmQA2ua4XygKw59LWk4APKW
+yLsAh1SQ/kPVBwptua4v9kh2uLa4wJbrduWBWSDljskOBSDxGZUH0kHq7JIh
+5oci+CBnvRZE43cWHAiC0BDz7ZIh9glVwvlg/5yug/P7Qf552uiQD7KvIvOA
+JsidVs0Q+2MKIfLfmx1AxgYmFBxgAIFbLQ6c14EOnpUPse9sK5wPjq/YDjif
+C0QXdDmAnLHuczGcHwR1P4wPtse+6sC/KxUv1UK6HMDhHF99ACTNhZQeAFPb
+AYQ=
             "]]}], 
          RGBColor[1, 1, 1], 
          FilledCurveBox[{
            BezierCurve[CompressedData["
-1:eJxTTMoPSmViYGAwBGIQffirRkz/iUaHQluu64tXlBxA5/cfAgqsbXQAcQsy
-Sw7skGt9HZjS6ADk2XKxlxxY5/6wSqSuAaL+QtEBsLqDdQ5A0XXupkUQ/Ytr
-HMD6OIog6v9VO4Dt+VV4YNZMINCtdtCMAar8UHjAA6SxvcohDQTeFR4Ai3+p
-gOh/UXggCMTQLXcwBgH5ogMgaY09pQ5nzwDBlSKI+jN1DtVA6x9aNBPkg5xr
-m1TrsO3z3ysV15oOfAM661BntQNYfFkTRP2ESoj8viaI/aWlUPc2QcIjpgji
-f6+WAyBjq5YUORw8tdB126HWA2DxN1C+VTskPKrLHISaD5xa6NQBCe9pVQ5r
-ZKJSrAU6IOGxsc7BcsuJsn132yH8pw0Oi1yBLmhuO/AmEGjjQSifu/UAOJz3
-Njj8u1LxUu1BywFDDqBJmxsc3EAO3toCcd+SBgeweG8LxL8k8MHx2VrlAI63
-fcUE+eB08bwKEr+TiiHu31vjsAQofL28GOL+07UO4HCqKT4Ajkfregd5oDN3
-NBVD3HugwQGs7ydUv2AjJLw1Sg6AlMnFN0LsC8NMr5TyAWtplCQ=
+1:eJxTTMoPSmViYGAwBGIQffirRkz/iUaHQluu64tXlBxA5084BBRY2+hgB+QW
+ZJYc2CnX+jowpdEByLPlYi85sN79YZVIXQNE/YWiA/YgdQfrHICi69xNiw5M
+BOlfXOOwA6SPo+jABpD6f9UOIOH+X4UHZs8EAt1qB82Y/kNfPxQe8ARpbK9y
+SAOBd4UHtEDiXyog+l8UHggGMXTLHYxBQL7oQBxQWmNPqcMZELhSdABszpk6
+h2qg9Q8tmgnyQc61Tap12Pb575WKa00HvgGddaiz2gEsvqwJon5CJUR+X9OB
+IJD9paVQ9zYdALsrpsihAOR/r5YDIGOrlhQ5HDi10HXbodYDYPE3UL5V+wGQ
+c2OqyxyEmoEiTh0HwOEwrcphjUxUirVAxwFQcMzcWOdgueVE2b677RD+0waH
+Ra5AFzS3HXgdCLTxIJTP3XoAHM57Gxz+Xal4qfag5YAhB9CkzQ0ObiAHb22B
+uG9JgwNYvLcF4l8S+CDnF7RWOYC8JbKvmCAfnC6eV0Hid1IxxP17axyWgAKi
+vBji/tO1DuBwqik+AI5H63oHkDN3NBVD3HugwQGs7ydUv2CjAyhavmqUHAAp
+k4tvhNgXhpleKeUDAIAZlCM=
             "]]}]}, ImageSize -> 240]& )}], 
    Cell[
     StyleData["TextButtonDisplay"], 
@@ -263,24 +265,24 @@ NBVD3HugwQGs7ydUv2AjJLw1Sg6AlMnFN0LsC8NMr5TyAWtplCQ=
 (*CellTagsOutline
 CellTagsIndex->{
  "$title"->{
-  Cell[604, 21, 421, 13, 140, "Title",ExpressionUUID->"0ac06cd2-7247-475f-9f50-5d0787550bb2",
+  Cell[604, 21, 421, 13, 140, "Title",ExpressionUUID->"bb513db8-850e-4e80-9c57-eb6a067fd565",
    CellTags->"$title"]},
  "$init"->{
-  Cell[1028, 36, 1641, 40, 140, "Init",ExpressionUUID->"1344fc7e-8fda-455e-b7da-8c528a24bd82",
+  Cell[1028, 36, 1641, 40, 140, "Init",ExpressionUUID->"9d1acba6-0342-4166-a503-865c1f660819",
    CellTags->"$init"]}
  }
 *)
 (*CellTagsIndex
 CellTagsIndex->{
- {"$title", 10562, 264},
- {"$init", 10693, 267}
+ {"$title", 10616, 266},
+ {"$init", 10747, 269}
  }
 *)
 (*NotebookFileOutline
 Notebook[{
-Cell[604, 21, 421, 13, 140, "Title",ExpressionUUID->"0ac06cd2-7247-475f-9f50-5d0787550bb2",
+Cell[604, 21, 421, 13, 140, "Title",ExpressionUUID->"bb513db8-850e-4e80-9c57-eb6a067fd565",
  CellTags->"$title"],
-Cell[1028, 36, 1641, 40, 140, "Init",ExpressionUUID->"1344fc7e-8fda-455e-b7da-8c528a24bd82",
+Cell[1028, 36, 1641, 40, 140, "Init",ExpressionUUID->"9d1acba6-0342-4166-a503-865c1f660819",
  CellTags->"$init"]
 }
 ]

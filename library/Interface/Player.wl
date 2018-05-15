@@ -18,44 +18,27 @@ PlayerControls[audio_] := Module[
   },
   time := QuantityMagnitude[stream["Position"], "Seconds"];
   With[{StatusAlias = StatusAlias}, Column[{
-  Row[{
-    Column[{Style[Dynamic[TimeDisplay[time]], 20], Spacer[1]}],
-    Spacer[7],
-    Magnify[EventHandler[
-      Dynamic[Graphics[{progressSlider[time / duration, 16]}]],
-      {"MouseDragged" :> (stream["Position"] = duration * progressLocate[16])}
-    ], 3.6],
-    Spacer[8],
-    Column[{Style[TimeDisplay[duration], 20], Spacer[1]}]
-  }, ImageSize -> Full, Alignment -> Center],
-  Row[{
-    Module[{style = "Default"},
-      Dynamic @ Switch[stream[StatusAlias],
-        "Playing",EventHandler[SmartButton["Pause", style], {
-          "MouseDown" :> (style = "Clicked"),
-          "MouseUp" :> (style = "Default"; stream[StatusAlias] = "Paused")
-        }],
-        "Paused"|"Stopped",EventHandler[SmartButton["Play", style], {
-          "MouseDown" :> (style = "Clicked"),
-          "MouseUp" :> (style = "Default"; stream[StatusAlias] = "Playing")
-        }]
-      ]
-    ],
-    Spacer[20],
-    Module[{style = "Default"},
-      EventHandler[Dynamic@SmartButton["Stop",style],{
-        "MouseDown" :> (style = "Clicked"),
-        "MouseUp" :> (style = "Default"; stream[StatusAlias] = "Stopped"; stream["Position"] = 0)
-      }]
-    ],
-    Spacer[20],
-    Module[{style = "Default"},
-      EventHandler[Dynamic @ SmartButton["ArrowL", style], {
-        "MouseDown" :> (style = "Clicked"),
-        "MouseUp" :> (style = "Default"; AudioStop[]; DialogReturn[Thulium`Playlist[Thulium`CurrentPlaylist]])
-      }]
-    ]   
-  }, ImageSize -> {300, 60}, Alignment -> Center]
+    Row[{
+      Column[{Style[Dynamic[TimeDisplay[time]], 20], Spacer[1]}],
+      Spacer[7],
+      Magnify[EventHandler[
+        Dynamic[Graphics[{progressSlider[time / duration, 16]}]],
+        {"MouseDragged" :> (stream["Position"] = duration * progressLocate[16])}
+      ], 3.6],
+      Spacer[8],
+      Column[{Style[TimeDisplay[duration], 20], Spacer[1]}]
+    }, ImageSize -> Full, Alignment -> Center],
+    Row[{
+      Dynamic @ SwitchButton[stream[StatusAlias],
+        {"Playing", "Pause", Hold[stream[StatusAlias] = "Paused"]},
+        {"Paused", "Play", Hold[stream[StatusAlias] = "Playing"]},
+        {"Stopped", "Play", Hold[stream[StatusAlias] = "Playing"]}
+      ],
+      Spacer[20],
+      SmartButton["Stop", stream[StatusAlias] = "Stopped"; stream["Position"] = 0],
+      Spacer[20],
+      SmartButton["Return", AudioStop[]; DialogReturn[Thulium`Playlist[Thulium`CurrentPlaylist]]]
+    }, ImageSize -> {300, 60}, Alignment -> Center]
   }, Alignment -> Center]
 ]];
 
@@ -75,11 +58,12 @@ ImageDisplay[image_] := Block[
           {{360, Automatic}, aspectRatio > 1 && aspectRatio < 2}
         }]], {"FadedFrame"}],
         If[ImageIndex[[image]] != <||>,
-          Column[If[KeyExistsQ[ImageIndex[[image]], #],
-            TagName[[#]] <> ": " <> ImageIndex[[image, #]],
+          Column[If[KeyExistsQ[ImageIndex[image], #],
+            TagName[[#]] <> ": " <> ImageIndex[image, #],
             Nothing
           ]& /@ imageTags],
-          TextDict[["NoImageInfo"]]
+          TextDict["NoImageInfo"],
+          TextDict["NoImageInfo"]
         ]
       ],
       Spacer[{40, 40}]
@@ -87,7 +71,7 @@ ImageDisplay[image_] := Block[
   }]
 ];
 
-Player[song_]:=Block[{image, audio, imageExist = False, aspectRatio},
+Player[song_] := Block[{image, audio, imageExist = False, aspectRatio},
   Quiet @ Check[
     audio = Import[$DataPath <> "Buffer/" <> song <> ".buffer", "MP3"],
     Return[Thulium`Playlist[Thulium`CurrentPlaylist]],
@@ -99,33 +83,33 @@ Player[song_]:=Block[{image, audio, imageExist = False, aspectRatio},
       Nothing
     ],
     Spacer[48],
-    Column[Join[{Spacer[{60,60}],
-      If[SongIndex[[song,"Comment"]]!="",
-        If[TextLength@SongIndex[[song,"Comment"]]>16,
-          Column,Row
-        ][{
-          Caption[SongIndex[[song,"SongName"]],"Title"],
-          Caption[" ("<>SongIndex[[song,"Comment"]]<>")","TitleCmt"]
-        },Alignment->Center],
-        Caption[SongIndex[[song,"SongName"]],"Title"]
+    Column[{
+      Spacer[{60, 60}],
+      If[SongIndex[song, "Comment"] != "",
+        If[TextLength @ SongIndex[song, "Comment"] > 16, Column, Row][{
+          Caption[SongIndex[song, "SongName"], "Title"],
+          Caption[" (" <> SongIndex[song, "Comment"] <> ")", "TitleCmt"]
+        }, Alignment -> Center],
+        Caption[SongIndex[song, "SongName"], "Title"]
       ],
       Spacer[1],
-      Column[If[SongIndex[[song,#]]!="",
-        Caption[TagName[[#]]<>": "<>SongIndex[[song,#]],"Text"],
+      Column[If[SongIndex[song, #] != "",
+        Caption[TagName[[#]] <> ": " <> SongIndex[[song, #]], "Text"],
         Nothing
-      ]&/@{"Origin","Composer","Lyricist","Adapter"},Alignment->Center],
+      ]& /@ {"Origin", "Composer", "Lyricist", "Adapter"}, Alignment -> Center],
       Spacer[1],
-      If[SongIndex[[song,"Abstract"]]!="",
-        Column[Caption[#,"Text"]&/@StringSplit[SongIndex[[song,"Abstract"]],"\n"],Center],
+      If[SongIndex[song, "Abstract"] != "",
+        Column[Caption[#, "Text"]& /@ StringSplit[SongIndex[song, "Abstract"], "\n"], Center],
         Nothing
       ],
-      Spacer[1]},
-      {PlayerControls[audio]},
-      {Spacer[{60,60}]}
-    ],Alignment->Center,ItemSize->Full],
-  Spacer[48]},Alignment->Center,ImageSize->Full],
+      Spacer[1],
+      PlayerControls[audio],
+      Spacer[{60, 60}]
+    }, Alignment -> Center, ItemSize -> Full],
+    Spacer[48]
+  }, Alignment -> Center,ImageSize -> Full],
   Background -> WindowBackground,
-  WindowTitle -> TextDict["Playing"]<>": "<>SongIndex[song,"SongName"]];
+  WindowTitle -> TextDict["Playing"] <> ": " <> SongIndex[song, "SongName"]];
 ];
 
 End[];

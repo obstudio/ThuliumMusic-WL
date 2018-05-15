@@ -36,7 +36,7 @@ newPlaylist[playlist_] := Block[
             Row[{
               SmartButton["Play", DialogReturn[$Epi; Thulium`Player[songList[[page, index]]]]],
               Spacer[10],
-              SmartButton["ArrowL", DialogReturn[$Epi; Thulium`homepage]]
+              SmartButton["Return", DialogReturn[$Epi; Thulium`homepage]]
             }, Alignment -> Right, ImageSize -> {400, 60}]
           }],
           If[info["Comment"] == "", Nothing,

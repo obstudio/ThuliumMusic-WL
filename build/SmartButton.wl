@@ -1,8 +1,12 @@
 (* ::Package:: *)
 
-BeginPackage["Thulium`SmartButton`", {"Thulium`Graphics`"}];
+BeginPackage["Thulium`SmartButton`", {
+  "Thulium`Graphics`",
+  "Thulium`Assets`"
+}];
 
 SmartButton::usage = "a smart display of button.";
+SwitchButton::usage = "SwitchButton";
 
 Begin["`Private`"];
 
@@ -19,7 +23,7 @@ SmartButtonData = <|
   "Stop"->GraphicsGroup[{
     Rectangle[{-0.4,-0.4},{0.4,0.4},RoundingRadius->{0.1,0.1}]
   }],
-  "ArrowL"->GraphicsGroup[{
+  "Return"->GraphicsGroup[{
     Thickness[0.1],CapForm["Round"],JoinForm["Round"],
     Line[{{-0.4,0},{0.4,0}}],
     Line[{{0,-0.4},{-0.4,0},{0,0.4}}]
@@ -181,32 +185,55 @@ SmartButtonDisplay[name_, style_] := If[style == "Default",
     SmartButtonDisplay[name, "Basic"],
     SmartButtonDisplay[name, "Mouseover"]
   ],
-  With[{scheme = SmartButtonColor[style]}, Graphics[{
-    squareRounded[0.06, 1, scheme],
-    scheme[["Body"]], 
-    SmartButtonData[name]
-  }]]
+  With[{scheme = SmartButtonColor[style]}, 
+    Graphics[{
+      squareRounded[0.06, 1, scheme],
+      scheme[["Body"]], 
+      SmartButtonData[name]
+    }]
+  ]
 ];
 
 SetAttributes[SmartButton, HoldRest];
-SmartButton[buttonName_, action_] := DynamicModule[{style = "Default"},
-  EventHandler[Dynamic @ SmartButtonDisplay[buttonName, style],{
+SmartButton[name_String, action_] := SmartButton[name, name, action];
+SmartButton[name_String, info_String, action_] := Module[{style = "Default"},
+  EventHandler[Dynamic @ TooltipDisplay[
+    SmartButtonDisplay[name, style],
+    TextDict[info]
+  ], {
     "MouseDown" :> (style = "Clicked"),
     "MouseUp" :> (style = "Default"; action)
   }]
-]
+];
+
+SwitchButton[source_, items__] := Module[{style = "Default"},
+  PaneSelector[
+    #[[1]] -> EventHandler[Dynamic @ TooltipDisplay[
+      SmartButtonDisplay[#[[2]], style],
+      TextDict[#[[2]]]
+    ], {
+      "MouseDown" :> (style = "Clicked"),
+      "MouseUp" :> (style = "Default"; ReleaseHold @ #[[3]])
+    }]& /@ {items},
+    source
+  ]
+];
 
 End[];
 
 EndPackage[];
 
-DeclarePackage["Thulium`SmartButton`", {"SmartButton"}];
+DeclarePackage["Thulium`SmartButton`", {"SmartButton", "SwitchButton"}];
 
 
 DumpSave[$LocalPath <> "library/Package/SmartButton.mx", {"Thulium`SmartButton`"}];
 
 
 (* ::Input:: *)
-(*buttonNames=Keys[buttonData];*)
+(*ClearAll["Thulium`SmartButton`*"]*)
+
+
+(* ::Input:: *)
+(*buttonNames=Keys[Thulium`SmartButton`Private`SmartButtonData];*)
 (*buttonNamePaged=Partition[buttonNames,UpTo@Ceiling[Length@buttonNames/Ceiling[Length@buttonNames/9]]];*)
-(*Grid[buttonDisplay/@#&/@buttonNamePaged,ItemSize->{6,6},Spacings->{.5,0}]*)
+(*Grid[Thulium`SmartButton`Private`SmartButtonDisplay/@#&/@buttonNamePaged,ItemSize->{6,6},Spacings->{.5,0}]*)

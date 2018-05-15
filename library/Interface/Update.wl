@@ -132,7 +132,7 @@ CheckUpdate := Block[
       filename = newImages[[i]];
       metaFileName = StringReplace[filename, RegularExpression["\\.[^\\.]+$"] -> ".json"];
       image = Import[$CloudPath <> "images/" <> filename];
-      Export[$DataPath <> "Images/" <> filename, image];
+      If[!FailureQ[image], Export[$DataPath <> "Images/" <> filename, image]];
       AssociateTo[ImageIndex, filename -> Association @ Import[$CloudPath <> "images/" <> metaFileName]]
     ], {i, Length @ newImages}],
   ProgressDisplay[newImages, i, "Downloading images from the internet ......"]]];

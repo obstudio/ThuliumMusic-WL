@@ -180,18 +180,8 @@ End[];
 EndPackage[];
 
 
-DeclarePackage["Thulium`Graphics`",{
-  "SVGPath",
-  "VertexAssign",
-  "progressBar",
-  "progressSlider",
-  "progressLocate",
-  "squareRounded",
-  "CleanMessages",
-  "MessageDisplay",
-  "RawDisplay",
-  "MonitorDisplay",
-  "ProgressDisplay"
-}]
-
 DumpSave[$LocalPath <> "library/Package/.Graphics.mx", "Thulium`Graphics`"];
+
+
+(* ::Input:: *)
+(*Clear["Thulium`Graphics`*"];*)

@@ -50,7 +50,7 @@ PlayerControls[audio_] := Module[
     ],
     Spacer[20],
     Module[{style = "Default"},
-      EventHandler[Dynamic@SmartButton["ArrowL", style], {
+      EventHandler[Dynamic @ SmartButton["ArrowL", style], {
         "MouseDown" :> (style = "Clicked"),
         "MouseUp" :> (style = "Default"; AudioStop[]; DialogReturn[Thulium`Playlist[Thulium`CurrentPlaylist]])
       }]
@@ -59,37 +59,46 @@ PlayerControls[audio_] := Module[
   }, Alignment -> Center]
 ]];
 
-Player[song_]:=Block[
-  {
-    image, audio, imageExist=False, aspectRatio
-  },
+ImageDisplay[image_] := Block[
+  {source, aspectRatio},
+  source = Import[$DataPath <> "Images/" <> image];
+  aspectRatio = ImageAspectRatio[source];
+  Row[{
+    Spacer[48],
+    Column[{
+      Spacer[{40, 40}],
+      TooltipDisplay[
+        ImageEffect[Image[source, ImageSize -> Piecewise[{
+          {{Automatic, 600}, aspectRatio > 2},
+          {{480, Automatic}, aspectRatio < 1/2},
+          {{Automatic, 400}, aspectRatio <= 1 && aspectRatio > 1/2},
+          {{360, Automatic}, aspectRatio > 1 && aspectRatio < 2}
+        }]], {"FadedFrame"}],
+        If[ImageIndex[[image]] != <||>,
+          Column[If[KeyExistsQ[ImageIndex[[image]], #],
+            TagName[[#]] <> ": " <> ImageIndex[[image, #]],
+            Nothing
+          ]& /@ imageTags],
+          TextDict[["NoImageInfo"]]
+        ]
+      ],
+      Spacer[{40, 40}]
+    }]
+  }]
+];
+
+Player[song_]:=Block[{image, audio, imageExist = False, aspectRatio},
   Quiet @ Check[
     audio = Import[$DataPath <> "Buffer/" <> song <> ".buffer", "MP3"],
     Return[Thulium`Playlist[Thulium`CurrentPlaylist]],
   Import::nffil];
   AudioStop[];
-  If[SongIndex[song, "Image"] != "",
-    imageExist = True;
-    image = Import[$DataPath <> "Images/" <> SongIndex[song, "Image"]];
-    aspectRatio = ImageAspectRatio[image];
-  ];
   CreateDialog[Row[{
-    If[imageExist,Row[{Spacer[48],Column[{Spacer[{40,40}],
-      Tooltip[ImageEffect[Image[image,ImageSize->Piecewise[{
-          {{Automatic,600},aspectRatio>2},
-          {{480,Automatic},aspectRatio<1/2},
-          {{Automatic,400},aspectRatio<=1&&aspectRatio>1/2},
-          {{360,Automatic},aspectRatio>1&&aspectRatio<2}
-        }]],{"FadedFrame"}],
-        If[ImageIndex[[SongIndex[[song,"Image"]]]]!=<||>,
-          Column[If[KeyExistsQ[ImageIndex[[SongIndex[[song,"Image"]]]],#],
-            TagName[[#]]<>": "<>ImageIndex[[SongIndex[[song,"Image"]],#]],
-            Nothing
-          ]&/@imageTags],
-          TextDict[["NoImageInfo"]]
-        ]
-      ],
-    Spacer[{40,40}]}]}],Nothing],Spacer[48],
+    If[SongIndex[song, "Image"] != "",
+      ImageDisplay[SongIndex[song, "Image"]],
+      Nothing
+    ],
+    Spacer[48],
     Column[Join[{Spacer[{60,60}],
       If[SongIndex[[song,"Comment"]]!="",
         If[TextLength@SongIndex[[song,"Comment"]]>16,
@@ -131,4 +140,4 @@ Thulium`Player = Thulium`Interface`Player`Player;
 
 
 (* ::Input:: *)
-(*Thulium`Player["Touhou/Oriental_Blood"]*)
+(*Thulium`Player["Touhou/Dream_Battle"]*)

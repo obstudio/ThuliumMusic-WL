@@ -30,6 +30,8 @@ imageTags = {"Title", "Painter", "PainterID", "IllustID", "Source", "URL"};
 aboutTags = {"Version", "Producer", "Website"};
 langList = {"chs", "eng"};
 
+TooltipDisplay::usage = "TooltipDisplay";
+
 Begin["`Private`"];
 
 LogoCloud = SVGPath["M836.15,454.53c90.25,18.32,158.21,98.11,158.21,193.791c0,109.22-88.54,197.729-197.75,197.729h-568.5
@@ -56,20 +58,18 @@ RefreshLanguage := With[
   MsgDict = Association @ Import[langDataPath <> "Messages.json"];
 ];
 
-StyleFont := If[$OperatingSystem === "MacOSX", "\:82f9\:65b9", "\:5fae\:8f6f\:96c5\:9ed1"];
-
-StyleDict := <|
+StyleDict := Once @ With[{font = If[$OperatingSystem === "MacOSX", "\:82f9\:65b9", "\:5fae\:8f6f\:96c5\:9ed1"]}, <|
   "None" -> {},
   "Text" -> {FontSize -> 20}, 
-  "Title" -> {FontSize -> 32, FontFamily -> StyleFont, FontWeight -> Bold},
-  "TitleCmt" -> {FontSize -> 28, FontFamily -> StyleFont, FontWeight -> Bold, FontColor -> GrayLevel[0.4]},
-  "Subtitle" -> {FontSize -> 24, FontFamily -> StyleFont, FontWeight -> Bold},
-  "BigTitle" -> {FontSize -> 40, FontFamily -> StyleFont, FontWeight -> Bold},
-  "BigTitleCmt" -> {FontSize -> 40, FontFamily -> StyleFont, FontWeight -> Bold, FontColor -> GrayLevel[0.4]},
-  "SongName" -> {FontSize -> 24, FontFamily -> StyleFont}, 
-  "SongIndex" -> {FontSize -> 22, FontFamily -> StyleFont, FontColor -> GrayLevel[0.2]},
-  "SongComment" -> {FontSize -> 22, FontFamily -> StyleFont, FontColor -> GrayLevel[0.4]}
-|>;
+  "Title" -> {FontSize -> 32, FontFamily -> font, FontWeight -> Bold},
+  "TitleCmt" -> {FontSize -> 28, FontFamily -> font, FontWeight -> Bold, FontColor -> GrayLevel[0.4]},
+  "Subtitle" -> {FontSize -> 24, FontFamily -> font, FontWeight -> Bold},
+  "BigTitle" -> {FontSize -> 40, FontFamily -> font, FontWeight -> Bold},
+  "BigTitleCmt" -> {FontSize -> 40, FontFamily -> font, FontWeight -> Bold, FontColor -> GrayLevel[0.4]},
+  "SongName" -> {FontSize -> 24, FontFamily -> font}, 
+  "SongIndex" -> {FontSize -> 22, FontFamily -> font, FontColor -> GrayLevel[0.2]},
+  "SongComment" -> {FontSize -> 22, FontFamily -> font, FontColor -> GrayLevel[0.4]}
+|>];
 
 RenderTemplate[template_, arguments_] := StringReplace[template, {
   "&" ~~ id: DigitCharacter :> ToString[arguments[[ToExpression @ id]], FormatType -> InputForm],
@@ -105,6 +105,26 @@ TimeDisplay[seconds_, levelspec_: 2] := StringRiffle[{
   {level, levelspec - 1, 1, -1}]
 }, ":"];
 
+TooltipDisplay[content_, tooltip_] := Tooltip[
+  content,
+  Framed[
+    Pane[
+      tooltip,
+      ImageSize -> All,
+      ImageMargins -> {{4, 4}, {4, 4}}
+    ],
+    Background -> RGBColor[1, 1, 0.9, 0.8],
+    FrameStyle -> {1, RGBColor[0.8, 0.8, 0.7, 0.2]},
+    RoundingRadius -> {8, 8},
+    ContentPadding -> True
+  ],
+  TooltipDelay -> 0.1,
+  TooltipStyle -> {
+    CellFrame -> {{0, 0}, {0, 0}},
+    Background -> RGBColor[0, 0, 0, 0]
+  }
+];
+
 End[];
 
 EndPackage[];
@@ -119,3 +139,8 @@ DeclarePackage["Thulium`Assets`", {
 
 
 DumpSave[$LocalPath <> "library/Package/Assets.mx", "Thulium`Assets`"];
+
+
+(* ::Input:: *)
+(*Clear["Thulium`Assets`*"]*)
+(*Clear["Thulium`Assets`*`*"]*)

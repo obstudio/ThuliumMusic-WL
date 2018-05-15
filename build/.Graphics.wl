@@ -9,6 +9,12 @@ progressSlider::usage = "Draw a progress slider.";
 progressLocate::usage = "Location to progression";
 squareRounded::usage = "Draw a rounded square.";
 
+CleanMessages::usage = "clean messages on the screen";
+MessageDisplay::usage = "display a message on the screen";
+RawDisplay::usage = "display input form of string instead of output form";
+MonitorDisplay::usage = "display a monitor during an evaluating process";
+ProgressDisplay::usage = "display a progress indicator in a monitored process";
+
 Begin["`Private`"];
 
 SVGPath[string_] := Block[
@@ -69,6 +75,48 @@ VertexAssign[vertices_, {pt1x_, pt1y_} -> pos1_, {pt2x_, pt2y_} -> pos2_] := {
   )/((pt1x - pt2x) ^ 2 + (pt1y - pt2y) ^ 2),
 0}& /@ vertices;
 
+MonitorDisplay[content_] := Style[
+  Framed[
+    Pane[content,
+      Scrollbars -> False,
+      Alignment -> {Center, Center},
+      ImageMargins -> {{4, 4}, {4, 4}},
+      ImageSize -> {Dynamic @ CurrentValue[EvaluationNotebook[], WindowSize][[1]] / 2 - 200, Automatic}
+    ],
+    Background -> RGBColor[0.96, 0.98, 1],
+    RoundingRadius -> {8, 8},
+    ContentPadding -> True,
+    FrameStyle -> None
+  ],
+  FontFamily -> "Calibri",
+  FontSize -> 16
+];
+
+ProgressDisplay[items_, index_, title_] := MonitorDisplay[
+  Column[{
+    title,
+    Graphics[progressBar[(index - 1) / Length[items], 24], ImageSize -> {400, 20}],
+    Row[{
+      "Loading: ", Spacer[2],
+      items[[index]], Spacer[6],
+      "(", index, "/", Length[items], ")"
+    }]
+  }, Alignment -> Center]
+];
+
+MessageDisplay[cells_] := Block[{msgCells},
+  If[CurrentValue[{StyleDefinitions, "<Tooltip>"}] == {}, Return[]];
+  SelectionMove[First @ Cells[CellTags -> "$monitor"], After, Cell, AutoScroll -> False];
+  NotebookWrite[EvaluationNotebook[], cells];
+  NotebookLocate["$title"];
+];
+
+CleanMessages[maxCount_] := With[{msgCells = Cells[CellTags -> "$msg"]},
+  If[Length @ msgCells > maxCount, NotebookDelete[Drop[msgCells, maxCount]]];
+];
+
+RawDisplay[text_] := FormBox[StyleBox["\"" <> text <> "\"", FontFamily -> "Calibri"], "InputForm"];
+
 progressBarShape[l_, r_, t_] := {
   {l, 1}, {l - t, 1}, {l - 1, t}, {l - 1, 0},
   {l - 1, -t}, {l - t, -1}, {l, -1}, {l, -1},
@@ -76,18 +124,18 @@ progressBarShape[l_, r_, t_] := {
   {r + 1, 0}, {r + 1, t}, {r + t, 1}, {r, 1}
 };
 
-progressBar[pro_,len_]:=With[
+progressBar[pro_, len_] := With[
   { 
-    content=progressBarShape[-len,len*(2pro-1),3/5],
-    profile=progressBarShape[-len,len,3/5]
+    content = progressBarShape[-len, len * (2 pro - 1), 3 / 5],
+    profile = progressBarShape[-len, len, 3 / 5]
   },
   GraphicsGroup[{
-    RGBColor["#D0D0F0"],Thickness[1/len/4],
-    BezierCurve[profile],Line[{{-len,1},{len,1}}],
-    RGBColor["#F0F0FF"],FilledCurve[{BezierCurve[profile]}],
-    Texture[Table[{c,1-c,1},{c,0,1,1/256}]],
+    RGBColor["#D0D0F0"], Thickness[1 / len / 4],
+    BezierCurve[profile], Line[{{-len, 1}, {len, 1}}],
+    RGBColor["#F0F0FF"], FilledCurve[{BezierCurve[profile]}],
+    Texture[Table[{c, 1 - c, 1}, {c, 0, 1, 1 / 256}]],
     FilledCurve[{BezierCurve[content]},
-      VertexTextureCoordinates->VertexAssign[content,{-len,0}->1/5,{len,0}->4/5]
+      VertexTextureCoordinates -> VertexAssign[content, {-len, 0} -> 1 / 5, {len, 0} -> 4 / 5]
     ]
   }]
 ];
@@ -138,7 +186,12 @@ DeclarePackage["Thulium`Graphics`",{
   "progressBar",
   "progressSlider",
   "progressLocate",
-  "squareRounded"
+  "squareRounded",
+  "CleanMessages",
+  "MessageDisplay",
+  "RawDisplay",
+  "MonitorDisplay",
+  "ProgressDisplay"
 }]
 
 DumpSave[$LocalPath <> "library/Package/.Graphics.mx", "Thulium`Graphics`"];

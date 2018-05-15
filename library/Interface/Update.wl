@@ -1,6 +1,10 @@
 (* ::Package:: *)
 
-BeginPackage["Thulium`Update`", {"Thulium`System`", "Thulium`Assets`"}];
+BeginPackage["Thulium`Update`", {
+  "Thulium`System`",
+  "Thulium`Assets`",
+  "Thulium`Graphics`"
+}];
 
 CheckUpdate::usage = "CheckUpdate";
 

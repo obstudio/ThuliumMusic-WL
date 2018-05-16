@@ -89,10 +89,56 @@ AssignTemplate["Message", Function[
     FrameStyle -> None
   ]
 ]];
-      
+
+AssignTemplate["Setter", Function[
+  PaneSelectorBox[{
+    True -> #6,
+    False -> PaneSelectorBox[{
+      True -> TemplateBox[{
+        TagBox[
+          PaneSelectorBox[
+            {True -> #4, False -> #5},
+            Dynamic @ CurrentValue["MouseButtonTest"]
+          ],
+        EventHandlerTag @ {"MouseClicked" :> #1 = #2}],
+        #7, 0.2
+      }, "<Tooltip>"],
+      False -> #3
+    }, Dynamic @ CurrentValue["MouseOver"]]
+  }, Dynamic[#1 === #2]]
+]];
+
+AssignTemplate["Setter-Item", Function[
+  FrameBox[
+    PaneBox[
+      StyleBox[#1, FontFamily -> "Calibri", FontSize -> 16],
+      Scrollbars -> False,
+      Alignment -> {Center, Center},
+      ImageMargins -> {{2, 2}, {2, 2}},
+      ImageSize -> {#3, Automatic}
+    ],
+    Background -> #2,
+    RoundingRadius -> {8, 8},
+    ContentPadding -> True,
+    FrameStyle -> None
+  ]
+]];
+
 End[];
 
 EndPackage[];
 
 
 DumpSave[$LocalPath <> "library/Package/StyleSheet.mx", {"Thulium`StyleSheet`"}];
+
+
+(* ::Input:: *)
+(*ClearAll["Thulium`StyleSheet`*"]*)
+
+
+(* ::Input:: *)
+(*SetterBox//Options*)
+
+
+(* ::Input:: *)
+(*CurrentValue[{StyleDefinitions,"Setter"}]*)

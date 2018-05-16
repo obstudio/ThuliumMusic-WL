@@ -92,35 +92,39 @@ AssignTemplate["Message", Function[
 
 AssignTemplate["Setter", Function[
   PaneSelectorBox[{
-    True -> #6,
+    True -> #5,
     False -> PaneSelectorBox[{
       True -> TemplateBox[{
         TagBox[
           PaneSelectorBox[
-            {True -> #4, False -> #5},
+            {True -> #6, False -> #7},
             Dynamic @ CurrentValue["MouseButtonTest"]
           ],
-        EventHandlerTag @ {"MouseClicked" :> #1 = #2}],
-        #7, 0.2
+        EventHandlerTag @ {"MouseClicked" :> (#1 = #2)}],
+        #3, 0.2
       }, "<Tooltip>"],
-      False -> #3
+      False -> #4
     }, Dynamic @ CurrentValue["MouseOver"]]
-  }, Dynamic[#1 === #2]]
+  }, Dynamic[#1] === #2]
 ]];
 
 AssignTemplate["Setter-Item", Function[
   FrameBox[
     PaneBox[
-      StyleBox[#1, FontFamily -> "Calibri", FontSize -> 16],
+      StyleBox[#1,
+        FontFamily -> "Calibri",
+        FontSize -> 16,
+        FontColor -> #2
+      ],
       Scrollbars -> False,
       Alignment -> {Center, Center},
       ImageMargins -> {{2, 2}, {2, 2}},
-      ImageSize -> {#3, Automatic}
+      ImageSize -> {#5, #6}
     ],
-    Background -> #2,
+    Background -> #3,
     RoundingRadius -> {8, 8},
     ContentPadding -> True,
-    FrameStyle -> None
+    FrameStyle -> Directive[Thickness[1], #4]
   ]
 ]];
 

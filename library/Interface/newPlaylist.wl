@@ -1,70 +1,13 @@
 (* ::Package:: *)
 
-newPlaylist[playlist_] := Block[
-  {info, length, songList, indexList, pageCount},
-  info = PlaylistIndex[playlist];
-  length = Length @ info["SongList"];
-  pageCount = Ceiling[length / ListSize];
-  songList = Partition["Song" /. info["SongList"], UpTo @ Ceiling[length / pageCount]];
-  indexList = Partition["Index" /. info["SongList"], UpTo @ Ceiling[length / pageCount]];
-  If[Thulium`PageIndex[playlist] > pageCount, Thulium`PageIndex[playlist] = pageCount];
-  Module[{page = Thulium`PageIndex[playlist], index = 1},
-    CreateDialog[
-      Container[With[
-        {
-          songList = songList, pageCount = pageCount, indexList = indexList,
-          indexWidth = info["IndexWidth"],
-          $Epi = Unevaluated[Thulium`PageIndex[playlist] = page]
-        },
-        Column[{
-          Row[{
-            Row[{
-              Caption[info[["Title"]], "BigTitle"]
-            }, Alignment -> Left, ImageSize -> 400],
-            Row[{
-              SmartButton["Play", DialogReturn[$Epi; Thulium`Player[songList[[page, index]]]]],
-              Spacer[10],
-              SmartButton["Return", DialogReturn[$Epi; Thulium`homepage]]
-            }, Alignment -> Right, ImageSize -> {400, 60}]
-          }],
-          If[info["Comment"] == "", Nothing,
-            Row[{
-              Caption[info[["Comment"]], "Subtitle"]
-            }, Alignment -> Left, ImageSize -> 800]
-          ],
-          Spacer[20],
-          Dynamic[
-            Row[{SetterList[Dynamic[index], Table[
-              Row[{
-                Row[{
-                  Spacer[8],
-                  If[indexWidth > 0,
-                    Row[{
-                      Caption[indexList[[page, id]], "SongIndex"],
-                      Spacer[16]
-                    }, ImageSize -> indexWidth, Alignment -> Center],
-                    Spacer[4]
-                  ],
-                  Caption[SongIndex[songList[[page, id]], "SongName"], "SongName"]
-                }, Alignment -> Left, ImageSize -> 480],
-                Row[{
-                  Row[{"Right"}, Alignment -> Center],
-                  Spacer[8]
-                }, Alignment -> Right, ImageSize -> 480]
-              }, Alignment -> Center, ImageSize -> {960, 32}],
-            {id, Length @ songList[[page]]}]]},
-            ImageSize -> {960, 600}],
-          TrackedSymbols :> {page}],
-          Spacer[20],
-          PageSelector[Dynamic[page], pageCount]
-        }, Center]
-      ], 100, 40],
-      WindowTitle -> TagName[info["Type"]] <> " - " <> info["Title"],
-      Background -> WindowBackground
-    ];
-  ];
-];
+BeginPackage[Thulium`Interface`Playlist, {
+  "Thulium`System`",
+  "Thulium`Assets`"
+}];
 
+newPlaylist::usage = "newPlaylist";
+
+Begin["`Private`"];
 
 newPlaylist[playlist_] := Block[
   {info, length, songList, indexList, pageCount},
@@ -78,33 +21,31 @@ newPlaylist[playlist_] := Block[
     CreateDialog[
       {
         Cell[BoxData @ GridBox[{
-          {TemplateBox[{index, 2, "wooo"}, "<SetterBar>"]}
-        }]]
+          {TemplateBox[{Unevaluated[index], 1, "booo", "booo"}, "<Setter-Local>"]},
+          {TemplateBox[{Unevaluated[index], 2, "fooo", "fooo"}, "<Setter-Local>"]},
+          {TemplateBox[{Unevaluated[index], 3, "wooo", "wooo"}, "<Setter-Local>"]}
+        }, RowSpacings -> 0]],
+        TextCell[Dynamic @ index]
       },
+      
       StyleDefinitions -> Notebook[{
         Thulium`StyleSheet`Include["Setter-Item"],
         Thulium`StyleSheet`Include["Setter"],
         Thulium`StyleSheet`Include["Tooltip"],
         
-        Cell[StyleData["<SetterBar>"],
+        Cell[StyleData["<Setter-Local>"],
           TemplateBoxOptions -> {DisplayFunction -> Function[
-  PaneSelectorBox[{
-    True -> TemplateBox[{#3, RGBColor[0.96, 0.96, 1], 40}, "<Setter-Item>"],
-    False -> PaneSelectorBox[{
-      True -> 
-        TagBox[
-          PaneSelectorBox[
-            {True -> TemplateBox[{#3, RGBColor[0.92, 1, 0.92], 40}, "<Setter-Item>"],
-            False -> TemplateBox[{#3, RGBColor[0.96, 1, 0.96], 40}, "<Setter-Item>"]},
-            Dynamic @ CurrentValue["MouseButtonTest"]
-          ],
-        EventHandlerTag @ {"MouseClicked" :> #1 = #2}],
-      False -> TemplateBox[{#3, RGBColor[1, 0.96, 0.96], 40}, "<Setter-Item>"]
-    }, Dynamic @ CurrentValue["MouseOver"]]
-  }, Dynamic[#1 === #2]]
+            TemplateBox[{
+              #1, #2, #3,
+              TemplateBox[{#4, RGBColor[0, 0, 0], RGBColor[0.96, 0.98, 1], RGBColor[0.96, 0.98, 1], 200, 36}, "<Setter-Item>"],
+              TemplateBox[{#4, RGBColor[0, 0, 0], RGBColor[0.96, 1, 0.98], RGBColor[0.94, 1, 0.98], 200, 36}, "<Setter-Item>"],
+              TemplateBox[{#4, RGBColor[0, 0, 0], RGBColor[0.92, 1, 0.98], RGBColor[0.88, 1, 0.98], 200, 36}, "<Setter-Item>"],
+              TemplateBox[{#4, RGBColor[0, 0, 0], RGBColor[0.97, 1, 0.97], RGBColor[0.97, 1, 0.97], 200, 36}, "<Setter-Item>"]
+            }, "<Setter>"]
           ]}
         ]
       }],
+      
       ShowCellLabel -> False,
       ShowCellTags -> False,
       ShowCellBracket -> False,
@@ -124,6 +65,10 @@ newPlaylist[playlist_] := Block[
     ];
   ];
 ];
+
+End[];
+
+EndPackage[];
 
 
 (* ::Input:: *)

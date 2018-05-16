@@ -4,7 +4,7 @@ Begin["Thulium`System`"];
 
 Begin["`Private`"];
 
-$$Version = "2.3";
+$$Version = "2.4";
 $$Build = 701;
 If[DirectoryQ[$LocalPath <> ".git"], 
   With[{ref = StringCases[Import[$LocalPath <> ".git/HEAD"], RegularExpression["^ref: (.+)$"] :> "$1"][[1]]},

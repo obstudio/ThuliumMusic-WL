@@ -14,7 +14,7 @@ NotebookDataLength[     11069,        282]
 NotebookOptionsPosition[      2673,         78]
 NotebookOutlinePosition[     10982,        281]
 CellTagsIndexPosition[     10889,        275]
-WindowTitle->Thulium Music Player 2.3
+WindowTitle->Thulium Music Player 2.4
 WindowFrame->ModelessDialog*)
 
 (* Beginning of Notebook Content *)
@@ -28,11 +28,11 @@ Cell[BoxData[
    FontColor->RGBColor[0.1, 0.4, 0.7]], 
   TemplateBox[{1},
    "Spacer1"], 
-  StyleBox["\<\"v2.3\"\>",
+  StyleBox["\<\"v2.4\"\>",
    FontFamily->"Source Sans Pro",
    FontSize->24,
    FontColor->RGBColor[0.3, 0.5, 0.8]]}]], "Title",
- CellTags->"$title",ExpressionUUID->"bb513db8-850e-4e80-9c57-eb6a067fd565"],
+ CellTags->"$title",ExpressionUUID->"a7100f5c-a6d8-4772-be85-eafe525289d8"],
 
 Cell[BoxData[
  RowBox[{
@@ -74,7 +74,7 @@ Cell[BoxData[
    "LogoButton"], 
   TemplateBox[{4},
    "Spacer1"]}]], "Init",
- CellTags->"$init",ExpressionUUID->"9d1acba6-0342-4166-a503-865c1f660819"]
+ CellTags->"$init",ExpressionUUID->"3d720bdd-bf43-4791-924c-f2e52dfad808"]
 },
 Editable->False,
 Saveable->False,
@@ -95,7 +95,7 @@ WindowMargins->{{229, Automatic}, {Automatic, 32}},
 WindowFrame->"ModelessDialog",
 WindowElements->{},
 WindowFrameElements->{"CloseBox", "MinimizeBox", "ZoomBox"},
-WindowTitle->"Thulium Music Player 2.3",
+WindowTitle->"Thulium Music Player 2.4",
 ShowCellBracket->False,
 Evaluatable->False,
 CellContext->"Global`",
@@ -265,10 +265,10 @@ k4tvhNgXhpleKeUDAIAZlCM=
 (*CellTagsOutline
 CellTagsIndex->{
  "$title"->{
-  Cell[604, 21, 421, 13, 140, "Title",ExpressionUUID->"bb513db8-850e-4e80-9c57-eb6a067fd565",
+  Cell[604, 21, 421, 13, 140, "Title",ExpressionUUID->"a7100f5c-a6d8-4772-be85-eafe525289d8",
    CellTags->"$title"]},
  "$init"->{
-  Cell[1028, 36, 1641, 40, 140, "Init",ExpressionUUID->"9d1acba6-0342-4166-a503-865c1f660819",
+  Cell[1028, 36, 1641, 40, 140, "Init",ExpressionUUID->"3d720bdd-bf43-4791-924c-f2e52dfad808",
    CellTags->"$init"]}
  }
 *)
@@ -280,9 +280,9 @@ CellTagsIndex->{
 *)
 (*NotebookFileOutline
 Notebook[{
-Cell[604, 21, 421, 13, 140, "Title",ExpressionUUID->"bb513db8-850e-4e80-9c57-eb6a067fd565",
+Cell[604, 21, 421, 13, 140, "Title",ExpressionUUID->"a7100f5c-a6d8-4772-be85-eafe525289d8",
  CellTags->"$title"],
-Cell[1028, 36, 1641, 40, 140, "Init",ExpressionUUID->"9d1acba6-0342-4166-a503-865c1f660819",
+Cell[1028, 36, 1641, 40, 140, "Init",ExpressionUUID->"3d720bdd-bf43-4791-924c-f2e52dfad808",
  CellTags->"$init"]
 }
 ]

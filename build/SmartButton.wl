@@ -103,12 +103,6 @@ SmartButtonData = <|
     Disk[{-0.4,0},0.12],
     Disk[{0.4,0},0.12]
   }],
-  "Refresh"->With[{r=0.48},GraphicsGroup[{
-    Thickness[0.06],CapForm["Round"],JoinForm["Round"],
-    Circle[{0,0},r,{0,7/4Pi}],
-    Line[{{r,0},{r-0.16,0.08}}],
-    Line[{{r,0},{r+0.08,0.16}}]
-  }]],
   "EnterPlaylist"->With[
     {t=Pi/8,s={0.12,0.02},h={0,0.64},i={0,0.04},a={-0.36,-0.36},b={0.28,-0.16}},
     GraphicsGroup[{
@@ -142,6 +136,21 @@ SmartButtonData = <|
       Circle[c,r],
       Line[{c+s*r*{1,-1},c+s*(r+0.2)*{1,-1}}],
       Line[{{-0.06,-0.36},{-0.44,-0.36},{-0.44,0.36},{-0.08,0.36},{0,0.24},{0.44,0.24},{0.44,0.12}}]
+    }]
+  ],
+  "Single" -> With[{x = 0.48, y = 0.2, d = 0.2},
+    GraphicsGroup[{
+      Thickness[0.08], CapForm["Round"], JoinForm["Round"],
+      Line[{{-x, y}, {x, y}, {x - d, y + d}}],
+      Line[{{x, -y}, {-x, -y}, {d - x, - y - d}}]
+    }]
+  ],
+  "Loop" -> With[{r = 0.48},
+    GraphicsGroup[{
+      Thickness[0.08], CapForm["Round"], JoinForm["Round"],
+      Circle[{0, 0}, r, {0, 7/4 Pi}],
+      Line[{{r, 0}, {r - 0.15, 0.1}}],
+      Line[{{r, 0}, {r + 0.1, 0.15}}]
     }]
   ],
   "Directory"->With[{l=0.44,w=0.36,dw=0.12,x1=-0.08,x2=0},GraphicsGroup[{
@@ -196,7 +205,7 @@ SmartButtonDisplay[name_, style_] := If[style == "Default",
 
 SetAttributes[SmartButton, HoldRest];
 SmartButton[name_String, action_] := SmartButton[name, name, action];
-SmartButton[name_String, info_String, action_] := Module[{style = "Default"},
+SmartButton[name_String, info_String, action_] := DynamicModule[{style = "Default"},
   EventHandler[Dynamic @ TooltipDisplay[
     SmartButtonDisplay[name, style],
     TextDict[info]
@@ -206,7 +215,7 @@ SmartButton[name_String, info_String, action_] := Module[{style = "Default"},
   }]
 ];
 
-SwitchButton[source_, items__] := Module[{style = "Default"},
+SwitchButton[source_, items__] := DynamicModule[{style = "Default"},
   PaneSelector[
     #[[1]] -> EventHandler[Dynamic @ TooltipDisplay[
       SmartButtonDisplay[#[[2]], style],
@@ -237,3 +246,11 @@ DumpSave[$LocalPath <> "library/Package/SmartButton.mx", {"Thulium`SmartButton`"
 (*buttonNames=Keys[Thulium`SmartButton`Private`SmartButtonData];*)
 (*buttonNamePaged=Partition[buttonNames,UpTo@Ceiling[Length@buttonNames/Ceiling[Length@buttonNames/9]]];*)
 (*Grid[Thulium`SmartButton`Private`SmartButtonDisplay/@#&/@buttonNamePaged,ItemSize->{6,6},Spacings->{.5,0}]*)
+
+
+(* ::Input:: *)
+(*stat=1;*)
+(*SwitchButton[Dynamic[stat,UpdateInterval->0.1],*)
+(*{1,"Play",Hold[stat=2]},*)
+(*{2,"Stop",Hold[stat=1]}*)
+(*]//List*)

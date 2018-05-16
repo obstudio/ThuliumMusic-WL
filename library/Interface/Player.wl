@@ -28,17 +28,22 @@ PlayerControls[audio_] := Module[
       Spacer[8],
       Column[{Style[TimeDisplay[duration], 20], Spacer[1]}]
     }, ImageSize -> Full, Alignment -> Center],
-    Row[{
+    Row[Riffle[{
+      If[$VersionNumber >= 11.3, 
+        Dynamic @ SwitchButton[stream["AudioLooping"],
+          {False, "Loop", Hold[stream["AudioLooping"] = True]},
+          {True, "Single", Hold[stream["AudioLooping"] = False]}
+        ],
+        Nothing
+      ],
       Dynamic @ SwitchButton[stream[StatusAlias],
         {"Playing", "Pause", Hold[stream[StatusAlias] = "Paused"]},
         {"Paused", "Play", Hold[stream[StatusAlias] = "Playing"]},
         {"Stopped", "Play", Hold[stream[StatusAlias] = "Playing"]}
       ],
-      Spacer[20],
       SmartButton["Stop", stream[StatusAlias] = "Stopped"; stream["Position"] = 0],
-      Spacer[20],
       SmartButton["Return", AudioStop[]; DialogReturn[Thulium`Playlist[Thulium`CurrentPlaylist]]]
-    }, ImageSize -> {300, 60}, Alignment -> Center]
+    }, Spacer[20]], ImageSize -> {Automatic, 60}, Alignment -> Center]
   }, Alignment -> Center]
 ]];
 
@@ -57,11 +62,15 @@ ImageDisplay[image_] := Block[
           {{Automatic, 400}, aspectRatio <= 1 && aspectRatio > 1/2},
           {{360, Automatic}, aspectRatio > 1 && aspectRatio < 2}
         }]], {"FadedFrame"}],
-        If[ImageIndex[[image]] != <||>,
-          Column[If[KeyExistsQ[ImageIndex[image], #],
-            TagName[[#]] <> ": " <> ImageIndex[image, #],
-            Nothing
-          ]& /@ imageTags],
+        If[ImageIndex[image] != <||>,
+          Grid[
+            If[KeyExistsQ[ImageIndex[image], #],
+              {TagName[[#]] <> ":", ImageIndex[image, #]},
+              Nothing
+            ]& /@ imageTags,
+            Spacings -> 0.4,
+            Alignment -> {{Center, Left}}
+          ],
           TextDict["NoImageInfo"],
           TextDict["NoImageInfo"]
         ]
@@ -117,6 +126,10 @@ End[];
 EndPackage[];
 
 Thulium`Player = Thulium`Interface`Player`Player;
+
+
+(* ::Input:: *)
+(*Thulium`Playlist["All"];*)
 
 
 (* ::Input:: *)

@@ -23,6 +23,8 @@
 	"PgNext": "下一页",
 	"PgPrev": "上一页",
 	"SongPath": "歌曲位置",
+	"Loop": "循环播放",
+	"Single": "单曲播放",
 	"ChooseIdentity": "选择身份: ",
 	"ChooseLanguage": "选择语言: ",
 	"ChoosePlayer": "选择播放器: ",

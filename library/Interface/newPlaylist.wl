@@ -1,6 +1,6 @@
 (* ::Package:: *)
 
-BeginPackage[Thulium`Interface`Playlist, {
+BeginPackage["Thulium`Interface`Playlist`", {
   "Thulium`System`",
   "Thulium`Assets`"
 }];

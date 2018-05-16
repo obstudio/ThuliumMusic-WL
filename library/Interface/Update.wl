@@ -46,7 +46,7 @@ CheckUpdate := Block[
     SetDirectory[$DataPath];
     bufferHash = Association @ Import[$DataPath <> "Buffer.json"];
     bufferList = StringReplace["\\" -> "/"] /@ StringTake[FileNames["*.buffer", "Buffer", Infinity], {8, -8}];
-    Scan[DeleteFile[# <> ".buffer"]&, Complement[ToLowerCase /@ bufferList, ToLowerCase /@ songList]];
+    Scan[DeleteFile[$DataPath <> "buffer/" <> # <> ".buffer"]&, Complement[ToLowerCase /@ bufferList, ToLowerCase /@ songList]];
     imageList = DeleteCases[Values @ SongIndex[[All, "Image"]], ""];
     imageDirList = DeleteDuplicates[DirectoryName /@ imageList];
     Scan[If[!DirectoryQ[#], CreateDirectory[#]]&["images/" <> #]&, imageDirList];

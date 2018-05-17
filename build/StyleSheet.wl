@@ -1,5 +1,9 @@
 (* ::Package:: *)
 
+ClearAll["Thulium`StyleSheet`*"];
+ClearAll["Thulium`StyleSheet`*`*"];
+
+
 BeginPackage["Thulium`StyleSheet`"];
 
 Include = <||>;
@@ -44,16 +48,38 @@ AssignTemplate["Button", Function[
     True -> TemplateBox[{
       TagBox[
         TagBox[
-          PaneSelectorBox[
-            {True -> #2, False -> #3},
-            Dynamic @ CurrentValue["MouseButtonTest"]
-          ],
-        EventHandlerTag @ {"MouseClicked" :> ReleaseHold @ #4}],
+          PaneSelectorBox[{
+            True -> #2,
+            False -> #3
+          }, Dynamic @ CurrentValue["MouseButtonTest"]],
+        EventHandlerTag @ {"MouseClicked" :> ReleaseHold @ #4, PassEventsUp -> False}],
       MouseAppearanceTag @ "LinkHand"],
       #5, 0.2
     }, "<Tooltip>"],
     False -> #1
   }, Dynamic @ CurrentValue["MouseOver"]]
+]];
+
+AssignTemplate["Button-r-Template", Function[
+  GraphicsBox[{
+    JoinForm["Round"], CapForm["Round"], #2,
+    DiskBox[{0, 0}, 0.96],
+    Thickness[0.04], Opacity[1], #3,
+    CircleBox[{0, 0}, 0.96],
+    Opacity[1], #4, #1
+  }, ImageSize -> #5]
+]];
+
+AssignTemplate["Button-Round", Function[
+  PaneSelectorBox[{
+    "Play" -> TemplateBox[{
+      GraphicsGroupBox[{Thickness[0.08],
+        PolygonBox[{{-0.2, -0.4}, {-0.2, 0.4}, {0.4, 0}}],
+        LineBox[{{-0.2, -0.4}, {-0.2, 0.4}, {0.4, 0}, {-0.2, -0.4}}]
+      }],
+      #2, #3, #4, #5
+    }, "<Button-r-Template>"]
+  }, #1]
 ]];
 
 AssignTemplate["Pane", Function[
@@ -118,17 +144,28 @@ AssignTemplate["Setter-Item", Function[
       ],
       Scrollbars -> False,
       Alignment -> {Center, Center},
-      ImageMargins -> {{2, 2}, {2, 2}},
+      ImageMargins -> {{0, 0}, {0, 0}},
       ImageSize -> {#5, #6}
     ],
     Background -> #3,
     RoundingRadius -> {8, 8},
-    ContentPadding -> True,
+    ContentPadding -> False,
     FrameStyle -> Directive[Thickness[1], #4]
   ]
 ]];
 
 End[];
+
+tmButton = Sequence[
+  Include["Button"],
+  Include["Button-Round"],
+  Include["Button-r-Template"]
+];
+
+tmSetter = Sequence[
+  Include["Setter"],
+  Include["Setter-Item"]
+];
 
 EndPackage[];
 
@@ -138,6 +175,7 @@ DumpSave[$LocalPath <> "library/Package/StyleSheet.mx", {"Thulium`StyleSheet`"}]
 
 (* ::Input:: *)
 (*ClearAll["Thulium`StyleSheet`*"]*)
+(*ClearAll["Thulium`StyleSheet`*`*"]*)
 
 
 (* ::Input:: *)

@@ -6,6 +6,9 @@ BeginPackage["Thulium`Assets`", {
 }];
 
 WindowBackground::usage = "Thulium front end window background";
+ChsFont::usage = "Thulium Music chinese Font";
+EngFont::usage = "Thulium Music english Font";
+StyleDict::usage = "Thulium Style Dict";
 Caption::usage = "Thulium front end captions.";
 Container::usage = "Dialog container framework.";
 TextLength::usage = "TextLength";
@@ -58,6 +61,9 @@ RefreshLanguage := With[
   MsgDict = Association @ Import[langDataPath <> "Messages.json"];
 ];
 
+ChsFont := Once @ If[$OperatingSystem === "MacOSX", "\:82f9\:65b9", "\:5fae\:8f6f\:96c5\:9ed1"];
+EngFont := Once @ If[$OperatingSystem === "MacOSX", "Calibri", "Calibri"];
+
 StyleDict := Once @ With[{font = If[$OperatingSystem === "MacOSX", "\:82f9\:65b9", "\:5fae\:8f6f\:96c5\:9ed1"]}, <|
   "None" -> {},
   "Text" -> {FontSize -> 20}, 
@@ -66,6 +72,7 @@ StyleDict := Once @ With[{font = If[$OperatingSystem === "MacOSX", "\:82f9\:65b9
   "Subtitle" -> {FontSize -> 24, FontFamily -> font, FontWeight -> Bold},
   "BigTitle" -> {FontSize -> 40, FontFamily -> font, FontWeight -> Bold},
   "BigTitleCmt" -> {FontSize -> 40, FontFamily -> font, FontWeight -> Bold, FontColor -> GrayLevel[0.4]},
+  "FormHint" -> {FontSize -> 20, FontFamily -> font, FontSlant -> Plain, FontColor -> GrayLevel[0.4]}, 
   "SongName" -> {FontSize -> 24, FontFamily -> font}, 
   "SongIndex" -> {FontSize -> 22, FontFamily -> font, FontColor -> GrayLevel[0.2]},
   "SongComment" -> {FontSize -> 22, FontFamily -> font, FontColor -> GrayLevel[0.4]}

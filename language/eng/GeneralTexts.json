@@ -1,5 +1,13 @@
 {
 	"Thulium": "Thulium Music Player",
+	"Login": "Login",
+	"LoginTitle": "Login",
+	"UserName": "User Name",
+	"Password": "Password",
+	"EnterUserName": "Enter User Name",
+	"EnterPassword": "Enter Password",
+	"RememberPassword": "Remember Password",
+	"GuestLogin": "Guest",
 	"Playlist": "Playlist",
 	"Assistant": "Debugging Assistant",
 	"AllSongs": "AllSongs",

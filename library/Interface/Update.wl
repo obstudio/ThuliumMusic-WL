@@ -1,6 +1,10 @@
 (* ::Package:: *)
 
-BeginPackage["Thulium`Update`", {"Thulium`System`", "Thulium`Assets`"}];
+BeginPackage["Thulium`Update`", {
+  "Thulium`System`",
+  "Thulium`Assets`",
+  "Thulium`Graphics`"
+}];
 
 CheckUpdate::usage = "CheckUpdate";
 
@@ -42,7 +46,7 @@ CheckUpdate := Block[
     SetDirectory[$DataPath];
     bufferHash = Association @ Import[$DataPath <> "Buffer.json"];
     bufferList = StringReplace["\\" -> "/"] /@ StringTake[FileNames["*.buffer", "Buffer", Infinity], {8, -8}];
-    Scan[DeleteFile[# <> ".buffer"]&, Complement[ToLowerCase /@ bufferList, ToLowerCase /@ songList]];
+    Scan[DeleteFile[$DataPath <> "buffer/" <> # <> ".buffer"]&, Complement[ToLowerCase /@ bufferList, ToLowerCase /@ songList]];
     imageList = DeleteCases[Values @ SongIndex[[All, "Image"]], ""];
     imageDirList = DeleteDuplicates[DirectoryName /@ imageList];
     Scan[If[!DirectoryQ[#], CreateDirectory[#]]&["images/" <> #]&, imageDirList];
@@ -128,7 +132,7 @@ CheckUpdate := Block[
       filename = newImages[[i]];
       metaFileName = StringReplace[filename, RegularExpression["\\.[^\\.]+$"] -> ".json"];
       image = Import[$CloudPath <> "images/" <> filename];
-      Export[$DataPath <> "Images/" <> filename, image];
+      If[!FailureQ[image], Export[$DataPath <> "Images/" <> filename, image]];
       AssociateTo[ImageIndex, filename -> Association @ Import[$CloudPath <> "images/" <> metaFileName]]
     ], {i, Length @ newImages}],
   ProgressDisplay[newImages, i, "Downloading images from the internet ......"]]];

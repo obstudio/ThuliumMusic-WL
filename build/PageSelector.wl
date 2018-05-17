@@ -115,7 +115,7 @@ PageSelector[Dynamic[page_], pageCount_] := Block[{},
         }]
       ]
     ]
-  }, ImageSize -> {500, 60}, Alignment -> Center]
+  }, ImageSize -> {All, 60}, Alignment -> Center]
 ];
 
 End[];

@@ -4,7 +4,7 @@ Begin["Thulium`System`"];
 
 Begin["`Private`"];
 
-$$Version = "2.3";
+$$Version = "2.4";
 $$Build = 701;
 If[DirectoryQ[$LocalPath <> ".git"], 
   With[{ref = StringCases[Import[$LocalPath <> ".git/HEAD"], RegularExpression["^ref: (.+)$"] :> "$1"][[1]]},
@@ -43,7 +43,12 @@ uiSetPath := Module[{path = defaultDataPath},
     Spacer[96],
     Column[{
       Spacer[{48,48}],
-      Graphics[{logo},ImageSize->{512,Automatic}],
+      Graphics[{
+        RGBColor["#00A0E9"],
+        FilledCurve[{BezierCurve[Thulium`Assets`LogoCloud]}],
+        RGBColor["#FFFFFF"],
+        FilledCurve[{BezierCurve[Thulium`Assets`LogoNote]}]
+      },ImageSize->{512,Automatic}],
       Spacer[1],
       Caption[TextDict["ChooseBasePath"],"Title"],
       Row[{

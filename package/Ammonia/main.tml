@@ -22,94 +22,96 @@ j		2nd inversion	[2:], [:1]+12
 # Function
 
 function Con(octave, scale = 1) {
-    if (octave === 0) {
-        for (const name in this.Library.Pitch) {
-            if (this.Library.Pitch[name].Generated) {
-                this.Library.Pitch[name].splice(1)
-            }
-        }
-    } else {
-        for (const name in this.Library.Pitch) {
-            if (this.Library.Pitch[name].Generated && '1' <= name && name <= '9') {
-                const source = this.Library.Pitch[name][0]
-                this.Library.Pitch[name].splice(1)
-                this.Library.Pitch[name].push({
-                    Pitch: source.Pitch + octave * 12,
-                    Volume: scale
-                })
-            }
-        }
-    }
+	if (octave === 0) {
+		for (const name in this.Library.Pitch) {
+			if (this.Library.Pitch[name].Generated) {
+				this.Library.Pitch[name].splice(1)
+			}
+		}
+	} else {
+		for (const name in this.Library.Pitch) {
+			if (this.Library.Pitch[name].Generated && '1' <= name && name <= '9') {
+				const source = this.Library.Pitch[name][0]
+				this.Library.Pitch[name].splice(1)
+				this.Library.Pitch[name].push({
+					Pitch: source.Pitch + octave * 12,
+					Volume: scale
+				})
+			}
+		}
+	}
 }
 
 function Vol(volume) {
-    // alias: (${0:uns}%)
-    this.Settings.assignSetting('Volume', volume / 100, (volume) => volume > 0)
+	// alias: (${0:uns}%)
+	this.Settings.assignSetting('Volume', volume / 100, (volume) => volume > 0)
 }
 
 function Key(key) {
-    // alias: (1=${0:str})
-    if (typeof key === 'string') {
-        const match = arguments[0].match(/^((#|b)\2*)?([A-G])(('|,)\5*)?/)
-        this.Settings.Key = { C: 0, G: 7, D: 2, A: 9, E: 4, B: -1, F: 5 }[match[3]]
-        this.Settings.Key += (!match[2]) ? 0 : (match[2] === 'b' ? -1 : 1) * match[1].length
-        this.Settings.Key += (!match[5]) ? 0 : (match[5] === ',' ? -12 : 12) * match[4].length
-    } else {
-        this.Settings.Key = key
-    }
+	// alias: (1=${0:str})
+	if (typeof key === 'string') {
+		const match = arguments[0].match(/^((#|b)\2*)?([A-G])(('|,)\5*)?/)
+		this.Settings.Key = { C: 0, G: 7, D: 2, A: 9, E: 4, B: -1, F: 5 }[match[3]]
+		this.Settings.Key += (!match[2]) ? 0 : (match[2] === 'b' ? -1 : 1) * match[1].length
+		this.Settings.Key += (!match[5]) ? 0 : (match[5] === ',' ? -12 : 12) * match[4].length
+	} else {
+		this.Settings.Key = key
+	}
 }
 
 function KeyShift(delta) {
-    // alias: (${0:sig})
-    this.Settings.Key += delta
+	// alias: (${0:sig})
+	this.Settings.Key += delta
 }
 
 function Oct(octave) {
-    const tonality = (this.Settings.Key + 2) % 12
-    this.Settings.Key = tonality - 2 + octave * 12
+	const tonality = this.Settings.Key >= -2
+	  ? (this.Settings.Key + 2) % 12
+	  : (this.Settings.Key + 2) % 12 + 12
+	this.Settings.Key = tonality - 2 + octave * 12
 }
 
 function Spd(speed) {
-    // alias: (${0:uns})
-    this.Settings.assignSetting('Speed', speed, (speed) => speed > 0);
+	// alias: (${0:uns})
+	this.Settings.assignSetting('Speed', speed, (speed) => speed > 0);
 }
 
 function BarBeat(bar, beat) {
-    // alias: (${0:uns}/${1:uns})
-    this.Settings.assignSetting('Bar', bar, (bar) => bar > 0 && Number.isInteger(bar))
-    this.Settings.assignSetting('Beat', beat, (beat) => beat > 0 && Number.isInteger(Math.log2(beat)))
+	// alias: (${0:uns}/${1:uns})
+	this.Settings.assignSetting('Bar', bar, (bar) => bar > 0 && Number.isInteger(bar))
+	this.Settings.assignSetting('Beat', beat, (beat) => beat > 0 && Number.isInteger(Math.log2(beat)))
 }
 
 function Dur(scale) {
-    this.Settings.assignSetting('Duration', scale, () => true)
+	this.Settings.assignSetting('Duration', scale, () => true)
 }
 
 function Acct(scale) {
-    this.Settings.assignSetting('Accent', scale, (scale) => scale > 1)
+	this.Settings.assignSetting('Accent', scale, (scale) => scale > 1)
 }
 
 function Light(scale) {
-    this.Settings.assignSetting('Light', scale, (scale) => scale < 1 && scale > 0)
+	this.Settings.assignSetting('Light', scale, (scale) => scale < 1 && scale > 0)
 }
 
 function Trace(count) {
-    this.Settings.assignSetting('Trace', count, (count) => count > 0 && count <= 4 && Number.isInteger(count))
+	this.Settings.assignSetting('Trace', count, (count) => count > 0 && count <= 4 && Number.isInteger(count))
 }
 
 function FadeIn(time) {
-    this.Settings.assignSetting('FadeIn', time, (time) => time >= 0)
+	this.Settings.assignSetting('FadeIn', time, (time) => time >= 0)
 }
 
 function FadeOut(time) {
-    this.Settings.assignSetting('FadeOut', time, (time) => time >= 0)
+	this.Settings.assignSetting('FadeOut', time, (time) => time >= 0)
 }
 
 function Rev(r) {
-    this.Settings.assignSetting('Rev', r, () => true)
+	this.Settings.assignSetting('Rev', r, () => true)
 }
 
 function Stac(rest, index = 1) {
-    this.Settings.assignSettingAtIndex('Stac', index, rest, (rest) => rest >= 0 && rest <= 1)
+	this.Settings.assignSettingAtIndex('Stac', index, rest, (rest) => rest >= 0 && rest <= 1)
 }
 
 # End

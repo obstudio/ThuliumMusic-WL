@@ -28,10 +28,10 @@ Settings[] := Module[{choices = UserInfo},
         UserInfo=choices;
         Export[$UserPath<>"Default.json",UserInfo];
         RefreshLanguage;
-        DialogReturn[Thulium`homepage],
+        DialogReturn[Thulium`Homepage[]],
       ImageSize->150],
       Spacer[10],
-      Button[TextDict["Return"],DialogReturn[Thulium`homepage],ImageSize->150]
+      Button[TextDict["Return"],DialogReturn[Thulium`Homepage[]],ImageSize->150]
     }],Spacer[{40,40}]
   },Center,ItemSize->Full],
   Background->WindowBackground,WindowTitle->TextDict["Settings"]]
@@ -70,7 +70,7 @@ About[] := CreateDialog[Column[{Spacer[{40,40}],
     },Alignment->Left]
   },Alignment->Left,ItemSize->Full],Spacer[60]}],
   Spacer[{20,20}],
-  Button[TextDict["Return"],DialogReturn[Thulium`homepage],ImageSize->100],
+  Button[TextDict["Return"],DialogReturn[Thulium`Homepage[]],ImageSize->100],
 Spacer[{40,40}]},Center,ItemSize->Full],
 WindowTitle->TextDict["About"],Background->WindowBackground];
 

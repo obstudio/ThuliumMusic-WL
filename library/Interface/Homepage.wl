@@ -86,12 +86,12 @@ Thulium`Playlist[playlist_] := Block[{info, songList, songListPaged, pageCount},
             SmartButton["Play", DialogReturn[PageIndex[[playlist]] = page; Thulium`Player[song]]],
             Spacer[10],
             If[UserInfo["Developer"] && playlist == "All", Row[{
-              SmartButton["Modify", DialogReturn[PageIndex[[playlist]] = page; Thulium`ModifySong[song]]],
+              SmartButton["Modify", "ModifySong", DialogReturn[PageIndex[[playlist]] = page; Thulium`ModifySong[song]]],
               Spacer[10],
-              SmartButton["Add", DialogReturn[PageIndex[[playlist]] = page; Thulium`AddSong[]]],
+              SmartButton["Add", "AddSong", DialogReturn[PageIndex[[playlist]] = page; Thulium`AddSong[]]],
               Spacer[10]}],
             Nothing],
-            SmartButton["ArrowL", DialogReturn[PageIndex[[playlist]] = page; Thulium`Homepage[]]],
+            SmartButton["Return", DialogReturn[PageIndex[[playlist]] = page; Thulium`Homepage[]]],
             Spacer[40]
           }, Alignment -> Right, ImageSize -> {480, 56}]
         }],

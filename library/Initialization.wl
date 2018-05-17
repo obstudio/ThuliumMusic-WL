@@ -24,56 +24,7 @@ StatusAlias::usage = "alias for \"Status\" as a property of AudioStream";
 InitializePackage::usage = "initialize all packages";
 InitializeParser::usage = "initialize Thulium Music parser";
 
-CleanMessages::usage = "clean messages on the screen";
-MessageDisplay::usage = "display a message on the screen";
-RawDisplay::usage = "display input form of string instead of output form";
-MonitorDisplay::usage = "display a monitor during an evaluating process";
-ProgressDisplay::usage = "display a progress indicator in a monitored process";
-
 Begin["`Private`"];
-
-
-MonitorDisplay[content_] := Style[
-  Framed[
-    Pane[content,
-      Scrollbars -> False,
-      Alignment -> {Center, Center},
-      ImageMargins -> {{4, 4}, {4, 4}},
-      ImageSize -> {Dynamic @ CurrentValue[EvaluationNotebook[], WindowSize][[1]] / 2 - 200, Automatic}
-    ],
-    Background -> RGBColor[0.96, 0.98, 1],
-    RoundingRadius -> {8, 8},
-    ContentPadding -> True,
-    FrameStyle -> None
-  ],
-  FontFamily -> "Calibri",
-  FontSize -> 16
-];
-
-ProgressDisplay[items_, index_, title_] := MonitorDisplay[
-  Column[{
-    title,
-    Graphics[progressBar[(index - 1) / Length[items], 24], ImageSize -> {400, 20}],
-    Row[{
-      "Loading: ", Spacer[2],
-      items[[index]], Spacer[6],
-      "(", index, "/", Length[items], ")"
-    }]
-  }, Alignment -> Center]
-];
-
-MessageDisplay[cells_] := Block[{msgCells},
-  If[CurrentValue[{StyleDefinitions, "<Tooltip>"}] == {}, Return[]];
-  SelectionMove[First @ Cells[CellTags -> "$monitor"], After, Cell, AutoScroll -> False];
-  NotebookWrite[EvaluationNotebook[], cells];
-  NotebookLocate["$title"];
-];
-
-CleanMessages[maxCount_] := With[{msgCells = Cells[CellTags -> "$msg"]},
-  If[Length @ msgCells > maxCount, NotebookDelete[Drop[msgCells, maxCount]]];
-];
-
-RawDisplay[text_] := FormBox[StyleBox["\"" <> text <> "\"", FontFamily -> "Calibri"], "InputForm"];
 
 
 MenuCell = Cell[BoxData @ RowBox[{(*

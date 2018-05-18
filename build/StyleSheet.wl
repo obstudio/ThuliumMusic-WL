@@ -163,7 +163,7 @@ AssignTemplate["Setter-Item", Function[
     PaneBox[
       StyleBox[#1,
         FontFamily -> "Calibri",
-        FontSize -> 16,
+        FontSize -> 12,
         FontColor -> #2
       ],
       Scrollbars -> False,
@@ -172,7 +172,7 @@ AssignTemplate["Setter-Item", Function[
       ImageSize -> {#5, #6}
     ],
     Background -> #3,
-    RoundingRadius -> {8, 8},
+    RoundingRadius -> 4,
     ContentPadding -> False,
     FrameStyle -> Directive[Thickness[1], #4]
   ]
@@ -225,13 +225,13 @@ AssignTemplate["PageSel-Data", Function[
         FontSize -> 16,
         FontColor -> #4
       ],
-      {0, 0}, Center
+      {0, -0.04}, Center
     ],
     #2, #3, #4, #5
   }, "<PageSel-Template>"]]
 ]];
 
-AssignTemplate["PageSel-g-Button", Function[
+AssignTemplate["PageSel-Graphic", Function[
   PaneSelectorBox[{
     True -> TemplateBox[{#1, Opacity[0], RGBColor[0.8, 0.8, 0.8], RGBColor[0.8, 0.8, 0.8], 28}, "<PageSel-Data>"],
     False -> TemplateBox[{
@@ -243,14 +243,14 @@ AssignTemplate["PageSel-g-Button", Function[
   }, Dynamic[#2] === #3]
 ]];
 
-AssignTemplate["PageSel-n-Button", Function[
+AssignTemplate["PageSel-Numeric", Function[
   PaneSelectorBox[{
     True -> TemplateBox[{#1, RGBColor[0.1, 0.5, 0.8], RGBColor[0.1, 0.5, 0.8], RGBColor[1, 1, 1], 28}, "<PageSel-Data>"],
     False -> TemplateBox[{
       TemplateBox[{#1, RGBColor[1, 1, 1], RGBColor[0.1, 0.5, 0.8], RGBColor[0.1, 0.5, 0.8], 28}, "<PageSel-Data>"],
       TemplateBox[{#1, RGBColor[0.1, 0.5, 0.8], RGBColor[0.1, 0.5, 0.8], RGBColor[1, 1, 1], 28}, "<PageSel-Data>"],
       TemplateBox[{#1, RGBColor[0.6, 0.8, 1], RGBColor[0.1, 0.5, 0.8], RGBColor[0.1, 0.5, 0.8], 28}, "<PageSel-Data>"],
-      #2 = #1
+      (#2 = #1)
     }, "<Button-no-Tooltip>"]
   }, Dynamic[#2] === #1]
 ]];
@@ -259,41 +259,38 @@ End[];
 
 Begin["`PageSel`"];
 
-PageSelSpacer = TemplateBox[{0.4}, "Spacer1"];
+PageSelSpacerBox = TemplateBox[{0.2}, "Spacer1"];
 
 SetAttributes[tmPageSelBox1, HoldFirst];
 tmPageSelBox1[page_, pageCount_] := RowBox[{
-  TemplateBox[{"Prev", Unevaluated[page], 1, AddTo[#, -1]&}, "<PageSel-g-Button>"],
+  TemplateBox[{"Prev", Unevaluated[page], 1, AddTo[#, -1]&}, "<PageSel-Graphic>"],
   TemplateBox[{2}, "Spacer1"],
   RowBox[Riffle[
-    Array[TemplateBox[{#, Unevaluated[page]}, "<PageSel-n-Button>"]&, pageCount],
-  PageSelSpacer]],
+    Array[TemplateBox[{#, Unevaluated[page]}, "<PageSel-Numeric>"]&, pageCount],
+  PageSelSpacerBox]],
   TemplateBox[{2}, "Spacer1"],
-  TemplateBox[{"Next", Unevaluated[page], pageCount, AddTo[#, 1]&}, "<PageSel-g-Button>"]
+  TemplateBox[{"Next", Unevaluated[page], pageCount, AddTo[#, 1]&}, "<PageSel-Graphic>"]
 }];
 
-SetAttributes[tmPageSelBox2Numbers, HoldRest];
 tmPageSelBox2Numbers[center_, page_] := RowBox[Riffle[
-  TemplateBox[{#, Unevaluated[page]}, "<PageSel-n-Button>"]& /@ Range[center - 3, center + 3],
-PageSelSpacer]];
+  TemplateBox[{#, Unevaluated[page]}, "<PageSel-Numeric>"]& /@ Range[center - 3, center + 3],
+PageSelSpacerBox]];
 
 SetAttributes[tmPageSelBox2, HoldFirst];
 tmPageSelBox2[page_, pageCount_] := RowBox[{
-  TemplateBox[{"First", Unevaluated[page], 1, Set[#, 1]&}, "<PageSel-g-Button>"],
-  PageSelSpacer,
-  TemplateBox[{"Prev", Unevaluated[page], 1, AddTo[#, -1]&}, "<PageSel-g-Button>"],
+  TemplateBox[{"First", Unevaluated[page], 1, Set[#, 1]&}, "<PageSel-Graphic>"],
+  PageSelSpacerBox,
+  TemplateBox[{"Prev", Unevaluated[page], 1, AddTo[#, -1]&}, "<PageSel-Graphic>"],
   TemplateBox[{2}, "Spacer1"],
-  PaneSelectorBox[
-    Join[
-      # -> tmPageSelBox2Numbers[4, page]& /@ Range[1, 3],
-      # -> tmPageSelBox2Numbers[#, page]& /@ Range[4, pageCount - 4],
-      # -> tmPageSelBox2Numbers[pageCount - 3, page]& /@ Range[pageCount - 3, pageCount]
-    ],
-  Dynamic[page]],
+  PaneSelectorBox[Join[
+    # -> tmPageSelBox2Numbers[4, Unevaluated[page]]& /@ Range[1, 3],
+    # -> tmPageSelBox2Numbers[#, Unevaluated[page]]& /@ Range[4, pageCount - 4],
+    # -> tmPageSelBox2Numbers[pageCount - 3, Unevaluated[page]]& /@ Range[pageCount - 3, pageCount]
+  ], Dynamic[page]],
   TemplateBox[{2}, "Spacer1"],
-  TemplateBox[{"Next", Unevaluated[page], pageCount, AddTo[#, 1]&}, "<PageSel-g-Button>"],
-  PageSelSpacer,
-  TemplateBox[{"Last", Unevaluated[page], pageCount, Set[#, pageCount]&}, "<PageSel-g-Button>"]
+  TemplateBox[{"Next", Unevaluated[page], pageCount, AddTo[#, 1]&}, "<PageSel-Graphic>"],
+  PageSelSpacerBox,
+  TemplateBox[{"Last", Unevaluated[page], pageCount, Set[#, pageCount]&}, "<PageSel-Graphic>"]
 }];
 
 End[];
@@ -309,8 +306,8 @@ tmButton = Sequence[
 tmPageSel = Sequence[
   Include["PageSel-Data"],
   Include["PageSel-Template"],
-  Include["PageSel-n-Button"],
-  Include["PageSel-g-Button"]
+  Include["PageSel-Numeric"],
+  Include["PageSel-Graphic"]
 ];
 
 tmSetter = Sequence[

@@ -1,5 +1,9 @@
 (* ::Package:: *)
 
+ClearAll["Thulium`Assets`*"];
+ClearAll["Thulium`Assets`*`*"];
+
+
 BeginPackage["Thulium`Assets`", {
   "Thulium`System`",
   "Thulium`Graphics`"
@@ -100,6 +104,7 @@ Container[content_, {l_, r_}, {b_, t_}] := Column[{
 
 (* Using CJK Unified Ideographs from Unicode 5.0 *)
 (* Full-width characters range: \u2E80 - \uFE4F *)
+SetAttributes[TextLength, Listable];
 TextLength[str_String] := With[
   {charCode = ToCharacterCode[str, "Unicode"]},
   Length[charCode] + Length @ Select[charCode, 11904 <= # <= 65103&]
@@ -146,8 +151,3 @@ DeclarePackage["Thulium`Assets`", {
 
 
 DumpSave[$LocalPath <> "library/Package/Assets.mx", "Thulium`Assets`"];
-
-
-(* ::Input:: *)
-(*Clear["Thulium`Assets`*"]*)
-(*Clear["Thulium`Assets`*`*"]*)

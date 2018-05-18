@@ -10,41 +10,96 @@ newPlaylist::usage = "newPlaylist";
 
 Begin["`Private`"];
 
-GetValue[TemplateArgBox[value_, _]] := GetValue[value];
-GetValue[value_] := value;
-
 newPlaylist[playlist_] := Block[
-  {info, length, songList, indexList, pageCount},
+  {
+    info, length, songList, indexList, indexWidth, pageCount, display, notebook
+  },
+  
   info = PlaylistIndex[playlist];
   length = Length @ info["SongList"];
   pageCount = Ceiling[length / 10];
   songList = Partition["Song" /. info["SongList"], UpTo @ Ceiling[length / pageCount]];
   indexList = Partition["Index" /. info["SongList"], UpTo @ Ceiling[length / pageCount]];
+  indexWidth = 8 * Max[0, TextLength /@ DeleteCases[indexList, "Index", Infinity]];
   If[Thulium`PageIndex[playlist] > pageCount, Thulium`PageIndex[playlist] = pageCount];
+  
   Module[{page = Thulium`PageIndex[playlist], index = 1},
     With[
       {
         ChsFont = ChsFont, TextDict = TextDict,
         tmPageSelBox = If[pageCount > 7, tmPageSelBox2, tmPageSelBox1]
       },
-      CreateDialog[
+      
+      display = Table[Table[
+        With[{songInfo = SongIndex[info["Path"] <> songList[[pg, id]]]},
+          {TemplateBox[{Unevaluated[index], id,
+            GridBox[
+              {
+                {TagName["FileName"] <> ":", songList[[pg, id]]},
+                {TagName["SongName"] <> ":", songInfo["SongName"]},
+                If[songInfo["Uploader"] =!= "",
+                  {TagName["Uploader"] <> ":", songInfo["Uploader"]},
+                Nothing]
+              },
+              ColumnSpacings -> 1,
+              ColumnAlignments -> {Center, Left}
+            ],
+            RowBox[{
+              If[indexWidth > 0,
+                PaneBox[
+                  AdjustmentBox[
+                    StyleBox[indexList[[pg, id]],
+                      FontSize -> 12,
+                      FontFamily -> ChsFont,
+                      FontColor -> GrayLevel[0.3]
+                    ],
+                    BoxMargins -> {{0, 0.6}, {0, 0}},
+                    BoxBaselineShift -> -0.4
+                  ],
+                  ImageSize -> indexWidth,
+                  Alignment -> Center
+                ],
+                Nothing
+              ],
+              StyleBox[songInfo["SongName"],
+                FontSize -> 14,
+                FontFamily -> ChsFont
+              ],
+              TemplateBox[{12}, "Spacer1"],
+              StyleBox[songInfo["Comment"],
+                FontSize -> 12,
+                FontFamily -> ChsFont,
+                FontColor -> GrayLevel[0.3]
+              ]
+            }]
+          }, "<Setter-Local>"]}
+        ],
+      {id, Length @ songList[[pg]]}], {pg, pageCount}];
+  
+      notebook = CreateDialog[
         {
           Cell[BoxData @ RowBox[{
             StyleBox[info["Title"], "Title"],
-            TemplateBox[{240}, "Spacer1"],
+            TemplateBox[{280}, "Spacer1"],
             AdjustmentBox[
               TemplateBox[{"Return", Null}, "<Button-Local>"],
               BoxBaselineShift -> -0.2
             ]
-          }], "Title"],
+          }], "Title", CellTags -> "Title"],
           
-          Cell[BoxData @ PaneBox[GridBox[{
-            {TemplateBox[{Unevaluated[index], 1, "booo", "booo"}, "<Setter-Local>"]},
-            {TemplateBox[{Unevaluated[index], 2, "fooo", "fooo"}, "<Setter-Local>"]},
-            {TemplateBox[{Unevaluated[index], 3, "wooo", "wooo"}, "<Setter-Local>"]}
-          }]], "SetterList"],
+          If[info["Comment"] =!= "", Cell[BoxData @ PaneBox[
+            StyleBox[info["Comment"], "Subtitle"]
+          ], "Subtitle"], Nothing],
           
-          Cell[BoxData @ tmPageSelBox[page, pageCount], "PageSelector"]
+          Cell[BoxData @ PaneBox[PaneSelectorBox[
+            Array[Function[{pg},
+              pg -> GridBox[Array[
+                Function[{id}, display[[pg, id]]],
+              Length @ songList[[pg]]]]
+            ], pageCount],
+          Dynamic[page]]], "SetterList", CellTags -> "SetterList"],
+          
+          Cell[BoxData @ tmPageSelBox[page, pageCount], "PageSelector", CellTags -> "PageSelector"]
         },
         
         StyleDefinitions -> Notebook[{
@@ -53,26 +108,33 @@ newPlaylist[playlist_] := Block[
           tmPageSel,
           
           Cell[StyleData["Title"],
-            CellMargins -> {{0, 0}, {16, 32}},
+            CellMargins -> {{0, 0}, {0, 24}},
             TextAlignment -> Center,
             FontFamily -> ChsFont,
-            FontSize -> 24
+            FontSize -> 24,
+            FontWeight -> Bold
+          ],
+          
+          Cell[StyleData["Subtitle"],
+            CellMargins -> {{0, 0}, {0, 0}},
+            TextAlignment -> Center,
+            FontFamily -> ChsFont,
+            FontSize -> 14,
+            PaneBoxOptions -> {Alignment -> Left, ImageSize -> 440}
           ],
           
           Cell[StyleData["SetterList"],
-            CellMargins -> {{0, 0}, {8, 8}},
+            CellMargins -> {{0, 0}, {16, 16}},
             TextAlignment -> Center,
             PaneBoxOptions -> {
-              Alignment -> {Center, Top},
-              ImageSize -> {Automatic, 200}
+              Alignment -> {Center, Center},
+              ImageSize -> {Automatic, 280}
             },
-            GridBoxOptions -> {
-              RowSpacings -> 0
-            }
+            GridBoxOptions -> {RowSpacings -> 0}
           ],
           
           Cell[StyleData["PageSelector"],
-            CellMargins -> {{0, 0}, {32, 16}},
+            CellMargins -> {{0, 0}, {24, 0}},
             TextAlignment -> Center
           ],
           
@@ -91,36 +153,33 @@ newPlaylist[playlist_] := Block[
             TemplateBoxOptions -> {DisplayFunction -> Function[
               TemplateBox[{
                 PaneSelectorBox[{
-                  True -> TemplateBox[{#1, Opacity[0], RGBColor[0, 0.7, 0.94], RGBColor[0, 0.7, 0.94], 20}, "<Button-Round>"],
-                  False -> TemplateBox[{#1, Opacity[0], Opacity[0], Opacity[0], 20}, "<Button-Round>"]
+                  True -> TemplateBox[{#1, Opacity[0], RGBColor[0, 0.7, 0.94], RGBColor[0, 0.7, 0.94], 18}, "<Button-Round>"],
+                  False -> TemplateBox[{#1, Opacity[0], Opacity[0], Opacity[0], 18}, "<Button-Round>"]
                 }, #3],
-                TemplateBox[{#1, RGBColor[0, 0.7, 0.94], RGBColor[0, 0.7, 0.94], RGBColor[1, 1, 1], 20}, "<Button-Round>"],
-                TemplateBox[{#1, RGBColor[0, 0.7, 0.94, 0.3], RGBColor[0, 0.7, 0.94], RGBColor[0, 0.7, 0.94], 20}, "<Button-Round>"],
-                #2, StyleBox[TextDict[#1], FontFamily -> ChsFont]
-              }, "<Button>"]
+                TemplateBox[{#1, RGBColor[0, 0.7, 0.94], RGBColor[0, 0.7, 0.94], RGBColor[1, 1, 1], 18}, "<Button-Round>"],
+                TemplateBox[{#1, RGBColor[0, 0.7, 0.94, 0.3], RGBColor[0, 0.7, 0.94], RGBColor[0, 0.7, 0.94], 18}, "<Button-Round>"],
+                #2
+              }, "<Button-no-Tooltip>"]
             ]}
           ],
           
           Cell[StyleData["<Setter-Item-Local>"],
             TemplateBoxOptions -> {DisplayFunction -> Function[
               TemplateBox[{
-                GridBox[
-                  {{
-                    AdjustmentBox[
+                RowBox[
+                  {
+                    PaneBox[
                       StyleBox[#1, FontSize -> 14, FontFamily -> ChsFont],
-                      BoxBaselineShift -> -0.6
+                      ImageSize -> 450,
+                      Alignment -> Left
                     ],
                     AdjustmentBox[
                       TemplateBox[{"Play", Null, #4}, "<Setter-Button>"],
-                      BoxBaselineShift -> -1
+                      BoxBaselineShift -> -0.1
                     ]
-                  }},
-                  RowAlignments -> Baseline,
-                  ColumnAlignments -> {Left, Right},
-                  ColumnWidths -> {20, 9},
-                  ColumnSpacings -> 0
+                  }
                 ],
-                RGBColor[0, 0, 0], #2, #3, 400, 20
+                RGBColor[0, 0, 0], #2, #3, 480, 18
               }, "<Setter-Item>"]
             ]}
           ],
@@ -146,15 +205,16 @@ newPlaylist[playlist_] := Block[
         WindowTitle -> TagName[info["Type"]] <> " - " <> info["Title"],
         WindowElements -> {},
         WindowFrameElements -> {"CloseBox", "MinimizeBox"},
-        WindowSize -> {1024, 768},
+        WindowSize -> {1200, 900},
         WindowFrame -> "ModelessDialog",
         Magnification -> 2,
         Saveable -> False,
-        Evaluatable -> False,
         Editable -> False,
-        Deployed -> True
+        Deployed -> True,
+        Evaluatable -> False
       ];
     ];
+    
     Evaluate[Unique[]] := index;
     Evaluate[Unique[]] := page;
   ];
@@ -166,12 +226,24 @@ EndPackage[];
 
 
 (* ::Input:: *)
+(*Thulium`Update`CheckUpdate;*)
+
+
+(* ::Input:: *)
 (*newPlaylist["All"];*)
 
 
 (* ::Input:: *)
-(*newPlaylist["Piano"];*)
+(*newPlaylist["TH11-Chireiden.qyl"];*)
 
 
 (* ::Input:: *)
-(*Graphics[{Black,Thickness[0.1],CapForm["Round"],Circle[]}]*)
+(*newPlaylist["Clannad.qyl"];*)
+
+
+(* ::Input:: *)
+(*SongIndex["Touhou/TH11-Chireiden/3rd_Eye"]*)
+
+
+(* ::Input:: *)
+(*PlaylistIndex["Clannad.qyl"]*)

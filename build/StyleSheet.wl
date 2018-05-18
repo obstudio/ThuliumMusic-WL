@@ -8,7 +8,8 @@ BeginPackage["Thulium`StyleSheet`"];
 
 Include = <||>;
 
-tmPageSelBox::usage = "Thulium Page Seletor Box";
+tmPageSelBox1::usage = "Thulium Page Seletor Box 1";
+tmPageSelBox2::usage = "Thulium Page Seletor Box 2";
 
 Begin["`Build`"];
 
@@ -258,21 +259,42 @@ End[];
 
 Begin["`PageSel`"];
 
-SetAttributes[tmPageSelBox, HoldFirst];
-tmPageSelBox[page_, pageCount_] := GridBox[{
-  {TemplateBox[{16, 16}, "Spacer2"]},
-  {RowBox[{
-    TemplateBox[{"Prev", Unevaluated[page], 1, AddTo[#, -1]&}, "<PageSel-g-Button>"],
-    TemplateBox[{2}, "Spacer1"],
-    RowBox[Riffle[
-      Array[TemplateBox[{#, Unevaluated[page]}, "<PageSel-n-Button>"]&, pageCount],
-      TemplateBox[{1}, "Spacer1"]
-    ]],
-    TemplateBox[{2}, "Spacer1"],
-    TemplateBox[{"Next", Unevaluated[page], pageCount, AddTo[#, 1]&}, "<PageSel-g-Button>"]
-  }]},
-  {TemplateBox[{16, 16}, "Spacer2"]}
-}, RowSpacings -> 0(*, ColumnSpacings \[Rule] 0*)];
+PageSelSpacer = TemplateBox[{0.4}, "Spacer1"];
+
+SetAttributes[tmPageSelBox1, HoldFirst];
+tmPageSelBox1[page_, pageCount_] := RowBox[{
+  TemplateBox[{"Prev", Unevaluated[page], 1, AddTo[#, -1]&}, "<PageSel-g-Button>"],
+  TemplateBox[{2}, "Spacer1"],
+  RowBox[Riffle[
+    Array[TemplateBox[{#, Unevaluated[page]}, "<PageSel-n-Button>"]&, pageCount],
+  PageSelSpacer]],
+  TemplateBox[{2}, "Spacer1"],
+  TemplateBox[{"Next", Unevaluated[page], pageCount, AddTo[#, 1]&}, "<PageSel-g-Button>"]
+}];
+
+SetAttributes[tmPageSelBox2Numbers, HoldRest];
+tmPageSelBox2Numbers[center_, page_] := RowBox[Riffle[
+  TemplateBox[{#, Unevaluated[page]}, "<PageSel-n-Button>"]& /@ Range[center - 3, center + 3],
+PageSelSpacer]];
+
+SetAttributes[tmPageSelBox2, HoldFirst];
+tmPageSelBox2[page_, pageCount_] := RowBox[{
+  TemplateBox[{"First", Unevaluated[page], 1, Set[#, 1]&}, "<PageSel-g-Button>"],
+  PageSelSpacer,
+  TemplateBox[{"Prev", Unevaluated[page], 1, AddTo[#, -1]&}, "<PageSel-g-Button>"],
+  TemplateBox[{2}, "Spacer1"],
+  PaneSelectorBox[
+    Join[
+      # -> tmPageSelBox2Numbers[4, page]& /@ Range[1, 3],
+      # -> tmPageSelBox2Numbers[#, page]& /@ Range[4, pageCount - 4],
+      # -> tmPageSelBox2Numbers[pageCount - 3, page]& /@ Range[pageCount - 3, pageCount]
+    ],
+  Dynamic[page]],
+  TemplateBox[{2}, "Spacer1"],
+  TemplateBox[{"Next", Unevaluated[page], pageCount, AddTo[#, 1]&}, "<PageSel-g-Button>"],
+  PageSelSpacer,
+  TemplateBox[{"Last", Unevaluated[page], pageCount, Set[#, pageCount]&}, "<PageSel-g-Button>"]
+}];
 
 End[];
 

@@ -31,7 +31,7 @@ AssignTemplate["Tooltip", Function[
           FontSize -> 24,
           FontColor -> RGBColor[0, 0, 0]
         ],
-        BoxMargins -> {{0.4, 0.4}, {0.2, 0.4}}
+        BoxMargins -> {{0.2, 0.4}, {0.2, 0.4}}
       ],
       Background -> RGBColor[1, 1, 0.9, 0.8],
       FrameStyle -> {1, RGBColor[0.8, 0.8, 0.7, 0.2]},
@@ -158,14 +158,17 @@ AssignTemplate["Setter", Function[
   }, Dynamic[#1] === #2]
 ]];
 
-AssignTemplate["Setter-Item", Function[
+AssignTemplate["List", Function[
+  PaneSelectorBox[{
+    True -> TemplateBox[{#2, #3, 0.2}, "<Tooltip>"],
+    False -> #1
+  }, Dynamic @ CurrentValue["MouseOver"]]
+]];
+
+AssignTemplate["Item", Function[
   FrameBox[
     PaneBox[
-      StyleBox[#1,
-        FontFamily -> "Calibri",
-        FontSize -> 12,
-        FontColor -> #2
-      ],
+      StyleBox[#1, FontColor -> #2],
       Scrollbars -> False,
       Alignment -> {Center, Center},
       ImageMargins -> {{0, 0}, {0, 0}},
@@ -310,9 +313,10 @@ tmPageSel = Sequence[
   Include["PageSel-Graphic"]
 ];
 
-tmSetter = Sequence[
+tmList = Sequence[
   Include["Setter"],
-  Include["Setter-Item"]
+  Include["Item"],
+  Include["List"]
 ];
 
 EndPackage[];

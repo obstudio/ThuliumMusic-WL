@@ -15,6 +15,7 @@ newPlaylist[playlist_] := Block[
     info, length, songList, indexList, indexWidth, pageCount, display, notebook
   },
   
+  Thulium`CurrentPlaylist = playlist;
   info = PlaylistIndex[playlist];
   length = Length @ info["SongList"];
   pageCount = Ceiling[length / 10];
@@ -31,21 +32,14 @@ newPlaylist[playlist_] := Block[
       },
       
       display = Table[Table[
-        With[{songInfo = SongIndex[info["Path"] <> songList[[pg, id]]]},
-          {TemplateBox[{Unevaluated[index], id,
-            GridBox[
-              {
-                {TagName["FileName"] <> ":", songList[[pg, id]]},
-                {TagName["SongName"] <> ":", songInfo["SongName"]},
-                If[songInfo["Uploader"] =!= "",
-                  {TagName["Uploader"] <> ":", songInfo["Uploader"]},
-                Nothing]
-              },
-              ColumnSpacings -> 1,
-              ColumnAlignments -> {Center, Left}
-            ],
+        With[
+          {
+            songInfo = SongIndex[info["Path"] <> songList[[pg, id]]],
+            indexName = If[indexList[[pg, id]] =!= "Index", indexList[[pg, id]], ""]
+          },
+          {TemplateBox[{
             RowBox[{
-              If[indexWidth > 0,
+              If[indexName =!= "",
                 PaneBox[
                   AdjustmentBox[
                     StyleBox[indexList[[pg, id]],
@@ -66,13 +60,37 @@ newPlaylist[playlist_] := Block[
                 FontFamily -> ChsFont
               ],
               TemplateBox[{12}, "Spacer1"],
-              StyleBox[songInfo["Comment"],
-                FontSize -> 12,
-                FontFamily -> ChsFont,
-                FontColor -> GrayLevel[0.3]
+              If[Total @ TextLength[{indexName, songInfo["SongName"], songInfo["Comment"]}] <= 64,
+                StyleBox[songInfo["Comment"],
+                  FontSize -> 12,
+                  FontFamily -> ChsFont,
+                  FontColor -> GrayLevel[0.3]
+                ],
+                Nothing
               ]
-            }]
-          }, "<Setter-Local>"]}
+            }],
+            StyleBox[
+              GridBox[
+                {
+                  {TagName["FileName"] <> ":", songList[[pg, id]]},
+                  {TagName["SongName"] <> ":", songInfo["SongName"]},
+                  If[songInfo["Uploader"] =!= "",
+                    {TagName["Uploader"] <> ":", songInfo["Uploader"]},
+                  Nothing]
+                },
+                ColumnSpacings -> 1,
+                ColumnAlignments -> {Center, Left}
+              ],
+              FontSize -> 20,
+              FontFamily -> ChsFont
+            ],
+            With[{song = info["Path"] <> songList[[pg, id]]},
+              Hold @ DialogReturn[
+                PageIndex[playlist] = Dynamic[page];
+                Thulium`Player[song];
+              ]
+            ]
+          }, "<List-Local>"]}
         ],
       {id, Length @ songList[[pg]]}], {pg, pageCount}];
   
@@ -82,10 +100,10 @@ newPlaylist[playlist_] := Block[
             StyleBox[info["Title"], "Title"],
             TemplateBox[{280}, "Spacer1"],
             AdjustmentBox[
-              TemplateBox[{"Return", Null}, "<Button-Local>"],
+              TemplateBox[{"Return", Unevaluated @ DialogReturn[Thulium`Homepage[]]}, "<Button-Local>"],
               BoxBaselineShift -> -0.2
             ]
-          }], "Title", CellTags -> "Title"],
+          }], "Title"],
           
           If[info["Comment"] =!= "", Cell[BoxData @ PaneBox[
             StyleBox[info["Comment"], "Subtitle"]
@@ -97,13 +115,13 @@ newPlaylist[playlist_] := Block[
                 Function[{id}, display[[pg, id]]],
               Length @ songList[[pg]]]]
             ], pageCount],
-          Dynamic[page]]], "SetterList", CellTags -> "SetterList"],
+          Dynamic[page]]], "SetterList"],
           
-          Cell[BoxData @ tmPageSelBox[page, pageCount], "PageSelector", CellTags -> "PageSelector"]
+          Cell[BoxData @ tmPageSelBox[page, pageCount], "PageSelector"]
         },
         
         StyleDefinitions -> Notebook[{
-          tmSetter,
+          tmList,
           tmButton,
           tmPageSel,
           
@@ -149,7 +167,7 @@ newPlaylist[playlist_] := Block[
             ]}
           ],
           
-          Cell[StyleData["<Setter-Button>"],
+          Cell[StyleData["<List-Button>"],
             TemplateBoxOptions -> {DisplayFunction -> Function[
               TemplateBox[{
                 PaneSelectorBox[{
@@ -163,7 +181,7 @@ newPlaylist[playlist_] := Block[
             ]}
           ],
           
-          Cell[StyleData["<Setter-Item-Local>"],
+          Cell[StyleData["<Item-Local>"],
             TemplateBoxOptions -> {DisplayFunction -> Function[
               TemplateBox[{
                 RowBox[
@@ -174,25 +192,23 @@ newPlaylist[playlist_] := Block[
                       Alignment -> Left
                     ],
                     AdjustmentBox[
-                      TemplateBox[{"Play", Null, #4}, "<Setter-Button>"],
+                      TemplateBox[{"Play", #5, #4}, "<List-Button>"],
                       BoxBaselineShift -> -0.1
                     ]
                   }
                 ],
                 RGBColor[0, 0, 0], #2, #3, 480, 18
-              }, "<Setter-Item>"]
+              }, "<Item>"]
             ]}
           ],
           
-          Cell[StyleData["<Setter-Local>"],
+          Cell[StyleData["<List-Local>"],
             TemplateBoxOptions -> {DisplayFunction -> Function[
               TemplateBox[{
-                #1, #2, #3,
-                TemplateBox[{#4, RGBColor[0.96, 0.98, 1], RGBColor[0.96, 0.98, 1], False}, "<Setter-Item-Local>"],
-                TemplateBox[{#4, RGBColor[0.96, 1, 0.98], RGBColor[0.94, 1, 0.98], True}, "<Setter-Item-Local>"],
-                TemplateBox[{#4, RGBColor[0.92, 1, 0.98], RGBColor[0.88, 1, 0.98], False}, "<Setter-Item-Local>"],
-                TemplateBox[{#4, RGBColor[0.97, 1, 0.97], RGBColor[0.97, 1, 0.97], False}, "<Setter-Item-Local>"]
-              }, "<Setter>"]
+                TemplateBox[{#1, RGBColor[0.96, 0.98, 1], RGBColor[0.96, 0.98, 1], False, #3}, "<Item-Local>"],
+                TemplateBox[{#1, RGBColor[0.96, 1, 0.98], RGBColor[0.94, 1, 0.98], True, #3}, "<Item-Local>"],
+                #2
+              }, "<List>"]
             ]}
           ]
         }],
@@ -221,6 +237,8 @@ newPlaylist[playlist_] := Block[
 ];
 
 End[];
+
+Thulium`Playlist = Thulium`Interface`Playlist`newPlaylist;
 
 EndPackage[];
 

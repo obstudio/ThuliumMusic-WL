@@ -2,18 +2,22 @@
 
 BeginPackage["Thulium`Interface`Playlist`", {
   "Thulium`System`",
-  "Thulium`Assets`"
+  "Thulium`Assets`",
+  "Thulium`StyleSheet`"
 }];
 
 newPlaylist::usage = "newPlaylist";
 
 Begin["`Private`"];
 
+GetValue[TemplateArgBox[value_, _]] := GetValue[value];
+GetValue[value_] := value;
+
 newPlaylist[playlist_] := Block[
   {info, length, songList, indexList, pageCount},
   info = PlaylistIndex[playlist];
   length = Length @ info["SongList"];
-  pageCount = Ceiling[length / ListSize];
+  pageCount = Ceiling[length / 10];
   songList = Partition["Song" /. info["SongList"], UpTo @ Ceiling[length / pageCount]];
   indexList = Partition["Index" /. info["SongList"], UpTo @ Ceiling[length / pageCount]];
   If[Thulium`PageIndex[playlist] > pageCount, Thulium`PageIndex[playlist] = pageCount];
@@ -22,25 +26,70 @@ newPlaylist[playlist_] := Block[
     CreateDialog[
       {
         Cell[BoxData @ GridBox[{
+          {
+            AdjustmentBox[
+              StyleBox[info["Title"], "Title"],
+              BoxBaselineShift -> 0
+            ],
+            AdjustmentBox[
+              TemplateBox[{"Return", Null}, "<Button-Local>"],
+              BoxBaselineShift -> -0.4
+            ]
+          }
+        }], "Title"],
+        
+        Cell[BoxData @ GridBox[{
           {TemplateBox[{Unevaluated[index], 1, "booo", "booo"}, "<Setter-Local>"]},
           {TemplateBox[{Unevaluated[index], 2, "fooo", "fooo"}, "<Setter-Local>"]},
           {TemplateBox[{Unevaluated[index], 3, "wooo", "wooo"}, "<Setter-Local>"]}
         }], "SetterList"],
-        TextCell[Dynamic @ index]
+        
+        Cell[BoxData @ tmPageSelBox[page, pageCount], "PageSelector"]
       },
       
       StyleDefinitions -> Notebook[{
-        Thulium`StyleSheet`Include["Tooltip"],
-        Thulium`StyleSheet`tmSetter,
-        Thulium`StyleSheet`tmButton,
+        tmSetter,
+        tmButton,
+        tmPageSel,
+        
+        Cell[StyleData["Title"],
+          CellMargins -> {{20, 20}, {16, 32}},
+          TextAlignment -> Center,
+          FontFamily -> ChsFont,
+          FontSize -> 24,
+          GridBoxOptions -> {
+            ColumnAlignments -> {Left, Right},
+            ColumnWidths -> {12, 6},
+            ColumnSpacings -> 0,
+            RowSpacings -> 0
+          }
+        ],
         
         Cell[StyleData["SetterList"],
-          CellMargins -> {{20, 20}, {20, 20}},
+          CellMargins -> {{20, 20}, {8, 8}},
           TextAlignment -> Center,
-          GridBoxOptions -> {RowSpacings -> 0}
+          GridBoxOptions -> {
+            RowSpacings -> 0
+          }
+        ],
+        
+        Cell[StyleData["PageSelector"],
+          CellMargins -> {{20, 20}, {32, 16}},
+          TextAlignment -> Center
         ],
         
         Cell[StyleData["<Button-Local>"],
+          TemplateBoxOptions -> {DisplayFunction -> Function[
+            TemplateBox[{
+              TemplateBox[{#1, Opacity[0], RGBColor[0, 0.7, 0.94], RGBColor[0, 0.7, 0.94], 32}, "<Button-Round>"],
+              TemplateBox[{#1, RGBColor[0, 0.7, 0.94], RGBColor[0, 0.7, 0.94], RGBColor[1, 1, 1], 32}, "<Button-Round>"],
+              TemplateBox[{#1, RGBColor[0, 0.7, 0.94, 0.3], RGBColor[0, 0.7, 0.94], RGBColor[0, 0.7, 0.94], 32}, "<Button-Round>"],
+              #2, StyleBox[TextDict[#1], FontFamily -> ChsFont]
+            }, "<Button>"]
+          ]}
+        ],
+        
+        Cell[StyleData["<Setter-Button>"],
           TemplateBoxOptions -> {DisplayFunction -> Function[
             TemplateBox[{
               PaneSelectorBox[{
@@ -59,18 +108,18 @@ newPlaylist[playlist_] := Block[
             TemplateBox[{
               GridBox[
                 {{
-                  AdjustmentBox[StyleBox[#1,
-                    FontSize -> 14,
-                    FontFamily -> ChsFont
-                  ], BoxBaselineShift -> -0.6],
-                  AdjustmentBox[TemplateBox[
-                    {"Play", Null, #4},
-                    "<Button-Local>"
-                  ], BoxBaselineShift -> -1]
+                  AdjustmentBox[
+                    StyleBox[#1, FontSize -> 14, FontFamily -> ChsFont],
+                    BoxBaselineShift -> -0.6
+                  ],
+                  AdjustmentBox[
+                    TemplateBox[{"Play", Null, #4}, "<Setter-Button>"],
+                    BoxBaselineShift -> -1
+                  ]
                 }},
                 RowAlignments -> Baseline,
                 ColumnAlignments -> {Left, Right},
-                ColumnWidths -> {20, 8},
+                ColumnWidths -> {20, 9},
                 ColumnSpacings -> 0
               ],
               RGBColor[0, 0, 0], #2, #3, 400, 20
@@ -107,7 +156,10 @@ newPlaylist[playlist_] := Block[
       Editable -> False,
       Deployed -> True
     ];
-  ]];
+  ];
+  Evaluate[Unique[]] := index;
+  Evaluate[Unique[]] := page;
+  ];
 ];
 
 End[];

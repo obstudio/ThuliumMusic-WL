@@ -8,6 +8,8 @@ BeginPackage["Thulium`StyleSheet`"];
 
 Include = <||>;
 
+tmPageSelBox::usage = "Thulium Page Seletor Box";
+
 Begin["`Build`"];
 
 AssignTemplate[name_String, display_Function] := (
@@ -60,6 +62,20 @@ AssignTemplate["Button", Function[
   }, Dynamic @ CurrentValue["MouseOver"]]
 ]];
 
+AssignTemplate["Button-no-Tooltip", Function[
+  PaneSelectorBox[{
+    True -> TagBox[
+      TagBox[
+        PaneSelectorBox[{
+          True -> #2,
+          False -> #3
+        }, Dynamic @ CurrentValue["MouseButtonTest"]],
+      EventHandlerTag @ {"MouseClicked" :> ReleaseHold @ #4, PassEventsUp -> False}],
+    MouseAppearanceTag @ "LinkHand"],
+    False -> #1
+  }, Dynamic @ CurrentValue["MouseOver"]]
+]];
+
 AssignTemplate["Button-r-Template", Function[
   GraphicsBox[{
     JoinForm["Round"], CapForm["Round"], #2,
@@ -76,6 +92,13 @@ AssignTemplate["Button-Round", Function[
       GraphicsGroupBox[{Thickness[0.08],
         PolygonBox[{{-0.2, -0.4}, {-0.2, 0.4}, {0.4, 0}}],
         LineBox[{{-0.2, -0.4}, {-0.2, 0.4}, {0.4, 0}, {-0.2, -0.4}}]
+      }],
+      #2, #3, #4, #5
+    }, "<Button-r-Template>"],
+    "Return" -> TemplateBox[{
+      GraphicsGroupBox[{Thickness[0.1],
+        LineBox[{{-0.4, 0}, {0.4, 0}}],
+        LineBox[{{0, -0.4}, {-0.4, 0}, {0, 0.4}}]
       }],
       #2, #3, #4, #5
     }, "<Button-r-Template>"]
@@ -154,12 +177,118 @@ AssignTemplate["Setter-Item", Function[
   ]
 ]];
 
+AssignTemplate["PageSel-Template", With[{t = 0.3, r = 0.06}, Function[
+  GraphicsBox[{
+    Thickness[r], CapForm["Round"], #2,
+    RectangleBox[{r - 1, r - 1}, {1 - r, 1 - r}, RoundingRadius -> {t - r, t - r}],
+    Opacity[1], #3,
+    CircleBox[{t - 1, t - 1}, t - r, {Pi, 3/2 Pi}], CircleBox[{1 - t, 1 - t}, t - r, {0, 1/2 Pi}],
+    CircleBox[{1 - t, t - 1}, t - r, {-1/2 Pi, 0}], CircleBox[{t - 1, 1 - t}, t - r, {1/2 Pi, Pi}],
+    LineBox[{{t - 1, r - 1}, {1 - t, r - 1}}], LineBox[{{t - 1, 1 - r}, {1 - t, 1 - r}}],
+    LineBox[{{r - 1, t - 1}, {r - 1, 1 - t}}], LineBox[{{1 - r, t - 1}, {1 - r, 1 - t}}],
+    Opacity[1], #4, #1
+  }, ImageSize -> #5, ImageMargins -> 0]
+]]];
+
+AssignTemplate["PageSel-Data", Function[
+  PaneSelectorBox[{
+    "Prev" -> TemplateBox[{
+      GraphicsGroupBox[{Thickness[0.08],
+        LineBox[{{0.32, 0.48}, {-0.36, 0}, {0.32, -0.48}}]
+      }],
+      #2, #3, #4, #5
+    }, "<PageSel-Template>"],
+    "Next" -> TemplateBox[{
+      GraphicsGroupBox[{Thickness[0.08],
+        LineBox[{{-0.32, 0.48}, {0.36, 0}, {-0.32, -0.48}}]
+      }],
+      #2, #3, #4, #5
+    }, "<PageSel-Template>"],
+    "First" -> TemplateBox[{
+      GraphicsGroupBox[{Thickness[0.08],
+        LineBox[{{-0.4, -0.48}, {-0.4, 0.48}}],
+        LineBox[{{0.44, 0.48}, {-0.16, 0}, {0.44, -0.48}}]
+      }],
+      #2, #3, #4, #5
+    }, "<PageSel-Template>"],
+    "Last" -> TemplateBox[{
+      GraphicsGroupBox[{Thickness[0.08],
+        LineBox[{{0.4, -0.48}, {0.4, 0.48}}],
+        LineBox[{{-0.44, 0.48}, {0.16, 0}, {-0.44, -0.48}}]
+      }],
+      #2, #3, #4, #5
+    }, "<PageSel-Template>"]
+  }, #1, TemplateBox[{
+    InsetBox[
+      StyleBox[#1,
+        FontSize -> 16,
+        FontColor -> #4
+      ],
+      {0, 0}, Center
+    ],
+    #2, #3, #4, #5
+  }, "<PageSel-Template>"]]
+]];
+
+AssignTemplate["PageSel-g-Button", Function[
+  PaneSelectorBox[{
+    True -> TemplateBox[{#1, Opacity[0], RGBColor[0.8, 0.8, 0.8], RGBColor[0.8, 0.8, 0.8], 28}, "<PageSel-Data>"],
+    False -> TemplateBox[{
+      TemplateBox[{#1, RGBColor[1, 1, 1], RGBColor[0.1, 0.5, 0.8], RGBColor[0.1, 0.5, 0.8], 28}, "<PageSel-Data>"],
+      TemplateBox[{#1, RGBColor[0.1, 0.5, 0.8], RGBColor[0.1, 0.5, 0.8], RGBColor[1, 1, 1], 28}, "<PageSel-Data>"],
+      TemplateBox[{#1, RGBColor[0.6, 0.8, 1], RGBColor[0.1, 0.5, 0.8], RGBColor[0.1, 0.5, 0.8], 28}, "<PageSel-Data>"],
+      #4[#2]
+    }, "<Button-no-Tooltip>"]
+  }, Dynamic[#2] === #3]
+]];
+
+AssignTemplate["PageSel-n-Button", Function[
+  PaneSelectorBox[{
+    True -> TemplateBox[{#1, RGBColor[0.1, 0.5, 0.8], RGBColor[0.1, 0.5, 0.8], RGBColor[1, 1, 1], 28}, "<PageSel-Data>"],
+    False -> TemplateBox[{
+      TemplateBox[{#1, RGBColor[1, 1, 1], RGBColor[0.1, 0.5, 0.8], RGBColor[0.1, 0.5, 0.8], 28}, "<PageSel-Data>"],
+      TemplateBox[{#1, RGBColor[0.1, 0.5, 0.8], RGBColor[0.1, 0.5, 0.8], RGBColor[1, 1, 1], 28}, "<PageSel-Data>"],
+      TemplateBox[{#1, RGBColor[0.6, 0.8, 1], RGBColor[0.1, 0.5, 0.8], RGBColor[0.1, 0.5, 0.8], 28}, "<PageSel-Data>"],
+      #2 = #1
+    }, "<Button-no-Tooltip>"]
+  }, Dynamic[#2] === #1]
+]];
+
+End[];
+
+Begin["`PageSel`"];
+
+SetAttributes[tmPageSelBox, HoldFirst];
+tmPageSelBox[page_, pageCount_] := GridBox[{
+  {TemplateBox[{16, 16}, "Spacer2"]},
+  {RowBox[{
+    TemplateBox[{"Prev", Unevaluated[page], 1, AddTo[#, -1]&}, "<PageSel-g-Button>"],
+    TemplateBox[{2}, "Spacer1"],
+    RowBox[Riffle[
+      Array[TemplateBox[{#, Unevaluated[page]}, "<PageSel-n-Button>"]&, pageCount],
+      TemplateBox[{1}, "Spacer1"]
+    ]],
+    TemplateBox[{2}, "Spacer1"],
+    TemplateBox[{"Next", Unevaluated[page], pageCount, AddTo[#, 1]&}, "<PageSel-g-Button>"]
+  }]},
+  {TemplateBox[{16, 16}, "Spacer2"]}
+}, RowSpacings -> 0(*, ColumnSpacings \[Rule] 0*)];
+
 End[];
 
 tmButton = Sequence[
+  Include["Tooltip"],
   Include["Button"],
   Include["Button-Round"],
-  Include["Button-r-Template"]
+  Include["Button-r-Template"],
+  Include["Button-no-Tooltip"]
+];
+
+tmPageSel = Sequence[
+  Include["PageSel-Data"],
+  Include["PageSel-Template"],
+  Include["PageSel-n-Button"],
+  Include["PageSel-g-Button"]
 ];
 
 tmSetter = Sequence[

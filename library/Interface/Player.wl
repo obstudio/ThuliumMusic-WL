@@ -13,7 +13,7 @@ Begin["`Private`"];
 
 PlayerControls[audio_] := Module[
   {
-    stream = AudioPlay[audio], time,
+    stream = AudioPlay[audio, AudioLooping -> UserInfo["Looping"]], time,
     duration = QuantityMagnitude[Duration[audio], "Seconds"]
   },
   time := QuantityMagnitude[stream["Position"], "Seconds"];

@@ -4,8 +4,8 @@ Begin["Thulium`System`"];
 
 Begin["`Private`"];
 
-$$Version = "2.4";
-$$Build = 701;
+$$Version = "2.5";
+$$Build = 756;
 If[DirectoryQ[$LocalPath <> ".git"], 
   With[{ref = StringCases[Import[$LocalPath <> ".git/HEAD"], RegularExpression["^ref: (.+)$"] :> "$1"][[1]]},
     $$Commit = StringTake[Import[$LocalPath <> ".git/" <> ref], 7];
@@ -35,6 +35,8 @@ userInfoTemplate=<|
   "NodeJS" -> False,
   "Language" -> "chs",
   "Developer" -> False,
+  "ListLength" -> 10,
+  "Looping" -> False,
   "DataPath" -> defaultDataPath
 |>;
 

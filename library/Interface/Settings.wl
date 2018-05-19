@@ -14,7 +14,9 @@ Settings[] := Block[{},
   Module[
     {
       language = UserInfo["Language"],
-      developer = UserInfo["Developer"]
+      developer = UserInfo["Developer"],
+      listLength = UserInfo["ListLength"],
+      looping = UserInfo["Looping"]
     },
     With[{ChsFont = ChsFont, TextDict = TextDict},
       CreateDialog[
@@ -23,30 +25,56 @@ Settings[] := Block[{},
           
           Cell[BoxData @ GridBox[{
             {
-              TemplateBox[{TextDict["ChooseIdentity"] <> ":"}, "<Setter-Tag>"],
+              TemplateBox[{TextDict["ChooseIdentity"]}, "<Setter-Tag>"],
               RowBox[{
-                TemplateBox[{Unevaluated[developer], False,
-                  StyleBox[TextDict["NormalUser-Info"], "SetterInfo"],
+                TemplateBox[{Unevaluated[developer], False, 120,
+                  TextDict["NormalUser-Info"],
                   StyleBox[TextDict["NormalUser"], "SetterChoice"]
+                }, "<Setter-Tooltip-Local>"],
+                TemplateBox[{10}, "Spacer1"],
+                TemplateBox[{Unevaluated[developer], True, 120,
+                  TextDict["Developer-Info"],
+                  StyleBox[TextDict["Developer"], "SetterChoice"]
+                }, "<Setter-Tooltip-Local>"]
+              }]
+            },
+            {
+              TemplateBox[{TextDict["ChooseLanguage"]}, "<Setter-Tag>"],
+              RowBox[{
+                TemplateBox[{Unevaluated[language], "chs", 120,
+                  StyleBox[LangDict["chs"], "SetterChoice"]
                 }, "<Setter-Local>"],
                 TemplateBox[{10}, "Spacer1"],
-                TemplateBox[{Unevaluated[developer], True,
-                  StyleBox[TextDict["Developer-Info"], "SetterInfo"],
-                  StyleBox[TextDict["Developer"], "SetterChoice"]
+                TemplateBox[{Unevaluated[language], "eng", 120,
+                  StyleBox[LangDict["eng"], "SetterChoice"]
                 }, "<Setter-Local>"]
               }]
             },
             {
-              TemplateBox[{TextDict["ChooseLanguage"] <> ":"}, "<Setter-Tag>"],
+              TemplateBox[{TextDict["ChoosePlayMode"]}, "<Setter-Tag>"],
               RowBox[{
-                TemplateBox[{Unevaluated[language], "chs",
-                  StyleBox[LangDict["chs"], "SetterInfo"],
-                  StyleBox[LangDict["chs"], "SetterChoice"]
+                TemplateBox[{Unevaluated[looping], False, 120,
+                  StyleBox[TextDict["Sequential"], "SetterChoice"]
                 }, "<Setter-Local>"],
                 TemplateBox[{10}, "Spacer1"],
-                TemplateBox[{Unevaluated[language], "eng",
-                  StyleBox[LangDict["eng"], "SetterInfo"],
-                  StyleBox[LangDict["eng"], "SetterChoice"]
+                TemplateBox[{Unevaluated[looping], True, 120,
+                  StyleBox[TextDict["Looping"], "SetterChoice"]
+                }, "<Setter-Local>"]
+              }]
+            },
+            {
+              TemplateBox[{TextDict["ChooseListLength"]}, "<Setter-Tag>"],
+              RowBox[{
+                TemplateBox[{Unevaluated[listLength], 10, 75,
+                  StyleBox["10", "SetterChoice"]
+                }, "<Setter-Local>"],
+                TemplateBox[{8}, "Spacer1"],
+                TemplateBox[{Unevaluated[listLength], 20, 75,
+                  StyleBox["20", "SetterChoice"]
+                }, "<Setter-Local>"],
+                TemplateBox[{8}, "Spacer1"],
+                TemplateBox[{Unevaluated[listLength], 30, 75,
+                  StyleBox["30", "SetterChoice"]
                 }, "<Setter-Local>"]
               }]
             }
@@ -54,13 +82,17 @@ Settings[] := Block[{},
           
           Cell[BoxData @ RowBox[{
             TemplateBox[{8}, "Spacer1"],
-            TemplateBox[{"Tick", Hold @ DialogReturn[Thulium`Homepage[]]}, "<Button-Local>"],
-            TemplateBox[{8}, "Spacer1"],
-            TemplateBox[{"Return", Hold @ DialogReturn[
+            TemplateBox[{"Tick", Hold @ DialogReturn[
               UserInfo["Developer"] = GetValue[developer];
               UserInfo["Language"] = GetValue[language];
+              UserInfo["ListLength"] = GetValue[listLength];
+              UserInfo["Looping"] = GetValue[looping];
               Export[$UserPath <> "Default.json", UserInfo];
               RefreshLanguage;
+              Thulium`Homepage[];
+            ]}, "<Button-Local>"],
+            TemplateBox[{8}, "Spacer1"],
+            TemplateBox[{"Return", Hold @ DialogReturn[
               Thulium`Homepage[];
             ]}, "<Button-Local>"],
             TemplateBox[{8}, "Spacer1"]
@@ -80,12 +112,13 @@ Settings[] := Block[{},
           ],
           
           Cell[StyleData["SetterList"],
-            CellMargins -> {{0, 0}, {16, 16}},
+            CellMargins -> {{0, 0}, {8, 8}},
             TextAlignment -> Center,
             GridBoxOptions -> {
-              GridBoxAlignment -> Center,
-              RowSpacings -> 4,
-              ColumnSpacings -> 1
+              RowSpacings -> 2,
+              ColumnSpacings -> 2,
+              ColumnAlignments -> {Center, Center},
+              RowAlignments -> {Center, Center}
             }
           ],
           
@@ -107,11 +140,6 @@ Settings[] := Block[{},
             FontSize -> 16
           ],
           
-          Cell[StyleData["SetterInfo"],
-            FontFamily -> ChsFont,
-            FontSize -> 12
-          ],
-          
           Cell[StyleData["Bottom"],
             CellMargins -> {{0, 0}, {40, 24}},
             TextAlignment -> Center
@@ -119,18 +147,30 @@ Settings[] := Block[{},
           
           Cell[StyleData["<Item-Local>"],
             TemplateBoxOptions -> {DisplayFunction -> Function[
-              TemplateBox[{StyleBox[#1, FontWeight -> #2], RGBColor[0, 0, 0], #3, #4, 120, 32}, "<Item>"]
+              TemplateBox[{StyleBox[#1, FontWeight -> #2], RGBColor[0, 0, 0], #3, #4, #5, 32}, "<Item>"]
             ]}
           ],
           
           Cell[StyleData["<Setter-Local>"],
             TemplateBoxOptions -> {DisplayFunction -> Function[
-              TemplateBox[{#1, #2, #3,
-                TemplateBox[{#4, Plain, RGBColor[0.94, 0.96, 1], RGBColor[0.85, 0.9, 1]}, "<Item-Local>"],
-                TemplateBox[{#4, Bold, RGBColor[0.92, 1, 0.88], RGBColor[0.8, 1, 0.7]}, "<Item-Local>"],
-                TemplateBox[{#4, Plain, RGBColor[0.8, 1, 0.7], RGBColor[0.92, 1, 0.88]}, "<Item-Local>"],
-                TemplateBox[{#4, Plain, RGBColor[0.85, 0.9, 1], RGBColor[0.94, 0.96, 1]}, "<Item-Local>"]
+              TemplateBox[{#1, #2,
+                TemplateBox[{#4, Plain, RGBColor[0.94, 0.96, 1], RGBColor[0.85, 0.9, 1], #3}, "<Item-Local>"],
+                TemplateBox[{#4, Bold, RGBColor[0.92, 1, 0.88], RGBColor[0.8, 1, 0.7], #3}, "<Item-Local>"],
+                TemplateBox[{#4, Plain, RGBColor[0.8, 1, 0.7], RGBColor[0.92, 1, 0.88], #3}, "<Item-Local>"],
+                TemplateBox[{#4, Plain, RGBColor[0.85, 0.9, 1], RGBColor[0.94, 0.96, 1], #3}, "<Item-Local>"]
               }, "<Setter>"]
+            ]}
+          ],
+          
+          Cell[StyleData["<Setter-Tooltip-Local>"],
+            TemplateBoxOptions -> {DisplayFunction -> Function[
+              TemplateBox[{#1, #2, 
+                StyleBox[#4, FontFamily -> ChsFont, FontSize -> 24],
+                TemplateBox[{#5, Plain, RGBColor[0.94, 0.96, 1], RGBColor[0.85, 0.9, 1], #3}, "<Item-Local>"],
+                TemplateBox[{#5, Bold, RGBColor[0.92, 1, 0.88], RGBColor[0.8, 1, 0.7], #3}, "<Item-Local>"],
+                TemplateBox[{#5, Plain, RGBColor[0.8, 1, 0.7], RGBColor[0.92, 1, 0.88], #3}, "<Item-Local>"],
+                TemplateBox[{#5, Plain, RGBColor[0.85, 0.9, 1], RGBColor[0.94, 0.96, 1], #3}, "<Item-Local>"]
+              }, "<Setter-Tooltip>"]
             ]}
           ],
           
@@ -161,6 +201,8 @@ Settings[] := Block[{},
     
     Evaluate[Unique[]] := language;
     Evaluate[Unique[]] := developer;
+    Evaluate[Unique[]] := looping;
+    Evaluate[Unique[]] := listLength;
   ];
 ];
 

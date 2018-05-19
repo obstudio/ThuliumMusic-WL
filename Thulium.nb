@@ -10,11 +10,11 @@
 NotebookFileLineBreakTest
 NotebookFileLineBreakTest
 NotebookDataPosition[       158,          7]
-NotebookDataLength[     11069,        282]
+NotebookDataLength[     11123,        284]
 NotebookOptionsPosition[      2673,         78]
-NotebookOutlinePosition[     10982,        281]
-CellTagsIndexPosition[     10889,        275]
-WindowTitle->Thulium Music Player 2.4
+NotebookOutlinePosition[     11036,        283]
+CellTagsIndexPosition[     10943,        277]
+WindowTitle->Thulium Music Player 2.5
 WindowFrame->ModelessDialog*)
 
 (* Beginning of Notebook Content *)
@@ -28,11 +28,11 @@ Cell[BoxData[
    FontColor->RGBColor[0.1, 0.4, 0.7]], 
   TemplateBox[{1},
    "Spacer1"], 
-  StyleBox["\<\"v2.4\"\>",
+  StyleBox["\<\"v2.5\"\>",
    FontFamily->"Source Sans Pro",
    FontSize->24,
    FontColor->RGBColor[0.3, 0.5, 0.8]]}]], "Title",
- CellTags->"$title",ExpressionUUID->"a7100f5c-a6d8-4772-be85-eafe525289d8"],
+ CellTags->"$title",ExpressionUUID->"b8055c39-a823-4675-9899-6b8013dbefbf"],
 
 Cell[BoxData[
  RowBox[{
@@ -74,7 +74,7 @@ Cell[BoxData[
    "LogoButton"], 
   TemplateBox[{4},
    "Spacer1"]}]], "Init",
- CellTags->"$init",ExpressionUUID->"3d720bdd-bf43-4791-924c-f2e52dfad808"]
+ CellTags->"$init",ExpressionUUID->"0d992b2e-059b-46fe-bfb4-102ade6c0a38"]
 },
 Editable->False,
 Saveable->False,
@@ -95,7 +95,7 @@ WindowMargins->{{229, Automatic}, {Automatic, 32}},
 WindowFrame->"ModelessDialog",
 WindowElements->{},
 WindowFrameElements->{"CloseBox", "MinimizeBox", "ZoomBox"},
-WindowTitle->"Thulium Music Player 2.4",
+WindowTitle->"Thulium Music Player 2.5",
 ShowCellBracket->False,
 Evaluatable->False,
 CellContext->"Global`",
@@ -113,7 +113,7 @@ StyleDefinitions->Notebook[{
          AdjustmentBox[
           
           StyleBox[#2, FontFamily -> "Calibri", FontSize -> 24, FontColor -> 
-           RGBColor[0, 0, 0]], BoxMargins -> {{0.4, 0.4}, {0.2, 0.4}}], 
+           RGBColor[0, 0, 0]], BoxMargins -> {{0.2, 0.2}, {0.2, 0.4}}], 
          Background -> RGBColor[1, 1, 0.9, 0.8], FrameStyle -> {1, 
            RGBColor[0.8, 0.8, 0.7, 0.2]}, RoundingRadius -> {8, 8}, 
          ContentPadding -> True], TooltipDelay -> #3, 
@@ -129,7 +129,9 @@ StyleDefinitions->Notebook[{
               PaneSelectorBox[{True -> #2, False -> #3}, 
                Dynamic[
                 CurrentValue["MouseButtonTest"]]], 
-              EventHandlerTag[{"MouseClicked" :> ReleaseHold[#4]}]], 
+              
+              EventHandlerTag[{
+               "MouseClicked" :> ReleaseHold[#4], PassEventsUp -> False}]], 
              MouseAppearanceTag["LinkHand"]], #5, 0.2}, "<Tooltip>"], 
          False -> #}, 
         Dynamic[
@@ -265,24 +267,24 @@ k4tvhNgXhpleKeUDAIAZlCM=
 (*CellTagsOutline
 CellTagsIndex->{
  "$title"->{
-  Cell[604, 21, 421, 13, 140, "Title",ExpressionUUID->"a7100f5c-a6d8-4772-be85-eafe525289d8",
+  Cell[604, 21, 421, 13, 140, "Title",ExpressionUUID->"b8055c39-a823-4675-9899-6b8013dbefbf",
    CellTags->"$title"]},
  "$init"->{
-  Cell[1028, 36, 1641, 40, 140, "Init",ExpressionUUID->"3d720bdd-bf43-4791-924c-f2e52dfad808",
+  Cell[1028, 36, 1641, 40, 140, "Init",ExpressionUUID->"0d992b2e-059b-46fe-bfb4-102ade6c0a38",
    CellTags->"$init"]}
  }
 *)
 (*CellTagsIndex
 CellTagsIndex->{
- {"$title", 10616, 266},
- {"$init", 10747, 269}
+ {"$title", 10670, 268},
+ {"$init", 10801, 271}
  }
 *)
 (*NotebookFileOutline
 Notebook[{
-Cell[604, 21, 421, 13, 140, "Title",ExpressionUUID->"a7100f5c-a6d8-4772-be85-eafe525289d8",
+Cell[604, 21, 421, 13, 140, "Title",ExpressionUUID->"b8055c39-a823-4675-9899-6b8013dbefbf",
  CellTags->"$title"],
-Cell[1028, 36, 1641, 40, 140, "Init",ExpressionUUID->"3d720bdd-bf43-4791-924c-f2e52dfad808",
+Cell[1028, 36, 1641, 40, 140, "Init",ExpressionUUID->"0d992b2e-059b-46fe-bfb4-102ade6c0a38",
  CellTags->"$init"]
 }
 ]

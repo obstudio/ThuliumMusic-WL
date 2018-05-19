@@ -178,19 +178,23 @@ AssignTemplate["Message", Function[
 ]];
 
 AssignTemplate["Setter", Function[
+  PaneSelectorBox[{
+    True -> #4,
+    False -> PaneSelectorBox[{
+      True -> TagBox[
+        PaneSelectorBox[
+          {True -> #5, False -> #6},
+          Dynamic @ CurrentValue["MouseButtonTest"]
+        ],
+      EventHandlerTag @ {"MouseClicked" :> (#1 = #2)}],
+    False -> #3
+    }, Dynamic @ CurrentValue["MouseOver"]]
+  }, Dynamic[#1] === #2]
+]];
+
+AssignTemplate["Setter-Tooltip", Function[
   TemplateBox[{
-    PaneSelectorBox[{
-      True -> #5,
-      False -> PaneSelectorBox[{
-        True -> TagBox[
-          PaneSelectorBox[
-            {True -> #6, False -> #7},
-            Dynamic @ CurrentValue["MouseButtonTest"]
-          ],
-        EventHandlerTag @ {"MouseClicked" :> (#1 = #2)}],
-      False -> #4
-      }, Dynamic @ CurrentValue["MouseOver"]]
-    }, Dynamic[#1] === #2],
+    TemplateBox[{#1, #2, #4, #5, #6, #7}, "<Setter>"],
     #3, 0.2
   }, "<Tooltip>"]
 ]];
@@ -231,6 +235,7 @@ tmButton = Sequence[
 
 tmList = Sequence[
   Include["Setter"],
+  Include["Setter-Tooltip"],
   Include["Item"],
   Include["List"]
 ];

@@ -3,7 +3,8 @@
 BeginPackage["Thulium`Interface`Homepage`", {
   "Thulium`System`",
   "Thulium`Assets`",
-  "Thulium`StyleSheet`"
+  "Thulium`StyleSheet`",
+  "Thulium`PageSel`"
 }];
 
 Homepage::usage = "Thulium Music Home Page";
@@ -20,7 +21,7 @@ Homepage[] := Block[
   playlists = Partition[Keys @ PlaylistIndex, UpTo @ Ceiling[length / pageCount]];
   If[PageIndex["Main"] > pageCount, PageIndex["Main"] = pageCount];
   
-  Module[{page = Thulium`PageIndex["Main"], index = 1},
+  Module[{page = PageIndex["Main"], index = 1},
     With[
       {
         ChsFont = ChsFont, TextDict = TextDict,

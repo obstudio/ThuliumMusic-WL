@@ -3,7 +3,8 @@
 BeginPackage["Thulium`Interface`Playlist`", {
   "Thulium`System`",
   "Thulium`Assets`",
-  "Thulium`StyleSheet`"
+  "Thulium`StyleSheet`",
+  "Thulium`PageSel`"
 }];
 
 Playlist::usage = "Thulium Music Playlist Page";
@@ -24,7 +25,7 @@ Playlist[playlist_] := Block[
   indexWidth = 8 * Max[0, TextLength /@ DeleteCases[indexList, "Index", Infinity]];
   If[PageIndex[playlist] > pageCount, PageIndex[playlist] = pageCount];
   
-  Module[{page = Thulium`PageIndex[playlist], index = 1},
+  Module[{page = PageIndex[playlist], index = 1},
     With[
       {
         ChsFont = ChsFont, TextDict = TextDict,
@@ -265,3 +266,7 @@ EndPackage[];
 
 (* ::Input:: *)
 (*PlaylistIndex["Clannad.qyl"]*)
+
+
+(* ::Input:: *)
+(*PageIndex*)

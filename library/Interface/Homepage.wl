@@ -72,7 +72,7 @@ Homepage[] := Block[
               FontFamily -> ChsFont
             ],
             With[{playlist = playlists[[pg, id]]},
-              Hold @ DialogReturn[PageIndex["Main"] = page; Thulium`Playlist[playlist]]
+              Hold @ DialogReturn[PageIndex["Main"] = GetValue[page]; Thulium`Playlist[playlist]]
             ]
           }, "<List-Local>"]}
         ],
@@ -84,17 +84,17 @@ Homepage[] := Block[
             StyleBox[TextDict["Thulium"], "Title"],
             TemplateBox[{200}, "Spacer1"],
             AdjustmentBox[
-              TemplateBox[{"Settings", Hold @ DialogReturn[PageIndex["Main"] = page; Thulium`Settings[]]}, "<Button-Local>"],
+              TemplateBox[{"Settings", Hold @ DialogReturn[PageIndex["Main"] = GetValue[page]; Thulium`Settings[]]}, "<Button-Local>"],
               BoxBaselineShift -> -0.2
             ],
             TemplateBox[{2}, "Spacer1"],
             AdjustmentBox[
-              TemplateBox[{"About", Hold @ DialogReturn[PageIndex["Main"] = page; Thulium`About[]]}, "<Button-Local>"],
+              TemplateBox[{"About", Hold @ DialogReturn[PageIndex["Main"] = GetValue[page]; Thulium`About[]]}, "<Button-Local>"],
               BoxBaselineShift -> -0.2
             ],
             TemplateBox[{2}, "Spacer1"],
             AdjustmentBox[
-              TemplateBox[{"Exit", Hold @ DialogReturn[PageIndex["Main"] = page]}, "<Button-Local>"],
+              TemplateBox[{"Exit", Hold @ DialogReturn[PageIndex["Main"] = GetValue[page]]}, "<Button-Local>"],
               BoxBaselineShift -> -0.2
             ]
           }], "Title"],

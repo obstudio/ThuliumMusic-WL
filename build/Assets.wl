@@ -17,7 +17,7 @@ Caption::usage = "Thulium front end captions.";
 Container::usage = "Dialog container framework.";
 TextLength::usage = "TextLength";
 TimeDisplay::usage = "TimeDisplay";
-ListSize::usage = "ListSize";
+GetValue::usage = "GetValue";
 
 LogoCloud::usage = "LogoCloud";
 LogoNote::usage = "LogoNote";
@@ -51,8 +51,10 @@ c-22.67-12.301-52.2-18.33-83.75-15.301c-65.69,6.311-115.29,49.521-110.78,96.53c4
 c65.69-6.311,115.29-49.53,110.78-96.53c-0.53-5.48-1.771-10.77-3.65-15.83h-0.01L424.34,315.88c6.1-2.72,35.51-4.39,52.38-4.1
 c22.98,0.39,59.32,7.82,69.48,10.78C555.89,325.38,569.07,330.54,569.07,330.54z"][[1]];
 
-ListSize = 16;
 WindowBackground = RGBColor[1, 1, 1];
+
+GetValue[TemplateArgBox[value_, __]] := GetValue[value];
+GetValue[value_] := value;
 
 LangDict = Association @ Import[$LocalPath <> "language/Languages.json"];
 TagDict = Association /@ Association @ Import[$LocalPath <> "Tags.json"];

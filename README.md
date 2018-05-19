@@ -72,6 +72,7 @@ ExternalEvaluate[session, "require('acorn')"]
 
 ## Change log / 更新日志
 
+- [2.4](https://github.com/obstudio/ThuliumMusicPlayer-WL/blob/master/changes/2.4.md) (2018.5.17)
 - [2.3](https://github.com/obstudio/ThuliumMusicPlayer-WL/blob/master/changes/2.3.md) (2018.5.5)
 - [2.2](https://github.com/obstudio/ThuliumMusicPlayer-WL/blob/master/changes/2.2.md) (2018.4.21)
 - [2.1](https://github.com/obstudio/ThuliumMusicPlayer-WL/blob/master/changes/2.1.md) (2018.4.1)

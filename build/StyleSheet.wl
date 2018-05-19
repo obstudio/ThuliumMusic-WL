@@ -60,6 +60,15 @@ AssignTemplate["Button", Function[
   }, Dynamic @ CurrentValue["MouseOver"]]
 ]];
 
+AssignTemplate["Button-Default", Function[
+  TemplateBox[{
+    TemplateBox[{#1, Opacity[0], RGBColor[0, 0.7, 0.94], RGBColor[0, 0.7, 0.94], #3}, "<Button-Round>"],
+    TemplateBox[{#1, RGBColor[0, 0.7, 0.94], RGBColor[0, 0.7, 0.94], RGBColor[1, 1, 1], #3}, "<Button-Round>"],
+    TemplateBox[{#1, RGBColor[0, 0.7, 0.94, 0.3], RGBColor[0, 0.7, 0.94], RGBColor[0, 0.7, 0.94], #3}, "<Button-Round>"],
+    #4, #2
+  }, "<Button>"]
+]];
+
 AssignTemplate["Button-no-Tooltip", Function[
   PaneSelectorBox[{
     True -> TagBox[
@@ -85,36 +94,43 @@ AssignTemplate["Button-r-Template", Function[
 ]];
 
 ButtonRoundData = <|
-    "Play" -> GraphicsGroupBox[{Thickness[0.08],
-      PolygonBox[{{-0.2, -0.4}, {-0.2, 0.4}, {0.4, 0}}],
-      LineBox[{{-0.2, -0.4}, {-0.2, 0.4}, {0.4, 0}, {-0.2, -0.4}}]
-    }],
-    "Return" -> GraphicsGroupBox[{Thickness[0.1],
-      LineBox[{{-0.4, 0}, {0.4, 0}}],
-      LineBox[{{0, -0.4}, {-0.4, 0}, {0, 0.4}}]
-    }],
-    "Enter" -> GraphicsGroupBox[{Thickness[0.1],
-      LineBox[{{-0.4, 0}, {0.4, 0}}],
-      LineBox[{{0, -0.4}, {0.4, 0}, {0, 0.4}}]
-    }],
-    "Exit" -> GraphicsGroupBox[{Thickness[0.08],
-      LineBox[{{0.24, -0.24}, {0.24, -0.4}, {-0.36, -0.4}, {-0.36, 0.4}, {0.24, 0.4}, {0.24, 0.24}}],
-      Thickness[0.06],
-      LineBox[{{0, 0}, {0.52, 0}}],
-      LineBox[{{0.4, 0.12}, {0.52, 0}, {0.4, -0.12}}]
-    }],
-    "About" -> GraphicsGroupBox[{Thickness[0.1], PointSize[0.1],
-      LineBox[{{0, -0.44}, {0, 0.1}}],
-      PointBox[{0, 0.44}]
-    }],
-    "Settings" -> GraphicsGroupBox[Evaluate @ {Thickness[0.12],
-      CircleBox[{0, 0}, 0.3],
-      GeometricTransformationBox[
-        RectangleBox[{-0.15, 0.3}, {0.15, 0.53}, RoundingRadius -> {0.05, 0.05}],
-        Evaluate @ Table[RotationMatrix[theta], {theta, 0, 5/3 Pi, 1/3 Pi}]
-      ]
-    }]
-  |>;
+  "Play" -> GraphicsGroupBox[{Thickness[0.08],
+    PolygonBox[{{-0.2, -0.4}, {-0.2, 0.4}, {0.4, 0}}],
+    LineBox[{{-0.2, -0.4}, {-0.2, 0.4}, {0.4, 0}, {-0.2, -0.4}}]
+  }],
+  "Return" -> GraphicsGroupBox[{Thickness[0.1],
+    LineBox[{{-0.4, 0}, {0.4, 0}}],
+    LineBox[{{0, -0.4}, {-0.4, 0}, {0, 0.4}}]
+  }],
+  "Enter" -> GraphicsGroupBox[{Thickness[0.1],
+    LineBox[{{-0.4, 0}, {0.4, 0}}],
+    LineBox[{{0, -0.4}, {0.4, 0}, {0, 0.4}}]
+  }],
+  "Exit" -> GraphicsGroupBox[{Thickness[0.08],
+    LineBox[{{0.24, -0.24}, {0.24, -0.4}, {-0.36, -0.4}, {-0.36, 0.4}, {0.24, 0.4}, {0.24, 0.24}}],
+    Thickness[0.06],
+    LineBox[{{0, 0}, {0.52, 0}}],
+    LineBox[{{0.4, 0.12}, {0.52, 0}, {0.4, -0.12}}]
+  }],
+  "About" -> GraphicsGroupBox[{Thickness[0.1], PointSize[0.1],
+    LineBox[{{0, -0.44}, {0, 0.1}}],
+    PointBox[{0, 0.44}]
+  }],
+  "Settings" -> GraphicsGroupBox[Evaluate @ {Thickness[0.12],
+    CircleBox[{0, 0}, 0.3],
+    GeometricTransformationBox[
+      RectangleBox[{-0.15, 0.3}, {0.15, 0.53}, RoundingRadius -> {0.05, 0.05}],
+      Evaluate @ Table[RotationMatrix[theta], {theta, 0, 5/3 Pi, 1/3 Pi}]
+    ]
+  }],
+  "Tick" -> GraphicsGroupBox[{Thickness[0.12],
+    LineBox[{{-0.4, -0.04}, {-0.12, -0.32}, {0.44, 0.24}}]
+  }],
+  "Cross" -> GraphicsGroupBox[{Thickness[0.12],
+    LineBox[{{-0.3, -0.3}, {0.3, 0.3}}],
+    LineBox[{{-0.3, 0.3}, {0.3, -0.3}}]
+  }]
+|>;
 
 AssignTemplate["Button-Round", With[
   {rule = Map[
@@ -162,21 +178,21 @@ AssignTemplate["Message", Function[
 ]];
 
 AssignTemplate["Setter", Function[
-  PaneSelectorBox[{
-    True -> #5,
-    False -> PaneSelectorBox[{
-      True -> TemplateBox[{
-        TagBox[
+  TemplateBox[{
+    PaneSelectorBox[{
+      True -> #5,
+      False -> PaneSelectorBox[{
+        True -> TagBox[
           PaneSelectorBox[
             {True -> #6, False -> #7},
             Dynamic @ CurrentValue["MouseButtonTest"]
           ],
         EventHandlerTag @ {"MouseClicked" :> (#1 = #2)}],
-        #3, 0.2
-      }, "<Tooltip>"],
       False -> #4
-    }, Dynamic @ CurrentValue["MouseOver"]]
-  }, Dynamic[#1] === #2]
+      }, Dynamic @ CurrentValue["MouseOver"]]
+    }, Dynamic[#1] === #2],
+    #3, 0.2
+  }, "<Tooltip>"]
 ]];
 
 AssignTemplate["List", Function[
@@ -209,7 +225,8 @@ tmButton = Sequence[
   Include["Button"],
   Include["Button-Round"],
   Include["Button-r-Template"],
-  Include["Button-no-Tooltip"]
+  Include["Button-no-Tooltip"],
+  Include["Button-Default"]
 ];
 
 tmList = Sequence[

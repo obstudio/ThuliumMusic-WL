@@ -116,7 +116,7 @@ If[!FileExistsQ[$DataPath <> "Index.mx"],
   SongIndex = <||>;
   PlaylistIndex = <||>;
   ImageIndex = <||>;
-  Thulium`PageIndex = <|"Main" -> 1|>;
+  PageIndex = <|"Main" -> 1|>;
   DumpSave[$DataPath <> "Index.mx", {
     SongIndex, PlaylistIndex, ImageIndex
   }],
@@ -124,7 +124,7 @@ If[!FileExistsQ[$DataPath <> "Index.mx"],
   If[Head[SongIndex] =!= Association, SongIndex = <||>];
   If[Head[ImageIndex] =!= Association, ImageIndex = <||>];
   If[Head[PlaylistIndex] =!= Association, PlaylistIndex = <||>];
-  Thulium`PageIndex = Prepend[
+  PageIndex = Prepend[
     AssociationMap[1&, Keys @ PlaylistIndex],
     {"Main" -> 1}
   ];

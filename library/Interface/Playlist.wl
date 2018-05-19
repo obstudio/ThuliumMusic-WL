@@ -87,7 +87,7 @@ Playlist[playlist_] := Block[
             ],
             With[{song = info["Path"] <> songList[[pg, id]]},
               Hold @ DialogReturn[
-                PageIndex[playlist] = page;
+                PageIndex[playlist] = GetValue[page];
                 Thulium`Player[song];
               ]
             ]
@@ -101,7 +101,7 @@ Playlist[playlist_] := Block[
             StyleBox[info["Title"], "Title"],
             TemplateBox[{280}, "Spacer1"],
             AdjustmentBox[
-              TemplateBox[{"Return", Hold @ DialogReturn[PageIndex[playlist] = page; Thulium`Homepage[]]}, "<Button-Local>"],
+              TemplateBox[{"Return", Hold @ DialogReturn[PageIndex[playlist] = GetValue[page]; Thulium`Homepage[]]}, "<Button-Local>"],
               BoxBaselineShift -> -0.2
             ]
           }], "Title"],

@@ -6,6 +6,5 @@
 	{"Type": "Playlist", "Name": "Original.qyl"},
 	{"Type": "Playlist", "Name": "Clannad.qyl"},
 	{"Type": "Playlist", "Name": "PVZ.qyl"},
-	{"Type": "Tag", "Name": "Piano"},
-	{"Type": "Tag", "Name": "$INCOMP"}
+	{"Type": "Tag", "Name": "Piano"}
 ]

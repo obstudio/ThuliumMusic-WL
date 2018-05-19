@@ -1,75 +1,232 @@
 (* ::Package:: *)
 
-(*BeginPackage["Thulium`Interface`Homepage`", {
+BeginPackage["Thulium`Interface`Homepage`", {
   "Thulium`System`",
   "Thulium`Assets`",
-  "Thulium`SmartButton`",
-  "Thulium`PageSelector`"
+  "Thulium`StyleSheet`"
 }];
 
-Homepage::usage = "Thulium Music Homepage Interface";
-Playlist::usage = "Thulium Music Playlist Interface";
+Homepage::usage = "Thulium Music Home Page";
 
-Begin["`Private`"];*)
+Begin["`Private`"];
 
-
-Thulium`Homepage[] := Block[{pageCount, playlistsPaged},
-  pageCount = Ceiling[Length @ Keys @ PlaylistIndex / 16];
+Homepage[] := Block[
+  {
+    length, playlists, pageCount, display
+  },
+  
+  length = Length @ Keys @ PlaylistIndex;
+  pageCount = Ceiling[length / 10];
+  playlists = Partition[Keys @ PlaylistIndex, UpTo @ Ceiling[length / pageCount]];
   If[PageIndex["Main"] > pageCount, PageIndex["Main"] = pageCount];
-  playlistsPaged = Partition[Keys @ PlaylistIndex, UpTo @ Ceiling[Length @ Keys @ PlaylistIndex / pageCount]];
-  Module[{playlist = Keys[PlaylistIndex][[1]], page = PageIndex["Main"]},
-    CreateDialog[With[{playlistsPaged = playlistsPaged},
-      Column[{Spacer[{40, 40}],
-        Row[{
-          Row[{Spacer[40], Caption[TextDict["Thulium"], "BigTitle"]}, Alignment -> Left, ImageSize -> 320],
-          Row[{
-            SmartButton["EnterPlaylist", DialogReturn[PageIndex["Main"] = page; playlist; Thulium`Playlist[playlist]]],
-            Spacer[10],
-            SmartButton["About", DialogReturn[PageIndex["Main"] = page; Thulium`About[]]],
-            Spacer[10],
-            SmartButton["Settings", DialogReturn[PageIndex["Main"] = page; Thulium`Settings[]]],
-            Spacer[10],
-            SmartButton["Exit", DialogReturn[PageIndex["Main"] = page]],
-            Spacer[40]
-          }, Alignment -> Right, ImageSize -> {400, 60}]
+  
+  Module[{page = Thulium`PageIndex["Main"], index = 1},
+    With[
+      {
+        ChsFont = ChsFont, TextDict = TextDict,
+        tmPageSelBox = If[pageCount > 7, tmPageSelBox2, tmPageSelBox1]
+      },
+      
+      display = Table[Table[
+        With[{info = PlaylistIndex[playlists[[pg, id]]]},
+          {TemplateBox[{
+            RowBox[{
+              PaneBox[
+                AdjustmentBox[
+                  StyleBox[TagName[info["Type"]],
+                    FontSize -> 12,
+                    FontFamily -> ChsFont,
+                    FontColor -> GrayLevel[0.3]
+                  ],
+                  BoxMargins -> {{0, 0.6}, {0, 0}},
+                  BoxBaselineShift -> -0.4
+                ],
+                ImageSize -> 32,
+                Alignment -> Center
+              ],
+              StyleBox[info["Title"],
+                FontSize -> 14,
+                FontFamily -> ChsFont
+              ],
+              TemplateBox[{12}, "Spacer1"],
+              If[Total @ TextLength[{TagName[info["Type"]], info["Title"], info["Comment"]}] <= 64,
+                StyleBox[info["Comment"],
+                  FontSize -> 12,
+                  FontFamily -> ChsFont,
+                  FontColor -> GrayLevel[0.3]
+                ],
+                Nothing
+              ]
+            }],
+            StyleBox[
+              GridBox[
+                {
+                  {TagName["Type"] <> ":", TagName[info["Type"]]},
+                  {TagName["Title"] <> ":", info["Title"]}
+                },
+                ColumnSpacings -> 1,
+                ColumnAlignments -> {Center, Left}
+              ],
+              FontSize -> 20,
+              FontFamily -> ChsFont
+            ],
+            With[{playlist = playlists[[pg, id]]},
+              Hold @ DialogReturn[PageIndex["Main"] = page; Thulium`Playlist[playlist]]
+            ]
+          }, "<List-Local>"]}
+        ],
+      {id, Length @ playlists[[pg]]}], {pg, pageCount}];
+  
+      CreateDialog[
+        {
+          Cell[BoxData @ RowBox[{
+            StyleBox[TextDict["Thulium"], "Title"],
+            TemplateBox[{200}, "Spacer1"],
+            AdjustmentBox[
+              TemplateBox[{"Settings", Hold @ DialogReturn[PageIndex["Main"] = page; Thulium`Settings[]]}, "<Button-Local>"],
+              BoxBaselineShift -> -0.2
+            ],
+            TemplateBox[{2}, "Spacer1"],
+            AdjustmentBox[
+              TemplateBox[{"About", Hold @ DialogReturn[PageIndex["Main"] = page; Thulium`About[]]}, "<Button-Local>"],
+              BoxBaselineShift -> -0.2
+            ],
+            TemplateBox[{2}, "Spacer1"],
+            AdjustmentBox[
+              TemplateBox[{"Exit", Hold @ DialogReturn[PageIndex["Main"] = page]}, "<Button-Local>"],
+              BoxBaselineShift -> -0.2
+            ]
+          }], "Title"],
+          
+          Cell[BoxData @ PaneBox[PaneSelectorBox[
+            Array[Function[{pg},
+              pg -> GridBox[Array[
+                Function[{id}, display[[pg, id]]],
+              Length @ playlists[[pg]]]]
+            ], pageCount],
+          Dynamic[page]]], "SetterList"],
+          
+          Cell[BoxData @ tmPageSelBox[page, pageCount], "PageSelector"]
+        },
+        
+        StyleDefinitions -> Notebook[{
+          tmList,
+          tmButton,
+          tmPageSel,
+          
+          Cell[StyleData["Title"],
+            CellMargins -> {{0, 0}, {0, 24}},
+            TextAlignment -> Center,
+            FontFamily -> ChsFont,
+            FontSize -> 24,
+            FontWeight -> Bold
+          ],
+          
+          Cell[StyleData["SetterList"],
+            CellMargins -> {{0, 0}, {16, 16}},
+            TextAlignment -> Center,
+            PaneBoxOptions -> {
+              Alignment -> {Center, Center},
+              ImageSize -> {Automatic, 280}
+            },
+            GridBoxOptions -> {RowSpacings -> 0}
+          ],
+          
+          Cell[StyleData["PageSelector"],
+            CellMargins -> {{0, 0}, {24, 0}},
+            TextAlignment -> Center
+          ],
+          
+          Cell[StyleData["<Button-Local>"],
+            TemplateBoxOptions -> {DisplayFunction -> Function[
+              TemplateBox[{
+                TemplateBox[{#1, Opacity[0], RGBColor[0, 0.7, 0.94], RGBColor[0, 0.7, 0.94], 32}, "<Button-Round>"],
+                TemplateBox[{#1, RGBColor[0, 0.7, 0.94], RGBColor[0, 0.7, 0.94], RGBColor[1, 1, 1], 32}, "<Button-Round>"],
+                TemplateBox[{#1, RGBColor[0, 0.7, 0.94, 0.3], RGBColor[0, 0.7, 0.94], RGBColor[0, 0.7, 0.94], 32}, "<Button-Round>"],
+                #2, StyleBox[TextDict[#1], FontFamily -> ChsFont]
+              }, "<Button>"]
+            ]}
+          ],
+          
+          Cell[StyleData["<List-Button>"],
+            TemplateBoxOptions -> {DisplayFunction -> Function[
+              TemplateBox[{
+                PaneSelectorBox[{
+                  True -> TemplateBox[{#1, Opacity[0], RGBColor[0, 0.7, 0.94], RGBColor[0, 0.7, 0.94], 18}, "<Button-Round>"],
+                  False -> TemplateBox[{#1, Opacity[0], Opacity[0], Opacity[0], 18}, "<Button-Round>"]
+                }, #3],
+                TemplateBox[{#1, RGBColor[0, 0.7, 0.94], RGBColor[0, 0.7, 0.94], RGBColor[1, 1, 1], 18}, "<Button-Round>"],
+                TemplateBox[{#1, RGBColor[0, 0.7, 0.94, 0.3], RGBColor[0, 0.7, 0.94], RGBColor[0, 0.7, 0.94], 18}, "<Button-Round>"],
+                #2
+              }, "<Button-no-Tooltip>"]
+            ]}
+          ],
+          
+          Cell[StyleData["<Item-Local>"],
+            TemplateBoxOptions -> {DisplayFunction -> Function[
+              TemplateBox[{
+                RowBox[
+                  {
+                    PaneBox[
+                      StyleBox[#1, FontSize -> 14, FontFamily -> ChsFont],
+                      ImageSize -> 450,
+                      Alignment -> Left
+                    ],
+                    AdjustmentBox[
+                      TemplateBox[{"Enter", #5, #4}, "<List-Button>"],
+                      BoxBaselineShift -> -0.1
+                    ]
+                  }
+                ],
+                RGBColor[0, 0, 0], #2, #3, 480, 18
+              }, "<Item>"]
+            ]}
+          ],
+          
+          Cell[StyleData["<List-Local>"],
+            TemplateBoxOptions -> {DisplayFunction -> Function[
+              TemplateBox[{
+                TemplateBox[{#1, RGBColor[0.96, 0.98, 1], RGBColor[0.96, 0.98, 1], False, #3}, "<Item-Local>"],
+                TemplateBox[{#1, RGBColor[0.96, 1, 0.98], RGBColor[0.94, 1, 0.98], True, #3}, "<Item-Local>"],
+                #2
+              }, "<List>"]
+            ]}
+          ]
         }],
-        Spacer[1],
-        Dynamic @ Row[{
-          Spacer[60],
-          Dynamic[With[{playlists = playlistsPaged[[page]]}, SetterBar[Dynamic@playlist,
-            #->Row[{
-              Row[{
-                Caption[TagName[[PlaylistIndex[[#,"Type"]]]],"SongComment"]
-              },Alignment->{Center,Top},ImageSize->{80,38}],
-              Caption[PlaylistIndex[[#,"Title"]], "SongName"],
-              Spacer[24],
-              Caption[PlaylistIndex[[#,"Comment"]], "SongComment"]				
-            },ImageSize->{720,30}]& /@ playlists,
-            Appearance->"Vertical"
-          ]],TrackedSymbols:>{page}],Spacer[60]
-        }],
-        Spacer[1],
-        PageSelector[Dynamic[page], pageCount],
-        Spacer[{40,40}]
-      }, Center, ItemSize->Full]],
-      WindowTitle->TextDict["Thulium"],
-      Background->WindowBackground
+        
+        ShowCellLabel -> False,
+        ShowCellTags -> False,
+        ShowCellBracket -> False,
+        CellGrouping -> Manual,
+        Background -> RGBColor[1, 1, 1],
+        WindowTitle -> TextDict["Thulium"],
+        WindowElements -> {},
+        WindowFrameElements -> {"CloseBox", "MinimizeBox"},
+        WindowSize -> {1200, 900},
+        WindowFrame -> "ModelessDialog",
+        Magnification -> 2,
+        Saveable -> False,
+        Editable -> False,
+        Deployed -> True,
+        Evaluatable -> False
+      ];
     ];
-  ]
+    
+    Evaluate[Unique[]] := index;
+    Evaluate[Unique[]] := page;
+  ];
 ];
 
+End[];
 
-(* ::Input:: *)
-(*Thulium`Homepage;*)
-
-
-(*End[];
+Thulium`Homepage = Thulium`Interface`Homepage`Homepage;
 
 EndPackage[];
 
-Thulium`Homepage = Thulium`Interface`Homepage`Homepage;
-Thulium`Playlist = Thulium`Interface`Homepage`Playlist;*)
+
+(* ::Input:: *)
+(*Thulium`Update`CheckUpdate;*)
 
 
 (* ::Input:: *)
-(*Thulium`Homepage[];*)
+(*Thulium`Interface`Homepage`Homepage[];*)

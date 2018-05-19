@@ -31,7 +31,7 @@ AssignTemplate["Tooltip", Function[
           FontSize -> 24,
           FontColor -> RGBColor[0, 0, 0]
         ],
-        BoxMargins -> {{0.2, 0.4}, {0.2, 0.4}}
+        BoxMargins -> {{0.2, 0.2}, {0.2, 0.4}}
       ],
       Background -> RGBColor[1, 1, 0.9, 0.8],
       FrameStyle -> {1, RGBColor[0.8, 0.8, 0.7, 0.2]},
@@ -87,23 +87,47 @@ AssignTemplate["Button-r-Template", Function[
   }, ImageSize -> #5]
 ]];
 
-AssignTemplate["Button-Round", Function[
-  PaneSelectorBox[{
-    "Play" -> TemplateBox[{
-      GraphicsGroupBox[{Thickness[0.08],
-        PolygonBox[{{-0.2, -0.4}, {-0.2, 0.4}, {0.4, 0}}],
-        LineBox[{{-0.2, -0.4}, {-0.2, 0.4}, {0.4, 0}, {-0.2, -0.4}}]
-      }],
-      #2, #3, #4, #5
-    }, "<Button-r-Template>"],
-    "Return" -> TemplateBox[{
-      GraphicsGroupBox[{Thickness[0.1],
-        LineBox[{{-0.4, 0}, {0.4, 0}}],
-        LineBox[{{0, -0.4}, {-0.4, 0}, {0, 0.4}}]
-      }],
-      #2, #3, #4, #5
-    }, "<Button-r-Template>"]
-  }, #1]
+ButtonRoundData = <|
+    "Play" -> GraphicsGroupBox[{Thickness[0.08],
+      PolygonBox[{{-0.2, -0.4}, {-0.2, 0.4}, {0.4, 0}}],
+      LineBox[{{-0.2, -0.4}, {-0.2, 0.4}, {0.4, 0}, {-0.2, -0.4}}]
+    }],
+    "Return" -> GraphicsGroupBox[{Thickness[0.1],
+      LineBox[{{-0.4, 0}, {0.4, 0}}],
+      LineBox[{{0, -0.4}, {-0.4, 0}, {0, 0.4}}]
+    }],
+    "Enter" -> GraphicsGroupBox[{Thickness[0.1],
+      LineBox[{{-0.4, 0}, {0.4, 0}}],
+      LineBox[{{0, -0.4}, {0.4, 0}, {0, 0.4}}]
+    }],
+    "Exit" -> GraphicsGroupBox[{Thickness[0.08],
+      LineBox[{{0.24, -0.24}, {0.24, -0.4}, {-0.36, -0.4}, {-0.36, 0.4}, {0.24, 0.4}, {0.24, 0.24}}],
+      Thickness[0.06],
+      LineBox[{{0, 0}, {0.52, 0}}],
+      LineBox[{{0.4, 0.12}, {0.52, 0}, {0.4, -0.12}}]
+    }],
+    "About" -> GraphicsGroupBox[{Thickness[0.1], PointSize[0.1],
+      LineBox[{{0, -0.44}, {0, 0.1}}],
+      PointBox[{0, 0.44}]
+    }],
+    "Settings" -> GraphicsGroupBox[Evaluate @ {Thickness[0.12],
+      CircleBox[{0, 0}, 0.3],
+      GeometricTransformationBox[
+        RectangleBox[{-0.15, 0.3}, {0.15, 0.53}, RoundingRadius -> {0.05, 0.05}],
+        Evaluate @ Table[RotationMatrix[theta], {theta, 0, 5/3 Pi, 1/3 Pi}]
+      ]
+    }]
+  |>;
+
+AssignTemplate["Button-Round", With[
+  {rule = Map[
+    Function[{name}, name -> TemplateBox[
+      {ButtonRoundData[name], Slot[2], Slot[3], Slot[4], Slot[5]},
+      "<Button-r-Template>"
+    ]],
+    Keys @ ButtonRoundData
+  ]},
+  PaneSelectorBox[rule, #1]&
 ]];
 
 AssignTemplate["Pane", Function[

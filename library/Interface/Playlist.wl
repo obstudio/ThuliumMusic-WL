@@ -6,13 +6,13 @@ BeginPackage["Thulium`Interface`Playlist`", {
   "Thulium`StyleSheet`"
 }];
 
-newPlaylist::usage = "newPlaylist";
+Playlist::usage = "Thulium Music Playlist Page";
 
 Begin["`Private`"];
 
-newPlaylist[playlist_] := Block[
+Playlist[playlist_] := Block[
   {
-    info, length, songList, indexList, indexWidth, pageCount, display, notebook
+    info, length, songList, indexList, indexWidth, pageCount, display
   },
   
   Thulium`CurrentPlaylist = playlist;
@@ -22,7 +22,7 @@ newPlaylist[playlist_] := Block[
   songList = Partition["Song" /. info["SongList"], UpTo @ Ceiling[length / pageCount]];
   indexList = Partition["Index" /. info["SongList"], UpTo @ Ceiling[length / pageCount]];
   indexWidth = 8 * Max[0, TextLength /@ DeleteCases[indexList, "Index", Infinity]];
-  If[Thulium`PageIndex[playlist] > pageCount, Thulium`PageIndex[playlist] = pageCount];
+  If[PageIndex[playlist] > pageCount, PageIndex[playlist] = pageCount];
   
   Module[{page = Thulium`PageIndex[playlist], index = 1},
     With[
@@ -86,7 +86,7 @@ newPlaylist[playlist_] := Block[
             ],
             With[{song = info["Path"] <> songList[[pg, id]]},
               Hold @ DialogReturn[
-                PageIndex[playlist] = Dynamic[page];
+                PageIndex[playlist] = page;
                 Thulium`Player[song];
               ]
             ]
@@ -94,13 +94,13 @@ newPlaylist[playlist_] := Block[
         ],
       {id, Length @ songList[[pg]]}], {pg, pageCount}];
   
-      notebook = CreateDialog[
+      CreateDialog[
         {
           Cell[BoxData @ RowBox[{
             StyleBox[info["Title"], "Title"],
             TemplateBox[{280}, "Spacer1"],
             AdjustmentBox[
-              TemplateBox[{"Return", Unevaluated @ DialogReturn[Thulium`Homepage[]]}, "<Button-Local>"],
+              TemplateBox[{"Return", Hold @ DialogReturn[PageIndex[playlist] = page; Thulium`Homepage[]]}, "<Button-Local>"],
               BoxBaselineShift -> -0.2
             ]
           }], "Title"],
@@ -238,7 +238,7 @@ newPlaylist[playlist_] := Block[
 
 End[];
 
-Thulium`Playlist = Thulium`Interface`Playlist`newPlaylist;
+Thulium`Playlist = Thulium`Interface`Playlist`Playlist;
 
 EndPackage[];
 
@@ -248,15 +248,15 @@ EndPackage[];
 
 
 (* ::Input:: *)
-(*newPlaylist["All"];*)
+(*Playlist["All"];*)
 
 
 (* ::Input:: *)
-(*newPlaylist["TH11-Chireiden.qyl"];*)
+(*Playlist["TH11-Chireiden.qyl"];*)
 
 
 (* ::Input:: *)
-(*newPlaylist["Clannad.qyl"];*)
+(*Playlist["Clannad.qyl"];*)
 
 
 (* ::Input:: *)

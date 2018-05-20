@@ -45,32 +45,6 @@ AssignTemplate["Tooltip", Function[
 
 AssignTemplate["Button", Function[
   PaneSelectorBox[{
-    True -> TemplateBox[{
-      TagBox[
-        TagBox[
-          PaneSelectorBox[{
-            True -> #2,
-            False -> #3
-          }, Dynamic @ CurrentValue["MouseButtonTest"]],
-        EventHandlerTag @ {"MouseClicked" :> ReleaseHold @ #4, PassEventsUp -> False}],
-      MouseAppearanceTag @ "LinkHand"],
-      #5, 0.2
-    }, "<Tooltip>"],
-    False -> #1
-  }, Dynamic @ CurrentValue["MouseOver"]]
-]];
-
-AssignTemplate["Button-Default", Function[
-  TemplateBox[{
-    TemplateBox[{#1, Opacity[0], RGBColor[0, 0.7, 0.94], RGBColor[0, 0.7, 0.94], #3}, "<Button-Round>"],
-    TemplateBox[{#1, RGBColor[0, 0.7, 0.94], RGBColor[0, 0.7, 0.94], RGBColor[1, 1, 1], #3}, "<Button-Round>"],
-    TemplateBox[{#1, RGBColor[0, 0.7, 0.94, 0.3], RGBColor[0, 0.7, 0.94], RGBColor[0, 0.7, 0.94], #3}, "<Button-Round>"],
-    #4, #2
-  }, "<Button>"]
-]];
-
-AssignTemplate["Button-no-Tooltip", Function[
-  PaneSelectorBox[{
     True -> TagBox[
       TagBox[
         PaneSelectorBox[{
@@ -83,7 +57,23 @@ AssignTemplate["Button-no-Tooltip", Function[
   }, Dynamic @ CurrentValue["MouseOver"]]
 ]];
 
-AssignTemplate["Button-r-Template", Function[
+AssignTemplate["Button-Tooltip", Function[
+  TemplateBox[{
+    TemplateBox[{#1, #2, #3, #4}, "<Button>"],
+    #5, 0.2
+  }, "<Tooltip>"]
+]];
+
+AssignTemplate["Button-Default", Function[
+  TemplateBox[{
+    TemplateBox[{#1, Opacity[0], RGBColor[0, 0.7, 0.94], RGBColor[0, 0.7, 0.94], #3}, "<Button-Round>"],
+    TemplateBox[{#1, RGBColor[0, 0.7, 0.94], RGBColor[0, 0.7, 0.94], RGBColor[1, 1, 1], #3}, "<Button-Round>"],
+    TemplateBox[{#1, RGBColor[0, 0.7, 0.94, 0.3], RGBColor[0, 0.7, 0.94], RGBColor[0, 0.7, 0.94], #3}, "<Button-Round>"],
+    #4, #2
+  }, "<Button-Tooltip>"]
+]];
+
+AssignTemplate["Button-Round-Template", Function[
   GraphicsBox[{
     JoinForm["Round"], CapForm["Round"], #2,
     DiskBox[{0, 0}, 0.96],
@@ -136,7 +126,7 @@ AssignTemplate["Button-Round", With[
   {rule = Map[
     Function[{name}, name -> TemplateBox[
       {ButtonRoundData[name], Slot[2], Slot[3], Slot[4], Slot[5]},
-      "<Button-r-Template>"
+      "<Button-Round-Template>"
     ]],
     Keys @ ButtonRoundData
   ]},
@@ -228,8 +218,8 @@ tmButton = Sequence[
   Include["Tooltip"],
   Include["Button"],
   Include["Button-Round"],
-  Include["Button-r-Template"],
-  Include["Button-no-Tooltip"],
+  Include["Button-Round-Template"],
+  Include["Button-Tooltip"],
   Include["Button-Default"]
 ];
 

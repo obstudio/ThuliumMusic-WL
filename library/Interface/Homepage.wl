@@ -49,7 +49,7 @@ Homepage[] := Block[
                 FontSize -> 14,
                 FontFamily -> ChsFont
               ],
-              TemplateBox[{12}, "Spacer1"],
+              TemplateBox[{8}, "Spacer1"],
               If[Total @ TextLength[{TagName[info["Type"]], info["Title"], info["Comment"]}] <= 64,
                 StyleBox[info["Comment"],
                   FontSize -> 12,
@@ -145,7 +145,7 @@ Homepage[] := Block[
                 TemplateBox[{#1, RGBColor[0, 0.7, 0.94], RGBColor[0, 0.7, 0.94], RGBColor[1, 1, 1], 32}, "<Button-Round>"],
                 TemplateBox[{#1, RGBColor[0, 0.7, 0.94, 0.3], RGBColor[0, 0.7, 0.94], RGBColor[0, 0.7, 0.94], 32}, "<Button-Round>"],
                 #2, StyleBox[TextDict[#1], FontFamily -> ChsFont]
-              }, "<Button>"]
+              }, "<Button-Tooltip>"]
             ]}
           ],
           
@@ -159,7 +159,7 @@ Homepage[] := Block[
                 TemplateBox[{#1, RGBColor[0, 0.7, 0.94], RGBColor[0, 0.7, 0.94], RGBColor[1, 1, 1], 18}, "<Button-Round>"],
                 TemplateBox[{#1, RGBColor[0, 0.7, 0.94, 0.3], RGBColor[0, 0.7, 0.94], RGBColor[0, 0.7, 0.94], 18}, "<Button-Round>"],
                 #2
-              }, "<Button-no-Tooltip>"]
+              }, "<Button>"]
             ]}
           ],
           

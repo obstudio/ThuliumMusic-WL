@@ -9,7 +9,7 @@ Login::usage = "Login";
 
 Begin["`Private`"];
 
-SetAttributes[tmInputField, HoldRest];
+SetAttributes[tmInputField, HoldFirst];
 Options[tmInputField] = {
   FieldHint -> "",
   FieldMasked -> False
@@ -17,28 +17,31 @@ Options[tmInputField] = {
 tmInputField[symbol_, test_, OptionsPattern[]] := FrameBox[
   InputFieldBox[Dynamic[symbol], String,
     FieldHint -> OptionValue[FieldHint],
-    FieldMasked -> OptionValue[FieldMasked]
+    FieldMasked -> OptionValue[FieldMasked],
+    ContinuousAction -> True
   ],
   FrameStyle -> Dynamic @ If[test, RGBColor[0.6, 1, 0.8], RGBColor[1, 0.7, 0.7], RGBColor[1, 0.7, 0.7]],
   Background -> Dynamic @ If[test, RGBColor[0.92, 1, 0.96], RGBColor[1, 0.94, 0.94], RGBColor[1, 0.94, 0.94]]
 ];
 
-Login[] := Module[{username, password, remember},
+Login[] := Module[{username = "", password = "", remember = ""},
   CreateDialog[
     {
-      Cell[BoxData @ StyleBox[TextDict["LoginTitle"], "Title"], "Title"],
+      Cell[BoxData @ StyleBox[TextDict["Login-Title"], "Title"], "Title"],
       Cell[BoxData @ GridBox[{
         {
           TextDict["UserName"],
-          tmInputField[username, username != "", FieldHint -> TextDict["EnterUserName"]]
+          tmInputField[username, StringMatchQ[username, RegularExpression["\\w+"]], FieldHint -> TextDict["EnterUserName"]]
         },
         {
           TextDict["Password"],
           tmInputField[password, password != "", FieldHint -> TextDict["EnterPassword"], FieldMasked -> True]
         }
       }, ColumnAlignments -> Center], "Form"],
-      TextCell[Dynamic[username]],
-      TextCell[Dynamic[IntegerString[Hash[password, "SHA256"], 16]]]
+      Cell[BoxData @ RowBox[{
+        TemplateBox[{10}, "Spacer1"],
+        TemplateBox[{}, "<Button-Local>"]
+      }]]
     },
     
     StyleDefinitions -> Notebook[{
@@ -95,6 +98,10 @@ Login[] := Module[{username, password, remember},
     Deployed -> True,
     DynamicEvaluationTimeout -> 30
   ];
+  
+  Evaluate[Unique[]] := username;
+  Evaluate[Unique[]] := password;
+  Evaluate[Unique[]] := remember;
 ];
 
 End[];

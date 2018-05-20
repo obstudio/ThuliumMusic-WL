@@ -76,7 +76,7 @@ tmPageSel = Sequence[
             RGBColor[0.6, 0.8, 1], RGBColor[0.1, 0.5, 0.8], RGBColor[0.1, 0.5, 0.8]
           }, "<PageSel-Graphic-Display>"],
           #4[#2]
-        }, "<Button-no-Tooltip>"]
+        }, "<Button>"]
       }, Dynamic[#2] === #3]
     ]]
   }],
@@ -113,7 +113,7 @@ tmPageSel = Sequence[
             RGBColor[0.6, 0.8, 1], RGBColor[0.1, 0.5, 0.8], RGBColor[0.1, 0.5, 0.8]
           }, "<PageSel-Numeric-Display>"],
           #2 = #1
-        }, "<Button-no-Tooltip>"]
+        }, "<Button>"]
       }, Dynamic[#2] === #1]
     ]]
   }]

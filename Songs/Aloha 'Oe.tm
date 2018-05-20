@@ -1,4 +1,4 @@
-﻿//Aloha 'Oe
+//Aloha 'Oe
 //Lili'uokalani
 
 (1=G)(4/4)(56)

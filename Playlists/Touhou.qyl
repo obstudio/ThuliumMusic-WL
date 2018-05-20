@@ -27,6 +27,7 @@
 		{"Index": "地灵殿EX面BOSS曲", "Song": "TH11-Chireiden/Hartmann_No_Youkai_Otome"},
 		{"Index": "地灵殿改编曲", "Song": "TH11-Chireiden/Hana_ni_Kaze"},
 		{"Index": "星莲船六面道中曲", "Song": "Houkainohi"},
+		{"Index": "神灵庙EX面BOSS曲", "Song": "Sawatari_no_Futa_Iwa"},
 		{"Index": "绀珠传一面道中曲", "Song": "TH15-Kanjuden/Wasuregataki"},
 		{"Index": "绀珠传一面BOSS曲", "Song": "TH15-Kanjuden/Usagi_ha_Mai_Orita"},
 		{"Index": "绀珠传二面道中曲", "Song": "TH15-Kanjuden/Mizuumi_Gekkou"},
@@ -43,6 +44,5 @@
 		{"Index": "绀珠传EX面BOSS曲", "Song": "TH15-Kanjuden/Pandemonic_Planet"},
 		{"Index": "组曲串烧", "Song": "Touhou_Mix_1"},
 		{"Index": "组曲串烧", "Song": "Touhou_Mix_2"}
-	],
-	"IndexWidth": 240
+	]
 }

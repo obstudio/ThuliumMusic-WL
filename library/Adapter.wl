@@ -314,11 +314,11 @@ Thulium`AudioAdapt[rawData_,OptionsPattern[AdaptingOptions]]:=Block[
 (* ::Input:: *)
 (*AudioStop[];AudioPlay[#[[2]]]&@*)
 (*EchoFunction["time: ",#[[1]]&]@*)
-(*Timing[Thulium`AudioAdapt[Thulium`Parse[$LocalPath<>"Songs/For_Elise.tm",{4}],"Rate"->1]];*)
+(*Timing[Thulium`AudioAdapt[Thulium`Parse[$LocalPath<>"Songs/Touhou/Sawatari_no_Futa_Iwa.tm",{4,7}],"Rate"->1]];*)
 
 
 (* ::Input:: *)
-(*Export[$LocalPath<>"test.mp3",Thulium`AudioAdapt[Thulium`Parse[$LocalPath<>"Songs/PVZ/Grasswalk.tm"]]];*)
+(*Export[$LocalPath<>"test.mp3",Thulium`AudioAdapt[Thulium`Parse[$LocalPath<>"Songs/Touhou/Sawatari_no_Futa_Iwa.tm"]]];*)
 
 
 (* ::Input:: *)

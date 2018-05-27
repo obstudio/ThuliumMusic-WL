@@ -17,14 +17,34 @@ class TmAdapter {
   }
 
   adapt() {
-    this.Tracks = this.Sections[0].Tracks
-    return this.Tracks.map(track => {
-      return {
-        Instrument: track.Instrument,
-        Content: track.Content,
-        Effects: track.Effects
-      }
+    const tracks = []
+    let duration = 0
+    this.Sections.forEach(section => {
+      section.Tracks.forEach(track => {
+        const data = track.Content.map(note => {
+          return {
+            Pitch: note.Pitch,
+            Volume: note.Volume,
+            Duration: note.Duration,
+            StartTime: note.StartTime + duration
+          }
+        })
+        let index = tracks.findIndex(t => t.Name === track.Name)
+        if (index === -1) {
+          index = tracks.length
+          tracks.push({
+            Name: track.Name,
+            Meta: track.Meta,
+            Settings: track.Settings,
+            Content: []
+          })
+        }
+        tracks[index].Content.push(...data)
+        tracks[index].Meta.Duration = track.Meta.Duration + duration
+      })
+      duration += Math.max(...section.Tracks.map(track => track.Meta.Duration))
     })
+    return tracks
   }
 
   theme(...spec) {

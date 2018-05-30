@@ -12,7 +12,7 @@ function setblock(x, y, z, block = 'redstone_wire', info = '') {
 function setcommand(x, y, z, data, inst) {
   return data.map((note, index) => `
     setblock ~${x} ${y + index} ~${z} ${index === 0 ? '' : 'chain_'}command_block 1
-    blockdata ~${x} ${y + index} ~${z} {Command: "playsound ${inst}.${60 + note.Pitch} master @p ~ ~ ~ ${note.Volume}"}`
+    blockdata ~${x} ${y + index} ~${z} {Command: "execute @p ~ ~ ~ playsound ${inst}.${60 + note.Pitch} master @p ~ ~ ~ ${note.Volume}"}`
   ).join('')
 }
 
@@ -107,6 +107,6 @@ class TmRedstone {
 }
 
 new TmRedstone({
-  source: 'Touhou/Oriental_Blood',
+  source: 'Clannad/Nagisa',
   dest: 'D:/Minecraft/.minecraft/saves/test'
 }).generate()

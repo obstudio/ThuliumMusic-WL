@@ -15,10 +15,10 @@ If[DirectoryQ[$LocalPath <> ".git"],
   $$Branch = "";
 ];
 
-Switch[$VersionNumber,
-  11.2, StatusAlias = "State",
-  11.3, StatusAlias = "Status",
-  _,
+Which[
+  $VersionNumber == 11.2, StatusAlias = "State",
+  $VersionNumber >= 11.3, StatusAlias = "Status",
+  True,
   CreateDialog[{
     TextCell["Sorry, but your Mathematica isn't updated enough."],
     TextCell["Try to install Mathematica with version no less than 11.2."],

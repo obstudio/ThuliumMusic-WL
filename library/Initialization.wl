@@ -107,7 +107,7 @@ InitializeParser := Block[{result, succeed, msgCells},
     
     succeed = Check[
       System`JS = StartExternalSession["NodeJS"];
-      result = ExternalEvaluate[System`JS, File[$LocalPath <> "library/Thulium.js"]];
+      result = ExternalEvaluate[System`JS, "const Thulium = require(\"" <> $LocalPath <> "library/Thulium\")"];
       DeleteObject[Drop[ExternalSessions[], -1]];
       True,
       $MessageList
